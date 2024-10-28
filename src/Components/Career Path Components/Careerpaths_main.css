@@ -1,0 +1,12 @@
+img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .career-card img {
+    transition: transform 0.3s ease;
+  }
+  
+  .career-card:hover img {
+    transform: scale(1.05);
+  }
