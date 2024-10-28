@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Tooltip } from '@mui/material';
+import { Tooltip, Drawer } from '@mui/material';
 import { styled } from '@mui/system';
+import { FiMenu, FiX } from 'react-icons/fi';
 
-// Updated NavLink styling with proper spacing
+// Styled component for nav links with active state
 const NavLink = styled(Link)(({ isActive }) => ({
   position: 'relative',
   color: isActive ? '#0d47a1' : '#666',
@@ -11,14 +12,14 @@ const NavLink = styled(Link)(({ isActive }) => ({
   fontSize: '11px',
   fontWeight: '500',
   fontFamily: 'sans-serif',
-  margin: '0 10px',  // Added horizontal margin
+  margin: '0 10px',
   padding: '4px 0',
   '&:after': {
     content: '""',
     position: 'absolute',
     width: '100%',
     height: '2px',
-    bottom: '-6px',  // Increased bottom spacing for underline
+    bottom: 0,
     left: 0,
     backgroundColor: '#0d47a1',
     transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
@@ -36,6 +37,7 @@ const NavLink = styled(Link)(({ isActive }) => ({
 
 const Navbar_main = () => {
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
   
   const navItems = [
     { text: 'HOME', tooltip: 'Go to Home', path: '/' },
@@ -46,6 +48,37 @@ const Navbar_main = () => {
     { text: 'RESOURCES', tooltip: 'Access Resources', path: '/resources' },
     { text: 'CONTACT', tooltip: 'Contact Us', path: '/contact' }
   ];
+
+  // Mobile drawer content
+  const drawer = (
+    <div className="w-[280px] h-full bg-white">
+      <div className="flex justify-between items-center p-4 border-b">
+        <Link to="/" className="flex items-center" onClick={() => setMobileOpen(false)}>
+          <span className="text-xl font-bold text-[#fa4616]">QLearning</span>
+          <span className="text-xl font-bold text-black">Academy</span>
+        </Link>
+        <button onClick={() => setMobileOpen(false)} className="p-2">
+          <FiX className="w-6 h-6" />
+        </button>
+      </div>
+      <div className="py-4">
+        {navItems.map((item, index) => (
+          <Link
+            key={index}
+            to={item.path}
+            onClick={() => setMobileOpen(false)}
+            className={`block px-6 py-3 text-sm ${
+              location.pathname === item.path 
+                ? 'text-[#0d47a1] bg-blue-50' 
+                : 'text-gray-600'
+            }`}
+          >
+            {item.text}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -64,8 +97,16 @@ const Navbar_main = () => {
               </Link>
             </div>
 
-            {/* Navigation Links with adjusted spacing */}
-            <div className="hidden md:flex items-center">
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2 rounded-full hover:bg-gray-100 text-gray-600"
+              onClick={() => setMobileOpen(true)}
+            >
+              <FiMenu className="w-6 h-6" />
+            </button>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center space-x-8">
               {navItems.map((item, index) => (
                 <Tooltip 
                   key={index} 
@@ -88,7 +129,7 @@ const Navbar_main = () => {
             </div>
 
             {/* Right Side - Language and Login */}
-            <div className="flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
               <Tooltip title="Change Language" arrow>
                 <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,6 +148,18 @@ const Navbar_main = () => {
           </div>
         </div>
       </nav>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        ModalProps={{
+          keepMounted: true
+        }}
+      >
+        {drawer}
+      </Drawer>
     </>
   );
 }
