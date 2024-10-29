@@ -13,6 +13,7 @@ import ScrollToTopButton from './Components/ScrollToTopButton';
 
 import CourseManager from './Components/Courses Components/CourseManager';
 import CourseContent from './Components/Courses Components/CourseContent';
+import CourseLesson from './Components/Courses Components/CourseLesson';
 
 // Create a Home component that contains all the landing page components
 const Home = () => {
@@ -36,6 +37,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses_main />} />
           <Route path="/courses/:id" element={<CourseContent />} />
+          <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
           <Route path="/learning-plans" element={<div>Learning Plans Page</div>} />
           <Route path="/career-paths" element={<Careerpaths_main />} />
           <Route path="/certification" element={<Certification_main />} />
@@ -44,6 +46,8 @@ function App() {
           <Route path="/admin/courses" element={<CourseManager />} />
           <Route path="/courses" element={<Courses_main />} />
           <Route path="/courses/:id" element={<CourseContent />} />
+          
+          <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
           {/* Contact Route - Redirects to external URL */}
           <Route
             path="/contact"

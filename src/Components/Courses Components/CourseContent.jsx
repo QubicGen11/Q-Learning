@@ -202,9 +202,12 @@ const CourseContent = () => {
                           )}
                         </div>
                       </div>
-                      <button className="px-6 py-2 border rounded hover:bg-gray-50">
+                      <Link 
+                        to={`/courses/${course.id}/lesson/${item.id}`}
+                        className="px-6 py-2 border rounded hover:bg-gray-50"
+                      >
                         {item.isCompleted ? 'Resume' : 'Start'}
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 ))}

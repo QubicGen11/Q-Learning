@@ -1,3 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Add these styles for lesson content */
+.lesson-content h3 {
+    @apply text-xl font-semibold mb-4 mt-6;
+  }
+  
+  .lesson-content h4 {
+    @apply text-lg font-medium mb-3 mt-5;
+  }
+  
+  .lesson-content p {
+    @apply text-gray-600 mb-4;
+  }
+  
+  .lesson-content ul, 
+  .lesson-content ol {
+    @apply ml-6 mb-4 space-y-2;
+  }
+  
+  .lesson-content ul {
+    @apply list-disc;
+  }
+  
+  .lesson-content ol {
+    @apply list-decimal;
+  }
+  
+  .lesson-content pre {
+    @apply bg-gray-50 p-4 rounded-lg mb-4 overflow-x-auto;
+  }
+  
+  .lesson-content code {
+    @apply font-mono text-sm;
+  }
+  
+  .video-section,
+  .practice-section,
+  .code-example {
+    @apply my-8 p-6 bg-gray-50 rounded-lg;
+  } 

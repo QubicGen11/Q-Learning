@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiClock, FiUser } from 'react-icons/fi';
 
 const CourseManager = () => {
   const [courses, setCourses] = useState([]);
@@ -26,7 +26,9 @@ const CourseManager = () => {
     graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
   };
 
-  const [formData, setFormData] = useState({
+  // Initialize formData with all required arrays
+  const initialFormState = {
+    id: Date.now(),
     title: '',
     description: '',
     duration: '',
@@ -36,27 +38,29 @@ const CourseManager = () => {
     completionTime: '',
     language: 'English',
     productCovered: 'Studio',
+    enrolledStudents: 0,
+    diplomaAvailable: true,
     courseAudience: '',
     productAlignment: '',
-    learningObjectives: [
-      'Explain what Workflow Analyzer is and how it works.',
-      'Describe the Workflow Analyzer rules categories and components.',
-      'Know how to export the analysis results.',
-      'Execute an analysis of your project to check for validation errors and any quality and reliability standards set as rules in the Workflow Analyzer.'
-    ],
+    learningObjectives: [], // Initialize empty array
     curriculum: [
       {
-        id: Date.now(),
-        title: '',
-        duration: '',
+        id: 1,
+        title: 'Introduction to Version Control',
+        duration: '45m',
         type: 'REQUIRED',
-        content: '',
-        isCompleted: false
+        isCompleted: false,
+        content: `
+          <div class="lesson-content">
+            <h3>What is Version Control?</h3>
+            <p>Version control is a system that records changes to a file or set of files over time.</p>
+          </div>
+        `
       }
-    ],
-    enrolledStudents: 0,
-    diplomaAvailable: true
-  });
+    ]
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
@@ -84,48 +88,58 @@ const CourseManager = () => {
 
   const handleEdit = (course) => {
     setCurrentCourse(course);
-    setFormData(course);
+    setFormData({
+      ...course,
+      learningObjectives: course.learningObjectives || [], // Ensure array exists
+      curriculum: course.curriculum || [] // Ensure array exists
+    });
   };
 
   const resetForm = () => {
     setCurrentCourse(null);
+    setFormData(initialFormState);
+  };
+
+  // Add learning objective
+  const addLearningObjective = () => {
     setFormData({
-      title: '',
-      description: '',
-      duration: '',
-      type: 'Frontend',
-      logo: '',
-      difficultyLevel: 'Intermediate',
-      completionTime: '',
-      language: 'English',
-      productCovered: 'Studio',
-      courseAudience: '',
-      productAlignment: '',
-      learningObjectives: [
-        'Explain what Workflow Analyzer is and how it works.',
-        'Describe the Workflow Analyzer rules categories and components.',
-        'Know how to export the analysis results.',
-        'Execute an analysis of your project to check for validation errors and any quality and reliability standards set as rules in the Workflow Analyzer.'
-      ],
-      curriculum: [
-        {
-          id: Date.now(),
-          title: '',
-          duration: '',
-          type: 'REQUIRED',
-          content: '',
-          isCompleted: false
-        }
-      ],
-      enrolledStudents: 0,
-      diplomaAvailable: true
+      ...formData,
+      learningObjectives: [...(formData.learningObjectives || []), '']
     });
-    setShowTechLogos(false);
+  };
+
+  // Remove learning objective
+  const removeLearningObjective = (index) => {
+    const newObjectives = [...formData.learningObjectives];
+    newObjectives.splice(index, 1);
+    setFormData({
+      ...formData,
+      learningObjectives: newObjectives
+    });
   };
 
   const selectTechLogo = (logoUrl) => {
     setFormData({ ...formData, logo: logoUrl });
     setShowTechLogos(false);
+  };
+
+  // Add a function to handle lesson completion
+  const handleLessonComplete = (lessonId) => {
+    const updatedCourses = courses.map(course => {
+      if (course.id === formData.id) {
+        const updatedCurriculum = course.curriculum.map(lesson => {
+          if (lesson.id === lessonId) {
+            return { ...lesson, isCompleted: true };
+          }
+          return lesson;
+        });
+        return { ...course, curriculum: updatedCurriculum };
+      }
+      return course;
+    });
+    
+    localStorage.setItem('courses', JSON.stringify(updatedCourses));
+    setCourses(updatedCourses);
   };
 
   return (
@@ -336,10 +350,10 @@ const CourseManager = () => {
           </div>
 
           {/* Learning Objectives */}
-          <div className="md:col-span-2">
+          <div className="mb-4">
             <label className="block mb-2">Learning Objectives</label>
             <div className="space-y-2">
-              {formData.learningObjectives.map((objective, index) => (
+              {formData.learningObjectives?.map((objective, index) => (
                 <div key={index} className="flex gap-2">
                   <input
                     type="text"
@@ -349,16 +363,13 @@ const CourseManager = () => {
                       newObjectives[index] = e.target.value;
                       setFormData({...formData, learningObjectives: newObjectives});
                     }}
-                    className="w-full p-2 border rounded"
+                    className="flex-1 p-2 border rounded"
                     placeholder="Enter learning objective"
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      const newObjectives = formData.learningObjectives.filter((_, i) => i !== index);
-                      setFormData({...formData, learningObjectives: newObjectives});
-                    }}
-                    className="text-red-600 hover:text-red-800"
+                    onClick={() => removeLearningObjective(index)}
+                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded"
                   >
                     Remove
                   </button>
@@ -366,12 +377,7 @@ const CourseManager = () => {
               ))}
               <button
                 type="button"
-                onClick={() => {
-                  setFormData({
-                    ...formData,
-                    learningObjectives: [...formData.learningObjectives, '']
-                  });
-                }}
+                onClick={addLearningObjective}
                 className="text-blue-600 hover:text-blue-800"
               >
                 + Add Learning Objective
@@ -509,33 +515,52 @@ const CourseManager = () => {
       </form>
 
       {/* Course List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map(course => (
-          <div key={course.id} className="bg-white p-6 rounded-lg shadow">
-            <div className="h-12 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
+        {courses.map((course) => (
+          <div key={course.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            {/* Course Image/Logo - reduced height */}
+            <div className="relative h-32 bg-gray-50">
               <img 
-                src={course.logo} 
-                alt={course.title} 
-                className="h-full object-contain"
+                src={course.logo || '/default-course-image.jpg'} 
+                alt={course.title}
+                className="w-full h-full object-contain p-2"
               />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
-            <p className="text-gray-600 mb-4">{course.description}</p>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">{course.duration}</span>
-              <div className="flex gap-2">
+              {/* Smaller action buttons */}
+              <div className="absolute top-2 right-2 flex gap-1">
                 <button
                   onClick={() => handleEdit(course)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                  className="p-1.5 bg-white rounded-full shadow-sm hover:bg-gray-50"
                 >
-                  <FiEdit />
+                  <FiEdit className="w-4 h-4 text-blue-600" />
                 </button>
                 <button
                   onClick={() => handleDelete(course.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded"
+                  className="p-1.5 bg-white rounded-full shadow-sm hover:bg-gray-50"
                 >
-                  <FiTrash2 />
+                  <FiTrash2 className="w-4 h-4 text-red-600" />
                 </button>
+              </div>
+            </div>
+
+            {/* Course Content - reduced padding */}
+            <div className="p-4">
+              <h3 className="text-base font-medium mb-1 text-gray-900 line-clamp-1">
+                {course.title}
+              </h3>
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                {course.description}
+              </p>
+              
+              {/* Course Meta Info - smaller text */}
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <FiClock className="w-3 h-3" />
+                  <span>{course.duration}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <FiUser className="w-3 h-3" />
+                  <span>{course.enrolledStudents || 0} students</span>
+                </div>
               </div>
             </div>
           </div>
