@@ -99,10 +99,16 @@ const Navbar_main = () => {
       <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
         <div className="max-w-9xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center">
-                <span className="text-2xl font-bold text-[#fa4616]">QLearning</span>
-                <span className="text-2xl font-bold text-black">Academy</span>
+            <div className="flex items-center ml-7">
+              <Link to="/" className="flex items-center space-x-1">
+                <span className="text-4xl font-extrabold text-[#0033A1] playwrite-gb-s-logo" style={{
+                  fontFamily: '"Playwrite GB S", serif',
+                  fontWeight: 900,
+                  fontOpticalSizing: 'auto',
+                  fontStyle: 'regular'
+
+                }}> <span className='text-yellow-500'>Q</span>lms</span>
+                <span className="text-2xl font-bold text-[#0033A1]"></span>
               </Link>
             </div>
 
@@ -163,7 +169,7 @@ const Navbar_main = () => {
               </Tooltip>
               <Link 
                 to="/login" 
-                className="bg-[#fa4616] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#e03e12] transition-colors duration-200"
+                className="bg-[#0033A1] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#e03e12] transition-colors duration-200"
               >
                 Login/Sign Up
               </Link>

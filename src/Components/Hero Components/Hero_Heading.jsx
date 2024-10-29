@@ -5,10 +5,10 @@ const Hero_Heading = () => {
     <div className="text-center py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8">
       <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-12">
         <span className="text-black inline-block">
-          Education is the
+        Empowering Minds, 
           <br className="hidden sm:block" />
           <span className="sm:hidden"> </span>
-          Foundation of Innovation
+          Shaping Futures
           <span className="text-xs sm:text-sm align-top ml-1">™</span>
         </span>
       </h1>
