@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiMoreVertical, FiClock } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState('English');
   const [sortBy, setSortBy] = useState('Featured');
+  const [courses, setCourses] = useState([]);
 
   const techLogos = {
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -25,160 +27,54 @@ const Courses_main = () => {
     graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
   };
 
-  const courses = [
-    // Frontend Fundamentals
-    {
-      logo: techLogos.html,
-      title: "HTML5 & CSS3 Fundamentals: Build Modern Websites",
-      duration: "2h",
-      type: "Frontend"
-    },
-    {
-      logo: techLogos.css,
-      title: "Advanced CSS: Flexbox, Grid & Animations",
-      duration: "2h 30m",
-      type: "Frontend"
-    },
-    {
-      logo: techLogos.javascript,
-      title: "JavaScript ES6+ Complete Guide",
-      duration: "3h 30m",
-      type: "Frontend"
-    },
-    {
-      logo: techLogos.typescript,
-      title: "TypeScript for JavaScript Developers",
-      duration: "2h 15m",
-      type: "Frontend"
-    },
-
-    // React Ecosystem
-    {
-      logo: techLogos.react,
-      title: "React.js: Building Modern User Interfaces",
-      duration: "2h 45m",
-      type: "Frontend"
-    },
-    {
-      logo: techLogos.redux,
-      title: "Redux & Redux Toolkit for State Management",
-      duration: "1h 30m",
-      type: "Frontend"
-    },
-    {
-      logo: techLogos.nextjs,
-      title: "Next.js 14: Full Stack Development",
-      duration: "3h 45m",
-      type: "Full Stack"
-    },
-    {
-      logo: techLogos.tailwind,
-      title: "Tailwind CSS: Modern Styling Framework",
-      duration: "1h 45m",
-      type: "Frontend"
-    },
-
-    // Backend Development
-    {
-      logo: techLogos.nodejs,
-      title: "Node.js & Express.js Backend Development",
-      duration: "2h 30m",
-      type: "Backend"
-    },
-    {
-      logo: techLogos.mongodb,
-      title: "MongoDB Database Design & Operations",
-      duration: "2h",
-      type: "Database"
-    },
-    {
-      logo: techLogos.postgresql,
-      title: "PostgreSQL: Advanced Database Concepts",
-      duration: "2h 15m",
-      type: "Database"
-    },
-    {
-      logo: techLogos.graphql,
-      title: "GraphQL API Development with Node.js",
-      duration: "2h",
-      type: "Backend"
-    },
-
-    // Cloud & DevOps
-    {
-      logo: techLogos.docker,
-      title: "Docker & Containerization Basics",
-      duration: "1h 45m",
-      type: "DevOps"
-    },
-    {
-      logo: techLogos.aws,
-      title: "AWS Services for Web Developers",
-      duration: "2h 30m",
-      type: "Cloud"
-    },
-    {
-      logo: techLogos.firebase,
-      title: "Firebase: Backend as a Service (BaaS)",
-      duration: "1h 30m",
-      type: "Cloud"
-    },
-    {
-      logo: techLogos.git,
-      title: "Git & GitHub Version Control Mastery",
-      duration: "1h 45m",
-      type: "DevOps"
-    },
-
-    // Additional Courses
-    {
-      logo: techLogos.react,
-      title: "React Native Mobile Development",
-      duration: "3h",
-      type: "Mobile"
-    },
-    {
-      logo: techLogos.javascript,
-      title: "Testing in JavaScript with Jest",
-      duration: "1h 30m",
-      type: "Testing"
-    },
-    {
-      logo: techLogos.nodejs,
-      title: "RESTful API Design with Node.js",
-      duration: "2h",
-      type: "Backend"
-    },
-    {
-      logo: techLogos.react,
-      title: "React Performance Optimization",
-      duration: "1h 45m",
-      type: "Frontend"
-    }
-  ];
-
-  // Update product counts based on new courses
   const products = [
     { name: "Frontend Development", count: 25 },
-    { name: "Backend Development", count: 18 },
-    { name: "Full Stack", count: 12 },
-    { name: "Database Management", count: 6 },
-    { name: "DevOps & Deployment", count: 10 },
-    { name: "Cloud Services", count: 7 },
-    { name: "Mobile Development", count: 5 },
-    { name: "Testing & QA", count: 6 },
-    { name: "API Development", count: 8 },
-    { name: "Performance Optimization", count: 4 }
+    // ... rest of your products array
   ];
 
-  // Categories for web development
   const categories = [
     { name: "New Releases", count: 54 },
-    { name: "Beginner Friendly", count: 32 },
-    { name: "Advanced Topics", count: 28 },
-    { name: "Project Based", count: 15 },
-    { name: "Certification Prep", count: 12 }
+    // ... rest of your categories array
   ];
+
+  useEffect(() => {
+    const initialCourses = [
+      // Frontend Fundamentals
+      {
+        logo: techLogos.html,
+        title: "HTML5 & CSS3 Fundamentals: Build Modern Websites",
+        duration: "2h",
+        type: "Frontend"
+      },
+      // ... rest of your courses array
+    ];
+
+    const storedCourses = localStorage.getItem('courses');
+    if (!storedCourses) {
+      localStorage.setItem('courses', JSON.stringify(initialCourses));
+      setCourses(initialCourses);
+    } else {
+      setCourses(JSON.parse(storedCourses));
+    }
+  }, []);
+
+  const filteredCourses = courses.filter(course => 
+    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleReset = () => {
+    setSearchQuery('');
+    setLanguage('English');
+    setSortBy('Featured');
+  };
+
+  const sortedCourses = [...filteredCourses].sort((a, b) => {
+    if (sortBy === 'Newest') {
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    }
+    return 0;
+  });
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
@@ -205,7 +101,12 @@ const Courses_main = () => {
 
           {/* Reset Link */}
           <div className="mb-4 sm:mb-6">
-            <button className="text-blue-600 hover:text-blue-800 text-sm">Reset</button>
+            <button 
+              onClick={handleReset}
+              className="text-blue-600 hover:text-blue-800 text-sm"
+            >
+              Reset
+            </button>
           </div>
 
           {/* Filters Section */}
@@ -254,7 +155,9 @@ const Courses_main = () => {
         <div className="flex-1">
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
-            <div className="text-gray-600 text-sm sm:text-base">204 Results</div>
+            <div className="text-gray-600 text-sm sm:text-base">
+              {sortedCourses.length} Results
+            </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <span className="text-sm">Language:</span>
@@ -283,28 +186,34 @@ const Courses_main = () => {
 
           {/* Course Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {courses.map((course, index) => (
-              <div key={index} className="bg-white border rounded-lg p-4 sm:p-6 hover:shadow-lg transition-shadow">
-                <div className="h-6 sm:h-8 mb-6 sm:mb-8">
-                  <img 
-                    src={course.logo} 
-                    alt={course.type} 
-                    className="h-full object-contain"
-                  />
-                </div>
-                <h3 className="text-blue-600 hover:text-blue-800 mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
-                  {course.title}
-                </h3>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-gray-600 text-xs sm:text-sm">
-                    <FiClock className="mr-1" />
-                    <span>{course.duration}</span>
+            {sortedCourses.map((course) => (
+              <Link 
+                to={`/courses/${course.id}`} 
+                key={course.id}
+                className="block"
+              >
+                <div className="bg-white border rounded-lg p-4 sm:p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center justify-center h-12 sm:h-16 mb-6">
+                    <img 
+                      src={course.logo} 
+                      alt={course.type} 
+                      className="max-h-full w-auto object-contain"
+                    />
                   </div>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <FiMoreVertical />
-                  </button>
+                  <h3 className="text-blue-600 hover:text-blue-800 mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
+                    {course.title}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-gray-600 text-xs sm:text-sm">
+                      <FiClock className="mr-1" />
+                      <span>{course.duration}</span>
+                    </div>
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <FiMoreVertical />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
