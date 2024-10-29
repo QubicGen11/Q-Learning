@@ -38,7 +38,7 @@ const NavLink = styled(Link)(({ isActive }) => ({
 const Navbar_main = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  
+
   const navItems = [
     { text: 'HOME', tooltip: 'Go to Home', path: '/' },
     { text: 'COURSES', tooltip: 'Browse Our Courses', path: '/courses' },
@@ -46,7 +46,7 @@ const Navbar_main = () => {
     { text: 'CAREER PATHS', tooltip: 'Explore Career Paths', path: '/career-paths' },
     { text: 'CERTIFICATION', tooltip: 'Get Certified', path: '/certification' },
     { text: 'RESOURCES', tooltip: 'Access Resources', path: '/resources' },
-    { text: 'CONTACT', tooltip: 'Contact Us', path: '/contact' }
+    { text: 'CONTACT', tooltip: 'Contact Us', path: 'https://www.qubicgen.com' }
   ];
 
   // Mobile drawer content
@@ -63,18 +63,31 @@ const Navbar_main = () => {
       </div>
       <div className="py-4">
         {navItems.map((item, index) => (
-          <Link
-            key={index}
-            to={item.path}
-            onClick={() => setMobileOpen(false)}
-            className={`block px-6 py-3 text-sm ${
-              location.pathname === item.path 
-                ? 'text-[#0d47a1] bg-blue-50' 
-                : 'text-gray-600'
-            }`}
-          >
-            {item.text}
-          </Link>
+          item.path.startsWith('http') ? (
+            <a
+              key={index}
+              href={item.path}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
+              className="block px-6 py-3 text-sm text-gray-600 hover:text-[#0d47a1]"
+            >
+              {item.text}
+            </a>
+          ) : (
+            <Link
+              key={index}
+              to={item.path}
+              onClick={() => setMobileOpen(false)}
+              className={`block px-6 py-3 text-sm ${
+                location.pathname === item.path 
+                  ? 'text-[#0d47a1] bg-blue-50' 
+                  : 'text-gray-600'
+              }`}
+            >
+              {item.text}
+            </Link>
+          )
         ))}
       </div>
     </div>
@@ -82,14 +95,10 @@ const Navbar_main = () => {
 
   return (
     <>
-      {/* Added a placeholder div to prevent content jump */}
       <div className="h-16"></div>
-      
-      {/* Added fixed positioning to the nav */}
       <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
         <div className="max-w-9xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            {/* Logo Section */}
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
                 <span className="text-2xl font-bold text-[#fa4616]">QLearning</span>
@@ -97,7 +106,6 @@ const Navbar_main = () => {
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
             <button 
               className="md:hidden p-2 rounded-full hover:bg-gray-100 text-gray-600"
               onClick={() => setMobileOpen(true)}
@@ -105,7 +113,6 @@ const Navbar_main = () => {
               <FiMenu className="w-6 h-6" />
             </button>
 
-            {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
               {navItems.map((item, index) => (
                 <Tooltip 
@@ -116,19 +123,35 @@ const Navbar_main = () => {
                   enterDelay={200}
                   leaveDelay={0}
                 >
-                  <NavLink 
-                    to={item.path}
-                    isActive={location.pathname === item.path || 
-                            (item.path === '/' && location.pathname === '/')}
-                    className="text-xs tracking-wide"
-                  >
-                    {item.text}
-                  </NavLink>
+                  {item.path.startsWith('http') ? (
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs tracking-wide text-gray-600 hover:text-[#0d47a1]"
+                      style={{
+                        position: 'relative',
+                        fontSize: '11px',
+                        fontWeight: '500',
+                        fontFamily: 'sans-serif'
+                      }}
+                    >
+                      {item.text}
+                    </a>
+                  ) : (
+                    <NavLink 
+                      to={item.path}
+                      isActive={location.pathname === item.path || 
+                                (item.path === '/' && location.pathname === '/')}
+                      className="text-xs tracking-wide"
+                    >
+                      {item.text}
+                    </NavLink>
+                  )}
                 </Tooltip>
               ))}
             </div>
 
-            {/* Right Side - Language and Login */}
             <div className="hidden md:flex items-center space-x-4">
               <Tooltip title="Change Language" arrow>
                 <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600">
@@ -149,7 +172,6 @@ const Navbar_main = () => {
         </div>
       </nav>
 
-      {/* Mobile Drawer */}
       <Drawer
         anchor="right"
         open={mobileOpen}
