@@ -7,6 +7,8 @@ const Courses_main = () => {
   const [language, setLanguage] = useState('English');
   const [sortBy, setSortBy] = useState('Featured');
   const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [filterSearch, setFilterSearch] = useState('');
 
   const techLogos = {
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -76,6 +78,19 @@ const Courses_main = () => {
     return 0;
   });
 
+  const filteredSidebarCourses = courses.filter(course => 
+    course.title.toLowerCase().includes(filterSearch.toLowerCase()) ||
+    course.type.toLowerCase().includes(filterSearch.toLowerCase())
+  );
+
+  const coursesByType = filteredSidebarCourses.reduce((acc, course) => {
+    if (!acc[course.type]) {
+      acc[course.type] = [];
+    }
+    acc[course.type].push(course);
+    return acc;
+  }, {});
+
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       {/* Header */}
@@ -85,40 +100,68 @@ const Courses_main = () => {
       
       {/* Main Layout */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left Sidebar - Hidden on mobile, shown as overlay or top section */}
+        {/* Left Sidebar */}
         <div className="w-full lg:w-[280px] lg:flex-shrink-0">
-          {/* Search Box */}
+          {/* Search Box for Filters */}
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search courses..."
               className="w-full px-4 py-2 border rounded-md pr-10 text-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={filterSearch}
+              onChange={(e) => setFilterSearch(e.target.value)}
             />
             <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
 
-          {/* Reset Link */}
-          <div className="mb-4 sm:mb-6">
-            <button 
-              onClick={handleReset}
-              className="text-blue-600 hover:text-blue-800 text-sm"
-            >
-              Reset
-            </button>
+          {/* Course List by Type */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-3">Course Categories</h2>
+            {Object.entries(coursesByType).map(([type, typeCourses]) => (
+              <div key={type} className="mb-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
+                  {type}
+                  <span className="text-gray-500 text-xs">
+                    ({typeCourses.length})
+                  </span>
+                </h3>
+                <div className="space-y-2 ml-2">
+                  {typeCourses.map((course) => (
+                    <button
+                      key={course.id}
+                      onClick={() => setSelectedCourse(course)}
+                      className={`w-full text-left px-2 py-1 text-sm rounded-md transition-colors
+                        ${selectedCourse?.id === course.id 
+                          ? 'bg-blue-100 text-blue-700' 
+                          : 'hover:bg-gray-100'
+                        }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={course.logo} 
+                          alt={course.type}
+                          className="w-4 h-4 object-contain"
+                        />
+                        <span className="truncate">{course.title}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Filters Section */}
-          <div className="flex flex-col sm:flex-row lg:flex-col gap-6 mb-6">
-            {/* Category */}
-            <div className="flex-1 lg:flex-none mb-4 sm:mb-0">
-              <h2 className="text-sm font-semibold mb-3 flex items-center">
+          {/* Original Filter Sections */}
+          <div className="border-t pt-6">
+            <h2 className="text-lg font-semibold mb-3">Additional Filters</h2>
+            {/* Category Section */}
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold mb-2 flex items-center">
                 Category
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </h2>
+              </h3>
               <div className="space-y-2">
                 {categories.map((category, index) => (
                   <label key={index} className="flex items-center space-x-2 text-sm">
@@ -130,14 +173,14 @@ const Courses_main = () => {
               </div>
             </div>
 
-            {/* Product */}
-            <div className="flex-1 lg:flex-none">
-              <h2 className="text-sm font-semibold mb-3 flex items-center">
+            {/* Product Section */}
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold mb-2 flex items-center">
                 Product
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </h2>
+              </h3>
               <div className="space-y-2">
                 {products.map((product, index) => (
                   <label key={index} className="flex items-center space-x-2 text-sm">
