@@ -3,17 +3,17 @@ import { Link } from 'react-router-dom';
 
 const FeatureCard = ({ title, description, link, linkText }) => {
   return (
-    <div className="flex flex-col max-w-sm">
+    <div className="flex flex-col max-w-sm transition-colors duration-200">
       {/* Red line at top */}
       <div className="w-12 h-1 bg-[#fa4616] mb-6"></div>
       
       {/* Title */}
-      <h2 className="text-3xl font-normal mb-6">
+      <h2 className="text-3xl font-normal mb-6 text-gray-900 dark:text-white transition-colors duration-200">
         {title}
       </h2>
       
       {/* Description */}
-      <p className="text-gray-600 mb-6 leading-relaxed">
+      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed transition-colors duration-200">
         {description}
       </p>
       
@@ -21,7 +21,8 @@ const FeatureCard = ({ title, description, link, linkText }) => {
       {link && linkText && (
         <Link 
           to={link} 
-          className="text-blue-600 hover:text-blue-800 flex items-center gap-2 font-medium"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                     flex items-center gap-2 font-medium transition-colors duration-200"
         >
           {linkText}
           <svg 
@@ -45,7 +46,7 @@ const FeatureCard = ({ title, description, link, linkText }) => {
 
 const Hero_Features = () => {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-16">
+    <div className="max-w-7xl mx-auto px-4 py-16 bg-white dark:bg-gray-900 transition-colors duration-200">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
         <FeatureCard 
           title="Learn skills"

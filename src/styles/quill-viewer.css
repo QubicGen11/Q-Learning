@@ -1,0 +1,76 @@
+/* Add this to your global CSS or create a new CSS module */
+.quill-content-viewer {
+  @apply text-gray-900 dark:text-white;
+}
+
+.quill-content-viewer .ql-editor {
+  padding: 0;
+}
+
+.quill-content-viewer .ql-editor h1 {
+  @apply text-3xl font-bold mb-4;
+}
+
+.quill-content-viewer .ql-editor h2 {
+  @apply text-2xl font-bold mb-3;
+}
+
+.quill-content-viewer .ql-editor h3 {
+  @apply text-xl font-bold mb-2;
+}
+
+.quill-content-viewer .ql-editor p {
+  @apply mb-4;
+}
+
+.quill-content-viewer .ql-editor ul {
+  @apply list-disc pl-5 mb-4;
+}
+
+.quill-content-viewer .ql-editor ol {
+  @apply list-decimal pl-5 mb-4;
+}
+
+.quill-content-viewer .ql-editor blockquote {
+  @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4;
+}
+
+.quill-content-viewer .ql-editor pre {
+  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg my-4;
+}
+
+.quill-content-viewer .ql-editor code {
+  @apply font-mono bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded;
+}
+
+.quill-content-viewer .ql-editor img {
+  @apply max-w-full h-auto rounded-lg my-4;
+}
+
+.quill-content-viewer .ql-editor iframe {
+  @apply w-full aspect-video rounded-lg my-4;
+}
+
+.quill-content-viewer .ql-editor a {
+  @apply text-blue-600 dark:text-blue-400 hover:underline;
+}
+
+.quill-content-viewer .ql-editor strong {
+  @apply font-bold;
+}
+
+.quill-content-viewer .ql-editor em {
+  @apply italic;
+}
+
+.quill-content-viewer .ql-editor .ql-align-center {
+  @apply text-center;
+}
+
+.quill-content-viewer .ql-editor .ql-align-right {
+  @apply text-right;
+}
+
+.quill-content-viewer .ql-editor .ql-align-justify {
+  @apply text-justify;
+} 

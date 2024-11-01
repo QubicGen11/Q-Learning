@@ -7,8 +7,6 @@ const Courses_main = () => {
   const [language, setLanguage] = useState('English');
   const [sortBy, setSortBy] = useState('Featured');
   const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [filterSearch, setFilterSearch] = useState('');
 
   const techLogos = {
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -78,117 +76,89 @@ const Courses_main = () => {
     return 0;
   });
 
-  const filteredSidebarCourses = courses.filter(course => 
-    course.title.toLowerCase().includes(filterSearch.toLowerCase()) ||
-    course.type.toLowerCase().includes(filterSearch.toLowerCase())
-  );
-
-  const coursesByType = filteredSidebarCourses.reduce((acc, course) => {
-    if (!acc[course.type]) {
-      acc[course.type] = [];
-    }
-    acc[course.type].push(course);
-    return acc;
-  }, {});
-
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 bg-white dark:bg-gray-900 transition-all duration-300">
       {/* Header */}
-      <div className="border-b pb-4 sm:pb-6 mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Courses</h1>
+      <div className="border-b border-gray-200 dark:border-gray-700 pb-4 sm:pb-6 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+          Courses
+        </h1>
       </div>
       
       {/* Main Layout */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left Sidebar */}
         <div className="w-full lg:w-[280px] lg:flex-shrink-0">
-          {/* Search Box for Filters */}
+          {/* Search Box */}
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="Search courses..."
-              className="w-full px-4 py-2 border rounded-md pr-10 text-sm"
-              value={filterSearch}
-              onChange={(e) => setFilterSearch(e.target.value)}
+              placeholder="Search..."
+              className="w-full px-4 py-2 border rounded-md pr-10 text-sm
+                       bg-white dark:bg-gray-800 
+                       border-gray-200 dark:border-gray-700
+                       text-gray-900 dark:text-white
+                       placeholder-gray-500 dark:placeholder-gray-400
+                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
           </div>
 
-          {/* Course List by Type */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-3">Course Categories</h2>
-            {Object.entries(coursesByType).map(([type, typeCourses]) => (
-              <div key={type} className="mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
-                  {type}
-                  <span className="text-gray-500 text-xs">
-                    ({typeCourses.length})
-                  </span>
-                </h3>
-                <div className="space-y-2 ml-2">
-                  {typeCourses.map((course) => (
-                    <button
-                      key={course.id}
-                      onClick={() => setSelectedCourse(course)}
-                      className={`w-full text-left px-2 py-1 text-sm rounded-md transition-colors
-                        ${selectedCourse?.id === course.id 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'hover:bg-gray-100'
-                        }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <img 
-                          src={course.logo} 
-                          alt={course.type}
-                          className="w-4 h-4 object-contain"
-                        />
-                        <span className="truncate">{course.title}</span>
-                      </div>
-                    </button>
+          {/* Reset Link */}
+          <div className="mb-4 sm:mb-6">
+            <button 
+              onClick={handleReset}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+            >
+              Reset
+            </button>
+          </div>
+
+          {/* Filters Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <div className="space-y-6">
+              {/* Category */}
+              <div>
+                <h2 className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">
+                  Category
+                </h2>
+                <div className="space-y-2">
+                  {categories.map((category, index) => (
+                    <label key={index} className="flex items-center space-x-2 text-sm">
+                      <input 
+                        type="checkbox" 
+                        className="form-checkbox text-blue-600 dark:text-blue-400
+                                 border-gray-300 dark:border-gray-600
+                                 rounded focus:ring-blue-500 dark:focus:ring-blue-400" 
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">{category.name}</span>
+                      <span className="text-gray-500 dark:text-gray-400">({category.count})</span>
+                    </label>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Original Filter Sections */}
-          <div className="border-t pt-6">
-            <h2 className="text-lg font-semibold mb-3">Additional Filters</h2>
-            {/* Category Section */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold mb-2 flex items-center">
-                Category
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </h3>
-              <div className="space-y-2">
-                {categories.map((category, index) => (
-                  <label key={index} className="flex items-center space-x-2 text-sm">
-                    <input type="checkbox" className="form-checkbox" />
-                    <span>{category.name}</span>
-                    <span className="text-gray-500">({category.count})</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Product Section */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold mb-2 flex items-center">
-                Product
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </h3>
-              <div className="space-y-2">
-                {products.map((product, index) => (
-                  <label key={index} className="flex items-center space-x-2 text-sm">
-                    <input type="checkbox" className="form-checkbox" />
-                    <span>{product.name}</span>
-                    <span className="text-gray-500">({product.count})</span>
-                  </label>
-                ))}
+              {/* Product */}
+              <div>
+                <h2 className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">
+                  Product
+                </h2>
+                <div className="space-y-2">
+                  {products.map((product, index) => (
+                    <label key={index} className="flex items-center space-x-2 text-sm">
+                      <input 
+                        type="checkbox" 
+                        className="form-checkbox text-blue-600 dark:text-blue-400
+                                 border-gray-300 dark:border-gray-600
+                                 rounded focus:ring-blue-500 dark:focus:ring-blue-400" 
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">{product.name}</span>
+                      <span className="text-gray-500 dark:text-gray-400">({product.count})</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -197,28 +167,39 @@ const Courses_main = () => {
         {/* Main Content */}
         <div className="flex-1">
           {/* Top Bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
-            <div className="text-gray-600 text-sm sm:text-base">
-              {sortedCourses.length} Results
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 
+                         bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+            <div className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+              {filteredCourses.length} Results
             </div>
+            
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
+              {/* Language Selector */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-sm">Language:</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">Language:</span>
                 <select 
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="border rounded px-2 py-1 text-sm min-w-[120px] w-full sm:w-auto"
+                  className="border rounded px-2 py-1 text-sm min-w-[120px] w-full sm:w-auto
+                           bg-white dark:bg-gray-700
+                           border-gray-300 dark:border-gray-600
+                           text-gray-900 dark:text-white"
                 >
                   <option>English</option>
                   <option>Spanish</option>
                 </select>
               </div>
+
+              {/* Sort Selector */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-sm">Sort By:</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">Sort By:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="border rounded px-2 py-1 text-sm min-w-[120px] w-full sm:w-auto"
+                  className="border rounded px-2 py-1 text-sm min-w-[120px] w-full sm:w-auto
+                           bg-white dark:bg-gray-700
+                           border-gray-300 dark:border-gray-600
+                           text-gray-900 dark:text-white"
                 >
                   <option>Featured</option>
                   <option>Newest</option>
@@ -233,25 +214,35 @@ const Courses_main = () => {
               <Link 
                 to={`/courses/${course.id}`} 
                 key={course.id}
-                className="block"
+                className="group"
               >
-                <div className="bg-white border rounded-lg p-4 sm:p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-center h-12 sm:h-16 mb-6">
+                <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 sm:p-6 
+                              hover:shadow-lg transition-all duration-300 relative">
+                  {/* Logo with Glow Effect */}
+                  <div className="relative flex items-center justify-center h-12 sm:h-16 mb-6">
+                    <div className="absolute inset-0 dark:bg-blue-500/20 rounded-full blur-xl scale-150 
+                                  opacity-0 dark:opacity-0 dark:group-hover:opacity-75 
+                                  transition-all duration-300 -z-10"></div>
                     <img 
                       src={course.logo} 
                       alt={course.type} 
-                      className="max-h-full w-auto object-contain"
+                      className="max-h-full w-auto object-contain relative z-10
+                               dark:opacity-90 group-hover:opacity-100
+                               transition-all duration-300"
                     />
                   </div>
-                  <h3 className="text-blue-600 hover:text-blue-800 mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
+                  
+                  <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                               mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
                     {course.title}
                   </h3>
+                  
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center text-gray-600 text-xs sm:text-sm">
+                    <div className="flex items-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
                       <FiClock className="mr-1" />
                       <span>{course.duration}</span>
                     </div>
-                    <button className="text-gray-400 hover:text-gray-600">
+                    <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                       <FiMoreVertical />
                     </button>
                   </div>

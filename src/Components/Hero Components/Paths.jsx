@@ -52,14 +52,14 @@ const Paths = () => {
   const selectedCareer = careerPaths.find(path => path.title === selectedRole);
 
   return (
-    <div className="bg-gray-50 py-20">
+    <div className="bg-gray-50 dark:bg-gray-900 py-20 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 md:px-[150px]">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-normal mb-6">
+          <h2 className="text-4xl font-normal mb-6 text-gray-900 dark:text-white transition-colors duration-300">
             Explore Web Development Paths
           </h2>
-          <p className="text-gray-600 max-w-3xl mx-auto">
+          <p className="text-gray-600 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-300">
             Behind every successful web application, there is a skilled development team. Each member 
             brings unique expertise in modern web technologies and best practices.
           </p>
@@ -74,10 +74,10 @@ const Paths = () => {
                 <button
                   key={path.title}
                   onClick={() => setSelectedRole(path.title)}
-                  className={`w-full text-left px-4 py-3 rounded transition-colors
+                  className={`w-full text-left px-4 py-3 rounded transition-all duration-300
                     ${selectedRole === path.title 
                       ? 'bg-blue-600 text-white' 
-                      : 'hover:bg-gray-200'}`}
+                      : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
                 >
                   {path.title}
                 </button>
@@ -86,25 +86,26 @@ const Paths = () => {
           </div>
 
           {/* Right Column - Details */}
-          <div className="md:col-span-8 bg-white p-8 rounded-lg relative">
+          <div className="md:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-lg relative transition-colors duration-300">
             {/* Dot Pattern Background */}
             <div className="absolute right-0 top-0 w-48 h-48 grid grid-cols-8 gap-2 opacity-10">
               {[...Array(64)].map((_, i) => (
-                <div key={i} className="w-1 h-1 bg-gray-400 rounded-full"/>
+                <div key={i} className="w-1 h-1 bg-gray-400 dark:bg-gray-500 rounded-full"/>
               ))}
             </div>
 
-            <h3 className="text-2xl font-normal mb-4">
+            <h3 className="text-2xl font-normal mb-4 text-gray-900 dark:text-white transition-colors duration-300">
               {selectedCareer?.description}
             </h3>
             
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">
               {selectedCareer?.details}
             </p>
 
             <Link 
               to="#" 
-              className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                         flex items-center gap-2 transition-colors duration-300"
             >
               {selectedCareer?.link}
               <svg 
@@ -126,8 +127,12 @@ const Paths = () => {
             <div className="absolute bottom-4 right-4 flex gap-2">
               {selectedRole === 'Frontend Developer' && (
                 <>
-                  <img src="https://staticcontent.cdn.contentraven.com/crcloud/pages/11218/1/en-us/images/thumb_1.png" alt="React" className="w-8 h-8" />
-                  <img src="https://staticcontent.cdn.contentraven.com/crcloud/pages/11218/1/en-us/images/thumb_5.png" alt="Next.js" className="w-8 h-8" />
+                  <img src="https://staticcontent.cdn.contentraven.com/crcloud/pages/11218/1/en-us/images/thumb_1.png" 
+                       alt="React" 
+                       className="w-8 h-8 dark:opacity-90" />
+                  <img src="https://staticcontent.cdn.contentraven.com/crcloud/pages/11218/1/en-us/images/thumb_5.png" 
+                       alt="Next.js" 
+                       className="w-8 h-8 dark:opacity-90" />
                 </>
               )}
               {/* Add similar conditions for other roles */}
