@@ -29,7 +29,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify({ email: user.email }));
       navigate('/course-manager');
     } else {
-      setError('Invalid credentials. Try admin@example.com / admin123');
+      setError('Invalid credentials. Try admin@gmail.com / admin123');
     }
   };
 
@@ -87,7 +87,7 @@ const Login = () => {
           
           <div className="text-sm text-center text-gray-600">
             <p>Demo Credentials:</p>
-            <p>Email: admin@example.com</p>
+            <p>Email: admin@gmail.com</p>
             <p>Password: admin123</p>
           </div>
         </form>
