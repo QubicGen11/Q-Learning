@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar_main from './Components/Navbar Components/Navbar_main';
 import Hero_Heading from './Components/Hero Components/Hero_Heading';
 import Hero_Features from './Components/Hero Components/Hero_Skills';
@@ -10,10 +10,11 @@ import Courses_main from './Components/Courses Components/Courses_main';
 import Careerpaths_main from './Components/Career Path Components/Careerpaths_main';
 import Certification_main from './Components/Certification Components/Certification_main';
 import ScrollToTopButton from './Components/ScrollToTopButton';
-
+import Login from './Components/Auth/Login';
 import CourseManager from './Components/Courses Components/CourseManager';
 import CourseContent from './Components/Courses Components/CourseContent';
 import CourseLesson from './Components/Courses Components/CourseLesson';
+import ProtectedRoute from './Components/Auth/ProtectedRoute';
 
 // Create a Home component that contains all the landing page components
 const Home = () => {
@@ -30,10 +31,19 @@ const Home = () => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <div>
         <Navbar_main />
         <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/course-manager" 
+            element={
+              <ProtectedRoute>
+                <CourseManager />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses_main />} />
           <Route path="/courses/:id" element={<CourseContent />} />
@@ -46,21 +56,19 @@ function App() {
           <Route path="/admin/courses" element={<CourseManager />} />
           <Route path="/courses" element={<Courses_main />} />
           <Route path="/courses/:id" element={<CourseContent />} />
-          
           <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
+          
           {/* Contact Route - Redirects to external URL */}
           <Route
             path="/contact"
             element={<Navigate to="https://www.qubicgen.com" replace />}
           />
 
-          <Route path="/login" element={<div>Login Page</div>} />
           <Route path="*" element={<div>404 Not Found</div>} />
-        
         </Routes>
-        <ScrollToTopButton /> 
+        <ScrollToTopButton />
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 

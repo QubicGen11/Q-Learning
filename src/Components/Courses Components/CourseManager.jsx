@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiClock, FiUser } from 'react-icons/fi';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { useNavigate } from 'react-router-dom';
 
 const CourseManager = () => {
   const [courses, setCourses] = useState([]);
   const [currentCourse, setCurrentCourse] = useState(null);
   const [showTechLogos, setShowTechLogos] = useState(false);
+  const navigate = useNavigate();
 
   // Tech logos object for predefined images
   const techLogos = {
@@ -63,9 +67,15 @@ const CourseManager = () => {
   const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      navigate('/login');
+      return;
+    }
+    
     const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
     setCourses(storedCourses);
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -142,9 +152,44 @@ const CourseManager = () => {
     setCourses(updatedCourses);
   };
 
+  // Add Quill modules configuration
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['blockquote', 'code-block'],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'direction': 'rtl' }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['link', 'image', 'video'],
+      ['clean']
+    ]
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
     <div className="max-w-[1600px] mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Course Manager</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Course Manager</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-600">
+            {JSON.parse(localStorage.getItem('user'))?.email}
+          </span>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
       {/* Course Form */}
       <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow">
@@ -440,16 +485,15 @@ const CourseManager = () => {
 
                     <div>
                       <label className="block mb-2 text-sm">Content</label>
-                      <textarea
+                      <ReactQuill
                         value={item.content}
-                        onChange={(e) => {
+                        onChange={(content) => {
                           const newCurriculum = [...formData.curriculum];
-                          newCurriculum[index].content = e.target.value;
+                          newCurriculum[index].content = content;
                           setFormData({...formData, curriculum: newCurriculum});
                         }}
-                        className="w-full p-2 border rounded"
-                        rows="2"
-                        placeholder="Enter lesson content"
+                        modules={modules}
+                        className="h-64 mb-12" // Added height and margin to accommodate toolbar
                       />
                     </div>
                   </div>
