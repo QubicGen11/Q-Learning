@@ -21,7 +21,7 @@ import { ThemeProvider } from './context/ThemeContext';
 const Home = () => {
   return (
     <>
-      <Hero_Head  ing />
+      <Hero_Heading />
       <Hero_Features />
       <Paths />
       <Educational_Ecosystem />
