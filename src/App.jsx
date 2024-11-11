@@ -19,6 +19,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import Carousel_main from './Components/Carousel Components/Carousel_main';
 import SkillsSection from './Components/SkillsSection';
 import Learners_main from './Components/Learners Components/Learners_main';
+import ContactSection from './Components/Contact Us Home/Contact_usmain';
 // import { AuthProvider } from './context/AuthContext';
 
 // Create a Home component that contains all the landing page components
@@ -36,6 +37,7 @@ const Home = () => {
       <Hero_Features />
       {/* <Paths /> */}
       <Educational_Ecosystem />
+      <ContactSection />
       <Testimonial />
     </>
   );

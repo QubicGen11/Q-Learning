@@ -3,6 +3,25 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiClock, FiHeart, FiUser, FiPlay } from 'react-icons/fi';
 import Navbar_main from '../Navbar Components/Navbar_main';
 
+const techLogos = {
+  html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
+  css: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg",
+  javascript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
+  react: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+  nextjs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+  nodejs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
+  mongodb: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg",
+  git: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
+  typescript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
+  tailwind: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg",
+  redux: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg",
+  postgresql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
+  docker: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
+  aws: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
+  firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
+  graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
+};
+
 const CourseContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,6 +36,7 @@ const CourseContent = () => {
     if (foundCourse) {
       setCourse({
         ...foundCourse,
+        logo: techLogos[foundCourse.techStack?.[0]] || techLogos.html,
         learningObjectives: foundCourse.learningObjectives || [],
         curriculum: foundCourse.curriculum || [],
         category: foundCourse.category || 'Development',
@@ -269,7 +289,11 @@ const CourseContent = () => {
               <div className="absolute inset-0 dark:bg-blue-500/20 rounded-full 
                             blur-xl scale-150 opacity-0 dark:opacity-0 
                             dark:group-hover:opacity-75 transition-all duration-300 -z-10"></div>
-              <img src={course.logo} alt="" className="w-24 h-24 sm:w-32 sm:h-32 object-contain relative z-10" />
+              <img 
+                src={course.logo || techLogos[course.techStack?.[0]] || techLogos.html}
+                alt="" 
+                className="w-24 h-24 sm:w-32 sm:h-32 object-contain relative z-10" 
+              />
             </div>
             <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
               {course.title}
@@ -317,6 +341,18 @@ const CourseContent = () => {
                 FAVORITE
               </button>
             </div>
+            {course.techStack && course.techStack.length > 0 && (
+              <div className="flex justify-center gap-2 mb-4">
+                {course.techStack.map(tech => (
+                  <img 
+                    key={tech}
+                    src={techLogos[tech]}
+                    alt={tech}
+                    className="w-6 h-6 object-contain"
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

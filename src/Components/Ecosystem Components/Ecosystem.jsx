@@ -83,9 +83,10 @@ const Educational_Ecosystem = () => {
       {/* Bot Image */}
       <div className="flex justify-end mt-8 sm:mt-12 px-4">
         <img 
-          src="https://staticcontent.cdn.contentraven.com/crcloud/pages/11218/1/en-us/images/bot_4.png"
+          src="https://res.cloudinary.com/defsu5bfc/image/upload/v1714828410/logo_3_jizb6b.png"
           alt="Friendly bot" 
-          className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 animate-bounce dark:opacity-90"
+          style={{rotate: '0deg'}}
+          className="w-16 h-16 sm:w-20 sm:h-20 lg:w-20 lg:h-20 animate-bounce dark:opacity-90 "
         />
       </div>
     </div>

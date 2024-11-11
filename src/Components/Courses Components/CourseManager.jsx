@@ -1,37 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiClock, FiUser, FiSearch, FiBook } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { useNavigate } from 'react-router-dom';
-import Navbar_main from '../Navbar Components/Navbar_main';
+import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus } from 'react-icons/fi';
+
+// Tech logos data with CDN links
+const techLogos = {
+  html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
+  css: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg",
+  javascript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
+  react: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+  nextjs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+  nodejs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
+  mongodb: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg",
+  git: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
+  typescript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
+  tailwind: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg",
+  redux: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg",
+  postgresql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
+  docker: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
+  aws: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
+  firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
+  graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
+};
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error:', error);
+    console.error('Error Info:', errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 text-red-600">
+          <h2>Something went wrong.</h2>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const CourseManager = () => {
-  const [courses, setCourses] = useState([]);
-  const [currentCourse, setCurrentCourse] = useState(null);
-  const [showTechLogos, setShowTechLogos] = useState(false);
   const navigate = useNavigate();
 
-  // Tech logos object for predefined images
-  const techLogos = {
-    html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
-    css: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg",
-    javascript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
-    react: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
-    nextjs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
-    nodejs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
-    mongodb: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg",
-    git: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
-    typescript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
-    tailwind: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg",
-    redux: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg",
-    postgresql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
-    docker: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
-    aws: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
-    firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
-    graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
-  };
-
-  // Add predefined categories
+  // Course Categories Data
   const courseCategories = [
     {
       title: "Development",
@@ -40,7 +71,10 @@ const CourseManager = () => {
         "Mobile Development",
         "Programming Languages",
         "Game Development",
-        "Database Design"
+        "Database Design",
+        "Software Testing",
+        "Software Engineering",
+        "Development Tools"
       ]
     },
     {
@@ -50,7 +84,10 @@ const CourseManager = () => {
         "Communication",
         "Management",
         "Sales",
-        "Strategy"
+        "Strategy",
+        "Operations",
+        "Project Management",
+        "Business Law"
       ]
     },
     {
@@ -60,13 +97,48 @@ const CourseManager = () => {
         "Network Security",
         "Hardware",
         "Operating Systems",
-        "Cloud Computing"
+        "Cloud Computing",
+        "Cybersecurity",
+        "Data Storage",
+        "DevOps"
+      ]
+    },
+    {
+      title: "Design",
+      subcategories: [
+        "Web Design",
+        "Graphic Design",
+        "Design Tools",
+        "User Experience",
+        "Game Design",
+        "3D & Animation",
+        "Fashion Design",
+        "Architectural Design"
+      ]
+    },
+    {
+      title: "Marketing",
+      subcategories: [
+        "Digital Marketing",
+        "Social Media Marketing",
+        "Content Marketing",
+        "SEO",
+        "Branding",
+        "Marketing Analytics",
+        "Public Relations",
+        "Advertising"
       ]
     }
   ];
 
-  // Initialize formData with all required arrays
-  const initialFormState = {
+  // State definitions
+  const [activeTab, setActiveTab] = useState('basicInfo');
+  const [activeLesson, setActiveLesson] = useState(0);
+  const [courses, setCourses] = useState([]);
+  const [currentCourse, setCurrentCourse] = useState(null);
+  const [showTechLogos, setShowTechLogos] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [formData, setFormData] = useState({
     id: Date.now(),
     title: '',
     description: '',
@@ -81,7 +153,7 @@ const CourseManager = () => {
     diplomaAvailable: true,
     courseAudience: '',
     productAlignment: '',
-    learningObjectives: [], // Initialize empty array
+    learningObjectives: [],
     curriculum: [
       {
         id: 1,
@@ -99,10 +171,12 @@ const CourseManager = () => {
     ],
     category: '',
     subcategory: '',
-  };
+    price: '',
+    prerequisites: '',
+    techStack: []
+  });
 
-  const [formData, setFormData] = useState(initialFormState);
-
+  // Fetch courses on mount
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
@@ -114,332 +188,109 @@ const CourseManager = () => {
     setCourses(storedCourses);
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedCourses = currentCourse 
-      ? courses.map(course => 
-          course.id === currentCourse.id ? { ...formData, id: course.id } : course
-        )
-      : [...courses, { ...formData, id: Date.now() }];
-    
-    localStorage.setItem('courses', JSON.stringify(updatedCourses));
-    setCourses(updatedCourses);
-    resetForm();
+    try {
+      const updatedCourses = [...courses];
+      if (currentCourse) {
+        // Update existing course
+        const index = courses.findIndex(course => course.id === currentCourse.id);
+        updatedCourses[index] = formData;
+      } else {
+        // Add new course
+        updatedCourses.push(formData);
+      }
+      
+      localStorage.setItem('courses', JSON.stringify(updatedCourses));
+      setCourses(updatedCourses);
+      
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+      
+      setFormData({
+        ...formData,
+        id: Date.now(),
+        title: '',
+        description: '',
+        // ... reset other fields as needed
+      });
+      setCurrentCourse(null);
+    } catch (error) {
+      console.error('Error saving course:', error);
+    }
   };
 
+  // Handle course deletion
   const handleDelete = (id) => {
     const updatedCourses = courses.filter(course => course.id !== id);
     localStorage.setItem('courses', JSON.stringify(updatedCourses));
     setCourses(updatedCourses);
   };
 
+  // Handle course editing
   const handleEdit = (course) => {
     setCurrentCourse(course);
-    setFormData({
-      ...course,
-      learningObjectives: course.learningObjectives || [], // Ensure array exists
-      curriculum: course.curriculum || [] // Ensure array exists
-    });
+    setFormData(course);
+    setActiveTab('basicInfo');
   };
 
-  const resetForm = () => {
-    setCurrentCourse(null);
-    setFormData(initialFormState);
-  };
-
-  // Add learning objective
-  const addLearningObjective = () => {
-    setFormData({
-      ...formData,
-      learningObjectives: [...(formData.learningObjectives || []), '']
-    });
-  };
-
-  // Remove learning objective
-  const removeLearningObjective = (index) => {
-    const newObjectives = [...formData.learningObjectives];
-    newObjectives.splice(index, 1);
-    setFormData({
-      ...formData,
-      learningObjectives: newObjectives
-    });
-  };
-
-  const selectTechLogo = (logoUrl) => {
-    setFormData({ ...formData, logo: logoUrl });
-    setShowTechLogos(false);
-  };
-
-  // Add a function to handle lesson completion
-  const handleLessonComplete = (lessonId) => {
-    const updatedCourses = courses.map(course => {
-      if (course.id === formData.id) {
-        const updatedCurriculum = course.curriculum.map(lesson => {
-          if (lesson.id === lessonId) {
-            return { ...lesson, isCompleted: true };
-          }
-          return lesson;
-        });
-        return { ...course, curriculum: updatedCurriculum };
-      }
-      return course;
-    });
-    
-    localStorage.setItem('courses', JSON.stringify(updatedCourses));
-    setCourses(updatedCourses);
-  };
-
-  // Add Quill modules configuration
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['blockquote', 'code-block'],
-      [{ 'script': 'sub'}, { 'script': 'super' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      [{ 'direction': 'rtl' }],
-      [{ 'color': [] }, { 'background': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
-    ]
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
-
-  // Add these tabs at the top of the form
-  const [activeTab, setActiveTab] = useState('basicInfo');
-
-  // Add these states for filtering and sorting
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
-
-  // Add this filter function
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = selectedFilter === 'all' || course.category === selectedFilter;
-    return matchesSearch && matchesFilter;
-  });
-
-  // Course List Section
   return (
-    <div className="max-w-[1600px] mx-auto p-6">
-        <Navbar_main />
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Course Manager</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-600">
-            {JSON.parse(localStorage.getItem('user'))?.email}
-          </span>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navigation Bar */}
+      <div className="bg-black text-white h-14 flex items-center justify-between px-4 fixed w-full top-0 z-50">
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={() => navigate('/courses')}
+            className="flex items-center"
           >
-            Logout
+            <span className="mr-2">←</span>
+            Back to courses
           </button>
+          <span className="font-bold">{formData.title || 'New Course'}</span>
         </div>
       </div>
 
-      {/* Course Form */}
-      <div className="mb-8">
-        {/* Form Tabs */}
-        <div className="flex border-b mb-6">
-          <button
-            onClick={() => setActiveTab('basicInfo')}
-            className={`px-6 py-3 font-medium ${
-              activeTab === 'basicInfo'
-                ? 'text-orange-500 border-b-2 border-orange-500'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Basic Information
-          </button>
-          <button
-            onClick={() => setActiveTab('curriculum')}
-            className={`px-6 py-3 font-medium ${
-              activeTab === 'curriculum'
-                ? 'text-orange-500 border-b-2 border-orange-500'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Curriculum
-          </button>
-          <button
-            onClick={() => setActiveTab('details')}
-            className={`px-6 py-3 font-medium ${
-              activeTab === 'details'
-                ? 'text-orange-500 border-b-2 border-orange-500'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Additional Details
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
-          {activeTab === 'basicInfo' && (
-            <div className="space-y-6">
-              {/* Basic Information Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Title & Duration */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Course Title</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="Enter course title"
-                    required
-                  />
-                </div>
-                
-                {/* Category Selection */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({
-                      ...formData, 
-                      category: e.target.value,
-                      subcategory: ''
-                    })}
-                    className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="">Select Category</option>
-                    {courseCategories.map((cat) => (
-                      <option key={cat.title} value={cat.title}>{cat.title}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Subcategory - Only shows when category is selected */}
-                {formData.category && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Subcategory</label>
-                    <select
-                      value={formData.subcategory}
-                      onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
-                      className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500"
-                    >
-                      <option value="">Select Subcategory</option>
-                      {courseCategories
-                        .find(cat => cat.title === formData.category)
-                        ?.subcategories.map((sub) => (
-                          <option key={sub} value={sub}>{sub}</option>
-                        ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Description */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-2">Description</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500"
-                    rows="4"
-                    placeholder="Enter course description"
-                    required
-                  />
-                </div>
+      {/* Main Content Area with Sidebar */}
+      <div className="flex pt-14">
+        {/* Left Sidebar */}
+        <div className="w-64 bg-white h-[calc(100vh-56px)] fixed border-r border-gray-200">
+          <div className="p-6 space-y-8">
+            {/* Plan your course */}
+            <div>
+              <h3 className="font-bold text-gray-900 mb-4">Plan your course</h3>
+              <div className="space-y-4">
+                <SidebarItem 
+                  label="Basic Info" 
+                  isActive={activeTab === 'basicInfo'}
+                  onClick={() => setActiveTab('basicInfo')}
+                />
+                <SidebarItem 
+                  label="Curriculum" 
+                  isCompleted={formData.curriculum.length > 0}
+                  isActive={activeTab === 'curriculum'}
+                  onClick={() => setActiveTab('curriculum')}
+                />
               </div>
             </div>
-          )}
 
-          {activeTab === 'curriculum' && (
-            <div className="space-y-6">
-              {/* Curriculum Section */}
-              <div className="border rounded-lg p-4">
-                {formData.curriculum.map((item, index) => (
-                  <div key={index} className="mb-6 p-4 border rounded-lg bg-gray-50">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block mb-2 text-sm">Lesson Title</label>
-                        <input
-                          type="text"
-                          value={item.title}
-                          onChange={(e) => {
-                            const newCurriculum = [...formData.curriculum];
-                            newCurriculum[index].title = e.target.value;
-                            setFormData({...formData, curriculum: newCurriculum});
-                          }}
-                          className="w-full p-2 border rounded"
-                          placeholder="Enter lesson title"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-2 text-sm">Lesson Duration</label>
-                        <input
-                          type="text"
-                          value={item.duration}
-                          onChange={(e) => {
-                            const newCurriculum = [...formData.curriculum];
-                            newCurriculum[index].duration = e.target.value;
-                            setFormData({...formData, curriculum: newCurriculum});
-                          }}
-                          className="w-full p-2 border rounded"
-                          placeholder="e.g., 30m"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-2 text-sm">Lesson Type</label>
-                        <select
-                          value={item.type}
-                          onChange={(e) => {
-                            const newCurriculum = [...formData.curriculum];
-                            newCurriculum[index].type = e.target.value;
-                            setFormData({...formData, curriculum: newCurriculum});
-                          }}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="REQUIRED">Required</option>
-                          <option value="OPTIONAL">Optional</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block mb-2 text-sm">Content</label>
-                        <ReactQuill
-                          value={item.content}
-                          onChange={(content) => {
-                            const newCurriculum = [...formData.curriculum];
-                            newCurriculum[index].content = content;
-                            setFormData({...formData, curriculum: newCurriculum});
-                          }}
-                          modules={modules}
-                          className="h-64 mb-12" // Added height and margin to accommodate toolbar
-                        />
-                      </div>
-                    </div>
-
-                    {/* Remove Lesson Button */}
-                    {formData.curriculum.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newCurriculum = formData.curriculum.filter((_, i) => i !== index);
-                          setFormData({...formData, curriculum: newCurriculum});
-                        }}
-                        className="mt-2 text-red-600 text-sm hover:text-red-800"
-                      >
-                        Remove Lesson
-                      </button>
-                    )}
-                  </div>
+            {/* Create your content */}
+            <div>
+              <h3 className="font-bold text-gray-900 mb-4">Create your content</h3>
+              <div className="space-y-4">
+                {formData.curriculum.map((lesson, index) => (
+                  <SidebarItem
+                    key={lesson.id}
+                    label={lesson.title || `Lesson ${index + 1}`}
+                    isCompleted={lesson.isCompleted}
+                    isActive={activeLesson === index}
+                    onClick={() => {
+                      setActiveTab('curriculum');
+                      setActiveLesson(index);
+                    }}
+                  />
                 ))}
-
                 <button
-                  type="button"
                   onClick={() => {
                     setFormData({
                       ...formData,
@@ -452,396 +303,480 @@ const CourseManager = () => {
                         isCompleted: false
                       }]
                     });
+                    setActiveTab('curriculum');
+                    setActiveLesson(formData.curriculum.length);
                   }}
-                  className="flex items-center gap-2 text-orange-500 hover:text-orange-600"
+                  className="flex items-center gap-2 text-[#5624D0] hover:text-[#4B1F9E] pl-8"
                 >
-                  <span className="text-xl">+</span> Add New Lesson
+                  <span>+</span> Add Lesson
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="ml-64 flex-1 p-8">
+          {showSuccessMessage && (
+            <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+              Course saved successfully!
+            </div>
           )}
 
-          {activeTab === 'details' && (
-            <div className="space-y-6">
-              {/* Additional Details Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Course Type */}
-                <div>
-                  <label className="block mb-2">Course Type</label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="w-full p-2 border rounded"
-                    required
-                  >
-                    <option value="Frontend">Frontend</option>
-                    <option value="Backend">Backend</option>
-                    <option value="Full Stack">Full Stack</option>
-                    <option value="DevOps">DevOps</option>
-                    <option value="Mobile">Mobile Development</option>
-                  </select>
-                </div>
-
-                {/* Enrolled Students */}
-                <div>
-                  <label className="block mb-2">Initial Enrolled Students</label>
-                  <input
-                    type="number"
-                    value={formData.enrolledStudents}
-                    onChange={(e) => setFormData({...formData, enrolledStudents: parseInt(e.target.value)})}
-                    className="w-full p-2 border rounded"
-                    min="0"
-                  />
-                </div>
-
-                {/* Logo section (existing code) */}
-                <div>
-                  <label className="block mb-2">Logo</label>
-                  <div className="space-y-2">
+          <form onSubmit={handleSubmit}>
+            {/* Basic Info Tab */}
+            {activeTab === 'basicInfo' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold mb-6">Basic Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Course Title*</label>
                     <input
-                      type="url"
-                      value={formData.logo}
-                      onChange={(e) => setFormData({...formData, logo: e.target.value})}
-                      className="w-full p-2 border rounded"
-                      placeholder="Enter logo URL"
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="Enter course title"
+                      required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowTechLogos(!showTechLogos)}
-                      className="text-blue-600 hover:text-blue-800 text-sm"
-                    >
-                      {showTechLogos ? 'Hide Tech Logos' : 'Choose from Tech Logos'}
-                    </button>
-                    
-                    {/* Tech Logos Grid */}
-                    {showTechLogos && (
-                      <div className="grid grid-cols-4 gap-4 mt-2 p-4 border rounded">
-                        {Object.entries(techLogos).map(([key, url]) => (
-                          <div
-                            key={key}
-                            onClick={() => selectTechLogo(url)}
-                            className={`p-2 border rounded cursor-pointer hover:bg-gray-50 ${
-                              formData.logo === url ? 'border-blue-500 bg-blue-50' : ''
-                            }`}
-                          >
-                            <img
-                              src={url}
-                              alt={key}
-                              className="h-8 w-8 object-contain mx-auto"
-                            />
-                            <p className="text-xs text-center mt-1">{key}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                </div>
 
-                {/* Diploma Available */}
-                <div>
-                  <label className="block mb-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.diplomaAvailable}
-                      onChange={(e) => setFormData({...formData, diplomaAvailable: e.target.checked})}
-                      className="mr-2"
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description*</label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      rows={3}
+                      placeholder="Course description"
+                      required
                     />
-                    Diploma Available
-                  </label>
-                </div>
+                  </div>
 
-                {/* Difficulty Level */}
-                <div>
-                  <label className="block mb-2">Difficulty Level</label>
-                  <select
-                    value={formData.difficultyLevel}
-                    onChange={(e) => setFormData({...formData, difficultyLevel: e.target.value})}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
-                  </select>
-                </div>
+                  {/* Duration */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Duration*</label>
+                    <input
+                      type="text"
+                      value={formData.duration}
+                      onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="e.g., 8 weeks"
+                      required
+                    />
+                  </div>
 
-                {/* Completion Time */}
-                <div>
-                  <label className="block mb-2">Completion Time</label>
-                  <input
-                    type="text"
-                    value={formData.completionTime}
-                    onChange={(e) => setFormData({...formData, completionTime: e.target.value})}
-                    className="w-full p-2 border rounded"
-                    placeholder="e.g., 4hr"
-                  />
-                </div>
+                  {/* Completion Time */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Completion Time</label>
+                    <input
+                      type="text"
+                      value={formData.completionTime}
+                      onChange={(e) => setFormData({...formData, completionTime: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="e.g., 2-3 hours per week"
+                    />
+                  </div>
 
-                {/* Language */}
-                <div>
-                  <label className="block mb-2">Language</label>
-                  <select
-                    value={formData.language}
-                    onChange={(e) => setFormData({...formData, language: e.target.value})}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="English">English</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="French">French</option>
-                  </select>
-                </div>
+                  {/* Type */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Course Type*</label>
+                    <select
+                      value={formData.type}
+                      onChange={(e) => setFormData({...formData, type: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      required
+                    >
+                      <option value="Frontend">Frontend</option>
+                      <option value="Backend">Backend</option>
+                      <option value="Full Stack">Full Stack</option>
+                      <option value="DevOps">DevOps</option>
+                      <option value="Mobile">Mobile Development</option>
+                    </select>
+                  </div>
 
-                {/* Product Covered */}
-                <div>
-                  <label className="block mb-2">Product Covered</label>
-                  <input
-                    type="text"
-                    value={formData.productCovered}
-                    onChange={(e) => setFormData({...formData, productCovered: e.target.value})}
-                    className="w-full p-2 border rounded"
-                    placeholder="e.g., Studio"
-                  />
-                </div>
+                  {/* Difficulty Level */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Difficulty Level*</label>
+                    <select
+                      value={formData.difficultyLevel}
+                      onChange={(e) => setFormData({...formData, difficultyLevel: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      required
+                    >
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
+                  </div>
 
-                {/* Course Audience */}
-                <div className="md:col-span-2">
-                  <label className="block mb-2">Course Audience</label>
-                  <textarea
-                    value={formData.courseAudience}
-                    onChange={(e) => setFormData({...formData, courseAudience: e.target.value})}
-                    className="w-full p-2 border rounded"
-                    rows="2"
-                    placeholder="Describe the target audience for this course"
-                  />
-                </div>
+                  {/* Language */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Language*</label>
+                    <select
+                      value={formData.language}
+                      onChange={(e) => setFormData({...formData, language: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      required
+                    >
+                      <option value="English">English</option>
+                      <option value="Spanish">Spanish</option>
+                      <option value="French">French</option>
+                      <option value="German">German</option>
+                      <option value="Chinese">Chinese</option>
+                    </select>
+                  </div>
 
-                {/* Product Alignment */}
-                <div className="md:col-span-2">
-                  <label className="block mb-2">Product Alignment</label>
-                  <textarea
-                    value={formData.productAlignment}
-                    onChange={(e) => setFormData({...formData, productAlignment: e.target.value})}
-                    className="w-full p-2 border rounded"
-                    rows="3"
-                    placeholder="Describe the product version alignment"
-                  />
+                  {/* Product Covered */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Product Covered</label>
+                    <input
+                      type="text"
+                      value={formData.productCovered}
+                      onChange={(e) => setFormData({...formData, productCovered: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="Enter product covered"
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Category*</label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      {courseCategories.map(category => (
+                        <option key={category.title} value={category.title}>
+                          {category.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Subcategory - Only show if category is selected */}
+                  {formData.category && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Subcategory</label>
+                      <select
+                        value={formData.subcategory}
+                        onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      >
+                        <option value="">Select Subcategory</option>
+                        {courseCategories
+                          .find(cat => cat.title === formData.category)
+                          ?.subcategories.map(sub => (
+                            <option key={sub} value={sub}>{sub}</option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Price */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Price*</label>
+                    <input
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="Enter price"
+                      required
+                    />
+                  </div>
+
+                  {/* Prerequisites */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Prerequisites</label>
+                    <input
+                      type="text"
+                      value={formData.prerequisites}
+                      onChange={(e) => setFormData({...formData, prerequisites: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="Enter prerequisites"
+                    />
+                  </div>
+
+                  {/* Course Audience */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Course Audience</label>
+                    <input
+                      type="text"
+                      value={formData.courseAudience}
+                      onChange={(e) => setFormData({...formData, courseAudience: e.target.value})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="Who is this course for?"
+                    />
+                  </div>
+
+                  {/* Diploma Available */}
+                  <div>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={formData.diplomaAvailable}
+                        onChange={(e) => setFormData({...formData, diplomaAvailable: e.target.checked})}
+                        className="rounded border-gray-300 text-[#5624D0] focus:ring-[#5624D0]"
+                      />
+                      <span className="text-sm font-medium">Diploma Available</span>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Learning Objectives */}
-                <div className="mb-4">
-                  <label className="block mb-2">Learning Objectives</label>
-                  <div className="space-y-2">
-                    {formData.learningObjectives?.map((objective, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          type="text"
-                          value={objective}
-                          onChange={(e) => {
-                            const newObjectives = [...formData.learningObjectives];
-                            newObjectives[index] = e.target.value;
-                            setFormData({...formData, learningObjectives: newObjectives});
-                          }}
-                          className="flex-1 p-2 border rounded"
-                          placeholder="Enter learning objective"
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-2">Learning Objectives</label>
+                  {formData.learningObjectives.map((objective, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={objective}
+                        onChange={(e) => {
+                          const newObjectives = [...formData.learningObjectives];
+                          newObjectives[index] = e.target.value;
+                          setFormData({...formData, learningObjectives: newObjectives});
+                        }}
+                        className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                        placeholder="Enter learning objective"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newObjectives = formData.learningObjectives.filter((_, i) => i !== index);
+                          setFormData({...formData, learningObjectives: newObjectives});
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        learningObjectives: [...formData.learningObjectives, '']
+                      });
+                    }}
+                    className="mt-2 text-[#5624D0] hover:text-[#4B1F9E] flex items-center gap-2"
+                  >
+                    <span>+</span> Add Learning Objective
+                  </button>
+                </div>
+
+                {/* Tech Logos Section */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-2">
+                    Technologies Used
+                  </label>
+                  
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4 bg-gray-50 rounded-lg">
+                    {Object.entries(techLogos).map(([name, url]) => (
+                      <div
+                        key={name}
+                        onClick={() => {
+                          const newTechStack = [...(formData.techStack || [])];
+                          const index = newTechStack.indexOf(name);
+                          
+                          if (index === -1) {
+                            newTechStack.push(name);
+                          } else {
+                            newTechStack.splice(index, 1);
+                          }
+                          
+                          setFormData({
+                            ...formData,
+                            techStack: newTechStack
+                          });
+                        }}
+                        className={`
+                          p-4 rounded-lg cursor-pointer transition-all duration-200
+                          ${formData.techStack?.includes(name) ? 'bg-[#5624D0]' : 'bg-white'}
+                        `}
+                      >
+                        <img 
+                          src={url}
+                          alt={name}
+                          className="w-full h-12 object-contain mb-2"
                         />
+                        <p className={`text-center text-sm capitalize ${
+                          formData.techStack?.includes(name) ? 'text-white' : 'text-gray-700'
+                        }`}>
+                          {name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Selected Technologies */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {formData.techStack?.map((tech) => (
+                      <div
+                        key={tech}
+                        className="flex items-center gap-2 px-3 py-1 bg-[#5624D0] text-white rounded-full"
+                      >
+                        <img 
+                          src={techLogos[tech]}
+                          alt={tech}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm capitalize">{tech}</span>
                         <button
-                          type="button"
-                          onClick={() => removeLearningObjective(index)}
-                          className="px-3 py-2 text-red-600 hover:bg-red-50 rounded"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              techStack: formData.techStack.filter(t => t !== tech)
+                            });
+                          }}
+                          className="ml-1 hover:text-red-200"
                         >
-                          Remove
+                          ×
                         </button>
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={addLearningObjective}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      + Add Learning Objective
-                    </button>
                   </div>
                 </div>
+
+                {/* Submit Button */}
+                <div className="mt-6">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#5624D0] text-white py-3 rounded-lg hover:bg-[#4B1F9E]"
+                  >
+                    {currentCourse ? 'Update Course' : 'Create Course'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Curriculum Tab */}
+            {activeTab === 'curriculum' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold mb-6">Course Curriculum</h2>
+                {formData.curriculum.map((lesson, index) => (
+                  <div 
+                    key={lesson.id}
+                    className={`p-6 border rounded-lg ${
+                      activeLesson === index ? 'border-[#5624D0] shadow-sm' : ''
+                    }`}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Lesson Title</label>
+                        <input
+                          type="text"
+                          value={lesson.title}
+                          onChange={(e) => {
+                            const newCurriculum = [...formData.curriculum];
+                            newCurriculum[index].title = e.target.value;
+                            setFormData({...formData, curriculum: newCurriculum});
+                          }}
+                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                          placeholder="Enter lesson title"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Duration</label>
+                        <input
+                          type="text"
+                          value={lesson.duration}
+                          onChange={(e) => {
+                            const newCurriculum = [...formData.curriculum];
+                            newCurriculum[index].duration = e.target.value;
+                            setFormData({...formData, curriculum: newCurriculum});
+                          }}
+                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                          placeholder="e.g., 45m"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Content</label>
+                      <ReactQuill
+                        value={lesson.content}
+                        onChange={(content) => {
+                          const newCurriculum = [...formData.curriculum];
+                          newCurriculum[index].content = content;
+                          setFormData({...formData, curriculum: newCurriculum});
+                        }}
+                        className="h-64 mb-12"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </form>
+
+          {/* Display existing courses */}
+          {activeTab === 'basicInfo' && courses.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4">Your Courses</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map(course => (
+                  <div key={course.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Course card content */}
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
+                      <p className="text-sm text-gray-600 mb-4">{course.description}</p>
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => handleEdit(course)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(course.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
-
-          {/* Form Actions */}
-          <div className="mt-8 flex justify-end gap-4">
-            {currentCourse && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            )}
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
-            >
-              {currentCourse ? 'Update Course' : 'Create Course'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Course List */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Courses ({courses.length})
-          </h2>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="bg-orange-500 text-white px-6 py-2.5 rounded-lg hover:bg-orange-600 
-                       transition-colors duration-200 flex items-center gap-2"
-          >
-            <span className="text-xl">+</span> Create New Course
-          </button>
         </div>
-
-        {/* Filters and Search */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 
-                           focus:ring-orange-500 focus:border-orange-500"
-              />
-              <FiSearch className="absolute left-3 top-3 text-gray-400" />
-            </div>
-
-            {/* Category Filter */}
-            <select
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              className="w-full p-2.5 border rounded-lg focus:ring-2 
-                         focus:ring-orange-500 focus:border-orange-500"
-            >
-              <option value="all">All Categories</option>
-              {courseCategories.map(cat => (
-                <option key={cat.title} value={cat.title}>{cat.title}</option>
-              ))}
-            </select>
-
-            {/* Sort */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full p-2.5 border rounded-lg focus:ring-2 
-                         focus:ring-orange-500 focus:border-orange-500"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="name">Name A-Z</option>
-              <option value="students">Most Students</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Course Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredCourses.map((course) => (
-            <div key={course.id} 
-                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 
-                            transform hover:-translate-y-1">
-              {/* Course Image/Logo */}
-              <div className="relative h-40 bg-gray-50 rounded-t-lg overflow-hidden">
-                <img 
-                  src={course.logo || '/default-course-image.jpg'} 
-                  alt={course.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                
-                {/* Action Buttons */}
-                <div className="absolute top-3 right-3 flex gap-2">
-                  <button
-                    onClick={() => handleEdit(course)}
-                    className="p-2 bg-white/90 rounded-full shadow hover:bg-white 
-                               transition-colors duration-200"
-                  >
-                    <FiEdit className="w-4 h-4 text-blue-600" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(course.id)}
-                    className="p-2 bg-white/90 rounded-full shadow hover:bg-white 
-                               transition-colors duration-200"
-                  >
-                    <FiTrash2 className="w-4 h-4 text-red-600" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Course Content */}
-              <div className="p-4">
-                {/* Category Badge */}
-                {course.category && (
-                  <span className="inline-block px-2.5 py-1 mb-2 text-xs font-medium 
-                                  bg-orange-100 text-orange-800 rounded-full">
-                    {course.category}
-                    {course.subcategory && ` • ${course.subcategory}`}
-                  </span>
-                )}
-
-                {/* Title */}
-                <h3 className="text-lg font-semibold mb-2 text-gray-900 line-clamp-1">
-                  {course.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                  {course.description}
-                </p>
-
-                {/* Meta Info */}
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1">
-                      <FiClock className="w-4 h-4" />
-                      {course.duration || 'N/A'}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <FiUser className="w-4 h-4" />
-                      {course.enrolledStudents || 0}
-                    </span>
-                  </div>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    course.difficultyLevel === 'Beginner' ? 'bg-green-100 text-green-800' :
-                    course.difficultyLevel === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {course.difficultyLevel}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredCourses.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <FiBook className="w-12 h-12 mx-auto" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No courses found
-            </h3>
-            <p className="text-gray-500">
-              Try adjusting your search or filter criteria
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default CourseManager; 
+// SidebarItem component
+const SidebarItem = ({ label, isActive, isCompleted, onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left pl-8 py-2 rounded-lg transition-colors ${
+        isActive 
+          ? 'bg-[#5624D0] text-white' 
+          : 'hover:bg-gray-50'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        {isCompleted && <span className="text-green-500">✓</span>}
+        <span>{label}</span>
+      </div>
+    </button>
+  );
+};
+
+// Wrap the export with ErrorBoundary
+export default function CourseManagerWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <CourseManager />
+    </ErrorBoundary>
+  );
+} 

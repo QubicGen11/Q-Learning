@@ -70,24 +70,51 @@ const Courses_main = () => {
   ];
 
   useEffect(() => {
-    const initialCourses = [
-      // Frontend Fundamentals
-      {
-        logo: techLogos.html,
-        title: "HTML5 & CSS3 Fundamentals: Build Modern Websites",
-        duration: "2h",
-        type: "Frontend"
-      },
-      // ... rest of your courses array
-    ];
-
+    // Get courses from localStorage
     const storedCourses = localStorage.getItem('courses');
-    if (!storedCourses) {
-      localStorage.setItem('courses', JSON.stringify(initialCourses));
-      setCourses(initialCourses);
+    let coursesToDisplay = [];
+
+    if (storedCourses) {
+      // Parse stored courses and ensure they have logos
+      coursesToDisplay = JSON.parse(storedCourses).map(course => ({
+        ...course,
+        logo: techLogos[course.techStack?.[0]] || techLogos.html // Default to HTML logo if no tech stack
+      }));
     } else {
-      setCourses(JSON.parse(storedCourses));
+      // Initial courses with proper logos
+      coursesToDisplay = [
+        {
+          id: 1,
+          title: "HTML5 & CSS3 Fundamentals",
+          duration: "2h",
+          type: "Frontend",
+          logo: techLogos.html,
+          techStack: ['html', 'css']
+        },
+        {
+          id: 2,
+          title: "Modern JavaScript Development",
+          duration: "4h",
+          type: "Frontend",
+          logo: techLogos.javascript,
+          techStack: ['javascript']
+        },
+        {
+          id: 3,
+          title: "React.js Complete Guide",
+          duration: "6h",
+          type: "Frontend",
+          logo: techLogos.react,
+          techStack: ['react']
+        },
+        // Add more initial courses as needed
+      ];
+      
+      // Store initial courses
+      localStorage.setItem('courses', JSON.stringify(coursesToDisplay));
     }
+
+    setCourses(coursesToDisplay);
   }, []);
 
   const filteredCourses = courses.filter(course => 
@@ -344,13 +371,27 @@ const Courses_main = () => {
                                   opacity-0 dark:opacity-0 dark:group-hover:opacity-75 
                                   transition-all duration-300 -z-10"></div>
                     <img 
-                      src={course.logo} 
-                      alt={course.type} 
+                      src={course.logo || techLogos[course.techStack?.[0]] || techLogos.html}
+                      alt={course.title} 
                       className="max-h-full w-auto object-contain relative z-10
                                dark:opacity-90 group-hover:opacity-100
                                transition-all duration-300"
                     />
                   </div>
+                  
+                  {/* Course Tech Stack Icons */}
+                  {course.techStack && course.techStack.length > 0 && (
+                    <div className="flex gap-2 mb-4">
+                      {course.techStack.map(tech => (
+                        <img 
+                          key={tech}
+                          src={techLogos[tech]}
+                          alt={tech}
+                          className="w-6 h-6 object-contain"
+                        />
+                      ))}
+                    </div>
+                  )}
                   
                   <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                                mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
@@ -362,9 +403,7 @@ const Courses_main = () => {
                       <FiClock className="mr-1" />
                       <span>{course.duration}</span>
                     </div>
-                    <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
-                      <FiMoreVertical />
-                    </button>
+                    <span className="text-sm text-gray-500">{course.type}</span>
                   </div>
                 </div>
               </Link>

@@ -39,7 +39,6 @@ const NavLink = styled(Link)(({ isActive, theme }) => ({
 }));
 
 const AuthDialog = ({ open, onClose, title, isSignUp }) => {
-  const [selectedRole, setSelectedRole] = useState(null);
   const [showEmailForm, setShowEmailForm] = useState(false);
 
   const socialProviders = [
@@ -49,19 +48,6 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
     { id: 'facebook', name: 'Facebook', icon: <FaFacebook className="w-5 h-5" /> },
     { id: 'twitter', name: 'Twitter', icon: <FaTwitter className="w-5 h-5" /> },
     { id: 'linkedin', name: 'LinkedIn', icon: <FaLinkedin className="w-5 h-5" /> }
-  ];
-
-  const roleProviders = [
-    { 
-      name: 'Student', 
-      icon: <FaUser className="w-5 h-5" />, 
-      description: isSignUp ? 'Start your learning journey' : 'Access your courses and continue learning'
-    },
-    { 
-      name: 'Instructor', 
-      icon: <FaChalkboardTeacher className="w-5 h-5" />, 
-      description: isSignUp ? 'Create and manage courses' : 'Manage your content and students'
-    }
   ];
 
   // Smoother animation variants
@@ -234,7 +220,6 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
       open={open} 
       onClose={() => {
         onClose();
-        setSelectedRole(null);
         setShowEmailForm(false);
       }}
       TransitionComponent={Fade}
@@ -247,25 +232,19 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
       <motion.div
         initial={false}
         animate={{
-          backgroundColor: selectedRole ? 'rgba(0,0,0,0.02)' : 'transparent'
+          backgroundColor: showEmailForm ? 'rgba(0,0,0,0.02)' : 'transparent'
         }}
         transition={{ duration: 0.6 }}
         className="pb-4"
       >
         <DialogTitle className="flex items-center p-6">
-          {(selectedRole || showEmailForm) && (
+          {showEmailForm && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
               className="mr-2 p-2 hover:bg-gray-100 rounded-full"
-              onClick={() => {
-                if (showEmailForm) {
-                  setShowEmailForm(false);
-                } else {
-                  setSelectedRole(null);
-                }
-              }}
+              onClick={() => setShowEmailForm(false)}
             >
               <FaArrowLeft className="w-5 h-5" />
             </motion.button>
@@ -276,55 +255,13 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            {showEmailForm 
-              ? `${title} with Email` 
-              : selectedRole 
-                ? `${title} as ${selectedRole}` 
-                : title}
+            {showEmailForm ? `${title} with Email` : title}
           </motion.span>
         </DialogTitle>
 
         <DialogContent className="px-6">
           <AnimatePresence mode="wait">
-            {!selectedRole ? (
-              <motion.div
-                key="roles"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="grid grid-cols-2 gap-4"
-              >
-                {roleProviders.map((provider) => (
-                  <motion.button
-                    key={provider.name}
-                    variants={itemVariants}
-                    whileHover={{ 
-                      scale: 1.02,
-                      transition: { duration: 0.2 }
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    className="
-                      w-full p-4 rounded-lg border dark:border-gray-700 
-                      flex flex-col items-center justify-center space-y-3 
-                      hover:bg-blue-50 dark:hover:bg-blue-900/20
-                      transition-all duration-300 shadow-sm hover:shadow-md
-                    "
-                    onClick={() => setSelectedRole(provider.name)}
-                  >
-                    <div className="text-3xl mb-2">
-                      {provider.icon}
-                    </div>
-                    <div className="text-center">
-                      <div className="font-semibold">{provider.name}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {provider.description}
-                      </div>
-                    </div>
-                  </motion.button>
-                ))}
-              </motion.div>
-            ) : showEmailForm ? (
+            {showEmailForm ? (
               <EmailForm isSignUp={isSignUp} />
             ) : (
               <motion.div
@@ -357,7 +294,6 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
                         setShowEmailForm(true);
                       } else {
                         onClose();
-                        setSelectedRole(null);
                         setShowEmailForm(false);
                       }
                     }}
