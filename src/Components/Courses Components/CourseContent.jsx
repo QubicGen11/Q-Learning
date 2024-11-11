@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart, FiUser, FiPlay } from 'react-icons/fi';
+import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart } from 'react-icons/fi';
 import Navbar_main from '../Navbar Components/Navbar_main';
 
 const techLogos = {
@@ -68,6 +68,10 @@ const CourseContent = () => {
         navigate(`/courses/${course.id}/lesson/${nextLesson.id}`);
       }
     }
+  };
+
+  const handleAddToCart = (course) => {
+    // Implement add to cart logic here
   };
 
   if (!course) {
@@ -363,13 +367,17 @@ const CourseContent = () => {
               </div>
             </div>
             <div className="flex flex-col gap-3">
+              {/* Add to Cart Button */}
               <button 
-                onClick={handleResume}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white 
-                               py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium 
-                               transition-colors duration-300">
-                RESUME COURSE
+                onClick={() => handleAddToCart(course)}
+                className="w-full bg-[#A435F0] hover:bg-[#8710ED] text-white 
+                           py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium 
+                           transition-colors duration-300 flex items-center justify-center gap-2">
+                <FiShoppingCart />
+                ADD TO CART
               </button>
+
+              {/* Favorite Button */}
               <button 
                 className="w-full border dark:border-gray-600 py-2.5 sm:py-3 rounded-lg 
                          flex items-center justify-center gap-2 text-sm sm:text-base 
@@ -380,6 +388,55 @@ const CourseContent = () => {
                 <FiHeart className={isFavorite ? "text-red-500 fill-current" : ""} />
                 FAVORITE
               </button>
+
+              {/* Price Display */}
+              <div className="mt-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                    ₹{course.price || 0}
+                  </span>
+                  {course.originalPrice && course.originalPrice > course.price && (
+                    <span className="text-lg text-gray-500 line-through">
+                      ₹{course.originalPrice}
+                    </span>
+                  )}
+                </div>
+                {course.discount > 0 && (
+                  <span className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                    {course.discount}% OFF
+                  </span>
+                )}
+              </div>
+
+              {/* Course Info */}
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <FiClock />
+                  <span>{course.duration}</span>
+                </div>
+                {course.diplomaAvailable && (
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                    <span>🎓</span>
+                    <span>Diploma of Completion included</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Progress Bar - Only show for enrolled courses */}
+              {courseProgress > 0 && (
+                <div className="mt-4">
+                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    <span>Course Progress</span>
+                    <span>{courseProgress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${courseProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             {course.techStack && course.techStack.length > 0 && (
               <div className="flex justify-center gap-2 mb-4">

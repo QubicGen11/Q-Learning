@@ -20,6 +20,8 @@ import Carousel_main from './Components/Carousel Components/Carousel_main';
 import SkillsSection from './Components/SkillsSection';
 import Learners_main from './Components/Learners Components/Learners_main';
 import ContactSection from './Components/Contact Us Home/Contact_usmain';
+import { CartProvider } from './context/CartContext';
+import Cart from './Components/Cart/Cart';
 // import { AuthProvider } from './context/AuthContext';
 
 // Create a Home component that contains all the landing page components
@@ -45,8 +47,8 @@ const Home = () => {
 
 function App() {
   return (
-    // <AuthProvider>
-      <ThemeProvider>
+    <ThemeProvider>
+      <CartProvider>
         <Router>
           <div className="min-h-screen transition-colors duration-200 dark:bg-gray-900">
             
@@ -83,14 +85,18 @@ function App() {
                 element={<Navigate to="https://www.qubicgen.com" replace />}
               />
 
+              <Route path="/cart" element={<Cart />} />
+
               <Route path="*" element={<div>404 Not Found</div>} />
             </Routes>
             <ScrollToTopButton />
           </div>
         </Router>
-      </ThemeProvider>
-    // </AuthProvider>
+      </CartProvider>
+    </ThemeProvider>
   );
 }
 
 export default App;
+
+   

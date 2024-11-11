@@ -172,6 +172,8 @@ const CourseManager = () => {
     category: '',
     subcategory: '',
     price: '',
+    originalPrice: '',
+    discount: '',
     prerequisites: '',
     techStack: [],
     courseImage: null,
@@ -481,14 +483,43 @@ const CourseManager = () => {
 
                   {/* Price */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Price*</label>
+                    <label className="block text-sm font-medium mb-2">Price (₹)*</label>
                     <input
                       type="number"
                       value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
                       className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                      placeholder="Enter price"
+                      placeholder="Enter course price"
                       required
+                    />
+                  </div>
+
+                  {/* Original Price (for discounts) */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Original Price (₹)</label>
+                    <input
+                      type="number"
+                      value={formData.originalPrice}
+                      onChange={(e) => setFormData({...formData, originalPrice: Number(e.target.value)})}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="Enter original price"
+                    />
+                  </div>
+
+                  {/* Discount Percentage */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Discount (%)</label>
+                    <input
+                      type="number"
+                      value={formData.discount}
+                      onChange={(e) => {
+                        const discount = Math.min(100, Math.max(0, Number(e.target.value)));
+                        setFormData({...formData, discount});
+                      }}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      placeholder="Enter discount percentage"
+                      min="0"
+                      max="100"
                     />
                   </div>
 
