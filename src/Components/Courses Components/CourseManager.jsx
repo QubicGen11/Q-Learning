@@ -173,7 +173,8 @@ const CourseManager = () => {
     subcategory: '',
     price: '',
     prerequisites: '',
-    techStack: []
+    techStack: [],
+    courseImage: null,
   });
 
   // Fetch courses on mount
@@ -642,6 +643,49 @@ const CourseManager = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Course Image */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Course Image</label>
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                    <div className="space-y-1 text-center">
+                      <div className="flex text-sm text-gray-600">
+                        <label htmlFor="course-image" className="relative cursor-pointer bg-white rounded-md font-medium text-[#5624D0] hover:text-[#4B1F9E]">
+                          <span>Upload a file</span>
+                          <input 
+                            id="course-image" 
+                            type="file" 
+                            className="sr-only"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setFormData({
+                                    ...formData,
+                                    courseImage: reader.result
+                                  });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  </div>
+                  {formData.courseImage && (
+                    <div className="mt-4">
+                      <img 
+                        src={formData.courseImage} 
+                        alt="Course preview" 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Submit Button */}

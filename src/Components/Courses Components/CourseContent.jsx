@@ -29,6 +29,7 @@ const CourseContent = () => {
   const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [isFavorite, setIsFavorite] = useState(false);
   const [courseProgress, setCourseProgress] = useState(0);
+  const [courseImage, setCourseImage] = useState(null);
 
   useEffect(() => {
     const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
@@ -55,6 +56,8 @@ const CourseContent = () => {
         const progress = Math.round((completedLessons / totalLessons) * 100);
         setCourseProgress(progress);
       }
+
+      setCourseImage(foundCourse.courseImage);
     }
   }, [id]);
 
@@ -84,26 +87,63 @@ const CourseContent = () => {
         <span className="text-gray-700 dark:text-white">{course.title}</span>
       </div>
 
-      {/* Course Header */}
-      <div className="mb-8 sm:mb-12">
-        <div className="text-orange-500 uppercase text-xs sm:text-sm font-medium mb-2">
-          {course.category} {course.subcategory && `• ${course.subcategory}`}
-        </div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 
-                       text-gray-900 dark:text-white">
-          {course.title}
-        </h1>
-        <p className="text-gray-600 dark:text-white mb-4 max-w-3xl text-sm sm:text-base">
-          {course.description}
-        </p>
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
-          <div className="flex items-center gap-2 text-gray-600 dark:text-white">
-            <FiUser className="text-gray-400 dark:text-white" />
-            <span>{course.enrolledStudents || 0} enrolled students</span>
+      {/* Course Header with Banner */}
+      <div className="relative mb-8 sm:mb-12">
+        {courseImage && (
+          <>
+            {/* Main background image with overlay */}
+            <div className="absolute inset-0 overflow-hidden rounded-lg">
+              <div className="absolute inset-0 bg-black/60 z-10" /> {/* Dark overlay */}
+              <img 
+                src={courseImage} 
+                alt={course.title}
+                className="w-full h-full object-cover"
+                style={{
+                  opacity: `${course.bannerSettings?.opacity || 70}%`,
+                  objectPosition: `center ${course.bannerSettings?.yPosition || 50}%`
+                }}
+              />
+            </div>
+
+            {/* Dark mode specific overlay */}
+            <div className="absolute inset-0 overflow-hidden rounded-lg hidden dark:block">
+              <div className="absolute inset-0 bg-black/80 z-10" /> {/* Darker overlay for dark mode */}
+              <img 
+                src={courseImage} 
+                alt={course.title}
+                className="w-full h-full object-cover"
+                style={{
+                  opacity: `${course.bannerSettings?.darkModeOpacity || 40}%`,
+                  objectPosition: `center ${course.bannerSettings?.yPosition || 50}%`
+                }}
+              />
+            </div>
+
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent z-20" />
+          </>
+        )}
+        
+        {/* Content */}
+        <div className="relative z-30 p-6 sm:p-8">
+          <div className="text-orange-500 uppercase text-xs sm:text-sm font-medium mb-2">
+            {course.category} {course.subcategory && `• ${course.subcategory}`}
           </div>
-          <div className="flex items-center gap-2 text-gray-500 dark:text-white">
-            <FiPlay className="dark:text-white" />
-            <span>In progress</span>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-white">
+            {course.title}
+          </h1>
+          <p className="text-gray-200 mb-4 max-w-3xl text-sm sm:text-base">
+            {course.description}
+          </p>
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
+            <div className="flex items-center gap-2 text-gray-200">
+              <FiUser className="text-gray-300" />
+              <span>{course.enrolledStudents || 0} enrolled students</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-200">
+              <FiPlay className="text-gray-300" />
+              <span>In progress</span>
+            </div>
           </div>
         </div>
       </div>
