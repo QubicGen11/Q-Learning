@@ -21,6 +21,7 @@ const SkillsSection = () => {
         { name: "React JS", learners: "7M+ learners" },
         { name: "Angular", learners: "4M+ learners" },
         { name: "Python", learners: "15.5M+ learners" },
+        { name: "DSA", learners: "15.5M+ learners" },
     
       ],
       courses: [
