@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiClock, FiHeart, FiUser, FiPlay } from 'react-icons/fi';
+import Navbar_main from '../Navbar Components/Navbar_main';
 
 const CourseContent = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [courseProgress, setCourseProgress] = useState(0);
 
   useEffect(() => {
     const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
@@ -16,6 +19,8 @@ const CourseContent = () => {
         ...foundCourse,
         learningObjectives: foundCourse.learningObjectives || [],
         curriculum: foundCourse.curriculum || [],
+        category: foundCourse.category || 'Development',
+        subcategory: foundCourse.subcategory || '',
         difficultyLevel: foundCourse.difficultyLevel || 'Intermediate',
         completionTime: foundCourse.completionTime || '1h',
         language: foundCourse.language || 'English',
@@ -23,8 +28,24 @@ const CourseContent = () => {
         courseAudience: foundCourse.courseAudience || '',
         productAlignment: foundCourse.productAlignment || ''
       });
+
+      if (foundCourse.curriculum && foundCourse.curriculum.length > 0) {
+        const completedLessons = foundCourse.curriculum.filter(lesson => lesson.isCompleted).length;
+        const totalLessons = foundCourse.curriculum.length;
+        const progress = Math.round((completedLessons / totalLessons) * 100);
+        setCourseProgress(progress);
+      }
     }
   }, [id]);
+
+  const handleResume = () => {
+    if (course?.curriculum && course.curriculum.length > 0) {
+      const nextLesson = course.curriculum.find(lesson => !lesson.isCompleted) || course.curriculum[0];
+      if (nextLesson) {
+        navigate(`/courses/${course.id}/lesson/${nextLesson.id}`);
+      }
+    }
+  };
 
   if (!course) {
     return <div>Loading...</div>;
@@ -33,6 +54,7 @@ const CourseContent = () => {
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-[130px] py-4 sm:py-6 
                     bg-white dark:bg-gray-900 min-h-screen transition-colors duration-300">
+      <Navbar_main />
       {/* Breadcrumb */}
       <div className="mb-4 sm:mb-6 text-xs sm:text-sm">
         <Link to="/courses" className="text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-200">
@@ -44,7 +66,9 @@ const CourseContent = () => {
 
       {/* Course Header */}
       <div className="mb-8 sm:mb-12">
-        <div className="text-orange-500 uppercase text-xs sm:text-sm font-medium mb-2">COURSE</div>
+        <div className="text-orange-500 uppercase text-xs sm:text-sm font-medium mb-2">
+          {course.category} {course.subcategory && `• ${course.subcategory}`}
+        </div>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 
                        text-gray-900 dark:text-white">
           {course.title}
@@ -97,6 +121,7 @@ const CourseContent = () => {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {[
+                    { label: 'CATEGORY', value: `${course.category || 'Development'}${course.subcategory ? ` • ${course.subcategory}` : ''}` },
                     { label: 'DIFFICULTY LEVEL', value: course.difficultyLevel },
                     { label: 'COMPLETION TIME', value: course.completionTime },
                     { label: 'LANGUAGE', value: course.language },
@@ -173,9 +198,11 @@ const CourseContent = () => {
                         </span>
                       </div>
                     </div>
-                    <button className="px-4 sm:px-6 py-1.5 sm:py-2 border dark:border-gray-600 rounded 
-                                     text-sm hover:bg-gray-50 dark:hover:bg-gray-700 
-                                     text-gray-700 dark:text-gray-300 transition-colors duration-300">
+                    <button 
+                      onClick={handleResume}
+                      className="px-4 sm:px-6 py-1.5 sm:py-2 border dark:border-gray-600 rounded 
+                               text-sm hover:bg-gray-50 dark:hover:bg-gray-700 
+                               text-gray-700 dark:text-gray-300 transition-colors duration-300">
                       Resume
                     </button>
                   </div>
@@ -204,14 +231,14 @@ const CourseContent = () => {
                           )}
                         </div>
                       </div>
-                      <Link 
-                        to={`/courses/${course.id}/lesson/${item.id}`}
+                      <button 
+                        onClick={() => navigate(`/courses/${course.id}/lesson/${item.id}`)}
                         className="px-6 py-2 border dark:border-gray-600 rounded 
                                  hover:bg-gray-50 dark:hover:bg-gray-700 
                                  text-gray-700 dark:text-gray-300 transition-colors duration-300"
                       >
                         {item.isCompleted ? 'Resume' : 'Start'}
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -259,8 +286,22 @@ const CourseContent = () => {
                 </div>
               )}
             </div>
+            <div className="mb-4">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+                <span>Course Progress</span>
+                <span>{courseProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${courseProgress}%` }}
+                />
+              </div>
+            </div>
             <div className="flex flex-col gap-3">
-              <button className="w-full bg-orange-500 hover:bg-orange-600 text-white 
+              <button 
+                onClick={handleResume}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white 
                                py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium 
                                transition-colors duration-300">
                 RESUME COURSE

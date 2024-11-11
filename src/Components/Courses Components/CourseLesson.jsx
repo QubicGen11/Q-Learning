@@ -4,6 +4,7 @@ import { FiClock, FiArrowLeft, FiCheck } from 'react-icons/fi';
 import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import parse from 'html-react-parser';
+import Navbar_main from '../Navbar Components/Navbar_main';
 
 const CourseLesson = () => {
   const { id, lessonId } = useParams();
@@ -20,6 +21,40 @@ const CourseLesson = () => {
       setCurrentLesson(lesson);
     }
   }, [id, lessonId]);
+
+  const handlePreviousLesson = () => {
+    if (course && currentLesson) {
+      const currentIndex = course.curriculum.findIndex(
+        lesson => lesson.id === parseInt(lessonId)
+      );
+      
+      if (currentIndex > 0) {
+        const previousLesson = course.curriculum[currentIndex - 1];
+        window.location.href = `/courses/${id}/lesson/${previousLesson.id}`;
+      }
+    }
+  };
+
+  const handleNextLesson = () => {
+    if (course && currentLesson) {
+      const currentIndex = course.curriculum.findIndex(
+        lesson => lesson.id === parseInt(lessonId)
+      );
+      
+      if (currentIndex < course.curriculum.length - 1) {
+        const nextLesson = course.curriculum[currentIndex + 1];
+        window.location.href = `/courses/${id}/lesson/${nextLesson.id}`;
+      }
+    }
+  };
+
+  const isFirstLesson = course?.curriculum?.findIndex(
+    lesson => lesson.id === parseInt(lessonId)
+  ) === 0;
+
+  const isLastLesson = course?.curriculum?.findIndex(
+    lesson => lesson.id === parseInt(lessonId)
+  ) === course?.curriculum?.length - 1;
 
   if (!course || !currentLesson) {
     return (
@@ -84,6 +119,7 @@ const CourseLesson = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Top Navigation Bar */}
+      <Navbar_main />
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 
                     transition-colors duration-300">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -141,16 +177,21 @@ const CourseLesson = () => {
               {/* Navigation Buttons */}
               <div className="mt-8 flex justify-between">
                 <button 
-                  className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded
-                           text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
-                  onClick={() => {/* Handle previous lesson */}}
+                  className={`px-4 py-2 border border-gray-200 dark:border-gray-700 rounded
+                            text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700
+                            transition-colors duration-300
+                            ${isFirstLesson ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={handlePreviousLesson}
+                  disabled={isFirstLesson}
                 >
                   Previous Lesson
                 </button>
                 <button 
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded
-                           transition-colors duration-300 relative group"
-                  onClick={() => {/* Handle next lesson */}}
+                  className={`px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded
+                            transition-colors duration-300 relative group
+                            ${isLastLesson ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={handleNextLesson}
+                  disabled={isLastLesson}
                 >
                   {/* Priority Glow Effect */}
                   <div className="absolute inset-0 rounded bg-orange-500/50 blur-md 

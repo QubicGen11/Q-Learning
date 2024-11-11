@@ -8,6 +8,8 @@ const Courses_main = () => {
   const [language, setLanguage] = useState('English');
   const [sortBy, setSortBy] = useState('Featured');
   const [courses, setCourses] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState([]);
 
   const techLogos = {
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -33,9 +35,38 @@ const Courses_main = () => {
     // ... rest of your products array
   ];
 
-  const categories = [
-    { name: "New Releases", count: 54 },
-    // ... rest of your categories array
+  const courseCategories = [
+    {
+      title: "Development",
+      count: 150,
+      subcategories: [
+        { name: "Web Development", count: 85 },
+        { name: "Mobile Development", count: 35 },
+        { name: "Programming Languages", count: 45 },
+        { name: "Game Development", count: 20 },
+        { name: "Database Design", count: 15 }
+      ]
+    },
+    {
+      title: "Business",
+      count: 130,
+      subcategories: [
+        { name: "Entrepreneurship", count: 40 },
+        { name: "Communication", count: 30 },
+        { name: "Management", count: 35 },
+        { name: "Sales", count: 25 }
+      ]
+    },
+    {
+      title: "IT & Software",
+      count: 120,
+      subcategories: [
+        { name: "IT Certifications", count: 45 },
+        { name: "Network Security", count: 30 },
+        { name: "Hardware", count: 15 },
+        { name: "Operating Systems", count: 30 }
+      ]
+    }
   ];
 
   useEffect(() => {
@@ -125,22 +156,108 @@ const Courses_main = () => {
               {/* Category */}
               <div>
                 <h2 className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">
-                  Category
+                  Categories
                 </h2>
-                <div className="space-y-2">
-                  {categories.map((category, index) => (
-                    <label key={index} className="flex items-center space-x-2 text-sm">
-                      <input 
-                        type="checkbox" 
-                        className="form-checkbox text-blue-600 dark:text-blue-400
-                                 border-gray-300 dark:border-gray-600
-                                 rounded focus:ring-blue-500 dark:focus:ring-blue-400" 
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">{category.name}</span>
-                      <span className="text-gray-500 dark:text-gray-400">({category.count})</span>
-                    </label>
+                <div className="space-y-4">
+                  {courseCategories.map((category) => (
+                    <div key={category.title} className="space-y-2">
+                      {/* Main Category */}
+                      <div className="flex items-center justify-between group">
+                        <label className="flex items-center space-x-2 text-sm cursor-pointer flex-grow">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedCategories.includes(category.title)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedCategories([...selectedCategories, category.title]);
+                              } else {
+                                setSelectedCategories(
+                                  selectedCategories.filter(cat => cat !== category.title)
+                                );
+                              }
+                            }}
+                            className="form-checkbox text-orange-500 dark:text-orange-400
+                                     border-gray-300 dark:border-gray-600
+                                     rounded focus:ring-orange-500 dark:focus:ring-orange-400" 
+                          />
+                          <span className="text-gray-700 dark:text-gray-300 group-hover:text-orange-500 
+                                         transition-colors duration-200">
+                            {category.title}
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-400">
+                            ({category.count})
+                          </span>
+                        </label>
+                        <button
+                          onClick={() => {
+                            setExpandedCategories(prev => 
+                              prev.includes(category.title)
+                                ? prev.filter(cat => cat !== category.title)
+                                : [...prev, category.title]
+                            );
+                          }}
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full
+                                   transition-colors duration-200"
+                        >
+                          <svg
+                            className={`w-4 h-4 transition-transform duration-200 
+                                       ${expandedCategories.includes(category.title) ? 'transform rotate-180' : ''}`}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Subcategories */}
+                      {expandedCategories.includes(category.title) && (
+                        <div className="ml-6 space-y-2">
+                          {category.subcategories.map((sub) => (
+                            <label key={sub.name} className="flex items-center justify-between text-sm 
+                                                       cursor-pointer group">
+                              <div className="flex items-center space-x-2">
+                                <input 
+                                  type="checkbox" 
+                                  checked={selectedCategories.includes(sub.name)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedCategories([...selectedCategories, sub.name]);
+                                    } else {
+                                      setSelectedCategories(
+                                        selectedCategories.filter(cat => cat !== sub.name)
+                                      );
+                                    }
+                                  }}
+                                  className="form-checkbox text-orange-500 dark:text-orange-400
+                                           border-gray-300 dark:border-gray-600
+                                           rounded focus:ring-orange-500 dark:focus:ring-orange-400" 
+                                />
+                                <span className="text-gray-600 dark:text-gray-400 group-hover:text-orange-500 
+                                               transition-colors duration-200">
+                                  {sub.name}
+                                </span>
+                              </div>
+                              <span className="text-gray-500 dark:text-gray-400">({sub.count})</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
+
+                {/* Reset Button */}
+                {selectedCategories.length > 0 && (
+                  <button
+                    onClick={() => setSelectedCategories([])}
+                    className="mt-4 text-sm text-orange-500 hover:text-orange-600 
+                               transition-colors duration-200"
+                  >
+                    Reset Filters
+                  </button>
+                )}
               </div>
 
               {/* Product */}

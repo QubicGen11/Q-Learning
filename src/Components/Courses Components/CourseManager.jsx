@@ -31,6 +31,40 @@ const CourseManager = () => {
     graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
   };
 
+  // Add predefined categories
+  const courseCategories = [
+    {
+      title: "Development",
+      subcategories: [
+        "Web Development",
+        "Mobile Development",
+        "Programming Languages",
+        "Game Development",
+        "Database Design"
+      ]
+    },
+    {
+      title: "Business",
+      subcategories: [
+        "Entrepreneurship",
+        "Communication",
+        "Management",
+        "Sales",
+        "Strategy"
+      ]
+    },
+    {
+      title: "IT & Software",
+      subcategories: [
+        "IT Certifications",
+        "Network Security",
+        "Hardware",
+        "Operating Systems",
+        "Cloud Computing"
+      ]
+    }
+  ];
+
   // Initialize formData with all required arrays
   const initialFormState = {
     id: Date.now(),
@@ -62,7 +96,9 @@ const CourseManager = () => {
           </div>
         `
       }
-    ]
+    ],
+    category: '',
+    subcategory: '',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -432,6 +468,50 @@ const CourseManager = () => {
             </div>
           </div>
 
+          {/* Category Selection */}
+          <div>
+            <label className="block mb-2">Course Category</label>
+            <select
+              value={formData.category}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  category: e.target.value,
+                  subcategory: '' // Reset subcategory when category changes
+                });
+              }}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">Select Category</option>
+              {courseCategories.map((cat) => (
+                <option key={cat.title} value={cat.title}>
+                  {cat.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Subcategory Selection - Only shows when category is selected */}
+          {formData.category && (
+            <div>
+              <label className="block mb-2">Course Subcategory</label>
+              <select
+                value={formData.subcategory}
+                onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Select Subcategory</option>
+                {courseCategories
+                  .find(cat => cat.title === formData.category)
+                  ?.subcategories.map((sub) => (
+                    <option key={sub} value={sub}>
+                      {sub}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+
           {/* Curriculum Section */}
           <div className="md:col-span-2">
             <label className="block mb-2">Curriculum</label>
@@ -593,6 +673,22 @@ const CourseManager = () => {
               <h3 className="text-base font-medium mb-1 text-gray-900 line-clamp-1">
                 {course.title}
               </h3>
+              
+              {/* Add Category Display */}
+              {(course.category || course.subcategory) && (
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-xs text-orange-500">
+                    {course.category}
+                    {course.subcategory && (
+                      <>
+                        <span className="mx-1 text-gray-400">•</span>
+                        <span>{course.subcategory}</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+              )}
+
               <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                 {course.description}
               </p>
