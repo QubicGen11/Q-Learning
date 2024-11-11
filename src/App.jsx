@@ -18,15 +18,23 @@ import ProtectedRoute from './Components/Auth/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
 import Carousel_main from './Components/Carousel Components/Carousel_main';
 import SkillsSection from './Components/SkillsSection';
+import Learners_main from './Components/Learners Components/Learners_main';
 // import { AuthProvider } from './context/AuthContext';
 
 // Create a Home component that contains all the landing page components
 const Home = () => {
   return (
     <>
-      <Hero_Heading />
+      {/* <Hero_Heading /> */}
+      <Navbar_main />
+      <div className='mt-4'>
+
+        <Carousel_main />
+      </div>
+      <SkillsSection />
+      <Learners_main />
       <Hero_Features />
-      <Paths />
+      {/* <Paths /> */}
       <Educational_Ecosystem />
       <Testimonial />
     </>
@@ -39,12 +47,9 @@ function App() {
       <ThemeProvider>
         <Router>
           <div className="min-h-screen transition-colors duration-200 dark:bg-gray-900">
-            <Navbar_main />
-            <div className='mt-4'>
-
-            <Carousel_main />
-            </div>
-            <SkillsSection />
+            
+           
+        
             <Routes>
               {/* <Route path="/login" element={<div>Login Page</div>} /> */}
               <Route path="/login" element={<Login />} />

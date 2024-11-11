@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiMoreVertical, FiClock } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import Navbar_main from '../Navbar Components/Navbar_main';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,6 +79,8 @@ const Courses_main = () => {
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 bg-white dark:bg-gray-900 transition-all duration-300">
+
+      <Navbar_main />
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 pb-4 sm:pb-6 mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">

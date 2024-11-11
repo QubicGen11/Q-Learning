@@ -3,6 +3,7 @@ import { FiEdit, FiTrash2, FiClock, FiUser } from 'react-icons/fi';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
+import Navbar_main from '../Navbar Components/Navbar_main';
 
 const CourseManager = () => {
   const [courses, setCourses] = useState([]);
@@ -176,6 +177,7 @@ const CourseManager = () => {
 
   return (
     <div className="max-w-[1600px] mx-auto p-6">
+        <Navbar_main />
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Course Manager</h1>
         <div className="flex items-center gap-4">

@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { FaChevronRight, FaChevronLeft, FaStar, FaStarHalfAlt } from 'react-icons/fa';
 
 const SkillsSection = () => {
   const [activeCategory, setActiveCategory] = useState("Web Development");
   const [activeSubCategory, setActiveSubCategory] = useState("Web Development");
+  const [showCourseArrows, setShowCourseArrows] = useState(false);
+  const [showSubCategoryArrows, setShowSubCategoryArrows] = useState(false);
+  const courseSliderRef = useRef(null);
+  const subCategorySliderRef = useRef(null);
 
   const categoryData = {
     "Web Development": {
@@ -141,7 +146,58 @@ const SkillsSection = () => {
     }
   };
 
-  // Settings for subcategories carousel
+  // Update the useEffect for overflow detection
+  useEffect(() => {
+    const checkOverflow = () => {
+      // Check course slider
+      if (courseSliderRef.current) {
+        const totalSlides = categoryData[activeCategory].courses.length;
+        const slidesToShow = window.innerWidth >= 1024 ? 4 : 
+                            window.innerWidth >= 768 ? 3 : 
+                            window.innerWidth >= 640 ? 2 : 1;
+        
+        setShowCourseArrows(totalSlides > slidesToShow);
+      }
+
+      // Check subcategory slider
+      if (subCategorySliderRef.current) {
+        const totalSubCategories = categoryData[activeCategory].subCategories.length;
+        const subCategoriesToShow = window.innerWidth >= 1024 ? 6 : 
+                                   window.innerWidth >= 768 ? 4 : 3;
+        
+        setShowSubCategoryArrows(totalSubCategories > subCategoriesToShow);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [activeCategory, categoryData]);
+
+  // Custom arrow components
+  const NextArrow = ({ onClick, show }) => (
+    show ? (
+      <button
+        onClick={onClick}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors -right-6"
+      >
+        <FaChevronRight className="w-5 h-5 text-gray-700" />
+      </button>
+    ) : null
+  );
+
+  const PrevArrow = ({ onClick, show }) => (
+    show ? (
+      <button
+        onClick={onClick}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors -left-6"
+      >
+        <FaChevronLeft className="w-5 h-5 text-gray-700" />
+      </button>
+    ) : null
+  );
+
+  // Updated settings for subcategories carousel
   const subCategorySettings = {
     dots: false,
     infinite: false,
@@ -162,10 +218,12 @@ const SkillsSection = () => {
           slidesToShow: 3,
         }
       }
-    ]
+    ],
+    nextArrow: <NextArrow show={showSubCategoryArrows} />,
+    prevArrow: <PrevArrow show={showSubCategoryArrows} />
   };
 
-  // Settings for courses carousel
+  // Updated settings for courses carousel
   const courseSettings = {
     dots: false,
     infinite: false,
@@ -192,11 +250,27 @@ const SkillsSection = () => {
           slidesToShow: 1,
         }
       }
-    ]
+    ],
+    nextArrow: <NextArrow show={showCourseArrows} />,
+    prevArrow: <PrevArrow show={showCourseArrows} />
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 0; i < 5; i++) {
+      if (i < Math.floor(rating)) {
+        stars.push(<FaStar key={i} className="text-[#b4690e] w-3 h-3" />);
+      } else if (i === Math.floor(rating) && rating % 1 !== 0) {
+        stars.push(<FaStarHalfAlt key={i} className="text-[#b4690e] w-3 h-3" />);
+      } else {
+        stars.push(<FaStar key={i} className="text-gray-300 w-3 h-3" />);
+      }
+    }
+    return stars;
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+    <div className="max-w-[1340px] mx-auto px-6 py-12">
       <h1 className="text-2xl font-bold mb-2">
         All the skills you need in one place
       </h1>
@@ -225,8 +299,12 @@ const SkillsSection = () => {
       </div>
 
       {/* Sub Categories Carousel */}
-      <div className="mb-8 relative">
-        <Slider {...subCategorySettings} className="subcategories-slider">
+      <div className="relative px-2 mb-8">
+        <Slider 
+          ref={subCategorySliderRef}
+          {...subCategorySettings} 
+          className="subcategories-slider"
+        >
           {categoryData[activeCategory].subCategories.map((category, index) => (
             <div key={index} className="px-2">
               <div
@@ -247,36 +325,62 @@ const SkillsSection = () => {
       </div>
 
       {/* Courses Carousel */}
-      <div className="relative">
-        <Slider {...courseSettings} className="courses-slider">
+      <div className="relative px-2">
+        <Slider 
+          ref={courseSliderRef}
+          {...courseSettings} 
+          className="course-slider"
+        >
           {categoryData[activeCategory].courses.map((course, index) => (
-            <div key={index} className="px-2">
-              <div className="border rounded-lg hover:shadow-lg transition-shadow">
-                <img
-                  src={course.image}
-                  alt={course.title}
-                  className="w-full aspect-video object-cover rounded-t-lg"
-                />
-                <div className="p-3">
-                  <h3 className="font-bold text-xs mb-1 line-clamp-2 h-10 ">
+            <div key={index} className="px-2 h-full">
+              <div className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200 h-[400px] flex flex-col">
+                {/* Image Container - Fixed height */}
+                <div className="w-full h-[180px]">
+                  <img 
+                    src={course.image} 
+                    alt={course.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Content Container - Flex grow to fill remaining space */}
+                <div className="p-4 flex flex-col flex-grow">
+                  {/* Title - Fixed height */}
+                  <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[40px]">
                     {course.title}
                   </h3>
-                  <p className="text-gray-600 text-xs mb-1 truncate">
+
+                  {/* Instructor */}
+                  <p className="text-sm text-gray-600 mb-2 truncate">
                     {course.instructor}
                   </p>
-                  <div className="flex items-center gap-1">
-                    <span className="text-orange-700 font-bold">{course.rating}</span>
-                    <span className="text-gray-500 text-sm whitespace-nowrap">{course.reviews}</span>
-                  </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="font-bold whitespace-nowrap">{course.price}</span>
-                    <span className="text-gray-500 line-through whitespace-nowrap">{course.originalPrice}</span>
-                  </div>
-                  {course.bestseller && (
-                    <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 mt-2">
-                      Bestseller
+
+                  {/* Rating */}
+                  <div className="flex items-center gap-1 mb-2">
+                    <span className="font-bold text-sm">{course.rating}</span>
+                    <div className="flex">
+                      {renderStars(course.rating)}
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {course.reviews}
                     </span>
-                  )}
+                  </div>
+
+                  {/* Price section - Push to bottom */}
+                  <div className="mt-auto">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-bold">{course.price}</span>
+                      <span className="text-gray-600 line-through text-sm">
+                        {course.originalPrice}
+                      </span>
+                    </div>
+
+                    {course.bestseller && (
+                      <span className="inline-block bg-[#eceb98] text-[#3d3c0a] text-xs font-bold px-2 py-1">
+                        Bestseller
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -285,72 +389,40 @@ const SkillsSection = () => {
       </div>
 
       <style jsx global>{`
-        /* Custom styles for the carousels */
-        .subcategories-slider .slick-prev,
-        .subcategories-slider .slick-next,
-        .courses-slider .slick-prev,
-        .courses-slider .slick-next {
-          width: 40px;
-          height: 40px;
-          background: white;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          z-index: 10;
+        .course-slider .slick-track,
+        .subcategories-slider .slick-track {
+          display: flex !important;
+          margin-left: 0 !important;
         }
 
-        .subcategories-slider .slick-prev:hover,
-        .subcategories-slider .slick-next:hover,
-        .courses-slider .slick-prev:hover,
-        .courses-slider .slick-next:hover {
-          background: white;
+        .course-slider .slick-slide,
+        .subcategories-slider .slick-slide {
+          height: inherit !important;
         }
 
-        .subcategories-slider .slick-prev:before,
-        .subcategories-slider .slick-next:before,
-        .courses-slider .slick-prev:before,
-        .courses-slider .slick-next:before {
-          color: #1c1d1f;
-          opacity: 1;
-        }
-
-        .subcategories-slider .slick-prev {
-          left: -20px;
-        }
-
-        .subcategories-slider .slick-next {
-          right: -20px;
-        }
-
-        .courses-slider .slick-prev {
-          left: -20px;
-        }
-
-        .courses-slider .slick-next {
-          right: -20px;
-        }
-
-        /* Hide arrows when they're not needed */
-        .slick-disabled {
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        /* Add these new styles */
-        .courses-slider .slick-slide {
-          height: auto; /* Ensure consistent height */
-        }
-
-        .courses-slider .slick-track {
-          display: flex;
-          align-items: stretch;
-        }
-
-        .courses-slider .slick-slide > div {
+        .course-slider .slick-slide > div,
+        .subcategories-slider .slick-slide > div {
           height: 100%;
         }
 
-        .courses-slider .slick-slide > div > div {
-          height: 100%;
+        .course-slider .slick-list,
+        .subcategories-slider .slick-list {
+          margin: 0 -8px;
+        }
+
+        /* Hide disabled arrows */
+        .course-slider .slick-disabled,
+        .subcategories-slider .slick-disabled {
+          display: none !important;
+        }
+
+        @media (max-width: 640px) {
+          .course-slider .slick-prev,
+          .course-slider .slick-next,
+          .subcategories-slider .slick-prev,
+          .subcategories-slider .slick-next {
+            display: none !important;
+          }
         }
       `}</style>
     </div>
