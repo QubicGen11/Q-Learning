@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar_main from './Components/Navbar Components/Navbar_main';
-import Hero_Heading from './Components/Hero Components/Hero_Heading';
-import Hero_Features from './Components/Hero Components/Hero_Skills';
-import Paths from './Components/Hero Components/Paths';
+import Hero_Heading from './Components/Hero Components/Hero Components/Hero_Heading';
+import Hero_Features from './Components/Hero Components/Hero Components/Hero_Skills';
+import Paths from './Components/Hero Components/Hero Components/Paths';
 import Educational_Ecosystem from './Components/Ecosystem Components/Ecosystem';
 import Testimonial from './Components/Testimonial Components/Testimonial';
 import Courses_main from './Components/Courses Components/Courses_main';
@@ -16,6 +16,8 @@ import CourseContent from './Components/Courses Components/CourseContent';
 import CourseLesson from './Components/Courses Components/CourseLesson';
 import ProtectedRoute from './Components/Auth/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
+import Carousel_main from './Components/Carousel Components/Carousel_main';
+import SkillsSection from './Components/SkillsSection';
 // import { AuthProvider } from './context/AuthContext';
 
 // Create a Home component that contains all the landing page components
@@ -38,6 +40,11 @@ function App() {
         <Router>
           <div className="min-h-screen transition-colors duration-200 dark:bg-gray-900">
             <Navbar_main />
+            <div className='mt-4'>
+
+            <Carousel_main />
+            </div>
+            <SkillsSection />
             <Routes>
               {/* <Route path="/login" element={<div>Login Page</div>} /> */}
               <Route path="/login" element={<Login />} />

@@ -402,8 +402,8 @@ const Navbar_main = () => {
     <div className="w-[280px] h-full bg-white dark:bg-gray-800 transition-colors duration-200">
       <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
         <Link to="/" className="flex items-center" onClick={() => setMobileOpen(false)}>
-          <span className="text-xl font-bold text-[#fa4616]">QLearning</span>
-          <span className="text-xl font-bold dark:text-white">Academy</span>
+          <span className="text-xl font-bold text-[#fa4616]">Q</span>
+          <span className="text-xl font-bold dark:text-white">LMS</span>
         </Link>
         <button onClick={() => setMobileOpen(false)} className="p-2 dark:text-white">
           <FiX className="w-6 h-6" />
@@ -444,114 +444,117 @@ const Navbar_main = () => {
   return (
     <>
       <div className="h-16"></div>
-      <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 fixed top-0 left-0 right-0 z-50 transition-colors duration-200">
-        <div className="max-w-9xl mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center ml-7">
-              <Link to="/" className="flex items-center space-x-1">
-                <span className="text-4xl font-extrabold text-[#0033A1] dark:text-[#4d7cc7] playwrite-gb-s-logo" style={{
-                  fontFamily: '"Playwrite GB S", serif',
-                  fontWeight: 900,
-                  fontOpticalSizing: 'auto',
-                  fontStyle: 'regular'
-                }}> 
-                  <span className='text-yellow-500'>Q</span>lms
-                </span>
-              </Link>
-            </div>
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 fixed top-0 left-0 right-0 z-50 transition-colors duration-200">
+        <div className="max-w-full mx-auto px-2.5">
+          <div className="flex items-center h-[72px] gap-2">
+            {/* Logo */}
+            <Link to="/" className="flex-shrink-0 flex items-center mr-2">
+              <span className="text-2xl md:text-3xl font-bold">
+                <span className="text-[#fa4616]">Q</span>
+                <span className="dark:text-white">LMS</span>
+              </span>
+            </Link>
 
+            {/* Menu Icon for Mobile */}
             <button 
-              className="md:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
               onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
             >
-              <FiMenu className="w-6 h-6" />
+              <FiMenu className="w-6 h-6 dark:text-white" />
             </button>
 
-            <div className="hidden md:flex items-center space-x-8">
-              {navItems.map((item, index) => (
-                <Tooltip 
-                  key={index} 
-                  title={item.tooltip} 
-                  placement="bottom" 
-                  arrow
-                  enterDelay={200}
-                  leaveDelay={0}
-                >
-                  {item.path.startsWith('http') ? (
-                    <a
-                      href={item.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs tracking-wide text-gray-600 dark:text-gray-300 hover:text-[#0d47a1] dark:hover:text-[#4d7cc7]"
-                      style={{
-                        position: 'relative',
-                        fontSize: '11px',
-                        fontWeight: '500',
-                        fontFamily: 'sans-serif'
-                      }}
-                    >
-                      {item.text}
-                    </a>
-                  ) : (
-                    <NavLink 
-                      to={item.path}
-                      isActive={location.pathname === item.path || 
-                                (item.path === '/' && location.pathname === '/')}
-                      className="text-xs tracking-wide dark:text-gray-300"
-                    >
-                      {item.text}
-                    </NavLink>
-                  )}
-                </Tooltip>
-              ))}
+            {/* Categories Dropdown - Hidden on mobile */}
+            <div className="hidden lg:block">
+              <button className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-sm text-[#1c1d1f] dark:text-white font-normal text-sm">
+                Categories
+              </button>
             </div>
 
-            <div className="hidden md:flex items-center space-x-4">
-              <Tooltip title="Change Language" arrow>
-                <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.6 9h16.8M3.6 15h16.8" />
-                  </svg>
-                </button>
-              </Tooltip>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setLoginDialogOpen(true)}
-                  className="bg-[#0033A1] dark:bg-[#4d7cc7] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#002280] dark:hover:bg-[#3d6cb7] transition-colors duration-200"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => setSignupDialogOpen(true)}
-                  className="bg-[#0033A1] dark:bg-[#4d7cc7] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#002280] dark:hover:bg-[#3d6cb7] transition-colors duration-200"
-                >
-                  Sign Up
-                </button>
-
-                <Link to="/login">
-                  <button
-                      className="bg-[#0033A1] dark:bg-[#4d7cc7] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#002280] dark:hover:bg-[#3d6cb7] transition-colors duration-200"
-                >
-                  Admin
-                </button>
-                </Link>
-
-
+            {/* Search Bar - Responsive width */}
+            <div className="flex-grow relative mx-2 hidden sm:block">
+              <div className="relative flex items-center h-12 max-w-[692px]">
+                <div className="relative flex-grow">
+                  <input
+                    type="text"
+                    placeholder="Search for anything"
+                    className="w-full h-12 pl-12 pr-4 border border-gray-900 dark:border-gray-600 
+                             bg-[#f8fafb] dark:bg-gray-800 
+                             text-sm text-gray-900 dark:text-gray-100
+                             focus:outline-none focus:border-[#1c1d1f] dark:focus:border-gray-400
+                             placeholder-gray-600 dark:placeholder-gray-400"
+                  />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                    <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-              aria-label="Toggle theme"
-            >
-              {isDarkMode ? (
-                <FaSun className="text-yellow-400 w-5 h-5" />
-              ) : (
-                <FaMoon className="text-gray-700 dark:text-gray-300 w-5 h-5" />
-              )}
+            {/* Search Icon for Mobile */}
+            <button className="sm:hidden p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+              <svg className="w-6 h-6 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </button>
+
+            {/* Right Side Menu - Responsive */}
+            <div className="flex items-center gap-1">
+              {/* Desktop-only buttons */}
+              <div className="hidden lg:flex items-center gap-1">
+                <button className="px-3 py-2 text-sm whitespace-nowrap hover:text-[#5624d0] dark:text-gray-200 dark:hover:text-gray-50">
+                  Plans & Pricing
+                </button>
+                <button className="px-3 py-2 text-sm whitespace-nowrap hover:text-[#5624d0] dark:text-gray-200 dark:hover:text-gray-50">
+                  QLMS Business
+                </button>
+                <button className="px-3 py-2 text-sm whitespace-nowrap hover:text-[#5624d0] dark:text-gray-200 dark:hover:text-gray-50">
+                  Teach on QLMS
+                </button>
+              </div>
+
+              {/* Cart - Hidden on smallest screens */}
+              <button className="hidden xs:block p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+                <svg className="w-6 h-6 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </button>
+
+              {/* Auth Buttons - Responsive text size */}
+              <button
+                onClick={() => setLoginDialogOpen(true)}
+                className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-bold border border-gray-900 dark:border-white hover:bg-[#f8fafb] dark:hover:bg-gray-800"
+              >
+                Log in
+              </button>
+
+              <button
+                onClick={() => setSignupDialogOpen(true)}
+                className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 border border-gray-900 dark:border-white hover:bg-gray-800 dark:hover:bg-gray-100"
+              >
+                Sign up
+              </button>
+
+              {/* Utility buttons - Hidden on smallest screens */}
+              <div className="hidden xs:flex items-center">
+                <button className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+                  <svg className="w-6 h-6 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={toggleDarkMode}
+                  className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                >
+                  {isDarkMode ? 
+                    <FaSun className="w-5 h-5 text-white" /> : 
+                    <FaMoon className="w-5 h-5" />
+                  }
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
