@@ -348,6 +348,66 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
       return () => clearInterval(interval);
     }, [timer]);
 
+    const handleSignup = async (e) => {
+      e.preventDefault();
+      
+      try {
+        // First step: Only send email
+        const response = await fetch('http://localhost:8089/qlms/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email
+          })
+        });
+
+        if (response.ok) {
+          toast.success('Verification code sent to your email!');
+          setSignupStep('verification');
+        } else {
+          const error = await response.json();
+          toast.error(error.message || 'Registration failed');
+        }
+      } catch (error) {
+        console.error('API call failed:', error);
+        toast.error('Registration failed. Please try again.');
+      }
+    };
+
+    const handleVerification = async () => {
+      try {
+        // Second step: Send all user details with OTP
+        const response = await fetch('http://localhost:8089/qlms/verifyRegistration', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+            registrationCode: otpCode
+          })
+        });
+
+        if (response.ok) {
+          toast.success('Account created successfully!');
+          setTimeout(() => {
+            onClose();
+          }, 1500);
+        } else {
+          const error = await response.json();
+          toast.error(error.message || 'Verification failed');
+        }
+      } catch (error) {
+        console.error('API call failed:', error);
+        toast.error('Verification failed. Please try again.');
+      }
+    };
+
     // If not signup, show login form
     if (!isSignUp) {
       if (loginMethod === 'choose') {
