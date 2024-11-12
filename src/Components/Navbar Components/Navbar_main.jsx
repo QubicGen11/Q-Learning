@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Tooltip, Drawer, Dialog, DialogContent, DialogTitle, Fade } from '@mui/material';
 import { styled } from '@mui/system';
@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { FaSun, FaMoon, FaUser, FaChalkboardTeacher, FaArrowLeft, FaGithub, FaGoogle, FaFacebook, FaTwitter, FaLinkedin, FaEnvelope, FaShoppingCart } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
+import { toast, Toaster } from 'react-hot-toast';
 // Updated NavLink styled component with dark mode
 const NavLink = styled(Link)(({ isActive, theme }) => ({
   position: 'relative',
@@ -101,213 +102,479 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
     }
   };
 
-  const EmailForm = ({ isSignUp }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="space-y-4"
-    >
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Email
-        </label>
-        <input
-          type="email"
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          placeholder="Enter your email"
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Password
-        </label>
-        <input
-          type="password"
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          placeholder={isSignUp ? "Create password" : "Enter password"}
-        />
-      </div>
+  const OTPInput = ({ value, onChange, length = 6 }) => {
+    const [otp, setOtp] = useState(new Array(length).fill(""));
+    const inputRefs = useRef([]);
+
+    useEffect(() => {
+      onChange(otp.join(""));
+    }, [otp]);
+
+    const handleChange = (element, index) => {
+      const newOtp = [...otp];
+      newOtp[index] = element.value;
+      setOtp(newOtp);
+
+      if (element.value && index < length - 1) {
+        inputRefs.current[index + 1].focus();
+      }
+    };
+
+    const handleKeyDown = (e, index) => {
+      if (e.key === "Backspace") {
+        if (!otp[index] && index > 0) {
+          const newOtp = [...otp];
+          newOtp[index - 1] = "";
+          setOtp(newOtp);
+          inputRefs.current[index - 1].focus();
+        }
+      }
+    };
+
+    const handlePaste = (e) => {
+      e.preventDefault();
+      const pasteData = e.clipboardData
+        .getData("text")
+        .replace(/[^A-Za-z0-9]/g, '');
       
-      {/* Show Confirm Password only for Sign Up */}
-      {isSignUp && (
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            placeholder="Confirm password"
-          />
-        </div>
-      )}
+      const newOtp = [...otp];
+      
+      for (let i = 0; i < Math.min(length, pasteData.length); i++) {
+        newOtp[i] = pasteData[i];
+        if (inputRefs.current[i]) {
+          inputRefs.current[i].value = pasteData[i];
+        }
+      }
+      
+      setOtp(newOtp);
+      
+      const focusIndex = Math.min(length - 1, pasteData.length - 1);
+      if (focusIndex >= 0) {
+        inputRefs.current[focusIndex].focus();
+      }
+    };
 
-      {/* Show Forgot Password link only for Sign In */}
-      {!isSignUp && (
-        <div className="flex justify-end">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            Forgot Password?
-          </motion.button>
-        </div>
-      )}
-
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+    return (
+      <div 
+        className="flex justify-between gap-2"
+        onPaste={handlePaste}
       >
-        {isSignUp ? "Create Account" : "Sign In"}
-      </motion.button>
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-            Or continue with
-          </span>
-        </div>
+        {otp.map((digit, index) => (
+          <input
+            key={index}
+            ref={(ref) => (inputRefs.current[index] = ref)}
+            type="text"
+            maxLength={1}
+            value={digit}
+            onChange={(e) => handleChange(e.target, index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            className="w-12 h-12 text-center text-xl font-semibold border-2 rounded-lg
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none
+                     dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                     transition-all duration-200"
+          />
+        ))}
       </div>
+    );
+  };
 
-      {/* Social Login Icons */}
-      <div className="flex justify-center space-x-4">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="p-2 rounded-full border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+  const EmailForm = ({ isSignUp, onClose }) => {
+    const [formData, setFormData] = useState({
+      email: '',
+      password: ''
+    });
+    const [loginMethod, setLoginMethod] = useState('choose'); // 'choose' | 'password' | 'otp'
+    const [otpCode, setOtpCode] = useState('');
+    const [timer, setTimer] = useState(0);
+
+    useEffect(() => {
+      if (timer > 0) {
+        const interval = setInterval(() => {
+          setTimer((prev) => prev - 1);
+        }, 1000);
+        return () => clearInterval(interval);
+      }
+    }, [timer]);
+
+    const handleInputChange = (e) => {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value
+      });
+    };
+
+    const handlePasswordLogin = async (e) => {
+      e.preventDefault();
+      try {
+        const response = await fetch('http://localhost:8089/qlms/loginWithPassword', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        });
+
+        if (response.ok) {
+          toast.success('Login successful!');
+          setTimeout(() => onClose(), 1500);
+        } else {
+          const error = await response.json();
+          toast.error(error.message || 'Invalid credentials');
+        }
+      } catch (error) {
+        console.error('API call failed:', error);
+        toast.error('Login failed. Please try again.');
+      }
+    };
+
+    const handleSendOTP = async () => {
+      try {
+        const response = await fetch('http://localhost:8089/qlms/sendOtp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email
+          })
+        });
+
+        if (response.ok) {
+          toast.success('OTP sent successfully!');
+          setLoginMethod('otp');
+          setTimer(30);
+        } else {
+          const error = await response.json();
+          toast.error(error.message || 'Failed to send OTP');
+        }
+      } catch (error) {
+        console.error('API call failed:', error);
+        toast.error('Failed to send OTP. Please try again.');
+      }
+    };
+
+    const handleOTPLogin = async () => {
+      try {
+        const response = await fetch('http://localhost:8089/qlms/loginWithotp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            otpCode: otpCode
+          })
+        });
+
+        if (response.ok) {
+          toast.success('Login successful!');
+          setTimeout(() => onClose(), 1500);
+        } else {
+          const error = await response.json();
+          toast.error(error.message || 'Invalid OTP');
+        }
+      } catch (error) {
+        console.error('API call failed:', error);
+        toast.error('Login failed. Please try again.');
+      }
+    };
+
+    // Choose login method screen
+    if (loginMethod === 'choose') {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="space-y-4"
         >
-          <FaGoogle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="p-2 rounded-full border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => setLoginMethod('password')}
+              className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                       transition-colors duration-200 focus:outline-none focus:ring-2 
+                       focus:ring-blue-500 focus:ring-offset-2 font-medium text-sm"
+            >
+              Continue with Password
+            </button>
+            <button
+              onClick={handleSendOTP}
+              className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 
+                       transition-colors duration-200 focus:outline-none focus:ring-2 
+                       focus:ring-blue-500 focus:ring-offset-2 font-medium text-sm
+                       dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            >
+              Continue with OTP
+            </button>
+          </div>
+        </motion.div>
+      );
+    }
+
+    // Password login screen
+    if (loginMethod === 'password') {
+      return (
+        <motion.form
+          onSubmit={handlePasswordLogin}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="space-y-4"
         >
-          <FaGithub className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="p-2 rounded-full border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                     transition-colors duration-200 focus:outline-none focus:ring-2 
+                     focus:ring-blue-500 focus:ring-offset-2 font-medium text-sm"
+          >
+            Sign In
+          </button>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setLoginMethod('choose')}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              Try another method
+            </button>
+          </div>
+        </motion.form>
+      );
+    }
+
+    // OTP verification screen
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="space-y-4"
+      >
+        <div className="text-center mb-6">
+          <h3 className="text-lg font-semibold">Enter OTP</h3>
+          <p className="text-sm text-gray-600">
+            We've sent a code to {formData.email}
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-center mb-4">
+            Enter OTP Code
+          </label>
+          <div className="flex justify-center">
+            <OTPInput
+              value={otpCode}
+              onChange={setOtpCode}
+              length={6}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleOTPLogin}
+          disabled={otpCode.length !== 6}
+          className={`w-full py-3 px-4 rounded-lg font-medium text-sm
+                     transition-colors duration-200 focus:outline-none
+                     focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                     ${otpCode.length === 6
+                       ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                       : 'bg-gray-300 cursor-not-allowed text-gray-500'}`}
         >
-          <FaFacebook className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="p-2 rounded-full border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        >
-          <FaTwitter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="p-2 rounded-full border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        >
-          <FaLinkedin className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-        </motion.button>
-      </div>
-    </motion.div>
-  );
+          Verify & Sign In
+        </button>
+
+        <div className="text-center space-y-2">
+          <button
+            onClick={() => {
+              if (timer === 0) {
+                handleSendOTP();
+              }
+            }}
+            disabled={timer > 0}
+            className={`text-blue-600 hover:text-blue-800 text-sm font-medium
+                       ${timer > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {timer > 0 ? `Resend OTP in ${timer}s` : 'Resend OTP'}
+          </button>
+          <br />
+          <button
+            onClick={() => setLoginMethod('choose')}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            Try another method
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={() => {
-        onClose();
-        setShowEmailForm(false);
-      }}
-      TransitionComponent={Fade}
-      TransitionProps={{ timeout: 500 }}
-      PaperProps={{
-        className: 'rounded-lg overflow-hidden',
-        style: { minWidth: '500px' }
-      }}
-    >
-      <motion.div
-        initial={false}
-        animate={{
-          backgroundColor: showEmailForm ? 'rgba(0,0,0,0.02)' : 'transparent'
+    <>
+      <Dialog 
+        open={open} 
+        onClose={onClose}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 500 }}
+        PaperProps={{
+          className: 'rounded-lg overflow-hidden',
+          style: { minWidth: '500px' }
         }}
-        transition={{ duration: 0.6 }}
-        className="pb-4"
       >
-        <DialogTitle className="flex items-center p-6">
-          {showEmailForm && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="mr-2 p-2 hover:bg-gray-100 rounded-full"
-              onClick={() => setShowEmailForm(false)}
-            >
-              <FaArrowLeft className="w-5 h-5" />
-            </motion.button>
-          )}
-          <motion.span 
-            className="text-2xl font-bold flex-grow text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-          >
-            {showEmailForm ? `${title} with Email` : title}
-          </motion.span>
-        </DialogTitle>
-
-        <DialogContent className="px-6">
-          <AnimatePresence mode="wait">
-            {showEmailForm ? (
-              <EmailForm isSignUp={isSignUp} />
-            ) : (
-              <motion.div
-                key="social"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="space-y-3"
+        <motion.div
+          initial={false}
+          animate={{
+            backgroundColor: showEmailForm ? 'rgba(0,0,0,0.02)' : 'transparent'
+          }}
+          transition={{ duration: 0.6 }}
+          className="pb-4"
+        >
+          <DialogTitle className="flex items-center p-6">
+            {showEmailForm && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="mr-2 p-2 hover:bg-gray-100 rounded-full"
+                onClick={() => setShowEmailForm(false)}
               >
-                {socialProviders.map((provider) => (
-                  <motion.button
-                    key={provider.name}
-                    variants={itemVariants}
-                    whileHover={{ 
-                      scale: 1.02,
-                      transition: { duration: 0.2 }
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`
-                      w-full p-4 rounded-lg border dark:border-gray-700 
-                      flex items-center justify-center space-x-3 
-                      ${provider.primary 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 border-transparent' 
-                        : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'}
-                      transition-all duration-300 shadow-sm hover:shadow-md
-                    `}
-                    onClick={() => {
-                      if (provider.id === 'email') {
-                        setShowEmailForm(true);
-                      } else {
-                        onClose();
-                        setShowEmailForm(false);
-                      }
-                    }}
-                  >
-                    {provider.icon}
-                    <span>{title} with {provider.name}</span>
-                  </motion.button>
-                ))}
-              </motion.div>
+                <FaArrowLeft className="w-5 h-5" />
+              </motion.button>
             )}
-          </AnimatePresence>
-        </DialogContent>
-      </motion.div>
-    </Dialog>
+            <motion.span 
+              className="text-2xl font-bold flex-grow text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              {showEmailForm ? `${title} with Email` : title}
+            </motion.span>
+          </DialogTitle>
+
+          <DialogContent className="px-6">
+            <AnimatePresence mode="wait">
+              {showEmailForm ? (
+                <EmailForm isSignUp={isSignUp} onClose={onClose} />
+              ) : (
+                <motion.div
+                  key="social"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-3"
+                >
+                  {socialProviders.map((provider) => (
+                    <motion.button
+                      key={provider.name}
+                      variants={itemVariants}
+                      whileHover={{ 
+                        scale: 1.02,
+                        transition: { duration: 0.2 }
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`
+                        w-full p-4 rounded-lg border dark:border-gray-700 
+                        flex items-center justify-center space-x-3 
+                        ${provider.primary 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 border-transparent' 
+                          : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'}
+                        transition-all duration-300 shadow-sm hover:shadow-md
+                      `}
+                      onClick={() => {
+                        if (provider.id === 'email') {
+                          setShowEmailForm(true);
+                        } else {
+                          onClose();
+                          setShowEmailForm(false);
+                        }
+                      }}
+                    >
+                      {provider.icon}
+                      <span>{title} with {provider.name}</span>
+                    </motion.button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </DialogContent>
+        </motion.div>
+      </Dialog>
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          success: {
+            style: {
+              background: '#4CAF50',
+              color: 'white',
+            },
+            duration: 3000,
+          },
+          error: {
+            style: {
+              background: '#EF5350',
+              color: 'white',
+            },
+            duration: 3000,
+          },
+          style: {
+            borderRadius: '8px',
+            padding: '16px',
+            fontSize: '14px',
+            maxWidth: '500px',
+          },
+        }}
+      />
+    </>
   );
 };
 
