@@ -8,6 +8,7 @@ import { FaSun, FaMoon, FaUser, FaChalkboardTeacher, FaArrowLeft, FaGithub, FaGo
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
 import { toast, Toaster } from 'react-hot-toast';
+import Cookies from 'js-cookie';
 // Updated NavLink styled component with dark mode
 const NavLink = styled(Link)(({ isActive, theme }) => ({
   position: 'relative',
@@ -218,7 +219,23 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
         });
 
         if (response.ok) {
-          toast.success('Login successful!');
+          const data = await response.json();
+          
+          // Store access token (shorter expiry)
+          Cookies.set('accessToken', data.accessToken, { 
+            expires: 1, // 1 day
+            secure: true,
+            sameSite: 'strict'
+          });
+          
+          // Store refresh token (longer expiry)
+          Cookies.set('refreshToken', data.refreshToken, { 
+            expires: 7, // 7 days
+            secure: true,
+            sameSite: 'strict'
+          });
+
+          toast.success(data.message || 'Login successful!');
           setTimeout(() => onClose(), 1500);
         } else {
           const error = await response.json();
@@ -270,7 +287,23 @@ const AuthDialog = ({ open, onClose, title, isSignUp }) => {
         });
 
         if (response.ok) {
-          toast.success('Login successful!');
+          const data = await response.json();
+          
+          // Store access token (shorter expiry)
+          Cookies.set('accessToken', data.accessToken, { 
+            expires: 1, // 1 day
+            secure: true,
+            sameSite: 'strict'
+          });
+          
+          // Store refresh token (longer expiry)
+          Cookies.set('refreshToken', data.refreshToken, { 
+            expires: 7, // 7 days
+            secure: true,
+            sameSite: 'strict'
+          });
+
+          toast.success(data.message || 'Login successful!');
           setTimeout(() => onClose(), 1500);
         } else {
           const error = await response.json();
@@ -917,3 +950,20 @@ const Navbar_main = () => {
 }
 
 export default Navbar_main;
+
+// Updated utility functions
+export const isAuthenticated = () => {
+  return !!Cookies.get('accessToken');
+};
+
+export const getTokens = () => {
+  return {
+    accessToken: Cookies.get('accessToken'),
+    refreshToken: Cookies.get('refreshToken')
+  };
+};
+
+export const logout = () => {
+  Cookies.remove('accessToken');
+  Cookies.remove('refreshToken');
+};
