@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart } from 'react-icons/fi';
 import Navbar_main from '../Navbar Components/Navbar_main';
 
-const CourseContent = () => {
+const CourseContent = ({ previewMode = false, previewData = null }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
@@ -46,51 +46,30 @@ const CourseContent = () => {
   }, []);
 
   useEffect(() => {
-    const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
-    const foundCourse = storedCourses.find(c => c.id === parseInt(id));
-    
-    if (foundCourse) {
-      const processedTechStack = (foundCourse.techStackData || []).map(tech => {
-        if (typeof tech === 'string') {
-          return {
-            name: tech,
-            url: techLogos[tech] || techLogos.html
-          };
-        }
-        return {
-          ...tech,
-          url: tech.url || techLogos[tech.name] || techLogos.html
-        };
-      });
-
-      setCourse({
-        ...foundCourse,
-        logo: processedTechStack[0]?.url || techLogos.html,
-        techStackData: processedTechStack,
-        learningObjectives: foundCourse.learningObjectives || [],
-        curriculum: foundCourse.curriculum || [],
-        category: foundCourse.category || 'Development',
-        subcategory: foundCourse.subcategory || '',
-        difficultyLevel: foundCourse.difficultyLevel || 'Intermediate',
-        completionTime: foundCourse.completionTime || '1h',
-        language: foundCourse.language || 'English',
-        productCovered: foundCourse.productCovered || 'Studio',
-        courseAudience: foundCourse.courseAudience || '',
-        productAlignment: foundCourse.productAlignment || ''
-      });
-
-      if (foundCourse.curriculum && foundCourse.curriculum.length > 0) {
-        const completedLessons = foundCourse.curriculum.filter(lesson => lesson.isCompleted).length;
-        const totalLessons = foundCourse.curriculum.length;
-        const progress = Math.round((completedLessons / totalLessons) * 100);
-        setCourseProgress(progress);
-      }
-
-      setCourseImage(foundCourse.courseImage);
+    if (previewMode && previewData) {
+      setCourse(previewData);
+      setCourseImage(previewData.courseImage);
+      return;
     }
-  }, [id, techLogos]);
+
+    const fetchCourse = async () => {
+      try {
+        const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
+        const foundCourse = storedCourses.find(c => c.id === parseInt(id));
+        if (foundCourse) {
+          setCourse(foundCourse);
+          setCourseImage(foundCourse.courseImage);
+        }
+      } catch (error) {
+        console.error('Error loading course:', error);
+      }
+    };
+
+    fetchCourse();
+  }, [id, previewMode, previewData]);
 
   const handleResume = () => {
+    if (previewMode) return;
     if (course?.curriculum && course.curriculum.length > 0) {
       const nextLesson = course.curriculum.find(lesson => !lesson.isCompleted) || course.curriculum[0];
       if (nextLesson) {
@@ -110,7 +89,7 @@ const CourseContent = () => {
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-[130px] py-4 sm:py-6 
                     bg-white dark:bg-gray-900 min-h-screen transition-colors duration-300">
-      <Navbar_main />
+      {!previewMode && <Navbar_main />}
       {/* Breadcrumb */}
       <div className="mb-4 sm:mb-6 text-xs sm:text-sm">
         <Link to="/courses" className="text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-200">

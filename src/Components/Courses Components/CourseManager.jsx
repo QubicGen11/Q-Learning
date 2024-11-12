@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus } from 'react-icons/fi';
+import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus, FiEye } from 'react-icons/fi';
+import CourseContent from './CourseContent';
 
 // Tech logos data with CDN links
 const techLogos = {
@@ -179,6 +180,8 @@ const CourseManager = () => {
     techStackData: [],
     courseImage: null,
   });
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
 
   // Fetch courses on mount
   useEffect(() => {
@@ -270,6 +273,48 @@ const CourseManager = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  // Add preview button next to the submit button
+  const previewButton = (
+    <button
+      type="button"
+      onClick={() => setShowPreview(true)}
+      className="w-full mt-4 bg-gray-100 text-gray-800 py-3 rounded-lg hover:bg-gray-200 flex items-center justify-center gap-2"
+    >
+      <FiEye /> Preview Course
+    </button>
+  );
+
+  const handlePreview = () => {
+    // Create preview data from your form data
+    const preview = {
+      ...formData,
+      id: 'preview',
+      enrolledStudents: 0,
+      bannerSettings: {
+        opacity: 70,
+        darkModeOpacity: 40,
+        yPosition: 50
+      },
+      price: formData.price || 0,
+      originalPrice: formData.originalPrice || 0,
+      duration: formData.duration || '0 hours',
+      courseImage: formData.courseImage || '',
+      logo: formData.logo || '',
+      curriculum: formData.curriculum || [],
+      techStackData: formData.techStackData || [],
+      learningObjectives: formData.learningObjectives || [],
+      courseAudience: formData.courseAudience || '',
+      productAlignment: formData.productAlignment || '',
+      category: formData.category || 'Development',
+      subcategory: formData.subcategory || '',
+      difficultyLevel: formData.difficultyLevel || 'Beginner',
+      language: formData.language || 'English'
+    };
+
+    setPreviewData(preview);
+    setShowPreview(true);
   };
 
   return (
@@ -873,8 +918,18 @@ const CourseManager = () => {
                   )}
                 </div>
 
-                {/* Submit Button */}
-                <div className="mt-6">
+                {/* Add Preview and Submit buttons together */}
+                <div className="mt-6 space-y-4">
+                  {/* Preview Button */}
+                  <button
+                    type="button"
+                    onClick={handlePreview}
+                    className="w-full bg-gray-100 text-gray-800 py-3 rounded-lg hover:bg-gray-200 flex items-center justify-center gap-2"
+                  >
+                    <FiEye className="w-5 h-5" /> Preview Course
+                  </button>
+
+                  {/* Submit Button */}
                   <button
                     type="submit"
                     className="w-full bg-[#5624D0] text-white py-3 rounded-lg hover:bg-[#4B1F9E]"
@@ -978,6 +1033,34 @@ const CourseManager = () => {
           )}
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && previewData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+          <div className="min-h-screen">
+            <div className="relative bg-white dark:bg-gray-900 w-full min-h-screen">
+              {/* Modal Header */}
+              <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between">
+                <h3 className="text-xl font-semibold">Course Preview</h3>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="text-gray-500 hover:text-gray-700 p-2"
+                >
+                  <FiX className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Course Content Preview */}
+              <div className="overflow-y-auto">
+                <CourseContent 
+                  previewMode={true}
+                  previewData={previewData}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
