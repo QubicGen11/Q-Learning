@@ -11,7 +11,7 @@ const Courses_main = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState([]);
 
-  const techLogos = {
+  const [techLogos, setTechLogos] = useState({
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
     css: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg",
     javascript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
@@ -28,7 +28,23 @@ const Courses_main = () => {
     aws: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
     firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
     graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
-  };
+  });
+
+  useEffect(() => {
+    // Load custom tech logos from localStorage
+    const customTechLogos = localStorage.getItem('customTechLogos');
+    if (customTechLogos) {
+      try {
+        const parsedLogos = JSON.parse(customTechLogos);
+        setTechLogos(prevLogos => ({
+          ...prevLogos,
+          ...parsedLogos
+        }));
+      } catch (error) {
+        console.error('Error parsing custom tech logos:', error);
+      }
+    }
+  }, []);
 
   const products = [
     { name: "Frontend Development", count: 25 },
@@ -70,52 +86,45 @@ const Courses_main = () => {
   ];
 
   useEffect(() => {
-    // Get courses from localStorage
     const storedCourses = localStorage.getItem('courses');
-    let coursesToDisplay = [];
-
+    const customTechLogos = JSON.parse(localStorage.getItem('customTechLogos') || '{}');
+    
     if (storedCourses) {
-      // Parse stored courses and ensure they have logos
-      coursesToDisplay = JSON.parse(storedCourses).map(course => ({
-        ...course,
-        logo: techLogos[course.techStack?.[0]] || techLogos.html // Default to HTML logo if no tech stack
-      }));
-    } else {
-      // Initial courses with proper logos
-      coursesToDisplay = [
-        {
-          id: 1,
-          title: "HTML5 & CSS3 Fundamentals",
-          duration: "2h",
-          type: "Frontend",
-          logo: techLogos.html,
-          techStack: ['html', 'css']
-        },
-        {
-          id: 2,
-          title: "Modern JavaScript Development",
-          duration: "4h",
-          type: "Frontend",
-          logo: techLogos.javascript,
-          techStack: ['javascript']
-        },
-        {
-          id: 3,
-          title: "React.js Complete Guide",
-          duration: "6h",
-          type: "Frontend",
-          logo: techLogos.react,
-          techStack: ['react']
-        },
-        // Add more initial courses as needed
-      ];
-      
-      // Store initial courses
-      localStorage.setItem('courses', JSON.stringify(coursesToDisplay));
-    }
+      try {
+        const parsedCourses = JSON.parse(storedCourses);
+        const processedCourses = parsedCourses.map(course => {
+          // First process the tech stack data
+          const processedTechStack = (course.techStackData || []).map(tech => {
+            if (typeof tech === 'string') {
+              return {
+                name: tech,
+                url: customTechLogos[tech] || techLogos[tech] || techLogos.html
+              };
+            }
+            return {
+              ...tech,
+              url: tech.url || 
+                   customTechLogos[tech.name] || 
+                   techLogos[tech.name] || 
+                   techLogos.html
+            };
+          });
 
-    setCourses(coursesToDisplay);
-  }, []);
+          return {
+            ...course,
+            // Use the first processed tech stack image as the main logo
+            logo: processedTechStack[0]?.url || techLogos.html,
+            techStackData: processedTechStack
+          };
+        });
+        
+        setCourses(processedCourses);
+      } catch (error) {
+        console.error('Error processing courses:', error);
+        setCourses([]);
+      }
+    }
+  }, [techLogos]);
 
   const filteredCourses = courses.filter(course => 
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -365,29 +374,38 @@ const Courses_main = () => {
               >
                 <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 sm:p-6 
                               hover:shadow-lg transition-all duration-300 relative">
-                  {/* Logo with Glow Effect */}
+                  {/* Main Logo */}
                   <div className="relative flex items-center justify-center h-12 sm:h-16 mb-6">
                     <div className="absolute inset-0 dark:bg-blue-500/20 rounded-full blur-xl scale-150 
                                   opacity-0 dark:opacity-0 dark:group-hover:opacity-75 
                                   transition-all duration-300 -z-10"></div>
                     <img 
-                      src={course.logo || techLogos[course.techStack?.[0]] || techLogos.html}
+                      src={course.techStackData?.[0]?.url || techLogos.html}
                       alt={course.title} 
                       className="max-h-full w-auto object-contain relative z-10
                                dark:opacity-90 group-hover:opacity-100
                                transition-all duration-300"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = techLogos.html;
+                      }}
                     />
                   </div>
                   
-                  {/* Course Tech Stack Icons */}
-                  {course.techStack && course.techStack.length > 0 && (
+                  {/* Tech Stack Icons */}
+                  {course.techStackData && course.techStackData.length > 0 && (
                     <div className="flex gap-2 mb-4">
-                      {course.techStack.map(tech => (
+                      {course.techStackData.map(tech => (
                         <img 
-                          key={tech}
-                          src={techLogos[tech]}
-                          alt={tech}
+                          key={tech.name}
+                          src={tech.url}
+                          alt={tech.name}
                           className="w-6 h-6 object-contain"
+                          title={tech.name}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = techLogos.html;
+                          }}
                         />
                       ))}
                     </div>

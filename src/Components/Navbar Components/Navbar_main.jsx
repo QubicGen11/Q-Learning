@@ -521,30 +521,30 @@ const Navbar_main = () => {
             </div>
 
             {/* Right Section - Responsive spacing */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center  sm:gap-2">
               {/* Desktop Navigation */}
               <div className="hidden lg:flex items-center">
                 <Link to="/courses">
                   <button className="px-2 sm:px-3 py-2 text-xs sm:text-sm 
                                    whitespace-nowrap hover:text-[#5624d0] 
                                    dark:text-gray-200 dark:hover:text-gray-50">
-                    My Courses
+                    Explore Courses
                   </button>
                 </Link>
                 <button className="hidden xl:block px-3 py-2 text-sm 
                                  whitespace-nowrap hover:text-[#5624d0] 
                                  dark:text-gray-200 dark:hover:text-gray-50">
-                  QLMS Collab
+                 About Us
                 </button>
                 <button className="hidden xl:block px-3 py-2 text-sm 
                                  whitespace-nowrap hover:text-[#5624d0] 
                                  dark:text-gray-200 dark:hover:text-gray-50">
-                  Teach on QLMS
+                  Contact Us
                 </button>
               </div>
 
               {/* Cart Icon - Show on tablet and up */}
-              <div className="hidden sm:flex items-center">
+              <div className="hidden sm:flex items-center mr-4">
                 <Link to="/cart">
                   <button className="p-2 sm:p-3 hover:bg-gray-100 
                                    dark:hover:bg-gray-800 rounded-full relative">
@@ -559,7 +559,7 @@ const Navbar_main = () => {
               </div>
 
               {/* Auth Buttons - Responsive sizing */}
-              <div className="flex items-center gap-1 sm:gap-2">
+              <div className="flex items-center sm:gap-2  space-x-2">
                 <button
                   onClick={() => setLoginDialogOpen(true)}
                   className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold 
@@ -582,15 +582,7 @@ const Navbar_main = () => {
 
               {/* Utility Buttons - Show on tablet and up */}
               <div className="hidden sm:flex items-center">
-                <button className="p-2 sm:p-3 hover:bg-gray-100 
-                                 dark:hover:bg-gray-800 rounded-full">
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 dark:text-white" 
-                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
-                          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                  </svg>
-                </button>
-
+                
                 <button
                   onClick={toggleDarkMode}
                   className="p-2 sm:p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"

@@ -176,6 +176,7 @@ const CourseManager = () => {
     discount: '',
     prerequisites: '',
     techStack: [],
+    techStackData: [],
     courseImage: null,
   });
 
@@ -236,6 +237,39 @@ const CourseManager = () => {
     setCurrentCourse(course);
     setFormData(course);
     setActiveTab('basicInfo');
+  };
+
+  // When adding a new custom technology
+  const handleAddTechnology = (name, url) => {
+    // Update form data
+    setFormData({
+      ...formData,
+      techStack: [...(formData.techStack || []), name],
+      techStackData: [...(formData.techStackData || []), { name, url }]
+    });
+
+    // Save custom tech logo to localStorage
+    const customTechLogos = JSON.parse(localStorage.getItem('customTechLogos') || '{}');
+    customTechLogos[name] = url;
+    localStorage.setItem('customTechLogos', JSON.stringify(customTechLogos));
+  };
+
+  // Add this function to handle file uploads
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // Set the URL input value to the base64 string
+        document.getElementById('techUrlInput').value = reader.result;
+        
+        // Show preview
+        const preview = document.getElementById('techPreview');
+        preview.src = reader.result;
+        preview.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -603,29 +637,34 @@ const CourseManager = () => {
                   </button>
                 </div>
 
-                {/* Tech Logos Section */}
+                {/* Tech Logos Section - With Custom URL Input */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-2">
                     Technologies Used
                   </label>
                   
+                  {/* Predefined Tech Stack */}
                   <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4 bg-gray-50 rounded-lg">
                     {Object.entries(techLogos).map(([name, url]) => (
                       <div
                         key={name}
                         onClick={() => {
                           const newTechStack = [...(formData.techStack || [])];
+                          const newTechStackData = [...(formData.techStackData || [])];
                           const index = newTechStack.indexOf(name);
                           
                           if (index === -1) {
                             newTechStack.push(name);
+                            newTechStackData.push({ name, url });
                           } else {
                             newTechStack.splice(index, 1);
+                            newTechStackData.splice(index, 1);
                           }
                           
                           setFormData({
                             ...formData,
-                            techStack: newTechStack
+                            techStack: newTechStack,
+                            techStackData: newTechStackData
                           });
                         }}
                         className={`
@@ -647,24 +686,139 @@ const CourseManager = () => {
                     ))}
                   </div>
 
-                  {/* Selected Technologies */}
+                  {/* Custom Technology Input with Local Upload */}
+                  <div className="mt-6 p-4 border rounded-lg">
+                    <h4 className="font-medium mb-4">Add Custom Technology</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Technology Name</label>
+                        <input
+                          type="text"
+                          id="techNameInput"
+                          placeholder="Enter technology name"
+                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Technology Image</label>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="url"
+                                id="techUrlInput"
+                                placeholder="Enter image URL"
+                                className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                                onChange={(e) => {
+                                  const preview = document.getElementById('techPreview');
+                                  if (e.target.value) {
+                                    preview.src = e.target.value;
+                                    preview.classList.remove('hidden');
+                                  } else {
+                                    preview.classList.add('hidden');
+                                  }
+                                }}
+                              />
+                              <span className="text-gray-500">or</span>
+                              <label className="cursor-pointer px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={handleFileUpload}
+                                />
+                                <span className="text-sm text-gray-700">Upload</span>
+                              </label>
+                            </div>
+                            {/* Preview */}
+                            <div className="mt-2 h-16 border rounded-lg overflow-hidden">
+                              <img
+                                id="techPreview"
+                                src=""
+                                alt="Preview"
+                                className="w-full h-full object-contain hidden"
+                              />
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nameInput = document.getElementById('techNameInput');
+                              const urlInput = document.getElementById('techUrlInput');
+                              
+                              if (nameInput.value && urlInput.value) {
+                                const name = nameInput.value.toLowerCase();
+                                const url = urlInput.value;
+                                
+                                // Save to localStorage first
+                                const customTechLogos = JSON.parse(localStorage.getItem('customTechLogos') || '{}');
+                                customTechLogos[name] = url;
+                                localStorage.setItem('customTechLogos', JSON.stringify(customTechLogos));
+                                
+                                // Then update form data
+                                setFormData({
+                                  ...formData,
+                                  techStack: [...(formData.techStack || []), name],
+                                  techStackData: [...(formData.techStackData || []), { name, url }]
+                                });
+                                
+                                // Clear inputs and preview
+                                nameInput.value = '';
+                                urlInput.value = '';
+                                const preview = document.getElementById('techPreview');
+                                preview.src = '';
+                                preview.classList.add('hidden');
+                              }
+                            }}
+                            className="px-4 py-2 bg-[#5624D0] text-white rounded-lg hover:bg-[#4B1F9E] h-12"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Add this script to handle preview */}
+                  <script
+                    dangerouslySetInnerHTML={{
+                      __html: `
+                        document.getElementById('techUrlInput').addEventListener('input', function(e) {
+                          const preview = document.getElementById('techPreview');
+                          if (e.target.value) {
+                            preview.src = e.target.value;
+                            preview.classList.remove('hidden');
+                            preview.onerror = function() {
+                              preview.classList.add('hidden');
+                            };
+                          } else {
+                            preview.classList.add('hidden');
+                          }
+                        });
+                      `
+                    }}
+                  />
+
+                  {/* Selected Technologies Display */}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {formData.techStack?.map((tech) => (
+                    {formData.techStackData?.map(({ name, url }) => (
                       <div
-                        key={tech}
+                        key={name}
                         className="flex items-center gap-2 px-3 py-1 bg-[#5624D0] text-white rounded-full"
                       >
                         <img 
-                          src={techLogos[tech]}
-                          alt={tech}
+                          src={url}
+                          alt={name}
                           className="w-4 h-4"
                         />
-                        <span className="text-sm capitalize">{tech}</span>
+                        <span className="text-sm capitalize">{name}</span>
                         <button
+                          type="button"
                           onClick={() => {
                             setFormData({
                               ...formData,
-                              techStack: formData.techStack.filter(t => t !== tech)
+                              techStack: formData.techStack.filter(t => t !== name),
+                              techStackData: formData.techStackData.filter(t => t.name !== name)
                             });
                           }}
                           className="ml-1 hover:text-red-200"

@@ -3,25 +3,6 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart } from 'react-icons/fi';
 import Navbar_main from '../Navbar Components/Navbar_main';
 
-const techLogos = {
-  html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
-  css: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg",
-  javascript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
-  react: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
-  nextjs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
-  nodejs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
-  mongodb: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg",
-  git: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
-  typescript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
-  tailwind: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg",
-  redux: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg",
-  postgresql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
-  docker: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
-  aws: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
-  firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
-  graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
-};
-
 const CourseContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,14 +11,62 @@ const CourseContent = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [courseProgress, setCourseProgress] = useState(0);
   const [courseImage, setCourseImage] = useState(null);
+  const [techLogos, setTechLogos] = useState({
+    html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
+    css: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg",
+    javascript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
+    react: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+    nextjs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+    nodejs: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
+    mongodb: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg",
+    git: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
+    typescript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
+    tailwind: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg",
+    redux: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg",
+    postgresql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
+    docker: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
+    aws: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
+    firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
+    graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
+  });
+
+  useEffect(() => {
+    const customTechLogos = localStorage.getItem('customTechLogos');
+    if (customTechLogos) {
+      try {
+        const parsedLogos = JSON.parse(customTechLogos);
+        setTechLogos(prevLogos => ({
+          ...prevLogos,
+          ...parsedLogos
+        }));
+      } catch (error) {
+        console.error('Error parsing custom tech logos:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
     const foundCourse = storedCourses.find(c => c.id === parseInt(id));
+    
     if (foundCourse) {
+      const processedTechStack = (foundCourse.techStackData || []).map(tech => {
+        if (typeof tech === 'string') {
+          return {
+            name: tech,
+            url: techLogos[tech] || techLogos.html
+          };
+        }
+        return {
+          ...tech,
+          url: tech.url || techLogos[tech.name] || techLogos.html
+        };
+      });
+
       setCourse({
         ...foundCourse,
-        logo: techLogos[foundCourse.techStack?.[0]] || techLogos.html,
+        logo: processedTechStack[0]?.url || techLogos.html,
+        techStackData: processedTechStack,
         learningObjectives: foundCourse.learningObjectives || [],
         curriculum: foundCourse.curriculum || [],
         category: foundCourse.category || 'Development',
@@ -59,7 +88,7 @@ const CourseContent = () => {
 
       setCourseImage(foundCourse.courseImage);
     }
-  }, [id]);
+  }, [id, techLogos]);
 
   const handleResume = () => {
     if (course?.curriculum && course.curriculum.length > 0) {
@@ -438,14 +467,18 @@ const CourseContent = () => {
                 </div>
               )}
             </div>
-            {course.techStack && course.techStack.length > 0 && (
+            {course.techStackData && course.techStackData.length > 0 && (
               <div className="flex justify-center gap-2 mb-4">
-                {course.techStack.map(tech => (
+                {course.techStackData.map(tech => (
                   <img 
-                    key={tech}
-                    src={techLogos[tech]}
-                    alt={tech}
+                    key={tech.name}
+                    src={tech.url}
+                    alt={tech.name}
                     className="w-6 h-6 object-contain"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = techLogos.html;
+                    }}
                   />
                 ))}
               </div>
