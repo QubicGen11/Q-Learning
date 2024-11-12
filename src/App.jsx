@@ -23,25 +23,41 @@ import ContactSection from './Components/Contact Us Home/Contact_usmain';
 import { CartProvider } from './context/CartContext';
 import Cart from './Components/Cart/Cart';
 import About from './Components/About Components/About';
-// import { AuthProvider } from './context/AuthContext';
+import Welcome from './Components/Welcome Component/Welcome';
+import Cookies from 'js-cookie';
 
 // Create a Home component that contains all the landing page components
 const Home = () => {
+  const token = Cookies.get('accessToken');
+
   return (
     <>
-      {/* <Hero_Heading /> */}
       <Navbar_main />
-      <div className='mt-4'>
-
-        <Carousel_main />
-      </div>
+      {token && (
+        <div className="welcome-carousel-container">
+          <Welcome />
+          <Carousel_main />
+        </div>
+      )}
+      {!token && (
+        <div className="mt-4">
+          <Carousel_main />
+        </div>
+      )}
       <SkillsSection />
       <Learners_main />
       <Hero_Features />
-      {/* <Paths /> */}
       <Educational_Ecosystem />
       <ContactSection />
       <Testimonial />
+
+      <style jsx>{`
+        .welcome-carousel-container {
+          position: relative;
+          background: white;
+          dark:bg-gray-900;
+        }
+      `}</style>
     </>
   );
 };
