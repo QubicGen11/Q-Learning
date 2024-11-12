@@ -531,11 +531,13 @@ const Navbar_main = () => {
                     Explore Courses
                   </button>
                 </Link>
+                <Link to="/about">
                 <button className="hidden xl:block px-3 py-2 text-sm 
                                  whitespace-nowrap hover:text-[#5624d0] 
                                  dark:text-gray-200 dark:hover:text-gray-50">
                  About Us
                 </button>
+                </Link>
                 <button className="hidden xl:block px-3 py-2 text-sm 
                                  whitespace-nowrap hover:text-[#5624d0] 
                                  dark:text-gray-200 dark:hover:text-gray-50">

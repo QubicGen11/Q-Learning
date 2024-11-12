@@ -22,6 +22,7 @@ import Learners_main from './Components/Learners Components/Learners_main';
 import ContactSection from './Components/Contact Us Home/Contact_usmain';
 import { CartProvider } from './context/CartContext';
 import Cart from './Components/Cart/Cart';
+import About from './Components/About Components/About';
 // import { AuthProvider } from './context/AuthContext';
 
 // Create a Home component that contains all the landing page components
@@ -67,6 +68,7 @@ function App() {
               />
               <Route path="/" element={<Home />} />
               <Route path="/courses" element={<Courses_main />} />
+              <Route path="/about" element={<About />} />
               <Route path="/courses/:id" element={<CourseContent />} />
               <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
               <Route path="/learning-plans" element={<div>Learning Plans Page</div>} />
@@ -79,7 +81,7 @@ function App() {
               <Route path="/courses/:id" element={<CourseContent />} />
               <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
               
-              {/* Contact Route - Redirects to external URL */}
+              {/* Contact Route - Redirects to external URL */} 
               <Route
                 path="/contact"
                 element={<Navigate to="https://www.qubicgen.com" replace />}
