@@ -37,6 +37,8 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.454.0",
     "postprocessing": "6.33.3",
+    "quill-image-drop-and-paste": "^2.0.1",
+    "quill-image-resize-module-react": "^3.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",

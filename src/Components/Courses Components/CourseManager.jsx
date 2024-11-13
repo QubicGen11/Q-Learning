@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import ImageResize from 'quill-image-resize-module-react';
+import Quill from 'quill';
 import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus, FiEye } from 'react-icons/fi';
 import CourseContent from './CourseContent';
+
+// Register modules
+Quill.register('modules/imageResize', ImageResize);
 
 // Tech logos data with CDN links
 const techLogos = {
@@ -59,6 +64,174 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+// Enhanced Quill configuration
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    ['blockquote', 'code-block'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
+    [{ 'indent': '-1'}, { 'indent': '+1' }],
+    [{ 'direction': 'rtl' }],
+    [{ 'size': ['small', false, 'large', 'huge'] }],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'font': [] }],
+    [{ 'align': [] }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
+  imageResize: {
+    parchment: Quill.import('parchment'),
+    modules: ['Resize', 'DisplaySize', 'Toolbar'],
+    displayStyles: {
+      backgroundColor: 'black',
+      border: 'none',
+      color: 'white'
+    },
+    handleStyles: {
+      backgroundColor: 'black',
+      border: 'none',
+      color: 'white'
+    },
+    toolbarStyles: {
+      backgroundColor: 'black',
+      border: 'none',
+      color: 'white'
+    }
+  },
+  clipboard: {
+    matchVisual: false
+  }
+};
+
+const quillFormats = [
+  'font',
+  'header',
+  'size',
+  'bold', 'italic', 'underline', 'strike',
+  'color', 'background',
+  'script',
+  'align',
+  'blockquote', 'code-block',
+  'list', 'bullet',
+  'indent',
+  'link', 'image', 'video',
+  'direction'
+];
+
+// Add custom styles
+const customStyles = `
+.ql-editor {
+  min-height: 400px;
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.ql-toolbar.ql-snow {
+  border-radius: 8px 8px 0 0;
+  border-color: #e2e8f0;
+  padding: 8px;
+  background: #f8fafc;
+}
+
+.ql-container.ql-snow {
+  border-radius: 0 0 8px 8px;
+  border-color: #e2e8f0;
+}
+
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+}
+
+.ql-editor .image-resizer {
+  border: 2px solid #0ea5e9;
+  position: absolute;
+}
+
+.ql-editor .image-resizer .resize-handle {
+  width: 12px;
+  height: 12px;
+  background-color: #0ea5e9;
+  border: 2px solid white;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.ql-formats {
+  margin-right: 15px !important;
+}
+
+.ql-toolbar button {
+  height: 28px;
+  width: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ql-toolbar button:hover {
+  background-color: #e2e8f0;
+  border-radius: 4px;
+}
+
+.ql-editor img {
+  cursor: pointer;
+}
+
+.ql-editor img.selected {
+  border: 2px solid #5624D0;
+}
+
+.image-resize-handles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.image-resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: black;
+  border: 1px solid white;
+}
+
+.image-resize-handle.se {
+  bottom: -5px;
+  right: -5px;
+  cursor: se-resize;
+}
+
+.image-resize-handle.sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: sw-resize;
+}
+
+.image-resize-handle.ne {
+  top: -5px;
+  right: -5px;
+  cursor: ne-resize;
+}
+
+.image-resize-handle.nw {
+  top: -5px;
+  left: -5px;
+  cursor: nw-resize;
+}
+`;
+
+// Add styles to document
+const styleSheet = document.createElement('style');
+styleSheet.type = 'text/css';
+styleSheet.innerText = customStyles;
+document.head.appendChild(styleSheet);
 
 const CourseManager = () => {
   const navigate = useNavigate();
@@ -134,7 +307,7 @@ const CourseManager = () => {
 
   // State definitions
   const [activeTab, setActiveTab] = useState('basicInfo');
-  const [activeLesson, setActiveLesson] = useState(0);
+  const [activeLesson, setActiveLesson] = useState(null);
   const [courses, setCourses] = useState([]);
   const [currentCourse, setCurrentCourse] = useState(null);
   const [showTechLogos, setShowTechLogos] = useState(false);
@@ -345,27 +518,24 @@ const CourseManager = () => {
                 <SidebarItem 
                   label="Basic Info" 
                   isActive={activeTab === 'basicInfo'}
-                  onClick={() => setActiveTab('basicInfo')}
-                />
-                <SidebarItem 
-                  label="Curriculum" 
-                  isCompleted={formData.curriculum.length > 0}
-                  isActive={activeTab === 'curriculum'}
-                  onClick={() => setActiveTab('curriculum')}
+                  onClick={() => {
+                    setActiveTab('basicInfo');
+                    setActiveLesson(null); // Reset active lesson
+                  }}
                 />
               </div>
             </div>
 
-            {/* Create your content */}
+            {/* Lessons Section */}
             <div>
-              <h3 className="font-bold text-gray-900 mb-4">Create your content</h3>
+              <h3 className="font-bold text-gray-900 mb-4">Lessons</h3>
               <div className="space-y-4">
                 {formData.curriculum.map((lesson, index) => (
                   <SidebarItem
                     key={lesson.id}
                     label={lesson.title || `Lesson ${index + 1}`}
                     isCompleted={lesson.isCompleted}
-                    isActive={activeLesson === index}
+                    isActive={activeTab === 'curriculum' && activeLesson === index}
                     onClick={() => {
                       setActiveTab('curriculum');
                       setActiveLesson(index);
@@ -374,23 +544,24 @@ const CourseManager = () => {
                 ))}
                 <button
                   onClick={() => {
+                    const newLesson = {
+                      id: Date.now(),
+                      title: `Lesson ${formData.curriculum.length + 1}`,
+                      duration: '',
+                      type: 'REQUIRED',
+                      content: '',
+                      isCompleted: false
+                    };
                     setFormData({
                       ...formData,
-                      curriculum: [...formData.curriculum, {
-                        id: Date.now(),
-                        title: '',
-                        duration: '',
-                        type: 'REQUIRED',
-                        content: '',
-                        isCompleted: false
-                      }]
+                      curriculum: [...formData.curriculum, newLesson]
                     });
                     setActiveTab('curriculum');
                     setActiveLesson(formData.curriculum.length);
                   }}
                   className="flex items-center gap-2 text-[#5624D0] hover:text-[#4B1F9E] pl-8"
                 >
-                  <span>+</span> Add Lesson
+                  <FiPlus /> Add Lesson
                 </button>
               </div>
             </div>
@@ -940,62 +1111,57 @@ const CourseManager = () => {
               </div>
             )}
 
-            {/* Curriculum Tab */}
-            {activeTab === 'curriculum' && (
+            {/* Curriculum Tab - Show single lesson */}
+            {activeTab === 'curriculum' && activeLesson !== null && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold mb-6">Course Curriculum</h2>
-                {formData.curriculum.map((lesson, index) => (
-                  <div 
-                    key={lesson.id}
-                    className={`p-6 border rounded-lg ${
-                      activeLesson === index ? 'border-[#5624D0] shadow-sm' : ''
-                    }`}
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Lesson Title</label>
-                        <input
-                          type="text"
-                          value={lesson.title}
-                          onChange={(e) => {
-                            const newCurriculum = [...formData.curriculum];
-                            newCurriculum[index].title = e.target.value;
-                            setFormData({...formData, curriculum: newCurriculum});
-                          }}
-                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                          placeholder="Enter lesson title"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Duration</label>
-                        <input
-                          type="text"
-                          value={lesson.duration}
-                          onChange={(e) => {
-                            const newCurriculum = [...formData.curriculum];
-                            newCurriculum[index].duration = e.target.value;
-                            setFormData({...formData, curriculum: newCurriculum});
-                          }}
-                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                          placeholder="e.g., 45m"
-                        />
-                      </div>
-                    </div>
-
+                <div className="p-6 border rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Content</label>
-                      <ReactQuill
-                        value={lesson.content}
-                        onChange={(content) => {
+                      <label className="block text-sm font-medium mb-2">Lesson Title</label>
+                      <input
+                        type="text"
+                        value={formData.curriculum[activeLesson].title}
+                        onChange={(e) => {
                           const newCurriculum = [...formData.curriculum];
-                          newCurriculum[index].content = content;
+                          newCurriculum[activeLesson].title = e.target.value;
                           setFormData({...formData, curriculum: newCurriculum});
                         }}
-                        className="h-64 mb-12"
+                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                        placeholder="Enter lesson title"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Duration</label>
+                      <input
+                        type="text"
+                        value={formData.curriculum[activeLesson].duration}
+                        onChange={(e) => {
+                          const newCurriculum = [...formData.curriculum];
+                          newCurriculum[activeLesson].duration = e.target.value;
+                          setFormData({...formData, curriculum: newCurriculum});
+                        }}
+                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                        placeholder="e.g., 45m"
                       />
                     </div>
                   </div>
-                ))}
+
+                  <div className="lesson-editor">
+                    <ReactQuill
+                      theme="snow"
+                      value={formData.curriculum[activeLesson].content}
+                      onChange={(content) => {
+                        const newCurriculum = [...formData.curriculum];
+                        newCurriculum[activeLesson].content = content;
+                        setFormData({...formData, curriculum: newCurriculum});
+                      }}
+                      modules={quillModules}
+                      formats={quillFormats}
+                      className="lesson-quill-editor"
+                      preserveWhitespace={true}
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </form>

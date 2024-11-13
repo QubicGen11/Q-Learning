@@ -66,8 +66,8 @@ const CourseLesson = () => {
 
   const renderContent = (content) => {
     const sanitizedContent = DOMPurify.sanitize(content, {
-      ADD_TAGS: ['iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'img', 'span'],
-      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow']
+      ADD_TAGS: ['iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'img', 'span', 'video', 'source'],
+      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow', 'width', 'height', 'data-size']
     });
 
     return (
@@ -93,7 +93,7 @@ const CourseLesson = () => {
               margin: 1em 0;
               font-style: italic;
             }
-            .lesson-content iframe {
+            .lesson-content iframe, .lesson-content video {
               max-width: 100%;
               margin: 1em 0;
               border-radius: 0.5em;
@@ -107,6 +107,58 @@ const CourseLesson = () => {
             .ql-align-center { text-align: center; }
             .ql-align-right { text-align: right; }
             .ql-align-justify { text-align: justify; }
+            .ql-size-small { font-size: 0.75em; }
+            .ql-size-large { font-size: 1.5em; }
+            .ql-size-huge { font-size: 2em; }
+            .ql-video {
+              width: 100%;
+              height: 0;
+              padding-bottom: 56.25%;
+              position: relative;
+            }
+            .ql-video iframe {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+            }
+            [data-size] {
+              width: attr(data-size px);
+              height: auto;
+            }
+            .ql-code-block {
+              background-color: #f8f9fa;
+              padding: 1em;
+              border-radius: 0.5em;
+              font-family: monospace;
+              white-space: pre-wrap;
+              margin: 1em 0;
+            }
+            .lesson-content img.image-float-left {
+              float: left;
+              margin-right: 1em;
+              margin-bottom: 1em;
+            }
+            
+            .lesson-content img.image-float-right {
+              float: right;
+              margin-left: 1em;
+              margin-bottom: 1em;
+            }
+            
+            .lesson-content img.image-align-center {
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+              margin-bottom: 1em;
+            }
+            
+            .lesson-content::after {
+              content: '';
+              display: table;
+              clear: both;
+            }
           `}
         </style>
         <div className="ql-editor">
