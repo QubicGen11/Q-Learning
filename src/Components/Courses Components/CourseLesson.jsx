@@ -12,6 +12,7 @@ const CourseLesson = () => {
   const [currentLesson, setCurrentLesson] = useState(null);
   const [progress, setProgress] = useState(0);
   const [courseImage, setCourseImage] = useState(null);
+  const [currentSection, setCurrentSection] = useState('about');
 
   const currentIndex = course?.curriculum?.findIndex(
     lesson => lesson.id === parseInt(lessonId)
@@ -69,6 +70,10 @@ const CourseLesson = () => {
   const isLastLesson = course?.curriculum?.findIndex(
     lesson => lesson.id === parseInt(lessonId)
   ) === course?.curriculum?.length - 1;
+
+  const handleSectionClick = (section) => {
+    setCurrentSection(section);
+  };
 
   if (!course || !currentLesson) {
     return (
@@ -228,39 +233,70 @@ const CourseLesson = () => {
             </div>
           </div>
 
-          {/* Course Navigation - Adjusted padding */}
+          {/* Course Navigation */}
           <div className="px-4 py-4">
-            {course?.curriculum?.map((lesson, index) => (
-              <Link
-                key={lesson.id}
-                to={`/courses/${id}/lesson/${lesson.id}`}
-                className={`block p-3 rounded-lg mb-2 transition-all duration-300
-                          ${lesson.id === parseInt(lessonId)
-                            ? 'bg-white dark:bg-gray-700 shadow-sm'
-                            : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                          }`}
+            {/* Introduction Section */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <span>INTRODUCTION</span>
+              </div>
+              
+              {/* About this course button */}
+              <button 
+                onClick={() => handleSectionClick('about')}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors
+                  ${currentSection === 'about' 
+                    ? 'bg-white dark:bg-gray-700 shadow-sm' 
+                    : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
               >
-                <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center
-                                ${lesson.isCompleted 
-                                  ? 'bg-green-100 dark:bg-green-500/20' 
-                                  : 'bg-gray-200 dark:bg-gray-600'}`}>
-                    {lesson.isCompleted ? (
-                      <FiCheck className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</span>
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">{lesson.title}</div>
-                    {/* <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                      <FiClock className="w-3 h-3" />
-                      <span>{lesson.duration}</span>
-                    </div> */}
-                  </div>
+                <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">1</span>
                 </div>
-              </Link>
-            ))}
+                <span className="text-sm font-medium">About this course</span>
+              </button>
+            </div>
+
+            {/* Course Content Section */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <span>COURSE CONTENT</span>
+              </div>
+              
+              {/* Existing course curriculum mapping */}
+              {course?.curriculum?.map((lesson, index) => (
+                <Link
+                  key={lesson.id}
+                  to={`/courses/${id}/lesson/${lesson.id}`}
+                  className={`block p-3 rounded-lg mb-2 transition-all duration-300
+                    ${lesson.id === parseInt(lessonId)
+                      ? 'bg-white dark:bg-gray-700 shadow-sm'
+                      : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center
+                      ${lesson.isCompleted 
+                        ? 'bg-green-100 dark:bg-green-500/20' 
+                        : 'bg-gray-200 dark:bg-gray-600'}`}
+                    >
+                      {lesson.isCompleted ? (
+                        <FiCheck className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <span className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</span>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">{lesson.title}</div>
+                      {lesson.duration && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                          <FiClock className="w-3 h-3" />
+                          <span>{lesson.duration}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -282,6 +318,56 @@ const CourseLesson = () => {
           {/* Main Content Area */}
           <div className="p-8">
             <div className="max-w-4xl mx-auto">
+              {/* About This Course Section */}
+              {currentLesson?.id === course?.curriculum[0]?.id && (
+                <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                  <h2 className="text-2xl font-bold mb-4">About This Course</h2>
+                  
+                  {/* Welcome Message */}
+                  {course.aboutCourse?.welcome && (
+                    <div className="prose dark:prose-invert mb-6">
+                      <p>{course.aboutCourse.welcome}</p>
+                    </div>
+                  )}
+                  
+                  {/* Prerequisites */}
+                  {course.aboutCourse?.prerequisites?.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2">Prerequisites</h3>
+                      <ul className="list-disc list-inside space-y-1">
+                        {course.aboutCourse.prerequisites.map((prereq, index) => (
+                          <li key={index}>{prereq}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Requirements */}
+                  {course.aboutCourse?.requirements?.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2">Course Requirements</h3>
+                      <ul className="list-disc list-inside space-y-1">
+                        {course.aboutCourse.requirements.map((req, index) => (
+                          <li key={index}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Learning Outcomes */}
+                  {course.aboutCourse?.learningOutcomes?.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2">What You'll Learn</h3>
+                      <ul className="list-disc list-inside space-y-1">
+                        {course.aboutCourse.learningOutcomes.map((outcome, index) => (
+                          <li key={index}>{outcome}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               {/* Lesson Content */}
               <div className="prose prose-lg dark:prose-invert max-w-none">
                 {renderContent(currentLesson?.content)}

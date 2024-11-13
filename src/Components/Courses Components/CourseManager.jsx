@@ -352,6 +352,13 @@ const CourseManager = () => {
     techStack: [],
     techStackData: [],
     courseImage: null,
+    aboutCourse: {
+      welcome: '',
+      prerequisites: [],
+      requirements: [],
+      duration: '',
+      learningOutcomes: []
+    }
   });
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState(null);
@@ -1200,6 +1207,104 @@ const CourseManager = () => {
                       />
                     </div>
                   )}
+                </div>
+
+                {/* About This Course Section */}
+                <div className="mt-8 border-t pt-8">
+                  <h3 className="text-xl font-bold mb-4">About This Course</h3>
+                  
+                  {/* Welcome Message */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2">Welcome Message</label>
+                    <textarea
+                      value={formData.aboutCourse.welcome}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutCourse: {
+                          ...formData.aboutCourse,
+                          welcome: e.target.value
+                        }
+                      })}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                      rows={4}
+                      placeholder="Add a welcome message for your students"
+                    />
+                  </div>
+
+                  {/* Prerequisites */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2">Prerequisites</label>
+                    <div className="space-y-2">
+                      {formData.aboutCourse.prerequisites.map((prereq, index) => (
+                        <div key={index} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={prereq}
+                            onChange={(e) => {
+                              const newPrereqs = [...formData.aboutCourse.prerequisites];
+                              newPrereqs[index] = e.target.value;
+                              setFormData({
+                                ...formData,
+                                aboutCourse: {
+                                  ...formData.aboutCourse,
+                                  prerequisites: newPrereqs
+                                }
+                              });
+                            }}
+                            className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                            placeholder="Enter prerequisite"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newPrereqs = formData.aboutCourse.prerequisites.filter((_, i) => i !== index);
+                              setFormData({
+                                ...formData,
+                                aboutCourse: {
+                                  ...formData.aboutCourse,
+                                  prerequisites: newPrereqs
+                                }
+                              });
+                            }}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setFormData({
+                          ...formData,
+                          aboutCourse: {
+                            ...formData.aboutCourse,
+                            prerequisites: [...formData.aboutCourse.prerequisites, '']
+                          }
+                        })}
+                        className="text-[#5624D0] hover:text-[#4B1F9E] flex items-center gap-2"
+                      >
+                        <FiPlus /> Add Prerequisite
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Course Requirements */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2">Course Requirements</label>
+                    <div className="space-y-2">
+                      {/* Similar structure as prerequisites, but for requirements */}
+                      {/* Add your requirements input fields here */}
+                    </div>
+                  </div>
+
+                  {/* Learning Outcomes */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2">What You'll Learn</label>
+                    <div className="space-y-2">
+                      {/* Similar structure as prerequisites, but for learning outcomes */}
+                      {/* Add your learning outcomes input fields here */}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Add Preview and Submit buttons together */}
