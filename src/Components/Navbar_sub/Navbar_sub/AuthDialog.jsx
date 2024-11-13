@@ -1,20 +1,34 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, Fade } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowLeft, FaEnvelope, FaGithub, FaGoogle, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import { FaArrowLeft, FaEnvelope, FaGithub, FaGoogle, FaLinkedin } from 'react-icons/fa';
 import { EmailForm } from './EmailForm';
 import { toast, Toaster } from 'react-hot-toast';
 
 export const AuthDialog = ({ open, onClose, title, isSignUp }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
 
+  const handleSocialAuth = (provider) => {
+    switch (provider) {
+      case 'google':
+        window.location.href = 'http://localhost:8089/qlms/auth/google';
+        break;
+      case 'github':
+        window.location.href = 'http://localhost:8089/qlms/auth/github';
+        break;
+      case 'email':
+        setShowEmailForm(true);
+        break;
+      default:
+        toast.error('This login method is not available yet');
+    }
+  };
+
   const socialProviders = [
     { id: 'email', name: 'Email', icon: <FaEnvelope className="w-5 h-5" />, primary: true },
     { id: 'github', name: 'GitHub', icon: <FaGithub className="w-5 h-5" /> },
     { id: 'google', name: 'Google', icon: <FaGoogle className="w-5 h-5" /> },
-    { id: 'facebook', name: 'Facebook', icon: <FaFacebook className="w-5 h-5" /> },
-    { id: 'twitter', name: 'Twitter', icon: <FaTwitter className="w-5 h-5" /> },
-    { id: 'linkedin', name: 'LinkedIn', icon: <FaLinkedin className="w-5 h-5" /> }
+    { id: 'linkedin', name: 'LinkedIn', icon: <FaLinkedin className="w-5 h-5" /> },
   ];
 
   const containerVariants = {
@@ -139,14 +153,7 @@ export const AuthDialog = ({ open, onClose, title, isSignUp }) => {
                           : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'}
                         transition-all duration-300 shadow-sm hover:shadow-md
                       `}
-                      onClick={() => {
-                        if (provider.id === 'email') {
-                          setShowEmailForm(true);
-                        } else {
-                          onClose();
-                          setShowEmailForm(false);
-                        }
-                      }}
+                      onClick={() => handleSocialAuth(provider.id)}
                     >
                       {provider.icon}
                       <span>{title} with {provider.name}</span>

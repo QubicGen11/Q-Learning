@@ -17,6 +17,7 @@ const SkillsSection = () => {
     "Web Development": {
       subCategories: [
         { name: "Web Development", learners: "13.3M+ learners" },
+        { name: "Web Development", learners: "13.3M+ learners" },
         { name: "JavaScript", learners: "17.7M+ learners" },
         { name: "React JS", learners: "7M+ learners" },
         { name: "Angular", learners: "4M+ learners" },
@@ -175,26 +176,42 @@ const SkillsSection = () => {
     return () => window.removeEventListener('resize', checkOverflow);
   }, [activeCategory, categoryData]);
 
-  // Custom arrow components
+  // Update the arrow components with fixed positioning
   const NextArrow = ({ onClick, show }) => (
     show ? (
-      <button
+      <div
         onClick={onClick}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors -right-6"
+        className="!absolute cursor-pointer"
+        style={{
+          top: '50%',
+          transform: 'translateY(-50%)',
+          right: '-8px',
+          zIndex: 10,
+        }}
       >
-        <FaChevronRight className="w-5 h-5 text-gray-700" />
-      </button>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors">
+          <FaChevronRight className="w-4 h-4 text-gray-700" />
+        </div>
+      </div>
     ) : null
   );
 
   const PrevArrow = ({ onClick, show }) => (
     show ? (
-      <button
+      <div
         onClick={onClick}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors -left-6"
+        className="!absolute cursor-pointer"
+        style={{
+          top: '50%',
+          transform: 'translateY(-50%)',
+          left: '-8px',
+          zIndex: 10,
+        }}
       >
-        <FaChevronLeft className="w-5 h-5 text-gray-700" />
-      </button>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors">
+          <FaChevronLeft className="w-4 h-4 text-gray-700" />
+        </div>
+      </div>
     ) : null
   );
 
@@ -271,7 +288,7 @@ const SkillsSection = () => {
   };
 
   return (
-    <div className="max-w-[1340px] mx-auto px-6 py-12">
+    <div className="max-w-[1340px] mx-auto px-12 py-12">
       <h1 className="text-2xl font-bold mb-2">
         All the skills you need in one place
       </h1>
@@ -409,12 +426,42 @@ const SkillsSection = () => {
         .course-slider .slick-list,
         .subcategories-slider .slick-list {
           margin: 0 -8px;
+          overflow: hidden !important;
+        }
+
+        /* Navigation button styles */
+        .slick-arrow {
+          position: absolute !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          z-index: 10 !important;
+          width: 40px !important;
+          height: 40px !important;
+        }
+
+        .slick-prev {
+          left: -8px !important;
+        }
+
+        .slick-next {
+          right: -8px !important;
         }
 
         /* Hide disabled arrows */
         .course-slider .slick-disabled,
         .subcategories-slider .slick-disabled {
           display: none !important;
+        }
+
+        /* Container styles */
+        .slick-slider {
+          position: relative !important;
+          padding: 0 8px !important;
+        }
+
+        .slick-list {
+          position: relative !important;
+          z-index: 1;
         }
 
         @media (max-width: 640px) {

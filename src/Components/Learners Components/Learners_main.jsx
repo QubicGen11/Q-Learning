@@ -76,21 +76,37 @@ const Learners_main = () => {
 
   // Custom arrow components
   const NextArrow = ({ onClick }) => (
-    <button
+    <div
       onClick={onClick}
-      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors -right-6"
+      className="!absolute cursor-pointer"
+      style={{
+        top: '50%',
+        transform: 'translateY(-50%)',
+        right: '-8px',
+        zIndex: 10,
+      }}
     >
-      <FaChevronRight className="w-5 h-5 text-gray-700" />
-    </button>
+      <div className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors">
+        <FaChevronRight className="w-4 h-4 text-gray-700" />
+      </div>
+    </div>
   );
 
   const PrevArrow = ({ onClick }) => (
-    <button
+    <div
       onClick={onClick}
-      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors -left-6"
+      className="!absolute cursor-pointer"
+      style={{
+        top: '50%',
+        transform: 'translateY(-50%)',
+        left: '-8px',
+        zIndex: 10,
+      }}
     >
-      <FaChevronLeft className="w-5 h-5 text-gray-700" />
-    </button>
+      <div className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-100 transition-colors">
+        <FaChevronLeft className="w-4 h-4 text-gray-700" />
+      </div>
+    </div>
   );
 
   // Slider settings
@@ -142,13 +158,13 @@ const Learners_main = () => {
   };
 
   return (
-    <div className="max-w-[1340px] mx-auto px-6 py-12">
+    <div className="max-w-[1340px] mx-auto px-12 py-12">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Learners are viewing</h2>
       </div>
 
-      <div className="relative px-2">
-        <Slider {...settings} className="course-slider -mx-2">
+      <div className="relative">
+        <Slider {...settings} className="course-slider">
           {courses.map((course) => (
             <div key={course.id} className="px-2">
               <div className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
@@ -221,17 +237,53 @@ const Learners_main = () => {
 
         .course-slider .slick-list {
           margin: 0 -8px;
+          overflow: hidden !important;
         }
 
-        .course-slider .slick-disabled {
-          opacity: 0;
-          cursor: default;
-          pointer-events: none;
+        /* Slider container */
+        .slick-slider {
+          position: relative !important;
+          padding: 0 8px !important;
+        }
+
+        /* Navigation button styles */
+        .slick-arrow {
+          position: absolute !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          z-index: 10 !important;
+          width: 40px !important;
+          height: 40px !important;
+          transition: none !important;
+        }
+
+        .slick-arrow:hover {
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+        }
+
+        .slick-arrow:before {
+          display: none !important;
+        }
+
+        .slick-prev {
+          left: -8px !important;
+        }
+
+        .slick-next {
+          right: -8px !important;
+        }
+
+        /* Hide disabled arrows */
+        .slick-disabled {
+          opacity: 0 !important;
+          cursor: default !important;
+          pointer-events: none !important;
         }
 
         @media (max-width: 640px) {
-          .course-slider .slick-prev,
-          .course-slider .slick-next {
+          .slick-prev,
+          .slick-next {
             display: none !important;
           }
         }

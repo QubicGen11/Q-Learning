@@ -201,6 +201,9 @@ const Carousel_main = () => {
           background: rgba(255, 255, 255, 0.3) !important;
           border-radius: 50% !important;
           backdrop-filter: blur(4px);
+          position: absolute;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
         }
 
         .slick-prev {
@@ -209,6 +212,21 @@ const Carousel_main = () => {
 
         .slick-next {
           right: 20px !important;
+        }
+
+        .slick-prev:before,
+        .slick-next:before {
+          color: white !important;
+          font-size: 24px !important;
+          opacity: 1 !important;
+          line-height: 1 !important;
+        }
+
+        /* Fix button positioning on hover */
+        .slick-prev:hover,
+        .slick-next:hover {
+          background: rgba(255, 255, 255, 0.4) !important;
+          top: 50% !important;
         }
 
         @media (max-width: 768px) {
@@ -225,6 +243,11 @@ const Carousel_main = () => {
           .slick-next {
             right: 10px !important;
           }
+
+          .slick-prev:before,
+          .slick-next:before {
+            font-size: 20px !important;
+          }
         }
 
         @media (max-width: 480px) {
@@ -240,20 +263,6 @@ const Carousel_main = () => {
 
           .slick-next {
             right: 5px !important;
-          }
-        }
-
-        .slick-prev:before,
-        .slick-next:before {
-          color: white !important;
-          font-size: 24px !important;
-          opacity: 1 !important;
-        }
-
-        @media (max-width: 768px) {
-          .slick-prev:before,
-          .slick-next:before {
-            font-size: 20px !important;
           }
         }
       `}</style>
