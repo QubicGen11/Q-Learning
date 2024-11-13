@@ -356,6 +356,9 @@ const CourseManager = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState(null);
 
+  // Add this state for editor content
+  const [editorContent, setEditorContent] = useState('');
+
   // Fetch courses on mount
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
@@ -488,6 +491,80 @@ const CourseManager = () => {
 
     setPreviewData(preview);
     setShowPreview(true);
+  };
+
+  // Update the handleLessonContentUpdate function
+  const handleLessonContentUpdate = (lessonIndex, content) => {
+    try {
+      const newCurriculum = [...formData.curriculum];
+      const images = Array.from(document.querySelectorAll('.ql-editor img'));
+      
+      newCurriculum[lessonIndex] = {
+        ...newCurriculum[lessonIndex],
+        content: content,
+        layout: {
+          version: 1,
+          images: images.map(img => ({
+            src: img.src,
+            width: img.width,
+            height: img.height,
+            style: img.getAttribute('style') || '',
+            class: img.getAttribute('class') || '',
+          }))
+        }
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        curriculum: newCurriculum
+      }));
+
+      // Update editor content
+      setEditorContent(content);
+      
+      // Save to localStorage
+      const updatedCourses = [...courses];
+      if (currentCourse) {
+        const courseIndex = courses.findIndex(course => course.id === currentCourse.id);
+        if (courseIndex !== -1) {
+          updatedCourses[courseIndex] = {
+            ...formData,
+            curriculum: newCurriculum
+          };
+          localStorage.setItem('courses', JSON.stringify(updatedCourses));
+          setCourses(updatedCourses);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating lesson content:', error);
+    }
+  };
+
+  // Add useEffect to handle lesson changes
+  useEffect(() => {
+    if (activeLesson !== null && formData.curriculum[activeLesson]) {
+      setEditorContent(formData.curriculum[activeLesson].content || '');
+    }
+  }, [activeLesson, formData.curriculum]);
+
+  // Add a function to restore layout when switching lessons
+  const restoreLayout = (content, layout) => {
+    if (!layout || !layout.images) return content;
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    const images = tempDiv.querySelectorAll('img');
+    layout.images.forEach((savedImg, index) => {
+      if (images[index]) {
+        images[index].width = savedImg.width;
+        images[index].height = savedImg.height;
+        if (savedImg.style) images[index].setAttribute('style', savedImg.style);
+        if (savedImg.class) images[index].setAttribute('class', savedImg.class);
+      }
+    });
+    
+    return tempDiv.innerHTML;
   };
 
   return (
@@ -1149,15 +1226,29 @@ const CourseManager = () => {
                   <div className="lesson-editor">
                     <ReactQuill
                       theme="snow"
-                      value={formData.curriculum[activeLesson].content}
+                      value={editorContent}
                       onChange={(content) => {
-                        const newCurriculum = [...formData.curriculum];
-                        newCurriculum[activeLesson].content = content;
-                        setFormData({...formData, curriculum: newCurriculum});
+                        setEditorContent(content);
+                        handleLessonContentUpdate(activeLesson, content);
                       }}
                       modules={quillModules}
-                      formats={quillFormats}
-                      className="lesson-quill-editor"
+                      formats={[
+                        'header',
+                        'bold', 'italic', 'underline', 'strike',
+                        'blockquote', 'code-block',
+                        'list', 'bullet',
+                        'script',
+                        'indent',
+                        'direction',
+                        'size',
+                        'color', 'background',
+                        'font',
+                        'align',
+                        'link', 'image', 'video',
+                        'clean',
+                        'width', 'height', 'style'
+                      ]}
+                      className="lesson-quill-editor h-[500px]"
                       preserveWhitespace={true}
                     />
                   </div>
