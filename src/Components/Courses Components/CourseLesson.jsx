@@ -11,6 +11,19 @@ const CourseLesson = () => {
   const [course, setCourse] = useState(null);
   const [currentLesson, setCurrentLesson] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [courseImage, setCourseImage] = useState(null);
+
+  const currentIndex = course?.curriculum?.findIndex(
+    lesson => lesson.id === parseInt(lessonId)
+  );
+
+  const nextLessonId = currentIndex < (course?.curriculum?.length - 1) 
+    ? course?.curriculum[currentIndex + 1]?.id 
+    : null;
+
+  const previousLessonId = currentIndex > 0 
+    ? course?.curriculum[currentIndex - 1]?.id 
+    : null;
 
   useEffect(() => {
     const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
@@ -19,6 +32,7 @@ const CourseLesson = () => {
       setCourse(foundCourse);
       const lesson = foundCourse.curriculum?.find(l => l.id === parseInt(lessonId));
       setCurrentLesson(lesson);
+      setCourseImage(foundCourse.courseImage);
     }
   }, [id, lessonId]);
 
@@ -67,57 +81,77 @@ const CourseLesson = () => {
   const renderContent = (content) => {
     const sanitizedContent = DOMPurify.sanitize(content, {
       ADD_TAGS: ['iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'img', 'span', 'video', 'source'],
-      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow', 'width', 'height', 'data-size', 'data-align', 'data-width']
+      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow', 'width', 'height']
     });
 
     return (
       <div className="lesson-content">
         <style>
           {`
-            .ql-editor {
-              padding: 0;
+            .lesson-content {
+              font-size: 16px;
+              line-height: 1.6;
             }
-            
-            .ql-editor p {
-              display: flex;
-              align-items: flex-start;
-              gap: 2rem;
+
+            .lesson-content p {
+              margin-bottom: 1.5rem;
+            }
+
+            .lesson-content h1, 
+            .lesson-content h2, 
+            .lesson-content h3 {
+              margin-top: 2rem;
               margin-bottom: 1rem;
+              font-weight: 600;
             }
 
-            .ql-editor p img {
-              order: 2;
-              max-width: 40%;
+            .lesson-content img {
+              max-width: 100%;
               height: auto;
-              margin-left: auto;
+              margin: 2rem auto;
+              display: block;
             }
 
-            .ql-editor p span {
-              flex: 1;
+            .lesson-content ul, 
+            .lesson-content ol {
+              margin-left: 1.5rem;
+              margin-bottom: 1.5rem;
             }
 
-            /* Maintain ReactQuill's alignment classes */
-            .ql-align-center {
-              text-align: center;
-            }
-            
-            .ql-align-right {
-              text-align: right;
-            }
-            
-            .ql-align-left {
-              text-align: left;
+            .lesson-content li {
+              margin-bottom: 0.5rem;
             }
 
-            @media (max-width: 768px) {
-              .ql-editor p {
-                flex-direction: column;
-              }
-              
-              .ql-editor p img {
-                max-width: 100%;
-                margin-left: 0;
-              }
+            .lesson-content table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 1.5rem;
+            }
+
+            .lesson-content td, 
+            .lesson-content th {
+              border: 1px solid #e2e8f0;
+              padding: 0.75rem;
+            }
+
+            .lesson-content code {
+              background-color: #f1f5f9;
+              padding: 0.2em 0.4em;
+              border-radius: 0.25rem;
+              font-size: 0.875em;
+            }
+
+            /* Preserve whitespace in certain elements */
+            .lesson-content pre,
+            .lesson-content code {
+              white-space: pre-wrap;
+            }
+
+            /* Fix spacing between inline elements */
+            .lesson-content span {
+              display: inline;
+              margin: 0;
+              padding: 0;
             }
           `}
         </style>
@@ -129,127 +163,151 @@ const CourseLesson = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top Navigation Bar */}
-      <Navbar_main />
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 
-                    transition-colors duration-300">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to={`/courses/${id}`} 
-                    className="text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-200 
-                             transition-colors duration-300">
-                <FiArrowLeft className="w-5 h-5" />
-              </Link>
-              <div>
-                <h1 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">
-                  {course.title}
-                </h1>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-white">
-                  <FiClock className="w-4 h-4" />
-                  <span>{currentLesson.duration}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-500 dark:text-white">
-                {progress}% Complete
-              </div>
-              <button 
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm 
-                         transition-colors duration-300 relative group"
-                onClick={() => {/* Handle completion */}}
-              >
-                {/* Priority Glow Effect */}
-                <div className="absolute inset-0 rounded-lg bg-orange-500/50 blur-md 
-                             opacity-0 group-hover:opacity-75 transition-opacity duration-300 -z-10"></div>
-                Mark as Complete
-              </button>
-            </div>
-          </div>
+      <div className="bg-black text-white h-14 flex items-center justify-between px-4 fixed w-full top-0 z-50">
+        <div className="flex items-center space-x-4">
+          <Link to={`/courses/${id}`} className="flex items-center">
+            <span className="mr-2">←</span>
+            Back to courses
+          </Link>
+          <span className="font-bold">{course?.title}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span>Course structure</span>
+          {nextLessonId && (
+            <Link 
+              to={`/courses/${id}/lesson/${nextLessonId}`} 
+              className="text-blue-400 hover:text-blue-300"
+            >
+              Next →
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Content Area */}
-          <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                {currentLesson.title}
-              </h2>
-              
-              {/* Lesson Content */}
-              <div className="prose prose-lg dark:prose-invert max-w-none">
-                {renderContent(currentLesson.content)}
+      {/* Main Content Area with Fixed Sidebar */}
+      <div className="flex pt-14">
+        {/* Fixed Left Sidebar */}
+        <div className="w-72 bg-gray-100 dark:bg-gray-800 fixed h-[calc(100vh-56px)] overflow-y-auto">
+          {/* Course Banner */}
+          <div className="relative h-48">
+            {courseImage && (
+              <>
+                {/* Main background image with overlay */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-black/60 z-10" />
+                  <img 
+                    src={courseImage} 
+                    alt={course?.title}
+                    className="w-full h-full object-cover"
+                    style={{
+                      opacity: `${course?.bannerSettings?.opacity || 70}%`,
+                      objectPosition: `center ${course?.bannerSettings?.yPosition || 50}%`
+                    }}
+                  />
+                </div>
+
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent z-20" />
+              </>
+            )}
+
+            {/* Course Title and Progress */}
+            <div className="relative z-30 p-6">
+              <h1 className="text-xl font-bold text-white mb-2">{course?.title}</h1>
+              <div className="text-sm text-gray-300 mb-4">
+                {progress}% COMPLETE
               </div>
-              
-              {/* Navigation Buttons */}
-              <div className="mt-8 flex justify-between">
-                <button 
-                  className={`px-4 py-2 border border-gray-200 dark:border-gray-700 rounded
-                            text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700
-                            transition-colors duration-300
-                            ${isFirstLesson ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={handlePreviousLesson}
-                  disabled={isFirstLesson}
-                >
-                  Previous Lesson
-                </button>
-                <button 
-                  className={`px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded
-                            transition-colors duration-300 relative group
-                            ${isLastLesson ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={handleNextLesson}
-                  disabled={isLastLesson}
-                >
-                  {/* Priority Glow Effect */}
-                  <div className="absolute inset-0 rounded bg-orange-500/50 blur-md 
-                               opacity-0 group-hover:opacity-75 transition-opacity duration-300 -z-10"></div>
-                  Next Lesson
-                </button>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 h-1 rounded-full">
+                <div 
+                  className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             </div>
           </div>
 
-          {/* Right Sidebar - Course Navigation */}
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-              <h3 className="font-medium mb-4 text-gray-900 dark:text-white">Course Content</h3>
-              <div className="space-y-2">
-                {course.curriculum?.map((lesson, index) => (
-                  <Link
-                    key={lesson.id}
-                    to={`/courses/${id}/lesson/${lesson.id}`}
-                    className={`block p-3 rounded-lg transition-all duration-300 group
-                              ${lesson.id === parseInt(lessonId)
-                                ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-500'
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-white'
-                              }`}
+          {/* Course Navigation - Adjusted padding */}
+          <div className="px-4 py-4">
+            {course?.curriculum?.map((lesson, index) => (
+              <Link
+                key={lesson.id}
+                to={`/courses/${id}/lesson/${lesson.id}`}
+                className={`block p-3 rounded-lg mb-2 transition-all duration-300
+                          ${lesson.id === parseInt(lessonId)
+                            ? 'bg-white dark:bg-gray-700 shadow-sm'
+                            : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                          }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center
+                                ${lesson.isCompleted 
+                                  ? 'bg-green-100 dark:bg-green-500/20' 
+                                  : 'bg-gray-200 dark:bg-gray-600'}`}>
+                    {lesson.isCompleted ? (
+                      <FiCheck className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</span>
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">{lesson.title}</div>
+                    {/* <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                      <FiClock className="w-3 h-3" />
+                      <span>{lesson.duration}</span>
+                    </div> */}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content - Adjusted margin and max-width */}
+        <div className="ml-72 flex-1">
+          {/* Header Section with Gradient */}
+          <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-8 border-b dark:border-gray-700">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {currentLesson?.title}
+              </h1>
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <FiClock className="w-4 h-4" />
+                <span>Duration: {currentLesson?.duration}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="p-8">
+            <div className="max-w-4xl mx-auto">
+              {/* Lesson Content */}
+              <div className="prose prose-lg dark:prose-invert max-w-none">
+                {renderContent(currentLesson?.content)}
+              </div>
+              
+              {/* Navigation Buttons - Updated Style */}
+              <div className="mt-12 flex items-center justify-between border-t dark:border-gray-700 pt-6">
+                {!isFirstLesson && (
+                  <Link 
+                    to={`/courses/${id}/lesson/${previousLessonId}`}
+                    className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center
-                                    ${lesson.isCompleted 
-                                      ? 'bg-green-100 dark:bg-green-500/20' 
-                                      : 'bg-gray-100 dark:bg-gray-700'}`}>
-                        {lesson.isCompleted ? (
-                          <FiCheck className="w-4 h-4 text-green-500" />
-                        ) : (
-                          <span className="text-sm text-gray-500 dark:text-white">{index + 1}</span>
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium">{lesson.title}</div>
-                        <div className="text-xs text-gray-500 dark:text-white flex items-center gap-1">
-                          <FiClock className="w-3 h-3" />
-                          <span>{lesson.duration}</span>
-                        </div>
-                      </div>
-                    </div>
+                    <span>←</span>
+                    <span>Previous</span>
                   </Link>
-                ))}
+                )}
+                
+                {!isLastLesson && (
+                  <Link 
+                    to={`/courses/${id}/lesson/${nextLessonId}`}
+                    className="flex items-center gap-2 text-blue-500 hover:text-blue-600 ml-auto transition-colors"
+                  >
+                    <span>Next</span>
+                    <span>→</span>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
