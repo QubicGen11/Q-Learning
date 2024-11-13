@@ -67,97 +67,57 @@ const CourseLesson = () => {
   const renderContent = (content) => {
     const sanitizedContent = DOMPurify.sanitize(content, {
       ADD_TAGS: ['iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'img', 'span', 'video', 'source'],
-      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow', 'width', 'height', 'data-size']
+      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow', 'width', 'height', 'data-size', 'data-align', 'data-width']
     });
 
     return (
       <div className="lesson-content">
         <style>
           {`
-            .lesson-content h1 { font-size: 2em; font-weight: bold; margin-bottom: 1em; }
-            .lesson-content h2 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.8em; }
-            .lesson-content h3 { font-size: 1.17em; font-weight: bold; margin-bottom: 0.6em; }
-            .lesson-content p { margin-bottom: 1em; }
-            .lesson-content strong, .lesson-content b { font-weight: bold; }
-            .lesson-content em, .lesson-content i { font-style: italic; }
-            .lesson-content ul, .lesson-content ol { 
-              margin-left: 2em; 
-              margin-bottom: 1em; 
-              list-style-type: disc; 
-            }
-            .lesson-content ol { list-style-type: decimal; }
-            .lesson-content li { margin-bottom: 0.5em; }
-            .lesson-content blockquote {
-              border-left: 4px solid #e2e8f0;
-              padding-left: 1em;
-              margin: 1em 0;
-              font-style: italic;
-            }
-            .lesson-content iframe, .lesson-content video {
-              max-width: 100%;
-              margin: 1em 0;
-              border-radius: 0.5em;
-            }
-            .lesson-content img {
-              max-width: 100%;
-              height: auto;
-              margin: 1em 0;
-              border-radius: 0.5em;
-            }
-            .ql-align-center { text-align: center; }
-            .ql-align-right { text-align: right; }
-            .ql-align-justify { text-align: justify; }
-            .ql-size-small { font-size: 0.75em; }
-            .ql-size-large { font-size: 1.5em; }
-            .ql-size-huge { font-size: 2em; }
-            .ql-video {
-              width: 100%;
-              height: 0;
-              padding-bottom: 56.25%;
-              position: relative;
-            }
-            .ql-video iframe {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-            }
-            [data-size] {
-              width: attr(data-size px);
-              height: auto;
-            }
-            .ql-code-block {
-              background-color: #f8f9fa;
-              padding: 1em;
-              border-radius: 0.5em;
-              font-family: monospace;
-              white-space: pre-wrap;
-              margin: 1em 0;
-            }
-            .lesson-content img.image-float-left {
-              float: left;
-              margin-right: 1em;
-              margin-bottom: 1em;
+            .ql-editor {
+              padding: 0;
             }
             
-            .lesson-content img.image-float-right {
-              float: right;
-              margin-left: 1em;
-              margin-bottom: 1em;
+            .ql-editor p {
+              display: flex;
+              align-items: flex-start;
+              gap: 2rem;
+              margin-bottom: 1rem;
             }
-            
-            .lesson-content img.image-align-center {
-              display: block;
+
+            .ql-editor p img {
+              order: 2;
+              max-width: 40%;
+              height: auto;
               margin-left: auto;
-              margin-right: auto;
-              margin-bottom: 1em;
+            }
+
+            .ql-editor p span {
+              flex: 1;
+            }
+
+            /* Maintain ReactQuill's alignment classes */
+            .ql-align-center {
+              text-align: center;
             }
             
-            .lesson-content::after {
-              content: '';
-              display: table;
-              clear: both;
+            .ql-align-right {
+              text-align: right;
+            }
+            
+            .ql-align-left {
+              text-align: left;
+            }
+
+            @media (max-width: 768px) {
+              .ql-editor p {
+                flex-direction: column;
+              }
+              
+              .ql-editor p img {
+                max-width: 100%;
+                margin-left: 0;
+              }
             }
           `}
         </style>

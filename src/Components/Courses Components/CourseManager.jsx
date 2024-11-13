@@ -4,7 +4,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import ImageResize from 'quill-image-resize-module-react';
 import Quill from 'quill';
-import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus, FiEye } from 'react-icons/fi';
+import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus, FiEye, FiSave } from 'react-icons/fi';
 import CourseContent from './CourseContent';
 
 // Register modules
@@ -565,6 +565,42 @@ const CourseManager = () => {
     });
     
     return tempDiv.innerHTML;
+  };
+
+  // Add this function to handle the lesson update
+  const handleUpdateLesson = async (lessonIndex) => {
+    try {
+      // Show loading state
+      setIsLoading(true);
+      
+      // Get the current lesson data
+      const lessonToUpdate = formData.curriculum[lessonIndex];
+      
+      // Show the lesson content in the editor
+      setEditorContent(lessonToUpdate.content || '');
+      
+      // Show the lesson title and duration in the input fields
+      setFormData(prev => ({
+        ...prev,
+        curriculum: prev.curriculum.map((lesson, index) => {
+          if (index === lessonIndex) {
+            return {
+              ...lesson,
+              title: lessonToUpdate.title || '',
+              duration: lessonToUpdate.duration || ''
+            };
+          }
+          return lesson;
+        })
+      }));
+      
+      // Hide the loading state
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error updating lesson:', error);
+      // Hide the loading state
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -1193,33 +1229,40 @@ const CourseManager = () => {
               <div className="space-y-6">
                 <div className="p-6 border rounded-lg">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Lesson Title</label>
-                      <input
-                        type="text"
-                        value={formData.curriculum[activeLesson].title}
-                        onChange={(e) => {
-                          const newCurriculum = [...formData.curriculum];
-                          newCurriculum[activeLesson].title = e.target.value;
-                          setFormData({...formData, curriculum: newCurriculum});
-                        }}
-                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                        placeholder="Enter lesson title"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Duration</label>
-                      <input
-                        type="text"
-                        value={formData.curriculum[activeLesson].duration}
-                        onChange={(e) => {
-                          const newCurriculum = [...formData.curriculum];
-                          newCurriculum[activeLesson].duration = e.target.value;
-                          setFormData({...formData, curriculum: newCurriculum});
-                        }}
-                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                        placeholder="e.g., 45m"
-                      />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-full">
+                        <div className="flex items-center gap-4 mb-2">
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium mb-1">Lesson Title</label>
+                            <input
+                              type="text"
+                              value={formData.curriculum[activeLesson]?.title || ''}
+                              onChange={(e) => handleLessonTitleChange(activeLesson, e.target.value)}
+                              className="w-full border rounded px-3 py-2"
+                              placeholder="Enter lesson title"
+                            />
+                          </div>
+                          <div className="w-32">
+                            <label className="block text-sm font-medium mb-1">Duration</label>
+                            <input
+                              type="text"
+                              value={formData.curriculum[activeLesson]?.duration || ''}
+                              onChange={(e) => handleLessonDurationChange(activeLesson, e.target.value)}
+                              className="w-full border rounded px-3 py-2"
+                              placeholder="20min"
+                            />
+                          </div>
+                          <div className="flex items-end">
+                            <button
+                              onClick={() => handleUpdateLesson(activeLesson)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            >
+                              <FiSave className="w-4 h-4" />
+                              Update
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
