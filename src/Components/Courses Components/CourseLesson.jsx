@@ -26,6 +26,9 @@ const CourseLesson = () => {
     ? course?.curriculum[currentIndex - 1]?.id 
     : null;
 
+  const isFirstLesson = currentIndex === 0;
+  const isLastLesson = currentIndex === (course?.curriculum?.length - 1);
+
   useEffect(() => {
     const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
     const foundCourse = storedCourses.find(c => c.id === parseInt(id));
@@ -37,45 +40,17 @@ const CourseLesson = () => {
     }
   }, [id, lessonId]);
 
-  const handlePreviousLesson = () => {
-    if (course && currentLesson) {
-      const currentIndex = course.curriculum.findIndex(
-        lesson => lesson.id === parseInt(lessonId)
-      );
-      
-      if (currentIndex > 0) {
-        const previousLesson = course.curriculum[currentIndex - 1];
-        window.location.href = `/courses/${id}/lesson/${previousLesson.id}`;
-      }
-    }
-  };
-
-  const handleNextLesson = () => {
-    if (course && currentLesson) {
-      const currentIndex = course.curriculum.findIndex(
-        lesson => lesson.id === parseInt(lessonId)
-      );
-      
-      if (currentIndex < course.curriculum.length - 1) {
-        const nextLesson = course.curriculum[currentIndex + 1];
-        window.location.href = `/courses/${id}/lesson/${nextLesson.id}`;
-      }
-    }
-  };
-
-  const isFirstLesson = course?.curriculum?.findIndex(
-    lesson => lesson.id === parseInt(lessonId)
-  ) === 0;
-
-  const isLastLesson = course?.curriculum?.findIndex(
-    lesson => lesson.id === parseInt(lessonId)
-  ) === course?.curriculum?.length - 1;
-
   const handleSectionClick = (section) => {
     setCurrentSection(section);
+    if (section !== 'about') {
+      const lesson = course.curriculum.find(l => l.id === parseInt(section));
+      setCurrentLesson(lesson);
+    } else {
+      setCurrentLesson(null);
+    }
   };
 
-  if (!course || !currentLesson) {
+  if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-pulse text-gray-600 dark:text-gray-300">Loading...</div>
@@ -236,66 +211,67 @@ const CourseLesson = () => {
           {/* Course Navigation */}
           <div className="px-4 py-4">
             {/* Introduction Section */}
-            <div className="mb-4">
+            <div className="mb-6">
               <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
                 <span>INTRODUCTION</span>
               </div>
               
-              {/* About this course button */}
+              {/* About this course button - Updated styling */}
               <button 
                 onClick={() => handleSectionClick('about')}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors
                   ${currentSection === 'about' 
-                    ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                    : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
               >
                 <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">1</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">1</span>
                 </div>
-                <span className="text-sm font-medium">About this course</span>
+                <span className="text-sm font-medium text-left">About this course</span>
               </button>
             </div>
 
             {/* Course Content Section */}
-            <div className="mb-4">
+            <div className="mb-6">
               <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
                 <span>COURSE CONTENT</span>
               </div>
               
-              {/* Existing course curriculum mapping */}
+              {/* Lesson buttons - Updated styling */}
               {course?.curriculum?.map((lesson, index) => (
-                <Link
+                <button
                   key={lesson.id}
-                  to={`/courses/${id}/lesson/${lesson.id}`}
-                  className={`block p-3 rounded-lg mb-2 transition-all duration-300
+                  onClick={() => handleSectionClick(lesson.id.toString())}
+                  className={`flex items-start p-3 rounded-lg mb-2 transition-all duration-300 w-full
                     ${lesson.id === parseInt(lessonId)
-                      ? 'bg-white dark:bg-gray-700 shadow-sm'
-                      : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center
+                  <div className="flex items-start gap-3 w-full">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0
                       ${lesson.isCompleted 
-                        ? 'bg-green-100 dark:bg-green-500/20' 
-                        : 'bg-gray-200 dark:bg-gray-600'}`}
+                        ? 'bg-green-100' 
+                        : 'bg-gray-200'}`}
                     >
                       {lesson.isCompleted ? (
                         <FiCheck className="w-4 h-4 text-green-500" />
                       ) : (
-                        <span className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</span>
+                        <span className="text-sm text-gray-600">{index + 1}</span>
                       )}
                     </div>
-                    <div>
-                      <div className="text-sm font-medium">{lesson.title}</div>
+                    <div className="flex flex-col items-start text-left">
+                      <div className="text-sm font-medium break-words w-full">{lesson.title}</div>
                       {lesson.duration && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                          <FiClock className="w-3 h-3" />
-                          <span>{lesson.duration}</span>
+                        <div className="text-xs text-gray-500 flex items-center gap-1">
+                          {/* <FiClock className="w-3 h-3" /> */}
+                          {/* <span>{lesson.duration}</span> */}
                         </div>
                       )}
                     </div>
                   </div>
-                </Link>
+                </button>
               ))}
+
             </div>
           </div>
         </div>
@@ -306,12 +282,14 @@ const CourseLesson = () => {
           <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-8 border-b dark:border-gray-700">
             <div className="max-w-4xl mx-auto">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {currentLesson?.title}
+                {currentSection === 'about' ? 'About This Course' : currentLesson?.title}
               </h1>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <FiClock className="w-4 h-4" />
-                <span>Duration: {currentLesson?.duration}</span>
-              </div>
+              {currentSection !== 'about' && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <FiClock className="w-4 h-4" />
+                  <span>Duration: {currentLesson?.duration}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -319,14 +297,14 @@ const CourseLesson = () => {
           <div className="p-8">
             <div className="max-w-4xl mx-auto">
               {/* About This Course Section */}
-              {currentLesson?.id === course?.curriculum[0]?.id && (
+              {currentSection === 'about' && (
                 <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
                   <h2 className="text-2xl font-bold mb-4">About This Course</h2>
                   
                   {/* Welcome Message */}
                   {course.aboutCourse?.welcome && (
                     <div className="prose dark:prose-invert mb-6">
-                      <p>{course.aboutCourse.welcome}</p>
+                      {parse(DOMPurify.sanitize(course.aboutCourse.welcome))}
                     </div>
                   )}
                   
@@ -334,11 +312,14 @@ const CourseLesson = () => {
                   {course.aboutCourse?.prerequisites?.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold mb-2">Prerequisites</h3>
-                      <ul className="list-disc list-inside space-y-1">
+                  
                         {course.aboutCourse.prerequisites.map((prereq, index) => (
-                          <li key={index}>{prereq}</li>
+                            <div className="prose dark:prose-invert mb-6" key={index}>
+                            
+                            {parse(DOMPurify.sanitize(prereq))}
+                          </div>
                         ))}
-                      </ul>
+               
                     </div>
                   )}
                   
@@ -354,24 +335,34 @@ const CourseLesson = () => {
                     </div>
                   )}
                   
-                  {/* Learning Outcomes */}
-                  {course.aboutCourse?.learningOutcomes?.length > 0 && (
+                  {/* What You'll Learn */}
+                  {course.aboutCourse?.whatYoullLearn && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold mb-2">What You'll Learn</h3>
-                      <ul className="list-disc list-inside space-y-1">
-                        {course.aboutCourse.learningOutcomes.map((outcome, index) => (
-                          <li key={index}>{outcome}</li>
-                        ))}
-                      </ul>
+                      <div className="prose dark:prose-invert">
+                        {parse(DOMPurify.sanitize(course.aboutCourse.whatYoullLearn))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* End Objectives */}
+                  {course.aboutCourse?.endObjectives && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2">At the End of This Course, You Should Be Able To:</h3>
+                      <div className="prose dark:prose-invert">
+                        {parse(DOMPurify.sanitize(course.aboutCourse.endObjectives))}
+                      </div>
                     </div>
                   )}
                 </div>
               )}
               
               {/* Lesson Content */}
-              <div className="prose prose-lg dark:prose-invert max-w-none">
-                {renderContent(currentLesson?.content)}
-              </div>
+              {currentSection !== 'about' && (
+                <div className="prose prose-lg dark:prose-invert max-w-none">
+                  {renderContent(currentLesson?.content)}
+                </div>
+              )}
               
               {/* Navigation Buttons - Updated Style */}
               <div className="mt-12 flex items-center justify-between border-t dark:border-gray-700 pt-6">

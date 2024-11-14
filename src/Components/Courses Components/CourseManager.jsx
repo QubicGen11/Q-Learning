@@ -356,8 +356,8 @@ const CourseManager = () => {
       welcome: '',
       prerequisites: [],
       requirements: [],
-      duration: '',
-      learningOutcomes: []
+      whatYoullLearn: '',
+      endObjectives: ''
     }
   });
   const [showPreview, setShowPreview] = useState(false);
@@ -610,6 +610,20 @@ const CourseManager = () => {
     }
   };
 
+  // Function to handle lesson title change
+  const handleLessonTitleChange = (lessonIndex, newTitle) => {
+    const updatedCurriculum = [...formData.curriculum];
+    updatedCurriculum[lessonIndex].title = newTitle;
+    setFormData({ ...formData, curriculum: updatedCurriculum });
+  };
+
+  // Function to handle lesson duration change
+  const handleLessonDurationChange = (lessonIndex, newDuration) => {
+    const updatedCurriculum = [...formData.curriculum];
+    updatedCurriculum[lessonIndex].duration = newDuration;
+    setFormData({ ...formData, curriculum: updatedCurriculum });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
@@ -641,6 +655,14 @@ const CourseManager = () => {
                   onClick={() => {
                     setActiveTab('basicInfo');
                     setActiveLesson(null); // Reset active lesson
+                  }}
+                />
+                <SidebarItem 
+                  label="About This Course" 
+                  isActive={activeTab === 'aboutCourse'}
+                  onClick={() => {
+                    setActiveTab('aboutCourse');
+                    setActiveLesson(null);
                   }}
                 />
               </div>
@@ -1209,104 +1231,6 @@ const CourseManager = () => {
                   )}
                 </div>
 
-                {/* About This Course Section */}
-                <div className="mt-8 border-t pt-8">
-                  <h3 className="text-xl font-bold mb-4">About This Course</h3>
-                  
-                  {/* Welcome Message */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">Welcome Message</label>
-                    <textarea
-                      value={formData.aboutCourse.welcome}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        aboutCourse: {
-                          ...formData.aboutCourse,
-                          welcome: e.target.value
-                        }
-                      })}
-                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                      rows={4}
-                      placeholder="Add a welcome message for your students"
-                    />
-                  </div>
-
-                  {/* Prerequisites */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">Prerequisites</label>
-                    <div className="space-y-2">
-                      {formData.aboutCourse.prerequisites.map((prereq, index) => (
-                        <div key={index} className="flex gap-2">
-                          <input
-                            type="text"
-                            value={prereq}
-                            onChange={(e) => {
-                              const newPrereqs = [...formData.aboutCourse.prerequisites];
-                              newPrereqs[index] = e.target.value;
-                              setFormData({
-                                ...formData,
-                                aboutCourse: {
-                                  ...formData.aboutCourse,
-                                  prerequisites: newPrereqs
-                                }
-                              });
-                            }}
-                            className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                            placeholder="Enter prerequisite"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newPrereqs = formData.aboutCourse.prerequisites.filter((_, i) => i !== index);
-                              setFormData({
-                                ...formData,
-                                aboutCourse: {
-                                  ...formData.aboutCourse,
-                                  prerequisites: newPrereqs
-                                }
-                              });
-                            }}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => setFormData({
-                          ...formData,
-                          aboutCourse: {
-                            ...formData.aboutCourse,
-                            prerequisites: [...formData.aboutCourse.prerequisites, '']
-                          }
-                        })}
-                        className="text-[#5624D0] hover:text-[#4B1F9E] flex items-center gap-2"
-                      >
-                        <FiPlus /> Add Prerequisite
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Course Requirements */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">Course Requirements</label>
-                    <div className="space-y-2">
-                      {/* Similar structure as prerequisites, but for requirements */}
-                      {/* Add your requirements input fields here */}
-                    </div>
-                  </div>
-
-                  {/* Learning Outcomes */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">What You'll Learn</label>
-                    <div className="space-y-2">
-                      {/* Similar structure as prerequisites, but for learning outcomes */}
-                      {/* Add your learning outcomes input fields here */}
-                    </div>
-                  </div>
-                </div>
-
                 {/* Add Preview and Submit buttons together */}
                 <div className="mt-6 space-y-4">
                   {/* Preview Button */}
@@ -1400,6 +1324,89 @@ const CourseManager = () => {
                       preserveWhitespace={true}
                     />
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* About This Course Tab */}
+            {activeTab === 'aboutCourse' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold mb-6">About This Course</h2>
+                
+                {/* What you'll learn from this course */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">What you'll learn from this course</label>
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.aboutCourse?.whatYoullLearn || ''}
+                    onChange={(content) => setFormData({
+                      ...formData,
+                      aboutCourse: {
+                        ...formData.aboutCourse,
+                        whatYoullLearn: content
+                      }
+                    })}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    className="mb-4"
+                  />
+                </div>
+
+                {/* At the end of this course, you should be able to: */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">At the end of this course, you should be able to:</label>
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.aboutCourse?.endObjectives || ''}
+                    onChange={(content) => setFormData({
+                      ...formData,
+                      aboutCourse: {
+                        ...formData.aboutCourse,
+                        endObjectives: content
+                      }
+                    })}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    className="mb-4"
+                  />
+                </div>
+
+                {/* Welcome Message */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Welcome Message</label>
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.aboutCourse?.welcome || ''}
+                    onChange={(content) => setFormData({
+                      ...formData,
+                      aboutCourse: {
+                        ...formData.aboutCourse,
+                        welcome: content
+                      }
+                    })}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    className="mb-4"
+                  />
+                </div>
+
+                {/* Course Prerequisites */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Course Prerequisites</label>
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.aboutCourse?.prerequisites.join('\n') || ''}
+                    onChange={(content) => setFormData({
+                      ...formData,
+                      aboutCourse: {
+                        ...formData.aboutCourse,
+                        prerequisites: content.split('\n')
+                      }
+                    })}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    className="mb-4"
+                  />
                 </div>
               </div>
             )}
