@@ -386,8 +386,7 @@ const CourseManager = () => {
         return;
       }
 
-      console.log('Submitting form...'); // Debug log
-
+      // Prepare the payload
       const payload = {
         welcome: formData.aboutCourse?.welcome || '',
         aboutCourse: formData.aboutCourse?.whatYoullLearn || '',
@@ -424,10 +423,14 @@ const CourseManager = () => {
         })) || []
       };
 
-      console.log('Payload:', payload); // Debug log
+      // Determine if we're creating or updating
+      const isUpdating = currentCourse?.id;
+      const url = isUpdating 
+        ? `http://localhost:8089/qlms/updateCourse/${currentCourse.id}`
+        : 'http://localhost:8089/qlms/createCourse/';
 
-      const response = await fetch('http://localhost:8089/qlms/createCourse/', {
-        method: 'POST',
+      const response = await fetch(url, {
+        method: isUpdating ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`
@@ -435,30 +438,29 @@ const CourseManager = () => {
         body: JSON.stringify(payload)
       });
 
-      console.log('Response status:', response.status); // Debug log
-
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create course');
+        throw new Error(errorData.message || `Failed to ${isUpdating ? 'update' : 'create'} course`);
       }
 
       const result = await response.json();
-      console.log('Success:', result); // Debug log
+      console.log('Success:', result);
 
       // Show success message
-      setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 3000);
+      toast.success(isUpdating ? 'Course updated successfully!' : 'Course created successfully!');
 
-      // Reset form
+      // Reset form and state
       setFormData(initialFormState);
       setActiveTab('basicInfo');
+      setCurrentCourse(null);
+      setIsEditMode(false);
       
       // Navigate to courses page
       navigate('/courses');
       
     } catch (error) {
       console.error('Error saving course:', error);
-      alert(error.message || 'Failed to save course. Please try again.');
+      toast.error(error.message || 'Failed to save course. Please try again.');
     }
   };
 
