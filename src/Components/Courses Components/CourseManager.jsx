@@ -6,6 +6,7 @@ import ImageResize from 'quill-image-resize-module-react';
 import Quill from 'quill';
 import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus, FiEye, FiSave } from 'react-icons/fi';
 import CourseContent from './CourseContent';
+import Cookies from 'js-cookie';
 
 // Register modules
 Quill.register('modules/imageResize', ImageResize);
@@ -233,8 +234,54 @@ styleSheet.type = 'text/css';
 styleSheet.innerText = customStyles;
 document.head.appendChild(styleSheet);
 
+// Initial form state - move this outside the component
+const initialFormState = {
+  id: Date.now(),
+  title: '',
+  description: '',
+  duration: '',
+  type: 'Frontend',
+  logo: '',
+  difficultyLevel: 'Intermediate',
+  completionTime: '',
+  language: 'English',
+  productCovered: 'Studio',
+  enrolledStudents: 0,
+  diplomaAvailable: true,
+  courseAudience: '',
+  productAlignment: '',
+  learningObjectives: [],
+  curriculum: [
+    {
+      id: 1,
+      title: 'Introduction to Version Control',
+      duration: '45m',
+      type: 'REQUIRED',
+      isCompleted: false,
+      content: ''
+    }
+  ],
+  category: '',
+  subcategory: '',
+  price: '',
+  originalPrice: '',
+  discount: '',
+  prerequisites: '',
+  techStack: [],
+  techStackData: [],
+  courseImage: null,
+  aboutCourse: {
+    welcome: '',
+    prerequisites: [],
+    requirements: [],
+    whatYoullLearn: '',
+    endObjectives: ''
+  }
+};
+
 const CourseManager = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState(initialFormState);
 
   // Course Categories Data
   const courseCategories = [
@@ -312,54 +359,6 @@ const CourseManager = () => {
   const [currentCourse, setCurrentCourse] = useState(null);
   const [showTechLogos, setShowTechLogos] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [formData, setFormData] = useState({
-    id: Date.now(),
-    title: '',
-    description: '',
-    duration: '',
-    type: 'Frontend',
-    logo: '',
-    difficultyLevel: 'Intermediate',
-    completionTime: '',
-    language: 'English',
-    productCovered: 'Studio',
-    enrolledStudents: 0,
-    diplomaAvailable: true,
-    courseAudience: '',
-    productAlignment: '',
-    learningObjectives: [],
-    curriculum: [
-      {
-        id: 1,
-        title: 'Introduction to Version Control',
-        duration: '45m',
-        type: 'REQUIRED',
-        isCompleted: false,
-        content: `
-          <div class="lesson-content">
-            <h3>What is Version Control?</h3>
-            <p>Version control is a system that records changes to a file or set of files over time.</p>
-          </div>
-        `
-      }
-    ],
-    category: '',
-    subcategory: '',
-    price: '',
-    originalPrice: '',
-    discount: '',
-    prerequisites: '',
-    techStack: [],
-    techStackData: [],
-    courseImage: null,
-    aboutCourse: {
-      welcome: '',
-      prerequisites: [],
-      requirements: [],
-      whatYoullLearn: '',
-      endObjectives: ''
-    }
-  });
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState(null);
 
@@ -368,46 +367,97 @@ const CourseManager = () => {
 
   // Fetch courses on mount
   useEffect(() => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = Cookies.get('accessToken');
     if (!authToken) {
       navigate('/login');
-      return;
     }
-    
-    const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
-    setCourses(storedCourses);
   }, [navigate]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
-      const updatedCourses = [...courses];
-      if (currentCourse) {
-        // Update existing course
-        const index = courses.findIndex(course => course.id === currentCourse.id);
-        updatedCourses[index] = formData;
-      } else {
-        // Add new course
-        updatedCourses.push(formData);
+      const accessToken = Cookies.get('accessToken');
+      if (!accessToken) {
+        alert('Please login first');
+        navigate('/login');
+        return;
       }
-      
-      localStorage.setItem('courses', JSON.stringify(updatedCourses));
-      setCourses(updatedCourses);
-      
+
+      console.log('Submitting form...'); // Debug log
+
+      const payload = {
+        welcome: formData.aboutCourse?.welcome || '',
+        aboutCourse: formData.aboutCourse?.whatYoullLearn || '',
+        endObjective: formData.aboutCourse?.endObjectives || '',
+        courseTitle: formData.title,
+        description: formData.description,
+        duration: formData.duration,
+        completionTime: formData.completionTime,
+        courseType: formData.type,
+        difficultyLevel: formData.difficultyLevel,
+        language: formData.language,
+        productCovered: formData.productCovered,
+        category: formData.category,
+        subCategory: formData.subcategory,
+        price: Number(formData.price) || 0,
+        originalPrice: Number(formData.originalPrice) || 0,
+        discount: `${formData.discount || 0}%`,
+        courseAudience: formData.courseAudience || '',
+        learningObjective: formData.learningObjectives?.join(', ') || '',
+        technologiesUsed: formData.techStack?.join(', ') || '',
+        technologyImage: formData.techStackData?.map(tech => tech.url)?.join(', ') || '',
+        customTechnology: formData.techStackData?.length > 0 ? 'Yes' : 'No',
+        coustomTechnologyImg: formData.techStackData?.length > 0 ? 
+          formData.techStackData.map(tech => tech.url).join(', ') : 'N/A',
+        courseBanner: formData.courseImage || '',
+        lessons: formData.curriculum?.map(lesson => ({
+          lessonTitle: lesson.title || '',
+          lessonDuration: lesson.duration || '',
+          lessonContent: lesson.content || ''
+        })) || [],
+        preRequisites: formData.aboutCourse?.prerequisites?.map(prereq => ({
+          preRequisiteRequired: prereq,
+          preRequisiteLevel: 'Beginner'
+        })) || []
+      };
+
+      console.log('Payload:', payload); // Debug log
+
+      const response = await fetch('http://localhost:8089/qlms/createCourse/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      console.log('Response status:', response.status); // Debug log
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create course');
+      }
+
+      const result = await response.json();
+      console.log('Success:', result); // Debug log
+
+      // Show success message
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
+
+      // Reset form
+      setFormData(initialFormState);
+      setActiveTab('basicInfo');
       
-      setFormData({
-        ...formData,
-        id: Date.now(),
-        title: '',
-        description: '',
-        // ... reset other fields as needed
-      });
-      setCurrentCourse(null);
+      // Navigate to courses page
+      navigate('/courses');
+      
     } catch (error) {
       console.error('Error saving course:', error);
+      alert(error.message || 'Failed to save course. Please try again.');
     }
   };
 
@@ -624,6 +674,29 @@ const CourseManager = () => {
     setFormData({ ...formData, curriculum: updatedCurriculum });
   };
 
+  // Add null checks for map operations
+  const renderTechStack = () => {
+    return formData.techStackData?.map(({ name, url }) => (
+      <div key={name} className="flex items-center gap-2 px-3 py-1 bg-[#5624D0] text-white rounded-full">
+        <img src={url} alt={name} className="w-4 h-4" />
+        <span className="text-sm capitalize">{name}</span>
+        <button
+          type="button"
+          onClick={() => {
+            setFormData({
+              ...formData,
+              techStack: formData.techStack.filter(t => t !== name),
+              techStackData: formData.techStackData.filter(t => t.name !== name)
+            });
+          }}
+          className="ml-1 hover:text-red-200"
+        >
+          ×
+        </button>
+      </div>
+    )) || null;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
@@ -718,7 +791,7 @@ const CourseManager = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Info Tab */}
             {activeTab === 'basicInfo' && (
               <div className="space-y-6">
@@ -1159,32 +1232,7 @@ const CourseManager = () => {
 
                   {/* Selected Technologies Display */}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {formData.techStackData?.map(({ name, url }) => (
-                      <div
-                        key={name}
-                        className="flex items-center gap-2 px-3 py-1 bg-[#5624D0] text-white rounded-full"
-                      >
-                        <img 
-                          src={url}
-                          alt={name}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-sm capitalize">{name}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFormData({
-                              ...formData,
-                              techStack: formData.techStack.filter(t => t !== name),
-                              techStackData: formData.techStackData.filter(t => t.name !== name)
-                            });
-                          }}
-                          className="ml-1 hover:text-red-200"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+                    {renderTechStack()}
                   </div>
                 </div>
 
