@@ -113,6 +113,7 @@ const Courses_main = () => {
           title: course.courseTitle,
           type: course.courseType,
           duration: course.duration,
+          courseImage: course.courseBanner,
           createdAt: new Date(), // You might want to add this field in your API
           techStackData: course.technologiesUsed.split(',').map(tech => ({
             name: tech.trim(),
@@ -385,8 +386,8 @@ const Courses_main = () => {
                                   opacity-0 dark:opacity-0 dark:group-hover:opacity-75 
                                   transition-all duration-300 -z-10"></div>
                     <img 
-                      src={course.techStackData?.[0]?.url || techLogos.html}
-                      alt={course.title} 
+                      src={course.courseImage}
+                      alt={course.courseTitle} 
                       className="max-h-full w-auto object-contain relative z-10
                                dark:opacity-90 group-hover:opacity-100
                                transition-all duration-300"
@@ -396,7 +397,8 @@ const Courses_main = () => {
                       }}
                     />
                   </div>
-                  
+
+                
                   {/* Tech Stack Icons */}
                   {course.techStackData && course.techStackData.length > 0 && (
                     <div className="flex gap-2 mb-4">

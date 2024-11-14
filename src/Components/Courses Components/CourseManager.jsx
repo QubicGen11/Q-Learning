@@ -995,6 +995,18 @@ const CourseManager = () => {
                       setActiveTab('curriculum');
                       setActiveLesson(index);
                     }}
+                    onDelete={() => {
+                      if (window.confirm('Are you sure you want to delete this lesson?')) {
+                        const updatedCurriculum = formData.curriculum.filter((_, i) => i !== index);
+                        setFormData({
+                          ...formData,
+                          curriculum: updatedCurriculum
+                        });
+                        setActiveLesson(null);
+                        setActiveTab('basicInfo');
+                        toast.success('Lesson deleted successfully');
+                      }
+                    }}
                   />
                 ))}
                 <button
@@ -1311,7 +1323,7 @@ const CourseManager = () => {
                 {/* Tech Logos Section - With Custom URL Input */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-2">
-                    Technologies Used
+                   Please Select your Thumbnail Image
                   </label>
                   
                   {/* Predefined Tech Stack */}
@@ -1359,19 +1371,19 @@ const CourseManager = () => {
 
                   {/* Custom Technology Input with Local Upload */}
                   <div className="mt-6 p-4 border rounded-lg">
-                    <h4 className="font-medium mb-4">Add Custom Technology</h4>
+                    <h4 className="font-medium mb-4">Add Custom Thumbnail Image</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Technology Name</label>
+                      {/* <div>
+                        <label className="block text-sm font-medium mb-2">Thumbnail Image Name</label>
                         <input
                           type="text"
                           id="techNameInput"
                           placeholder="Enter technology name"
                           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
                         />
-                      </div>
+                      </div> */}
                       <div>
-                        <label className="block text-sm font-medium mb-2">Technology Image</label>
+                        <label className="block text-sm font-medium mb-2">Thumbnail Image</label>
                         <div className="flex gap-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
@@ -1478,7 +1490,7 @@ const CourseManager = () => {
 
                 {/* Course Image */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Course Image</label>
+                  <label className="block text-sm font-medium mb-2">Banner Image</label>
                   <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
                     <div className="space-y-1 text-center">
                       <div className="flex text-sm text-gray-600">
@@ -1569,13 +1581,32 @@ const CourseManager = () => {
                               placeholder="20min"
                             />
                           </div>
-                          <div className="flex items-end">
+                          <div className="flex items-end gap-2">
                             <button
                               onClick={() => handleUpdateLesson(activeLesson)}
                               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
                             >
                               <FiSave className="w-4 h-4" />
                               Update
+                            </button>
+                            <button
+                              onClick={() => {
+                                // Show confirmation dialog
+                                if (window.confirm('Are you sure you want to delete this lesson?')) {
+                                  const updatedCurriculum = formData.curriculum.filter((_, index) => index !== activeLesson);
+                                  setFormData({
+                                    ...formData,
+                                    curriculum: updatedCurriculum
+                                  });
+                                  setActiveLesson(null);
+                                  setActiveTab('basicInfo');
+                                  toast.success('Lesson deleted successfully');
+                                }
+                              }}
+                              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center gap-2"
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                              Delete
                             </button>
                           </div>
                         </div>
@@ -1742,21 +1773,36 @@ const CourseManager = () => {
 };
 
 // SidebarItem component
-const SidebarItem = ({ label, isActive, isCompleted, onClick }) => {
+const SidebarItem = ({ label, isActive, isCompleted, onClick, onDelete }) => {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left pl-8 py-2 rounded-lg transition-colors ${
-        isActive 
-          ? 'bg-[#5624D0] text-white' 
-          : 'hover:bg-gray-50'
-      }`}
-    >
-      <div className="flex items-center gap-2">
-        {isCompleted && <span className="text-green-500">✓</span>}
-        <span>{label}</span>
-      </div>
-    </button>
+    <div className="flex items-center justify-between group">
+      <button
+        onClick={onClick}
+        className={`flex-grow text-left pl-8 py-2 rounded-lg transition-colors ${
+          isActive 
+            ? 'bg-[#5624D0] text-white' 
+            : 'hover:bg-gray-50'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {isCompleted && <span className="text-green-500">✓</span>}
+          <span>{label}</span>
+        </div>
+      </button>
+      {onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className={`mr-2 opacity-0 group-hover:opacity-100 transition-opacity ${
+            isActive ? 'text-white hover:text-red-200' : 'text-red-600 hover:text-red-800'
+          }`}
+        >
+          <FiTrash2 className="w-4 h-4" />
+        </button>
+      )}
+    </div>
   );
 };
 
