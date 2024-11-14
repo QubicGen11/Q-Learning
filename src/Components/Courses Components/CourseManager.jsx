@@ -939,8 +939,10 @@ const CourseManager = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      
       {/* Top Navigation Bar */}
       <div className="bg-black text-white h-14 flex items-center justify-between px-4 fixed w-full top-0 z-50">
+        
         <div className="flex items-center space-x-4">
           <button 
             onClick={() => navigate('/courses')}
@@ -1322,141 +1324,151 @@ const CourseManager = () => {
 
                 {/* Tech Logos Section - With Custom URL Input */}
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block font-medium mb-2 text-xl">
                    Please Select your Thumbnail Image
                   </label>
                   
                   {/* Predefined Tech Stack */}
-                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4 bg-gray-50 rounded-lg">
-                    {Object.entries(techLogos).map(([name, url]) => (
-                      <div
-                        key={name}
-                        onClick={() => {
-                          const newTechStack = [...(formData.techStack || [])];
-                          const newTechStackData = [...(formData.techStackData || [])];
-                          const index = newTechStack.indexOf(name);
-                          
-                          if (index === -1) {
-                            newTechStack.push(name);
-                            newTechStackData.push({ name, url });
-                          } else {
-                            newTechStack.splice(index, 1);
-                            newTechStackData.splice(index, 1);
-                          }
-                          
-                          setFormData({
-                            ...formData,
-                            techStack: newTechStack,
-                            techStackData: newTechStackData
-                          });
+                  <div>
+                    <h4 className="font-medium mb-4">Choose Thumbnail Image</h4>
+                    
+                    {/* Option 1: Predefined Tech Stack */}
+                    <div className="mb-4">
+                      <input 
+                        type="radio" 
+                        id="predefinedOption"
+                        name="thumbnailOption"
+                        className="mr-2"
+                        onChange={() => {
+                          document.getElementById('predefinedSection').style.display = 'block';
+                          document.getElementById('customSection').style.display = 'none';
                         }}
-                        className={`
-                          p-4 rounded-lg cursor-pointer transition-all duration-200
-                          ${formData.techStack?.includes(name) ? 'bg-[#5624D0]' : 'bg-white'}
-                        `}
-                      >
-                        <img 
-                          src={url}
-                          alt={name}
-                          className="w-full h-12 object-contain mb-2"
-                        />
-                        <p className={`text-center text-sm capitalize ${
-                          formData.techStack?.includes(name) ? 'text-white' : 'text-gray-700'
-                        }`}>
-                          {name}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Custom Technology Input with Local Upload */}
-                  <div className="mt-6 p-4 border rounded-lg">
-                    <h4 className="font-medium mb-4">Add Custom Thumbnail Image</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* <div>
-                        <label className="block text-sm font-medium mb-2">Thumbnail Image Name</label>
-                        <input
-                          type="text"
-                          id="techNameInput"
-                          placeholder="Enter technology name"
-                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                        />
-                      </div> */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Thumbnail Image</label>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="url"
-                                id="techUrlInput"
-                                placeholder="Enter image URL"
-                                className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
-                                onChange={(e) => {
-                                  const preview = document.getElementById('techPreview');
-                                  if (e.target.value) {
-                                    preview.src = e.target.value;
-                                    preview.classList.remove('hidden');
-                                  } else {
-                                    preview.classList.add('hidden');
-                                  }
-                                }}
-                              />
-                              <span className="text-gray-500">or</span>
-                              <label className="cursor-pointer px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={handleFileUpload}
-                                />
-                                <span className="text-sm text-gray-700">Upload</span>
-                              </label>
-                            </div>
-                            {/* Preview */}
-                            <div className="mt-2 h-16 border rounded-lg overflow-hidden">
-                              <img
-                                id="techPreview"
-                                src=""
-                                alt="Preview"
-                                className="w-full h-full object-contain hidden"
-                              />
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const nameInput = document.getElementById('techNameInput');
-                              const urlInput = document.getElementById('techUrlInput');
-                              
-                              if (nameInput.value && urlInput.value) {
-                                const name = nameInput.value.toLowerCase();
-                                const url = urlInput.value;
-                                
-                                // Save to localStorage first
-                                const customTechLogos = JSON.parse(localStorage.getItem('customTechLogos') || '{}');
-                                customTechLogos[name] = url;
-                                localStorage.setItem('customTechLogos', JSON.stringify(customTechLogos));
-                                
-                                // Then update form data
+                      />
+                      <label htmlFor="predefinedOption">Choose from predefined thumbnails</label>
+                      
+                      <div id="predefinedSection" style={{display: 'none'}} className="mt-4">
+                        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4 bg-gray-50 rounded-lg">
+                          {Object.entries(techLogos).map(([name, url]) => (
+                            <div
+                              key={name}
+                              onClick={() => {
                                 setFormData({
                                   ...formData,
-                                  techStack: [...(formData.techStack || []), name],
-                                  techStackData: [...(formData.techStackData || []), { name, url }]
+                                  techStack: [name],
+                                  techStackData: [{ name, url }]
                                 });
+                              }}
+                              className={`
+                                p-4 rounded-lg cursor-pointer transition-all duration-200
+                                ${formData.techStack?.includes(name) ? 'bg-[#5624D0]' : 'bg-white'}
+                              `}
+                            >
+                              <img 
+                                src={url}
+                                alt={name}
+                                className="w-full h-12 object-contain mb-2"
+                              />
+                              <p className={`text-center text-sm capitalize ${
+                                formData.techStack?.includes(name) ? 'text-white' : 'text-gray-700'
+                              }`}>
+                                {name}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Option 2: Custom Upload */}
+                    <div>
+                      <input 
+                        type="radio" 
+                        id="customOption"
+                        name="thumbnailOption"
+                        className="mr-2"
+                        onChange={() => {
+                          document.getElementById('predefinedSection').style.display = 'none';
+                          document.getElementById('customSection').style.display = 'block';
+                        }}
+                      />
+                      <label htmlFor="customOption">Upload custom thumbnail</label>
+
+                      <div id="customSection" style={{display: 'none'}} className="mt-4">
+                        <div className="p-4 border rounded-lg">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Thumbnail Name</label>
+                              <input
+                                type="text"
+                                id="techNameInput"
+                                placeholder="Enter thumbnail name"
+                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
                                 
-                                // Clear inputs and preview
-                                nameInput.value = '';
-                                urlInput.value = '';
-                                const preview = document.getElementById('techPreview');
-                                preview.src = '';
-                                preview.classList.add('hidden');
-                              }
-                            }}
-                            className="px-4 py-2 bg-[#5624D0] text-white rounded-lg hover:bg-[#4B1F9E] h-12"
-                          >
-                            Add
-                          </button>
+                                
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Thumbnail Image</label>
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="url"
+                                      id="techUrlInput"
+                                      placeholder="Enter image URL"
+                                      className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-[#5624D0]"
+                                      onChange={(e) => {
+                                        const preview = document.getElementById('techPreview');
+                                        preview.src = e.target.value;
+                                        preview.classList.toggle('hidden', !e.target.value);
+                                      }}
+                                    />
+                                    <span className="text-gray-500">or</span>
+                                    <label className="cursor-pointer px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleFileUpload}
+                                      />
+                                      <span className="text-sm text-gray-700">Upload</span>
+                                    </label>
+                                  </div>
+                                  <div className="mt-2 h-16 border rounded-lg overflow-hidden">
+                                    <img
+                                      id="techPreview"
+                                      src=""
+                                      alt="Preview"
+                                      className="w-full h-full object-contain hidden"
+                                    />
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nameInput = document.getElementById('techNameInput');
+                                    const urlInput = document.getElementById('techUrlInput');
+                                    
+                                    if (nameInput.value && urlInput.value) {
+                                      const name = nameInput.value.toLowerCase();
+                                      const url = urlInput.value;
+                                      
+                                      handleAddTechnology(name, url);
+                                      
+                                      nameInput.value = '';
+                                      urlInput.value = '';
+                                      const preview = document.getElementById('techPreview');
+                                      preview.src = '';
+                                      preview.classList.add('hidden');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-[#5624D0] text-white rounded-lg hover:bg-[#4B1F9E] h-12"
+                                >
+                                  Add
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

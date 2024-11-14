@@ -91,7 +91,7 @@ function App() {
               <Route path="/career-paths" element={<Careerpaths_main />} />
               <Route path="/certification" element={<Certification_main />} />
               <Route path="/resources" element={<div>Resources Page</div>} />
-              <Route path="/admin" element={<CourseManager />} />
+              <Route path="/become-instructor" element={<CourseManager />} />
               <Route path="/admin/courses" element={<CourseManager />} />
               <Route path="/courses" element={<Courses_main />} />
               <Route path="/courses/:id" element={<CourseContent />} />
