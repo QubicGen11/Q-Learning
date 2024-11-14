@@ -7,6 +7,7 @@ import Quill from 'quill';
 import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus, FiEye, FiSave } from 'react-icons/fi';
 import CourseContent from './CourseContent';
 import Cookies from 'js-cookie';
+import toast from 'react-hot-toast';
 
 // Register modules
 Quill.register('modules/imageResize', ImageResize);
@@ -356,7 +357,7 @@ const CourseManager = () => {
   const [activeTab, setActiveTab] = useState('basicInfo');
   const [activeLesson, setActiveLesson] = useState(null);
   const [courses, setCourses] = useState([]);
-  const [currentCourse, setCurrentCourse] = useState(null);
+
   const [showTechLogos, setShowTechLogos] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -696,6 +697,175 @@ const CourseManager = () => {
       </div>
     )) || null;
   };
+
+  // Add this useEffect to fetch courses
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const accessToken = Cookies.get('accessToken');
+        const response = await fetch('http://localhost:8089/qlms/allCourses', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        if (!response.ok) throw new Error('Failed to fetch courses');
+        const data = await response.json();
+        setCourses(data);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  // Add this section in your JSX where you want to display the courses
+  const renderCourses = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+      {courses.map((course) => (
+        <div 
+          key={course.id} 
+          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        >
+          <div className="relative h-48">
+            <img 
+              src={course.courseBanner || 'https://via.placeholder.com/400x200'} 
+              alt={course.courseTitle}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 m-2 rounded-full text-sm">
+              {course.difficultyLevel}
+            </div>
+          </div>
+          
+          <div className="p-4">
+            <h3 className="text-xl font-semibold mb-2 truncate">{course.courseTitle}</h3>
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
+            
+            <div className="flex justify-between items-center">
+              <div>
+                <span className="text-lg font-bold text-blue-600">${course.price}</span>
+                {course.originalPrice && (
+                  <span className="text-sm text-gray-400 line-through ml-2">
+                    ${course.originalPrice}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center text-sm text-gray-500">
+                <span className="mr-2">{course.duration}</span>
+                <span>{course.language}</span>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="text-sm text-gray-500">{course.courseType}</span>
+              </div>
+              <button 
+                onClick={() => handleEditCourse(course.id)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Edit Course
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Add this function to handle course editing
+  const handleEditCourse = async (courseId) => {
+    try {
+      const accessToken = Cookies.get('accessToken');
+      const response = await fetch(`http://localhost:8089/qlms/getCourseById/${courseId}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch course details');
+      const courseData = await response.json();
+
+      // Transform the data to match your form structure
+      setFormData({
+        id: courseData.id,
+        title: courseData.courseTitle,
+        description: courseData.description,
+        duration: courseData.duration,
+        completionTime: courseData.completionTime,
+        type: courseData.courseType,
+        difficultyLevel: courseData.difficultyLevel,
+        language: courseData.language,
+        productCovered: courseData.productCovered,
+        category: courseData.category,
+        subcategory: courseData.subCategory,
+        price: courseData.price,
+        originalPrice: courseData.originalPrice,
+        discount: courseData.discount?.replace('%', ''), // Remove % symbol
+        courseAudience: courseData.courseAudience,
+        courseImage: courseData.courseBanner,
+        
+        // About Course section
+        aboutCourse: {
+          welcome: courseData.welcome,
+          whatYoullLearn: courseData.aboutCourse,
+          endObjectives: courseData.endObjective,
+          prerequisites: courseData.coursePreRequisites?.map(pre => 
+            pre.preRequisites.preRequisiteRequired
+          ) || []
+        },
+
+        // Learning Objectives
+        learningObjectives: courseData.learningObjective?.split(',').map(obj => obj.trim()) || [],
+
+        // Tech Stack
+        techStack: courseData.technologiesUsed?.split(',').map(tech => tech.trim()) || [],
+        techStackData: courseData.technologyImage ? [{
+          name: courseData.technologiesUsed,
+          url: courseData.technologyImage
+        }] : [],
+
+        // Curriculum
+        curriculum: courseData.courseLesson?.map(lesson => ({
+          id: lesson.lessonId,
+          title: lesson.lesson.lessonTitle,
+          duration: lesson.lesson.lessonDuration,
+          content: lesson.lesson.lessonContent
+        })) || []
+      });
+
+      // Set current course
+      setCurrentCourse(courseData);
+      
+      // Switch to edit mode
+      setActiveTab('basicInfo');
+      setIsEditMode(true);
+
+    } catch (error) {
+      console.error('Error fetching course details:', error);
+      toast.error('Failed to load course details');
+    }
+  };
+
+  // Add these states if not already present
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentCourse, setCurrentCourse] = useState(null);
+
+  // Optional: Add a reset function when creating a new course
+  const handleNewCourse = () => {
+    setFormData(initialFormState);
+    setCurrentCourse(null);
+    setIsEditMode(false);
+    setActiveTab('basicInfo');
+  };
+
+  // Optional: Add a toast notification system
+  useEffect(() => {
+    if (currentCourse) {
+      toast.success('Course loaded for editing');
+    }
+  }, [currentCourse]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1462,33 +1632,9 @@ const CourseManager = () => {
 
           {/* Display existing courses */}
           {activeTab === 'basicInfo' && courses.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-bold mb-4">Your Courses</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {courses.map(course => (
-                  <div key={course.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    {/* Course card content */}
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{course.description}</p>
-                      <div className="flex justify-end space-x-2">
-                        <button
-                          onClick={() => handleEdit(course)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(course.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="container mx-auto px-4 py-8">
+              <h2 className="text-2xl font-bold mb-6">Your Courses</h2>
+              {renderCourses()}
             </div>
           )}
         </div>
