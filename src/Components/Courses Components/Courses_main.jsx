@@ -86,44 +86,49 @@ const Courses_main = () => {
   ];
 
   useEffect(() => {
-    const storedCourses = localStorage.getItem('courses');
-    const customTechLogos = JSON.parse(localStorage.getItem('customTechLogos') || '{}');
-    
-    if (storedCourses) {
+    const fetchCourses = async () => {
       try {
-        const parsedCourses = JSON.parse(storedCourses);
-        const processedCourses = parsedCourses.map(course => {
-          // First process the tech stack data
-          const processedTechStack = (course.techStackData || []).map(tech => {
-            if (typeof tech === 'string') {
-              return {
-                name: tech,
-                url: customTechLogos[tech] || techLogos[tech] || techLogos.html
-              };
-            }
-            return {
-              ...tech,
-              url: tech.url || 
-                   customTechLogos[tech.name] || 
-                   techLogos[tech.name] || 
-                   techLogos.html
-            };
-          });
+        // Get access token from cookies
+        const accessToken = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('accessToken='))
+          ?.split('=')[1];
 
-          return {
-            ...course,
-            // Use the first processed tech stack image as the main logo
-            logo: processedTechStack[0]?.url || techLogos.html,
-            techStackData: processedTechStack
-          };
+        const response = await fetch('http://localhost:8089/qlms/allCourses', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
         });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch courses');
+        }
+
+        const data = await response.json();
         
+        // Process the courses data
+        const processedCourses = data.map(course => ({
+          id: course.id,
+          title: course.courseTitle,
+          type: course.courseType,
+          duration: course.duration,
+          createdAt: new Date(), // You might want to add this field in your API
+          techStackData: course.technologiesUsed.split(',').map(tech => ({
+            name: tech.trim(),
+            url: techLogos[tech.toLowerCase().trim()] || techLogos.html
+          })),
+          // Add other fields as needed
+        }));
+
         setCourses(processedCourses);
       } catch (error) {
-        console.error('Error processing courses:', error);
+        console.error('Error fetching courses:', error);
         setCourses([]);
       }
-    }
+    };
+
+    fetchCourses();
   }, [techLogos]);
 
   const filteredCourses = courses.filter(course => 

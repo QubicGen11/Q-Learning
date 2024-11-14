@@ -48,25 +48,76 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
   useEffect(() => {
     if (previewMode && previewData) {
       setCourse(previewData);
-      setCourseImage(previewData.courseImage);
+      setCourseImage(previewData.courseBanner);
       return;
     }
 
     const fetchCourse = async () => {
       try {
-        const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
-        const foundCourse = storedCourses.find(c => c.id === parseInt(id));
-        if (foundCourse) {
-          setCourse(foundCourse);
-          setCourseImage(foundCourse.courseImage);
+        // Get access token from cookies
+        const accessToken = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('accessToken='))
+          ?.split('=')[1];
+
+        const response = await fetch(`http://localhost:8089/qlms/getCourseById/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch course');
         }
+
+        const data = await response.json();
+        
+        // Process the course data to match your component's expected format
+        const processedCourse = {
+          id: data.id,
+          title: data.courseTitle,
+          description: data.description,
+          category: data.category,
+          subcategory: data.subCategory,
+          difficultyLevel: data.difficultyLevel,
+          completionTime: data.completionTime,
+          language: data.language,
+          productCovered: data.productCovered,
+          courseAudience: data.courseAudience,
+          learningObjectives: data.learningObjective.split(',').map(obj => obj.trim()),
+          price: data.price,
+          originalPrice: data.originalPrice,
+          discount: data.discount,
+          duration: data.duration,
+          courseImage: data.courseBanner,
+          logo: data.technologyImage,
+          curriculum: data.courseLesson.map(lesson => ({
+            id: lesson.lessonId,
+            title: lesson.lesson.lessonTitle,
+            duration: lesson.lesson.lessonDuration,
+            type: 'REQUIRED',
+            isCompleted: false // You might want to track this separately
+          })),
+          techStackData: data.technologiesUsed.split(',').map(tech => ({
+            name: tech.trim(),
+            url: techLogos[tech.toLowerCase().trim()] || techLogos.html
+          })),
+          prerequisites: data.coursePreRequisites.map(prereq => ({
+            required: prereq.preRequisites.preRequisiteRequired,
+            level: prereq.preRequisites.preRequisiteLevel
+          }))
+        };
+
+        setCourse(processedCourse);
+        setCourseImage(data.courseBanner);
       } catch (error) {
         console.error('Error loading course:', error);
       }
     };
 
     fetchCourse();
-  }, [id, previewMode, previewData]);
+  }, [id, previewMode, previewData, techLogos]);
 
   const handleResume = () => {
     if (previewMode) return;

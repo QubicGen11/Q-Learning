@@ -5,6 +5,8 @@ import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import parse from 'html-react-parser';
 import Navbar_main from '../Navbar Components/Navbar_main';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const CourseLesson = () => {
   const { id, lessonId } = useParams();
@@ -15,7 +17,7 @@ const CourseLesson = () => {
   const [currentSection, setCurrentSection] = useState('about');
 
   const currentIndex = course?.curriculum?.findIndex(
-    lesson => lesson.id === parseInt(lessonId)
+    lesson => lesson.id === lessonId
   );
 
   const nextLessonId = currentIndex < (course?.curriculum?.length - 1) 
@@ -30,20 +32,56 @@ const CourseLesson = () => {
   const isLastLesson = currentIndex === (course?.curriculum?.length - 1);
 
   useEffect(() => {
-    const storedCourses = JSON.parse(localStorage.getItem('courses')) || [];
-    const foundCourse = storedCourses.find(c => c.id === parseInt(id));
-    if (foundCourse) {
-      setCourse(foundCourse);
-      const lesson = foundCourse.curriculum?.find(l => l.id === parseInt(lessonId));
-      setCurrentLesson(lesson);
-      setCourseImage(foundCourse.courseImage);
+    const fetchCourseData = async () => {
+      try {
+        const accessToken = Cookies.get('accessToken');
+        const response = await axios.get(`http://localhost:8089/qlms/getCourseById/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+
+        const courseData = response.data;
+        
+        // Transform the API data to match your existing structure
+        const transformedCourse = {
+          id: courseData.id,
+          title: courseData.courseTitle,
+          courseImage: courseData.courseBanner,
+          aboutCourse: {
+            welcome: courseData.welcome,
+            prerequisites: courseData.coursePreRequisites.map(pre => pre.preRequisites.preRequisiteRequired),
+            whatYoullLearn: courseData.learningObjective,
+            endObjectives: courseData.endObjective,
+          },
+          curriculum: courseData.courseLesson.map(lessonItem => ({
+            id: lessonItem.lesson.id,
+            title: lessonItem.lesson.lessonTitle,
+            duration: lessonItem.lesson.lessonDuration,
+            content: lessonItem.lesson.lessonContent,
+            isCompleted: false
+          }))
+        };
+
+        setCourse(transformedCourse);
+        const lesson = transformedCourse.curriculum?.find(l => l.id === lessonId);
+        setCurrentLesson(lesson);
+        setCourseImage(transformedCourse.courseImage);
+      } catch (error) {
+        console.error('Error fetching course:', error);
+        // Handle error appropriately
+      }
+    };
+
+    if (id) {
+      fetchCourseData();
     }
   }, [id, lessonId]);
 
   const handleSectionClick = (section) => {
     setCurrentSection(section);
     if (section !== 'about') {
-      const lesson = course.curriculum.find(l => l.id === parseInt(section));
+      const lesson = course.curriculum.find(l => l.id === section);
       setCurrentLesson(lesson);
     } else {
       setCurrentLesson(null);
@@ -241,9 +279,9 @@ const CourseLesson = () => {
               {course?.curriculum?.map((lesson, index) => (
                 <button
                   key={lesson.id}
-                  onClick={() => handleSectionClick(lesson.id.toString())}
+                  onClick={() => handleSectionClick(lesson.id)}
                   className={`flex items-start p-3 rounded-lg mb-2 transition-all duration-300 w-full
-                    ${lesson.id === parseInt(lessonId)
+                    ${lesson.id === lessonId
                       ? 'bg-white text-gray-900 shadow-sm' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
