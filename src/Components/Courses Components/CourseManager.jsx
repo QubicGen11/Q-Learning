@@ -366,6 +366,12 @@ const CourseManager = () => {
   // Add this state for editor content
   const [editorContent, setEditorContent] = useState('');
 
+  // Add this state for delete confirmation
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    show: false,
+    courseId: null
+  });
+
   // Fetch courses on mount
   useEffect(() => {
     const authToken = Cookies.get('accessToken');
@@ -759,20 +765,59 @@ const CourseManager = () => {
               </div>
             </div>
 
-            <div className="mt-4 flex justify-between items-center">
+            <div className="mt-4 flex justify-between items-center p-4">
               <div className="flex items-center">
                 <span className="text-sm text-gray-500">{course.courseType}</span>
               </div>
-              <button 
-                onClick={() => handleEditCourse(course.id)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Edit Course
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handleEditCourse(course.id)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <FiEdit2 className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={() => setDeleteConfirmation({ show: true, courseId: course.id })}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                >
+                  <FiTrash2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       ))}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Delete Course
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to delete this course? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setDeleteConfirmation({ show: false, courseId: null })}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleDeleteCourse(deleteConfirmation.courseId);
+                  setDeleteConfirmation({ show: false, courseId: null });
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -868,6 +913,29 @@ const CourseManager = () => {
       toast.success('Course loaded for editing');
     }
   }, [currentCourse]);
+
+  // Add delete handler
+  const handleDeleteCourse = async (courseId) => {
+    try {
+      const accessToken = Cookies.get('accessToken');
+      const response = await fetch(`http://localhost:8089/qlms/deleteCourse/${courseId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to delete course');
+
+      // Remove course from state
+      setCourses(courses.filter(course => course.id !== courseId));
+      toast.success('Course deleted successfully!');
+      
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      toast.error('Failed to delete course. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
