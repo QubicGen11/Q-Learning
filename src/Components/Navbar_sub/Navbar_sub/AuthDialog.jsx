@@ -5,7 +5,7 @@ import { FaArrowLeft, FaEnvelope, FaGithub, FaGoogle, FaLinkedin } from 'react-i
 import { EmailForm } from './EmailForm';
 import { toast, Toaster } from 'react-hot-toast';
 
-export const AuthDialog = ({ open, onClose, title, isSignUp }) => {
+export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
 
   const handleSocialAuth = (provider) => {

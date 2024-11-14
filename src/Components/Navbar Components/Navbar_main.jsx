@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Drawer } from '@mui/material';
@@ -10,6 +10,7 @@ import { SearchFilters } from '../Navbar_sub/Navbar_sub/SearchFilters';
 import { ProfileMenu } from '../Navbar_sub/Navbar_sub/ProfileMenu';
 import { MobileDrawer } from '../Navbar_sub/Navbar_sub/MobileDrawer';
 import { AuthDialog } from '../Navbar_sub/Navbar_sub/AuthDialog';
+import { toast } from 'react-hot-toast';
 
 const Navbar_main = () => {
   const location = useLocation();
@@ -17,12 +18,35 @@ const Navbar_main = () => {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [signupDialogOpen, setSignupDialogOpen] = useState(false);
+  const [sessionExpiredDialog, setSessionExpiredDialog] = useState(false);
   const isAuthenticated = !!Cookies.get('accessToken');
+
+  useEffect(() => {
+    let previousAuthState = isAuthenticated;
+
+    const checkAuth = () => {
+      const currentAuthState = !!Cookies.get('accessToken');
+      
+      // If user was authenticated before but now isn't
+      if (previousAuthState && !currentAuthState) {
+        toast.error('Session expired. Please login again.');
+        setSessionExpiredDialog(true);
+        handleLogout();
+      }
+      
+      previousAuthState = currentAuthState;
+    };
+
+    // Check auth status every second
+    const intervalId = setInterval(checkAuth, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleLogout = () => {
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
-    window.location.reload();
+    window.location.reload(); // Force refresh after logout
   };
 
   const navItems = isAuthenticated ? [
@@ -34,6 +58,33 @@ const Navbar_main = () => {
     { text: 'Contact Us', tooltip: 'Contact Us', path: '/contact' },
     { text: 'About Us', tooltip: 'Access Resources', path: '/resources' }
   ];
+
+  const SessionExpiredDialog = () => (
+    <AuthDialog
+      open={sessionExpiredDialog}
+      onClose={() => {
+        setSessionExpiredDialog(false);
+        setLoginDialogOpen(true); // Open login dialog when session expired dialog is closed
+      }}
+      title="Session Expired"
+      customContent={
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-semibold mb-4">Your session has expired</h2>
+          <p className="mb-6">Please login again to continue.</p>
+          <button
+            onClick={() => {
+              setSessionExpiredDialog(false);
+              setLoginDialogOpen(true);
+              window.location.reload();
+            }}
+            className="px-6 py-2 bg-[#5624d0] text-white rounded-md hover:bg-[#4c1fb1]"
+          >
+            Login
+          </button>
+        </div>
+      }
+    />
+  );
 
   return (
     <>
@@ -189,6 +240,7 @@ const Navbar_main = () => {
         />
       </Drawer>
 
+      <SessionExpiredDialog />
       <AuthDialog
         open={loginDialogOpen}
         onClose={() => setLoginDialogOpen(false)}
