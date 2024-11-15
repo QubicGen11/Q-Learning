@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart } from 'react-icons/fi';
 import Navbar_main from '../Navbar Components/Navbar_main';
+import CourseCommunity from './CourseCommunity';
+// import { div } from 'three/webgpu';
 
 const CourseContent = ({ previewMode = false, previewData = null }) => {
   const { id } = useParams();
@@ -214,7 +216,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-6 sm:mb-8 overflow-x-auto">
         <div className="flex gap-6 sm:gap-12 min-w-max pb-1">
-          {['OVERVIEW', 'COURSE_CURRICULUM', 'RELATED_COURSES'].map((tab) => (
+          {['OVERVIEW', 'COURSE_CURRICULUM', 'COMMUNITY', 'RELATED_COURSES'].map((tab) => (
             <button
               key={tab}
               className={`pb-3 sm:pb-4 px-1 text-sm sm:text-base whitespace-nowrap transition-colors duration-300
@@ -412,6 +414,19 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
                 </div>
               </div>
             </>
+          )}
+
+          {activeTab === 'COMMUNITY' && (
+            <CourseCommunity courseId={id} />
+          )}
+
+          {activeTab === 'RELATED_COURSES' && (
+            // ... existing related courses content ...
+            <div>
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
+                Related Courses
+              </h2>
+            </div>
           )}
         </div>
 

@@ -125,8 +125,8 @@ export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) =>
 
           <DialogContent className="px-6">
             <AnimatePresence mode="wait">
-              {showEmailForm ? (
-                <EmailForm isSignUp={isSignUp} onClose={onClose} />
+              {customContent ? (
+                customContent
               ) : (
                 <motion.div
                   key="social"

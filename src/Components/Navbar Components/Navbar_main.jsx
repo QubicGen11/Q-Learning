@@ -11,6 +11,7 @@ import { ProfileMenu } from '../Navbar_sub/Navbar_sub/ProfileMenu';
 import { MobileDrawer } from '../Navbar_sub/Navbar_sub/MobileDrawer';
 import { AuthDialog } from '../Navbar_sub/Navbar_sub/AuthDialog';
 import { toast } from 'react-hot-toast';
+import useAuthStore from '../../store/authStore';
 
 const Navbar_main = () => {
   const location = useLocation();
@@ -18,7 +19,7 @@ const Navbar_main = () => {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [signupDialogOpen, setSignupDialogOpen] = useState(false);
-  const [sessionExpiredDialog, setSessionExpiredDialog] = useState(false);
+  const { sessionExpired, setSessionExpired } = useAuthStore();
   const isAuthenticated = !!Cookies.get('accessToken');
 
   useEffect(() => {
@@ -27,19 +28,15 @@ const Navbar_main = () => {
     const checkAuth = () => {
       const currentAuthState = !!Cookies.get('accessToken');
       
-      // If user was authenticated before but now isn't
       if (previousAuthState && !currentAuthState) {
+        setSessionExpired(true);
         toast.error('Session expired. Please login again.');
-        setSessionExpiredDialog(true);
-        handleLogout();
       }
       
       previousAuthState = currentAuthState;
     };
 
-    // Check auth status every second
     const intervalId = setInterval(checkAuth, 1000);
-
     return () => clearInterval(intervalId);
   }, []);
 
@@ -61,10 +58,10 @@ const Navbar_main = () => {
 
   const SessionExpiredDialog = () => (
     <AuthDialog
-      open={sessionExpiredDialog}
+      open={sessionExpired}
       onClose={() => {
-        setSessionExpiredDialog(false);
-        setLoginDialogOpen(true); // Open login dialog when session expired dialog is closed
+        setSessionExpired(false);
+        setLoginDialogOpen(true);
       }}
       title="Session Expired"
       customContent={
@@ -73,9 +70,8 @@ const Navbar_main = () => {
           <p className="mb-6">Please login again to continue.</p>
           <button
             onClick={() => {
-              setSessionExpiredDialog(false);
+              setSessionExpired(false);
               setLoginDialogOpen(true);
-              window.location.reload();
             }}
             className="px-6 py-2 bg-[#5624d0] text-white rounded-md hover:bg-[#4c1fb1]"
           >
