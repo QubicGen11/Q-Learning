@@ -19,7 +19,7 @@ const Navbar_main = () => {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [signupDialogOpen, setSignupDialogOpen] = useState(false);
-  const { sessionExpired, setSessionExpired } = useAuthStore();
+  const { sessionExpired, setSessionExpired, showStayLoggedIn, setShowStayLoggedIn, refreshSession } = useAuthStore();
   const isAuthenticated = !!Cookies.get('accessToken');
 
   useEffect(() => {
@@ -29,8 +29,13 @@ const Navbar_main = () => {
       const currentAuthState = !!Cookies.get('accessToken');
       
       if (previousAuthState && !currentAuthState) {
-        setSessionExpired(true);
-        toast.error('Session expired. Please login again.');
+        const hasRefreshToken = !!Cookies.get('refreshToken');
+        if (hasRefreshToken) {
+          setShowStayLoggedIn(true);
+        } else {
+          setSessionExpired(true);
+          toast.error('Session expired. Please login again.');
+        }
       }
       
       previousAuthState = currentAuthState;
@@ -77,6 +82,43 @@ const Navbar_main = () => {
           >
             Login
           </button>
+        </div>
+      }
+    />
+  );
+
+  const StayLoggedInDialog = () => (
+    <AuthDialog
+      open={showStayLoggedIn}
+      onClose={() => {
+        setShowStayLoggedIn(false);
+        setSessionExpired(true);
+      }}
+      title="Stay Logged In?"
+      customContent={
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-semibold mb-4">Would you like to stay logged in?</h2>
+          <p className="mb-6">Your session has expired, but we can keep you logged in.</p>
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => {
+                refreshSession();
+                toast.success('Session extended successfully');
+              }}
+              className="px-6 py-2 bg-[#5624d0] text-white rounded-md hover:bg-[#4c1fb1]"
+            >
+              Stay Logged In
+            </button>
+            <button
+              onClick={() => {
+                setShowStayLoggedIn(false);
+                handleLogout();
+              }}
+              className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       }
     />
@@ -236,6 +278,7 @@ const Navbar_main = () => {
         />
       </Drawer>
 
+      <StayLoggedInDialog />
       <SessionExpiredDialog />
       <AuthDialog
         open={loginDialogOpen}
