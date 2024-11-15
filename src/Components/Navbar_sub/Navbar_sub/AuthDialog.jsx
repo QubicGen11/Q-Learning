@@ -10,14 +10,14 @@ export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) =>
 
   const handleSocialAuth = (provider) => {
     switch (provider) {
+      case 'email':
+        setShowEmailForm(true);
+        break;
       case 'google':
         window.location.href = 'http://localhost:8089/qlms/auth/google';
         break;
       case 'github':
         window.location.href = 'http://localhost:8089/qlms/auth/github';
-        break;
-      case 'email':
-        setShowEmailForm(true);
         break;
       default:
         toast.error('This login method is not available yet');
@@ -127,6 +127,11 @@ export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) =>
             <AnimatePresence mode="wait">
               {customContent ? (
                 customContent
+              ) : showEmailForm ? (
+                <EmailForm 
+                  isSignUp={isSignUp} 
+                  onClose={onClose}
+                />
               ) : (
                 <motion.div
                   key="social"
@@ -140,19 +145,10 @@ export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) =>
                     <motion.button
                       key={provider.name}
                       variants={itemVariants}
-                      whileHover={{ 
-                        scale: 1.02,
-                        transition: { duration: 0.2 }
-                      }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`
-                        w-full p-4 rounded-lg border dark:border-gray-700 
-                        flex items-center justify-center space-x-3 
-                        ${provider.primary 
-                          ? 'bg-blue-600 text-white hover:bg-blue-700 border-transparent' 
-                          : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'}
-                        transition-all duration-300 shadow-sm hover:shadow-md
-                      `}
+                      className={`w-full p-4 rounded-lg border flex items-center justify-center space-x-3 
+                        ${provider.primary ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'}`}
                       onClick={() => handleSocialAuth(provider.id)}
                     >
                       {provider.icon}
