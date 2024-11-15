@@ -26,6 +26,17 @@ import About from './Components/About Components/About';
 import Welcome from './Components/Welcome Component/Welcome';
 import Cookies from 'js-cookie';
 import ProfileSettings from './Components/Profile Components/ProfileSettings';
+import BecomeInstructor from './Components/Instructor/BecomeInstructor';
+import Swal from 'sweetalert2';
+
+// Configure default options for all SweetAlert2 popups
+Swal.mixin({
+  customClass: {
+    confirmButton: 'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mr-2',
+    cancelButton: 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700'
+  },
+  buttonsStyling: false
+});
 
 // Create a Home component that contains all the landing page components
 const Home = () => {
@@ -98,6 +109,7 @@ function App() {
               <Route path="/courses/:id" element={<CourseContent />} />
               <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
               <Route path="/profile" element={<ProfileSettings />} />
+              <Route path="/instructor" element={<BecomeInstructor />} />
               
               {/* Contact Route - Redirects to external URL */} 
               <Route

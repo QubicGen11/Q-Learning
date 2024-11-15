@@ -54,7 +54,7 @@ const Navbar_main = () => {
   const navItems = isAuthenticated ? [
     { text: 'Explore Courses', tooltip: 'View Your Courses', path: '/courses' },
     { text: 'My Learning', tooltip: 'View Your Courses', path: '/my-learning' },
-    { text: 'Become an Instructor', tooltip: 'Start Teaching', path: '/become-instructor' },
+    { text: 'Become an Instructor', tooltip: 'Start Teaching', path: '/instructor' },
   ] : [
     { text: 'Explore Courses', tooltip: 'Browse Our Courses', path: '/courses' },
     { text: 'Contact Us', tooltip: 'Contact Us', path: '/contact' },

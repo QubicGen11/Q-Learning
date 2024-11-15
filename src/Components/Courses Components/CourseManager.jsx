@@ -8,6 +8,7 @@ import { FiTrash2, FiEdit2, FiImage, FiClock, FiUser, FiCheck, FiX, FiPlus, FiEy
 import CourseContent from './CourseContent';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 // Register modules
 Quill.register('modules/imageResize', ImageResize);
@@ -365,12 +366,6 @@ const CourseManager = () => {
 
   // Add this state for editor content
   const [editorContent, setEditorContent] = useState('');
-
-  // Add this state for delete confirmation
-  const [deleteConfirmation, setDeleteConfirmation] = useState({
-    show: false,
-    courseId: null
-  });
 
   // Fetch courses on mount
   useEffect(() => {
@@ -777,7 +772,7 @@ const CourseManager = () => {
                   <FiEdit2 className="w-5 h-5" />
                 </button>
                 <button 
-                  onClick={() => setDeleteConfirmation({ show: true, courseId: course.id })}
+                  onClick={() => handleDeleteCourse(course.id)}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
                 >
                   <FiTrash2 className="w-5 h-5" />
@@ -787,37 +782,6 @@ const CourseManager = () => {
           </div>
         </div>
       ))}
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirmation.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4">
-            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-              Delete Course
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Are you sure you want to delete this course? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setDeleteConfirmation({ show: false, courseId: null })}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  handleDeleteCourse(deleteConfirmation.courseId);
-                  setDeleteConfirmation({ show: false, courseId: null });
-                }}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 
@@ -916,27 +880,62 @@ const CourseManager = () => {
 
   // Add delete handler
   const handleDeleteCourse = async (courseId) => {
-    try {
-      const accessToken = Cookies.get('accessToken');
-      const response = await fetch(`http://localhost:8089/qlms/deleteCourse/${courseId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
+    // Show confirmation dialog first
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+      background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#fff',
+      color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const accessToken = Cookies.get('accessToken');
+          const response = await fetch(`http://localhost:8089/qlms/deleteCourse/${courseId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to delete course');
+          }
+
+          // Remove course from state
+          setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+          
+          // Show success message
+          Swal.fire({
+            title: 'Deleted!',
+            text: 'Your course has been deleted.',
+            icon: 'success',
+            confirmButtonColor: '#3085d6',
+            background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+          });
+
+        } catch (error) {
+          console.error('Error deleting course:', error);
+          // Show error message
+          Swal.fire({
+            title: 'Error!',
+            text: 'Failed to delete course. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+          });
         }
-      });
-
-      if (!response.ok) throw new Error('Failed to delete course');
-
-      // Remove course from state
-      setCourses(courses.filter(course => course.id !== courseId));
-      toast.success('Course deleted successfully!');
-      
-    } catch (error) {
-      console.error('Error deleting course:', error);
-      toast.error('Failed to delete course. Please try again.');
-    }
+      }
+    });
   };
 
+  
   return (
     <div className="min-h-screen bg-gray-50">
       
