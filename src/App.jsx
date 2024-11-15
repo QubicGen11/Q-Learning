@@ -25,6 +25,7 @@ import Cart from './Components/Cart/Cart';
 import About from './Components/About Components/About';
 import Welcome from './Components/Welcome Component/Welcome';
 import Cookies from 'js-cookie';
+import ProfileSettings from './Components/Profile Components/ProfileSettings';
 
 // Create a Home component that contains all the landing page components
 const Home = () => {
@@ -96,6 +97,7 @@ function App() {
               <Route path="/courses" element={<Courses_main />} />
               <Route path="/courses/:id" element={<CourseContent />} />
               <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
+              <Route path="/profile" element={<ProfileSettings />} />
               
               {/* Contact Route - Redirects to external URL */} 
               <Route
