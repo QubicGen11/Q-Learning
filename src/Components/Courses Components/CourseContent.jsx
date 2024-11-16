@@ -4,6 +4,8 @@ import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart } from 'react-icons/fi
 import Navbar_main from '../Navbar Components/Navbar_main';
 import CourseCommunity from './CourseCommunity';
 import config from '../../config/apiConfig';
+import Loader from '../Common/Loader';
+import { toast } from 'react-hot-toast';
 // import { div } from 'three/webgpu';
 
 const CourseContent = ({ previewMode = false, previewData = null }) => {
@@ -32,6 +34,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
     firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
     graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const customTechLogos = localStorage.getItem('customTechLogos');
@@ -57,6 +60,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
     const fetchCourse = async () => {
       try {
+        setIsLoading(true);  // Start loading
         // Get access token from cookies
         const accessToken = document.cookie
           .split('; ')
@@ -116,6 +120,9 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
         setCourseImage(data.courseBanner);
       } catch (error) {
         console.error('Error loading course:', error);
+        toast.error('Failed to load course');
+      } finally {
+        setIsLoading(false);  // Stop loading
       }
     };
 
@@ -137,7 +144,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
   };
 
   if (!course) {
-    return <div>Loading...</div>;
+    return <Loader/>;
   }
 
   return (
@@ -369,12 +376,13 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
               {/* Curriculum Items */}
               <div className="space-y-3 sm:space-y-4">
-                {course.curriculum?.map((item, index) => (
+                {[...course.curriculum].reverse().map((item, index) => (
                   <div key={index} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full 
+                      <div className="w-8 h-8 bg-red-100 dark:bg-gray-700 rounded-full 
                                     flex items-center justify-center text-gray-500 dark:text-gray-400">
                         {item.isCompleted ? '✓' : ''}
+                        <img src={course.logo} alt="" className="w-full h-full object-contain relative z-10" />
                       </div>
                       <div className="flex-grow">
                         <h3 className="font-medium text-gray-900 dark:text-white">{item.title}</h3>

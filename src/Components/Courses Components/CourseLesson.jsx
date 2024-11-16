@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiClock, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { FiClock, FiArrowLeft, FiCheck, FiArrowRight } from 'react-icons/fi';
 import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import parse from 'html-react-parser';
@@ -8,6 +8,8 @@ import Navbar_main from '../Navbar Components/Navbar_main';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import config from '../../config/apiConfig';
+import './Course.css';
+import Loader from '../Common/Loader';
 
 const CourseLesson = () => {
   const { id, lessonId } = useParams();
@@ -16,21 +18,23 @@ const CourseLesson = () => {
   const [progress, setProgress] = useState(0);
   const [courseImage, setCourseImage] = useState(null);
   const [currentSection, setCurrentSection] = useState('about');
+  const [readingProgress, setReadingProgress] = useState(0);
+  const scrollRef = useRef(null);
 
   const currentIndex = course?.curriculum?.findIndex(
     lesson => lesson.id === lessonId
   );
 
-  const nextLessonId = currentIndex < (course?.curriculum?.length - 1) 
-    ? course?.curriculum[currentIndex + 1]?.id 
-    : null;
-
-  const previousLessonId = currentIndex > 0 
+  const nextLessonId = currentIndex > 0 
     ? course?.curriculum[currentIndex - 1]?.id 
     : null;
 
-  const isFirstLesson = currentIndex === 0;
-  const isLastLesson = currentIndex === (course?.curriculum?.length - 1);
+  const previousLessonId = currentIndex < (course?.curriculum?.length - 1) 
+    ? course?.curriculum[currentIndex + 1]?.id 
+    : null;
+
+  const isFirstLesson = currentIndex === (course?.curriculum?.length - 1);
+  const isLastLesson = currentIndex === 0;
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -79,6 +83,39 @@ const CourseLesson = () => {
     }
   }, [id, lessonId]);
 
+  useEffect(() => {
+    const calculateReadingProgress = () => {
+      if (!scrollRef.current || currentSection === 'about') {
+        setReadingProgress(0);
+        return;
+      }
+      
+      const element = scrollRef.current;
+      const totalHeight = element.scrollHeight - element.clientHeight;
+      const windowScrollTop = element.scrollTop;
+      
+      if (windowScrollTop === 0) {
+        setReadingProgress(0);
+      } else if (windowScrollTop + element.clientHeight >= element.scrollHeight - 10) {
+        setReadingProgress(100);
+      } else {
+        const progress = (windowScrollTop / totalHeight) * 100;
+        setReadingProgress(Math.round(progress));
+      }
+    };
+
+    const contentElement = scrollRef.current;
+    if (contentElement) {
+      contentElement.addEventListener('scroll', calculateReadingProgress);
+    }
+
+    return () => {
+      if (contentElement) {
+        contentElement.removeEventListener('scroll', calculateReadingProgress);
+      }
+    };
+  }, [currentLesson, currentSection]);
+
   const handleSectionClick = (section) => {
     setCurrentSection(section);
     if (section !== 'about') {
@@ -92,7 +129,9 @@ const CourseLesson = () => {
   if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-pulse text-gray-600 dark:text-gray-300">Loading...</div>
+        <div>
+          <Loader/>
+        </div>
       </div>
     );
   }
@@ -172,9 +211,79 @@ const CourseLesson = () => {
               margin: 0;
               padding: 0;
             }
+
+            /* Code block styling */
+            .lesson-content pre,
+            .lesson-content code {
+              background-color: #f6f8fa;  /* Light gray background */
+              border: 1px solid #e1e4e8;  /* Light border */
+              border-radius: 6px;
+              padding: 16px;
+              margin: 8px 0;
+              font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+              font-size: 14px;
+              line-height: 1.45;
+              overflow-x: auto;
+              color: #24292e;  /* Dark text color */
+            }
+
+            /* Dark mode styles */
+            @media (prefers-color-scheme: dark) {
+              .lesson-content pre,
+              .lesson-content code {
+                background-color: #1f2937;  /* Dark background */
+                border-color: #374151;
+                color: #e5e7eb;  /* Light text color */
+              }
+            }
+
+            /* Inline code styling */
+            .lesson-content code:not(pre code) {
+              background-color: rgba(175, 184, 193, 0.2);
+              padding: 0.2em 0.4em;
+              border-radius: 6px;
+              font-size: 85%;
+            }
+
+            /* Code block header (for language name) */
+            .lesson-content pre::before {
+              content: attr(data-language);
+              display: block;
+              background-color: #f1f5f9;
+              padding: 4px 16px;
+              margin: -16px -16px 16px -16px;
+              border-bottom: 1px solid #e1e4e8;
+              border-radius: 6px 6px 0 0;
+              font-size: 12px;
+              color: #57606a;
+            }
+
+            /* Copy button styles */
+            .code-block-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background-color: #f1f5f9;
+              padding: 8px 16px;
+              border-bottom: 1px solid #e1e4e8;
+            }
+
+            .copy-button {
+              padding: 4px 8px;
+              background-color: transparent;
+              border: 1px solid #d1d5db;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 12px;
+              color: #57606a;
+            }
+
+            .copy-button:hover {
+              background-color: #f3f4f6;
+            }
           `}
         </style>
-        <div className="ql-editor">
+        <div className="ql-editor bg-white dark:bg-gray-800">
           {parse(sanitizedContent)}
         </div>
       </div>
@@ -277,38 +386,67 @@ const CourseLesson = () => {
               </div>
               
               {/* Lesson buttons - Updated styling */}
-              {course?.curriculum?.map((lesson, index) => (
-                <button
-                  key={lesson.id}
-                  onClick={() => handleSectionClick(lesson.id)}
-                  className={`flex items-start p-3 rounded-lg mb-2 transition-all duration-300 w-full
-                    ${lesson.id === lessonId
-                      ? 'bg-white text-gray-900 shadow-sm' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                >
-                  <div className="flex items-start gap-3 w-full">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0
-                      ${lesson.isCompleted 
-                        ? 'bg-green-100' 
-                        : 'bg-gray-200'}`}
-                    >
-                      {lesson.isCompleted ? (
-                        <FiCheck className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <span className="text-sm text-gray-600">{index + 1}</span>
-                      )}
+              {[...course?.curriculum || []].reverse().map((lesson, index) => (
+                <div key={lesson.id} className="relative flex items-center">
+                  {/* Progress Circle */}
+                  <div className="absolute -left-2 flex items-center justify-center">
+                    <div className="relative w-8 h-8">
+                      {/* Background Circle */}
+                      <svg className="w-full h-full" viewBox="0 0 36 36">
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="16"
+                          fill="none"
+                          className="stroke-current text-gray-200 dark:text-gray-700"
+                          strokeWidth="2"
+                        />
+                        {/* Progress Circle */}
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="16"
+                          fill="none"
+                          className="stroke-current text-blue-500"
+                          strokeWidth="2"
+                          strokeDasharray={100}
+                          strokeDashoffset={currentLesson?.id === lesson.id && currentSection !== 'about' 
+                            ? 100 - readingProgress 
+                            : 100}
+                          transform="rotate(-90 18 18)"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      {/* Center Number/Check */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {lesson.isCompleted ? (
+                          <FiCheck className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <span className="text-sm text-gray-600">{index + 1}</span>
+                        )}
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Lesson Button */}
+                  <button
+                    onClick={() => handleSectionClick(lesson.id)}
+                    className={`w-full ml-8 flex items-center gap-3 p-3 rounded-lg transition-colors
+                      ${currentLesson?.id === lesson.id
+                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                  >
                     <div className="flex flex-col items-start text-left">
                       <div className="text-sm font-medium break-words w-full">{lesson.title}</div>
                       {lesson.duration && (
                         <div className="text-xs text-gray-500 flex items-center gap-1">
-                          {/* <FiClock className="w-3 h-3" /> */}
-                          {/* <span>{lesson.duration}</span> */}
+                          <FiClock className="w-3 h-3" />
+                          <span>{lesson.duration}</span>
                         </div>
                       )}
                     </div>
-                  </div>
-                </button>
+                  </button>
+                </div>
               ))}
 
             </div>
@@ -316,7 +454,11 @@ const CourseLesson = () => {
         </div>
 
         {/* Main Content - Adjusted margin and max-width */}
-        <div className="ml-72 flex-1">
+        <div 
+          ref={scrollRef}
+          className="ml-72 flex-1 overflow-y-auto"
+          style={{ height: 'calc(100vh - 56px)' }}
+        >
           {/* Header Section with Gradient */}
           <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-8 border-b dark:border-gray-700">
             <div className="max-w-4xl mx-auto">
@@ -405,24 +547,28 @@ const CourseLesson = () => {
               
               {/* Navigation Buttons - Updated Style */}
               <div className="mt-12 flex items-center justify-between border-t dark:border-gray-700 pt-6">
-                {!isFirstLesson && (
-                  <Link 
-                    to={`/courses/${id}/lesson/${previousLessonId}`}
-                    className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-                  >
-                    <span>←</span>
-                    <span>Previous</span>
-                  </Link>
-                )}
-                
-                {!isLastLesson && (
-                  <Link 
-                    to={`/courses/${id}/lesson/${nextLessonId}`}
-                    className="flex items-center gap-2 text-blue-500 hover:text-blue-600 ml-auto transition-colors"
-                  >
-                    <span>Next</span>
-                    <span>→</span>
-                  </Link>
+                {currentSection !== 'about' && (
+                  <>
+                    {!isFirstLesson && previousLessonId && (
+                      <Link 
+                        to={`/courses/${id}/lesson/${previousLessonId}`}
+                        className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                      >
+                        <FiArrowLeft className="w-4 h-4" />
+                        <span>Previous Lesson</span>
+                      </Link>
+                    )}
+                    
+                    {!isLastLesson && nextLessonId && (
+                      <Link 
+                        to={`/courses/${id}/lesson/${nextLessonId}`}
+                        className="flex items-center gap-2 text-blue-500 hover:text-blue-600 ml-auto transition-colors"
+                      >
+                        <span>Next Lesson</span>
+                        <FiArrowRight className="w-4 h-4" />
+                      </Link>
+                    )}
+                  </>
                 )}
               </div>
             </div>

@@ -1,0 +1,105 @@
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.loader-container.small {
+  min-height: 100px;
+  transform: scale(0.6);
+}
+
+.loader-container.large {
+  min-height: 300px;
+  transform: scale(1.2);
+}
+
+.loading-text {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  color: #666;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.book {
+  position: relative;
+  width: 50px;
+  height: 70px;
+  transform-style: preserve-3d;
+  transform: rotateX(60deg) rotateY(0deg) rotateZ(-30deg);
+  animation: book-bounce 1.5s ease infinite;
+}
+
+@keyframes book-bounce {
+  0%, 100% { transform: rotateX(60deg) rotateY(0deg) rotateZ(-30deg) translateZ(0); }
+  50% { transform: rotateX(60deg) rotateY(0deg) rotateZ(-30deg) translateZ(10px); }
+}
+
+.book__pg-shadow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateZ(-10px);
+  background-color: rgba(0, 0, 0, 0.25);
+  filter: blur(5px);
+  animation: shadow-bounce 1.5s ease infinite;
+}
+
+@keyframes shadow-bounce {
+  0%, 100% { transform: translateZ(-10px) scale(1); opacity: 1; }
+  50% { transform: translateZ(-10px) scale(0.8); opacity: 0.5; }
+}
+
+.book__pg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  transform-origin: left center;
+  transition: transform 0.5s ease;
+  animation: page-flip 1.5s ease infinite;
+}
+
+.book__pg--2 { animation-delay: 0.1s; background-color: #f8f8f8; }
+.book__pg--3 { animation-delay: 0.2s; background-color: #f1f1f1; }
+.book__pg--4 { animation-delay: 0.3s; background-color: #eaeaea; }
+.book__pg--5 { animation-delay: 0.4s; background-color: #e3e3e3; }
+
+@keyframes page-flip {
+  0% { transform: rotateY(0deg); }
+  20% { transform: rotateY(-30deg); }
+  35% { transform: rotateY(-120deg); }
+  50% { transform: rotateY(-120deg); }
+  65% { transform: rotateY(-120deg); }
+  80% { transform: rotateY(-30deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .loading-text {
+    color: #a3a3a3;
+  }
+  
+  .book__pg {
+    background-color: #2a2a2a;
+  }
+  
+  .book__pg--2 { background-color: #2d2d2d; }
+  .book__pg--3 { background-color: #303030; }
+  .book__pg--4 { background-color: #333333; }
+  .book__pg--5 { background-color: #363636; }
+}

@@ -28,6 +28,7 @@ import Cookies from 'js-cookie';
 import ProfileSettings from './Components/Profile Components/ProfileSettings';
 import BecomeInstructor from './Components/Instructor/BecomeInstructor';
 import Swal from 'sweetalert2';
+import Loader from './Components/Common/Loader';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -110,6 +111,7 @@ function App() {
               <Route path="/courses/:id/lesson/:lessonId" element={<CourseLesson />} />
               <Route path="/profile" element={<ProfileSettings />} />
               <Route path="/instructor" element={<BecomeInstructor />} />
+              <Route path="/loader" element={<Loader/>} />
               
               {/* Contact Route - Redirects to external URL */} 
               <Route

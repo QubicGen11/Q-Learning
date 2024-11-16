@@ -9,7 +9,6 @@ import CourseContent from './CourseContent';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import config from '../../config/apiConfig';
 
 // Register modules
 Quill.register('modules/imageResize', ImageResize);
@@ -428,8 +427,8 @@ const CourseManager = () => {
       // Determine if we're creating or updating
       const isUpdating = currentCourse?.id;
       const url = isUpdating 
-        ? `${config.CURRENT_URL}/qlms/updateCourse/${currentCourse.id}`
-        : `${config.CURRENT_URL}/qlms/createCourse/`;
+        ? `http://localhost:8089/qlms/updateCourse/${currentCourse.id}`
+        : 'http://localhost:8089/qlms/createCourse/';
 
       const response = await fetch(url, {
         method: isUpdating ? 'PUT' : 'POST',
@@ -466,7 +465,12 @@ const CourseManager = () => {
     }
   };
 
-
+  // Handle course deletion
+  const handleDelete = (id) => {
+    const updatedCourses = courses.filter(course => course.id !== id);
+    localStorage.setItem('courses', JSON.stringify(updatedCourses));
+    setCourses(updatedCourses);
+  };
 
   // Handle course editing
   const handleEdit = (course) => {
@@ -702,7 +706,7 @@ const CourseManager = () => {
     const fetchCourses = async () => {
       try {
         const accessToken = Cookies.get('accessToken');
-        const response = await fetch(`${config.CURRENT_URL}/qlms/allCourses`, {
+        const response = await fetch('http://localhost:8089/qlms/allCourses', {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
@@ -785,7 +789,7 @@ const CourseManager = () => {
   const handleEditCourse = async (courseId) => {
     try {
       const accessToken = Cookies.get('accessToken');
-      const response = await fetch(`${config.CURRENT_URL}/qlms/getCourseById/${courseId}`, {
+      const response = await fetch(`http://localhost:8089/qlms/getCourseById/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -891,7 +895,7 @@ const CourseManager = () => {
       if (result.isConfirmed) {
         try {
           const accessToken = Cookies.get('accessToken');
-          const response = await fetch(`${config.CURRENT_URL}/qlms/deleteCourse/${courseId}`, {
+          const response = await fetch(`http://localhost:8089/qlms/deleteCourse/${courseId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${accessToken}`
@@ -974,16 +978,6 @@ const CourseManager = () => {
                     setActiveTab('aboutCourse');
                     setActiveLesson(null);
                   }}
-                  
-                />
-                <SidebarItem 
-                  label="Create Exam" 
-                  isActive={activeTab === 'exam'}
-                  onClick={() => {
-                    setActiveTab('exam');
-                    setActiveLesson(null);
-                  }}
-                  
                 />
               </div>
             </div>
