@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart } from 'react-icons/fi';
 import Navbar_main from '../Navbar Components/Navbar_main';
 import CourseCommunity from './CourseCommunity';
+import config from '../../config/apiConfig';
 // import { div } from 'three/webgpu';
 
 const CourseContent = ({ previewMode = false, previewData = null }) => {
@@ -62,7 +63,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
           .find(row => row.startsWith('accessToken='))
           ?.split('=')[1];
 
-        const response = await fetch(`http://localhost:8089/qlms/getCourseById/${id}`, {
+        const response = await fetch(`${config.CURRENT_URL}/qlms/getCourseById/${id}`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'

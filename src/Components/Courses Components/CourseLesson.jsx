@@ -7,6 +7,7 @@ import parse from 'html-react-parser';
 import Navbar_main from '../Navbar Components/Navbar_main';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import config from '../../config/apiConfig';
 
 const CourseLesson = () => {
   const { id, lessonId } = useParams();
@@ -35,7 +36,7 @@ const CourseLesson = () => {
     const fetchCourseData = async () => {
       try {
         const accessToken = Cookies.get('accessToken');
-        const response = await axios.get(`http://localhost:8089/qlms/getCourseById/${id}`, {
+        const response = await axios.get(`${config.CURRENT_URL}/qlms/getCourseById/${id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`
           }

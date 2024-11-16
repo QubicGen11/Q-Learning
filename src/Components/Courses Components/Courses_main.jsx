@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiSearch, FiMoreVertical, FiClock } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Navbar_main from '../Navbar Components/Navbar_main';
+import config from '../../config/apiConfig';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,7 +95,7 @@ const Courses_main = () => {
           .find(row => row.startsWith('accessToken='))
           ?.split('=')[1];
 
-        const response = await fetch('http://localhost:8089/qlms/allCourses', {
+        const response = await fetch(`${config.CURRENT_URL}/qlms/allCourses`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'

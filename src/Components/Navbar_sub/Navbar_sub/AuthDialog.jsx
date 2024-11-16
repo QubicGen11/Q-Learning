@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowLeft, FaEnvelope, FaGithub, FaGoogle, FaLinkedin } from 'react-icons/fa';
 import { EmailForm } from './EmailForm';
 import { toast, Toaster } from 'react-hot-toast';
+import config from '../../../config/apiConfig';
 
 export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -14,10 +15,10 @@ export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) =>
         setShowEmailForm(true);
         break;
       case 'google':
-        window.location.href = 'http://localhost:8089/qlms/auth/google';
+        window.location.href = `${config.CURRENT_URL}/qlms/auth/google`;
         break;
       case 'github':
-        window.location.href = 'http://localhost:8089/qlms/auth/github';
+        window.location.href = `${config.CURRENT_URL}/qlms/auth/github`;
         break;
       default:
         toast.error('This login method is not available yet');

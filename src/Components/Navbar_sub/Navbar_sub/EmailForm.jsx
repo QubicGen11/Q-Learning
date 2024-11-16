@@ -4,6 +4,7 @@ import { FaArrowLeft, FaLock, FaEnvelope } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import { OTPInput } from './OTPInput';
+import config from '../../../config/apiConfig';
 
 export const EmailForm = ({ isSignUp, onClose }) => {
   const [formData, setFormData] = useState({
@@ -51,7 +52,7 @@ export const EmailForm = ({ isSignUp, onClose }) => {
   const handleSendLoginOTP = async (e) => {
     e?.preventDefault();
     try {
-      const response = await fetch('http://localhost:8089/qlms/sendOtp', {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/sendOtp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export const EmailForm = ({ isSignUp, onClose }) => {
 
   const handleOTPLogin = async () => {
     try {
-      const response = await fetch('http://localhost:8089/qlms/loginWithOtp', {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/loginWithOtp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +124,7 @@ export const EmailForm = ({ isSignUp, onClose }) => {
   const handlePasswordLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8089/qlms/loginWithPassword', {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/loginWithPassword`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +176,7 @@ export const EmailForm = ({ isSignUp, onClose }) => {
 
     try {
       // First step: Send email for registration
-      const response = await fetch('http://localhost:8089/qlms/register', {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +202,7 @@ export const EmailForm = ({ isSignUp, onClose }) => {
 
   const handleResendVerificationCode = async () => {
     try {
-      const response = await fetch('http://localhost:8089/qlms/sendOtp', {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/sendOtp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +228,7 @@ export const EmailForm = ({ isSignUp, onClose }) => {
   const handleVerification = async () => {
     try {
       // Complete registration with all details and verification code
-      const response = await fetch('http://localhost:8089/qlms/verifyRegistration', {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/verifyRegistration`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
