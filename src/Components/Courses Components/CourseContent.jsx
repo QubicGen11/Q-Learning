@@ -6,6 +6,8 @@ import CourseCommunity from './CourseCommunity';
 import config from '../../config/apiConfig';
 import Loader from '../Common/Loader';
 import { toast } from 'react-hot-toast';
+import DOMPurify from 'dompurify';
+import parse from 'html-react-parser';
 // import { div } from 'three/webgpu';
 
 const CourseContent = ({ previewMode = false, previewData = null }) => {
@@ -113,7 +115,8 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
           prerequisites: data.coursePreRequisites.map(prereq => ({
             required: prereq.preRequisites.preRequisiteRequired,
             level: prereq.preRequisites.preRequisiteLevel
-          }))
+          })),
+          coursePreRequisites: data.coursePreRequisites || []
         };
 
         setCourse(processedCourse);
@@ -272,34 +275,34 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
               {/* Prerequisites Section */}
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 
-                             text-gray-900 dark:text-white">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
                   <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
                   Prerequisites
                 </h2>
-                {course?.coursePreRequisites && (
-                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                    {course.coursePreRequisites.map((prereq) => (
-                      <div key={prereq.id} className="space-y-2">
-                        {prereq?.preRequisites && (
-                          <>
-                            <div 
-                              className="prose prose-sm dark:prose-invert text-gray-600 dark:text-white"
-                              dangerouslySetInnerHTML={{ 
-                                __html: prereq.preRequisites.preRequisiteRequired 
-                              }}
-                            />
-                            <div className="flex items-center gap-2 mt-2">
+                
+                <div className=" dark:bg-gray-800 p-4 rounded-lg">
+                  {course?.coursePreRequisites?.map((prereq) => (
+                    <div key={prereq.id} className="mb-4">
+                      {prereq?.preRequisites?.preRequisiteRequired && (
+                        <div className="space-y-4">
+                          <div 
+                            className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-200"
+                          >
+                            {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))}
+                          </div>
+                          
+                          {prereq.preRequisites.preRequisiteLevel && (
+                            <div className="mt-2">
                               <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded">
                                 Level: {prereq.preRequisites.preRequisiteLevel}
                               </span>
                             </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Course Audience */}

@@ -25,16 +25,16 @@ const CourseLesson = () => {
     lesson => lesson.id === lessonId
   );
 
-  const nextLessonId = currentIndex > 0 
-    ? course?.curriculum[currentIndex - 1]?.id 
-    : null;
-
-  const previousLessonId = currentIndex < (course?.curriculum?.length - 1) 
+  const nextLessonId = currentIndex < (course?.curriculum?.length - 1) 
     ? course?.curriculum[currentIndex + 1]?.id 
     : null;
 
-  const isFirstLesson = currentIndex === (course?.curriculum?.length - 1);
-  const isLastLesson = currentIndex === 0;
+  const previousLessonId = currentIndex > 0 
+    ? course?.curriculum[currentIndex - 1]?.id 
+    : null;
+
+  const isFirstLesson = currentIndex === 0;
+  const isLastLesson = currentIndex === (course?.curriculum?.length - 1);
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -364,7 +364,7 @@ const CourseLesson = () => {
                 <span>INTRODUCTION</span>
               </div>
               
-              {/* About this course button - Updated styling */}
+              {/* About this course button */}
               <button 
                 onClick={() => handleSectionClick('about')}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors
@@ -385,8 +385,8 @@ const CourseLesson = () => {
                 <span>COURSE CONTENT</span>
               </div>
               
-              {/* Lesson buttons - Updated styling */}
-              {[...course?.curriculum || []].reverse().map((lesson, index) => (
+              {/* Changed from reverse to normal order */}
+              {course?.curriculum?.map((lesson, index) => (
                 <div key={lesson.id} className="relative flex items-center">
                   {/* Progress Circle */}
                   <div className="absolute -left-2 flex items-center justify-center">
@@ -448,7 +448,6 @@ const CourseLesson = () => {
                   </button>
                 </div>
               ))}
-
             </div>
           </div>
         </div>
