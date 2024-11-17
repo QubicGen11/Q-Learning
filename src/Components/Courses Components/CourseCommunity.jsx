@@ -43,6 +43,7 @@ const CourseCommunity = ({ courseId }) => {
   const [replyContent, setReplyContent] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [likedComments, setLikedComments] = useState(new Set());
 
   useEffect(() => {
     fetchComments().catch(error => console.error("Error initializing comments:", error));
@@ -58,11 +59,29 @@ const CourseCommunity = ({ courseId }) => {
     }
 
     try {
+      // Get comments
       const commentsResponse = await axios.get(
         `http://localhost:8089/qlms/getAllCourseComments/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      // Get liked status for each comment
+      const likedStatusSet = new Set();
+      for (const comment of commentsResponse.data) {
+        try {
+          const likeStatusResponse = await axios.get(
+            `http://localhost:8089/qlms/isCommentLiked/${comment.id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (likeStatusResponse.data.isLiked) {
+            likedStatusSet.add(comment.id);
+          }
+        } catch (error) {
+          console.error(`Error fetching like status for comment ${comment.id}:`, error);
+        }
+      }
+
+      setLikedComments(likedStatusSet);
       setDiscussions(commentsResponse.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -141,6 +160,50 @@ const CourseCommunity = ({ courseId }) => {
     }
   };
 
+  const handleLikeComment = async (discussionId) => {
+    const token = getAccessTokenFromCookie();
+    if (!token) {
+      console.error("No access token found in cookies");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:8089/qlms/likeAComment',
+        { commentId: discussionId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Toggle like status
+      setLikedComments(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(discussionId)) {
+          newSet.delete(discussionId);
+        } else {
+          newSet.add(discussionId);
+        }
+        return newSet;
+      });
+
+      // Update like count in discussions
+      setDiscussions(prevDiscussions =>
+        prevDiscussions.map(discussion => {
+          if (discussion.id === discussionId) {
+            const likeDelta = response.data.message === "Comment liked" ? 1 : -1;
+            return {
+              ...discussion,
+              likes: (discussion.likes || 0) + likeDelta
+            };
+          }
+          return discussion;
+        })
+      );
+    } catch (error) {
+      console.error("Error liking comment:", error);
+      setError("Failed to like comment");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {error && <div className="text-red-500">{error}</div>}
@@ -205,10 +268,16 @@ const CourseCommunity = ({ courseId }) => {
 
               {/* Actions */}
               <div className="flex items-center gap-6 text-sm mb-4">
-                <button className="flex items-center gap-2 text-gray-500 dark:text-gray-400 
-                                 hover:text-blue-500 dark:hover:text-blue-400">
-                  <FiThumbsUp />
-                  <span>{discussion.likes} Likes</span>
+                <button 
+                  onClick={() => handleLikeComment(discussion.id)}
+                  className={`flex items-center gap-2 ${
+                    likedComments.has(discussion.id)
+                      ? 'text-blue-500 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400'
+                  }`}
+                >
+                  <FiThumbsUp className={likedComments.has(discussion.id) ? 'fill-current' : ''} />
+                  <span>{discussion.likes || 0} Likes</span>
                 </button>
                 <button 
                   onClick={() => setReplyingTo(discussion.id)}
