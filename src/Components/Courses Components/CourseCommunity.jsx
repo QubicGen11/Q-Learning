@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiMessageSquare, FiThumbsUp } from 'react-icons/fi';
 import axios from 'axios';
 import Loader from '../Common/Loader';
+import config from '../../config/apiConfig';
 
 // Utility function to retrieve access token from cookies
 const getAccessTokenFromCookie = () => {
@@ -61,7 +62,7 @@ const CourseCommunity = ({ courseId }) => {
     try {
       // Get comments
       const commentsResponse = await axios.get(
-        `http://localhost:8089/qlms/getAllCourseComments/${courseId}`,
+        `${config.CURRENT_URL}/qlms/getAllCourseComments/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -70,7 +71,7 @@ const CourseCommunity = ({ courseId }) => {
       for (const comment of commentsResponse.data) {
         try {
           const likeStatusResponse = await axios.get(
-            `http://localhost:8089/qlms/isCommentLiked/${comment.id}`,
+            `${config.CURRENT_URL}/qlms/isCommentLiked/${comment.id}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (likeStatusResponse.data.isLiked) {
@@ -103,7 +104,7 @@ const CourseCommunity = ({ courseId }) => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8089/qlms/createComment',
+        `${config.CURRENT_URL}/qlms/createComment`,
         { 
           comment: newPost, 
           courseId 
@@ -130,7 +131,7 @@ const CourseCommunity = ({ courseId }) => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8089/qlms/newReply',
+        `${config.CURRENT_URL}/qlms/newReply`,
         {
           reply: replyContent,
           commentId: discussionId,
@@ -169,7 +170,7 @@ const CourseCommunity = ({ courseId }) => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8089/qlms/likeAComment',
+        `${config.CURRENT_URL}/qlms/likeAComment`,
         { commentId: discussionId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
