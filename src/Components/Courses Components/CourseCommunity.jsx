@@ -3,6 +3,7 @@ import { FiMessageSquare, FiThumbsUp } from 'react-icons/fi';
 import axios from 'axios';
 import Loader from '../Common/Loader';
 import config from '../../config/apiConfig';
+import { toast } from 'react-hot-toast';
 
 // Utility function to retrieve access token from cookies
 const getAccessTokenFromCookie = () => {
@@ -44,7 +45,19 @@ const CourseCommunity = ({ courseId }) => {
   const [replyContent, setReplyContent] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [likedComments, setLikedComments] = useState(new Set());
+  const [likedComments, setLikedComments] = useState(() => {
+    // Initialize from localStorage if available
+    const saved = localStorage.getItem(`likedComments_${courseId}`);
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  // Save liked comments to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(
+      `likedComments_${courseId}`,
+      JSON.stringify([...likedComments])
+    );
+  }, [likedComments, courseId]);
 
   useEffect(() => {
     fetchComments().catch(error => console.error("Error initializing comments:", error));
@@ -66,27 +79,44 @@ const CourseCommunity = ({ courseId }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Get liked status for each comment
-      const likedStatusSet = new Set();
-      for (const comment of commentsResponse.data) {
+      // Get likes count and replies for each comment
+      const commentsWithData = await Promise.all(commentsResponse.data.map(async (comment) => {
         try {
-          const likeStatusResponse = await axios.get(
-            `${config.CURRENT_URL}/qlms/isCommentLiked/${comment.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (likeStatusResponse.data.isLiked) {
-            likedStatusSet.add(comment.id);
-          }
-        } catch (error) {
-          console.error(`Error fetching like status for comment ${comment.id}:`, error);
-        }
-      }
+          const [likesResponse, repliesResponse] = await Promise.all([
+            axios.get(
+              `${config.CURRENT_URL}/qlms/getAllCommentLikes/${comment.id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.get(
+              `${config.CURRENT_URL}/qlms/getCommentReplies/${comment.id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            ).catch(error => {
+              console.warn(`Failed to fetch replies for comment ${comment.id}:`, error);
+              return { data: [] }; // Return empty array if replies fetch fails
+            })
+          ]);
 
-      setLikedComments(likedStatusSet);
-      setDiscussions(commentsResponse.data);
+          return {
+            ...comment,
+            likes: likesResponse.data.numberOfLikes || 0,
+            isLiked: false,
+            commentReply: repliesResponse.data || []
+          };
+        } catch (error) {
+          console.error(`Error fetching data for comment ${comment.id}:`, error);
+          return {
+            ...comment,
+            likes: 0,
+            isLiked: false,
+            commentReply: []
+          };
+        }
+      }));
+
+      setDiscussions(commentsWithData);
     } catch (error) {
       console.error("Error fetching comments:", error);
-      setError("Failed to load comments");
+      toast.error("Failed to load comments");
     } finally {
       setIsLoading(false);
     }
@@ -130,34 +160,44 @@ const CourseCommunity = ({ courseId }) => {
     }
 
     try {
+      // First make the API call to create reply with correct payload
       const response = await axios.post(
         `${config.CURRENT_URL}/qlms/newReply`,
         {
           reply: replyContent,
           commentId: discussionId,
-          courseId
+          courseId: courseId,
+          userId: getUserIdFromToken() // You'll need to implement this function
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Update discussions with new reply
-      setDiscussions(prevDiscussions => 
+      // Get fresh replies using correct endpoint
+      const repliesResponse = await axios.get(
+        `${config.CURRENT_URL}/qlms/getCommentReplies/${discussionId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update state with fresh data
+      setDiscussions(prevDiscussions =>
         prevDiscussions.map(discussion => {
           if (discussion.id === discussionId) {
             return {
               ...discussion,
-              commentReply: [...(discussion.commentReply || []), response.data.data]
+              commentReply: repliesResponse.data || []
             };
           }
           return discussion;
         })
       );
-      
+
       setReplyContent('');
       setReplyingTo(null);
+      toast.success('Reply posted successfully');
+
     } catch (error) {
       console.error("Error posting reply:", error);
-      setError("Failed to post reply");
+      toast.error("Failed to post reply");
     }
   };
 
@@ -169,39 +209,122 @@ const CourseCommunity = ({ courseId }) => {
     }
 
     try {
-      const response = await axios.post(
-        `${config.CURRENT_URL}/qlms/likeAComment`,
-        { commentId: discussionId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      // Toggle like status
-      setLikedComments(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(discussionId)) {
-          newSet.delete(discussionId);
-        } else {
-          newSet.add(discussionId);
-        }
-        return newSet;
-      });
-
-      // Update like count in discussions
+      // First update UI optimistically
       setDiscussions(prevDiscussions =>
         prevDiscussions.map(discussion => {
           if (discussion.id === discussionId) {
-            const likeDelta = response.data.message === "Comment liked" ? 1 : -1;
+            const newLikeCount = discussion.isLiked ? discussion.likes - 1 : discussion.likes + 1;
             return {
               ...discussion,
-              likes: (discussion.likes || 0) + likeDelta
+              likes: newLikeCount,
+              isLiked: !discussion.isLiked
             };
           }
           return discussion;
         })
       );
+
+      // Make API call to like/unlike
+      await axios.post(
+        `${config.CURRENT_URL}/qlms/likeAComment`,
+        { commentId: discussionId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Get fresh like count
+      const likesResponse = await axios.get(
+        `${config.CURRENT_URL}/qlms/getAllCommentLikes/${discussionId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update state with server response
+      setDiscussions(prevDiscussions =>
+        prevDiscussions.map(discussion => {
+          if (discussion.id === discussionId) {
+            return {
+              ...discussion,
+              likes: likesResponse.data.numberOfLikes,
+              isLiked: !discussion.isLiked
+            };
+          }
+          return discussion;
+        })
+      );
+
+      // Update localStorage
+      const likedComments = new Set(JSON.parse(localStorage.getItem(`likedComments_${courseId}`) || '[]'));
+      if (likedComments.has(discussionId)) {
+        likedComments.delete(discussionId);
+      } else {
+        likedComments.add(discussionId);
+      }
+      localStorage.setItem(`likedComments_${courseId}`, JSON.stringify([...likedComments]));
+
     } catch (error) {
       console.error("Error liking comment:", error);
-      setError("Failed to like comment");
+      // Revert optimistic update on error
+      setDiscussions(prevDiscussions =>
+        prevDiscussions.map(discussion => {
+          if (discussion.id === discussionId) {
+            const originalLikeCount = discussion.isLiked ? discussion.likes + 1 : discussion.likes - 1;
+            return {
+              ...discussion,
+              likes: originalLikeCount,
+              isLiked: !discussion.isLiked
+            };
+          }
+          return discussion;
+        })
+      );
+      toast.error("Failed to update like");
+    }
+  };
+
+  // Initialize liked state from localStorage
+  useEffect(() => {
+    const savedLikes = localStorage.getItem(`likedComments_${courseId}`);
+    if (savedLikes) {
+      const likedSet = new Set(JSON.parse(savedLikes));
+      setDiscussions(prev => 
+        prev.map(discussion => ({
+          ...discussion,
+          isLiked: likedSet.has(discussion.id)
+        }))
+      );
+    }
+  }, [courseId]);
+
+  // Add this useEffect to fetch fresh data periodically or on focus
+  useEffect(() => {
+    fetchComments();
+
+    // Refresh data when window gains focus
+    const handleFocus = () => {
+      fetchComments();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    // Optional: Periodic refresh
+    const intervalId = setInterval(fetchComments, 30000); // Refresh every 30 seconds
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(intervalId);
+    };
+  }, [courseId]);
+
+  // Add this utility function to get userId from token
+  const getUserIdFromToken = () => {
+    const token = getAccessTokenFromCookie();
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId; // Adjust this based on your token structure
+    } catch (error) {
+      console.error("Error extracting userId from token:", error);
+      return null;
     }
   };
 
@@ -272,12 +395,12 @@ const CourseCommunity = ({ courseId }) => {
                 <button 
                   onClick={() => handleLikeComment(discussion.id)}
                   className={`flex items-center gap-2 ${
-                    likedComments.has(discussion.id)
+                    discussion.isLiked
                       ? 'text-blue-500 dark:text-blue-400'
                       : 'text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400'
                   }`}
                 >
-                  <FiThumbsUp className={likedComments.has(discussion.id) ? 'fill-current' : ''} />
+                  <FiThumbsUp className={discussion.isLiked ? 'fill-current' : ''} />
                   <span>{discussion.likes || 0} Likes</span>
                 </button>
                 <button 
