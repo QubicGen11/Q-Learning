@@ -9,6 +9,33 @@ const getAccessTokenFromCookie = () => {
   return match ? match[2] : null;
 };
 
+// Add these utility functions at the top
+const getInitialAvatar = (userName) => {
+  if (!userName) return 'U';
+  return userName.charAt(0).toUpperCase();
+};
+
+// Function to get a consistent gradient based on the username
+const getGradientColor = (userName) => {
+  if (!userName) return 'bg-gradient-to-r from-gray-400 to-gray-500';
+  
+  // List of gradient combinations
+  const gradients = [
+    'bg-gradient-to-r from-pink-500 to-purple-500',
+    'bg-gradient-to-r from-blue-500 to-teal-500',
+    'bg-gradient-to-r from-green-400 to-blue-500',
+    'bg-gradient-to-r from-yellow-400 to-orange-500',
+    'bg-gradient-to-r from-indigo-500 to-purple-500',
+    'bg-gradient-to-r from-red-500 to-pink-500',
+    'bg-gradient-to-r from-teal-400 to-blue-500',
+    'bg-gradient-to-r from-orange-500 to-red-500'
+  ];
+  
+  // Use the first character's char code to select a gradient
+  const index = userName.charCodeAt(0) % gradients.length;
+  return gradients[index];
+};
+
 const CourseCommunity = ({ courseId }) => {
   const [discussions, setDiscussions] = useState([]);
   const [newPost, setNewPost] = useState('');
@@ -153,11 +180,14 @@ const CourseCommunity = ({ courseId }) => {
           {discussions.map((discussion) => (
             <div key={discussion.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <div className="flex items-center gap-3 mb-3">
-                <img
-                  src={discussion.user?.avatar || 'default-avatar.png'}
-                  alt={discussion.userName || 'Unknown User'}
-                  className="w-10 h-10 rounded-full"
-                />
+                {/* Discussion avatar with gradient */}
+                <div 
+                  className={`w-10 h-10 rounded-full ${getGradientColor(discussion.userName)} 
+                             text-white flex items-center justify-center font-semibold text-lg
+                             shadow-md transition-transform hover:scale-105`}
+                >
+                  {getInitialAvatar(discussion.userName)}
+                </div>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white">
                     {discussion.userName || 'Unknown User'}
@@ -192,20 +222,23 @@ const CourseCommunity = ({ courseId }) => {
 
               {/* Replies Section */}
               <div className="ml-8 space-y-4">
-                {discussion.replies?.map((reply) => (
+                {discussion.commentReply?.map((reply) => (
                   <div key={reply.id} className="border-l-2 border-gray-200 pl-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <img
-                        src={reply.user?.avatar || 'default-avatar.png'}
-                        alt={reply.userName || 'Unknown User'}
-                        className="w-8 h-8 rounded-full"
-                      />
+                      {/* Reply avatar with gradient */}
+                      <div 
+                        className={`w-8 h-8 rounded-full ${getGradientColor(reply.userName)} 
+                                   text-white flex items-center justify-center font-semibold
+                                   shadow-md transition-transform hover:scale-105`}
+                      >
+                        {getInitialAvatar(reply.userName)}
+                      </div>
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">
                           {reply.userName || 'Unknown User'}
                         </h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {reply.timestamp}
+                          {new Date(reply.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
