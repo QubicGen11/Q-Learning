@@ -325,12 +325,12 @@ const Navbar_main = () => {
         title="Sign Up"
         isSignUp={true}
       />
-      <button 
+      {/* <button 
         onClick={simulateTokenExpiration}
         className="px-4 py-2 bg-red-500 text-white rounded"
       >
         Test Token Expiration
-      </button>
+      </button> */}
     </>
   );
 }
