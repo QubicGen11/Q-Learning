@@ -5,7 +5,9 @@ const config = {
     DEPLOY_URL: 'https://dev-be.qubinest.com',
   
     // Current URL - change this line to switch between environments
-    CURRENT_URL: 'https://dev-be.qubinest.com'  // or 'https://dev-be.qubinest.com'
+    CURRENT_URL: 'http://localhost:8089'  
+    // CURRENT_URL: 'https://dev-be.qubinest.com'  
+    // or 'https://dev-be.qubinest.com'
   };
   
   export default config;

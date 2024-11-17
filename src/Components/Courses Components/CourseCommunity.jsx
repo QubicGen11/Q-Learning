@@ -1,83 +1,160 @@
-import React, { useState } from 'react';
-import { FiMessageSquare, FiThumbsUp, FiUser } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiMessageSquare, FiThumbsUp } from 'react-icons/fi';
+import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
+
+// Utility function to retrieve access token from cookies
+const getAccessTokenFromCookie = () => {
+  const match = document.cookie.match(new RegExp('(^| )accessToken=([^;]+)'));
+  return match ? match[2] : null;
+};
+
+// Utility function to decode the token and get user info
+const getUserInfoFromToken = (token) => {
+  try {
+    const decoded = jwtDecode(token);
+    return {
+      userId: decoded.userId,
+      userName: decoded.userName,
+    };
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
 
 const CourseCommunity = ({ courseId }) => {
-  const [discussions, setDiscussions] = useState([
-    {
-      id: 1,
-      user: {
-        name: 'John Doe',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-      },
-      content: 'Has anyone completed the final project? I need some guidance.',
-      likes: 5,
-      replies: [
-        {
-          id: 1,
-          user: {
-            name: 'Jane Smith',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-          },
-          content: 'I can help you with that!',
-          timestamp: '1 hour ago',
-        }
-      ],
-      timestamp: '2 hours ago',
-    },
-  ]);
+  const [discussions, setDiscussions] = useState([]);
   const [newPost, setNewPost] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyContent, setReplyContent] = useState('');
+  const [error, setError] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
 
-  const handlePostSubmit = (e) => {
+  useEffect(() => {
+    const token = getAccessTokenFromCookie();
+    if (token) {
+      const user = getUserInfoFromToken(token);
+      setUserInfo(user);
+    }
+    fetchComments().catch(error => console.error("Error initializing comments:", error));
+  }, []);
+
+  const fetchComments = async () => {
+    const token = getAccessTokenFromCookie();
+    if (!token) {
+      console.error("No access token found in cookies");
+      return;
+    }
+
+    try {
+      // First get all comments
+      const commentsResponse = await axios.get(
+        `http://localhost:8089/qlms/getAllCourseComments/${courseId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // For each comment, fetch its replies
+      const commentsWithReplies = await Promise.all(
+        commentsResponse.data.map(async (comment) => {
+          try {
+            const repliesResponse = await axios.get(
+              `http://localhost:8089/qlms/getCommentReplies/${comment.id}`,  // Adjust this endpoint to match your API
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            return {
+              ...comment,
+              replies: repliesResponse.data || []
+            };
+          } catch (error) {
+            console.error(`Error fetching replies for comment ${comment.id}:`, error);
+            return { ...comment, replies: [] };
+          }
+        })
+      );
+
+      setDiscussions(commentsWithReplies);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      setError("Failed to load comments");
+    }
+  };
+
+  const handlePostSubmit = async (e) => {
     e.preventDefault();
     if (!newPost.trim()) return;
 
-    const newDiscussion = {
-      id: discussions.length + 1,
-      user: {
-        name: 'Current User', // Replace with actual user data
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CurrentUser',
-      },
-      content: newPost,
-      likes: 0,
-      replies: [],
-      timestamp: 'Just now',
-    };
+    const token = getAccessTokenFromCookie();
+    if (!token) {
+      console.error("No access token found in cookies");
+      return;
+    }
 
-    setDiscussions([newDiscussion, ...discussions]);
-    setNewPost('');
+    try {
+      const response = await axios.post(
+        'http://localhost:8089/qlms/createComment',
+        { comment: newPost, courseId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setDiscussions([response.data.data, ...discussions]);
+      setNewPost('');
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      setError("Failed to post comment");
+    }
   };
 
-  const handleReplySubmit = (discussionId) => {
+  const handleReplySubmit = async (discussionId) => {
     if (!replyContent.trim()) return;
 
-    const newReply = {
-      id: Date.now(),
-      user: {
-        name: 'Current User', // Replace with actual user data
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CurrentUser',
-      },
-      content: replyContent,
-      timestamp: 'Just now',
-    };
+    const token = getAccessTokenFromCookie();
+    if (!token) {
+      console.error("No access token found in cookies");
+      return;
+    }
 
-    setDiscussions(discussions.map(discussion => {
-      if (discussion.id === discussionId) {
-        return {
-          ...discussion,
-          replies: [...(discussion.replies || []), newReply],
-        };
-      }
-      return discussion;
-    }));
+    try {
+      const response = await axios.post(
+        'http://localhost:8089/qlms/newReply',
+        {
+          reply: replyContent,
+          userId: userInfo?.userId,
+          courseId,
+          commentId: discussionId,
+          userName: userInfo?.userName
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    setReplyContent('');
-    setReplyingTo(null);
+      const newReply = {
+        ...response.data.data,
+        userName: userInfo?.userName
+      };
+
+      // Update local state immediately for instant feedback
+      setDiscussions(prevDiscussions => 
+        prevDiscussions.map(discussion => {
+          if (discussion.id === discussionId) {
+            return {
+              ...discussion,
+              replies: [...(discussion.replies || []), newReply]
+            };
+          }
+          return discussion;
+        })
+      );
+      
+      setReplyContent('');
+      setReplyingTo(null);
+    } catch (error) {
+      console.error("Error posting reply:", error);
+      setError("Failed to post reply");
+    }
   };
 
   return (
     <div className="space-y-6">
+      {error && <div className="text-red-500">{error}</div>}
       {/* Create New Post */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <form onSubmit={handlePostSubmit} className="p-4">
@@ -114,13 +191,13 @@ const CourseCommunity = ({ courseId }) => {
             {/* User Info */}
             <div className="flex items-center gap-3 mb-3">
               <img
-                src={discussion.user.avatar}
-                alt={discussion.user.name}
+                src={discussion.user?.avatar || 'default-avatar.png'}
+                alt={userInfo?.userName || 'Unknown User'}
                 className="w-10 h-10 rounded-full"
               />
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-white">
-                  {discussion.user.name}
+                  {userInfo?.userName || 'Unknown User'}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {discussion.timestamp}
@@ -130,7 +207,7 @@ const CourseCommunity = ({ courseId }) => {
 
             {/* Content */}
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              {discussion.content}
+              {discussion.comment}
             </p>
 
             {/* Actions */}
@@ -156,13 +233,13 @@ const CourseCommunity = ({ courseId }) => {
                 <div key={reply.id} className="border-l-2 border-gray-200 pl-4">
                   <div className="flex items-center gap-3 mb-2">
                     <img
-                      src={reply.user.avatar}
-                      alt={reply.user.name}
+                      src={reply.user?.avatar || 'default-avatar.png'}
+                      alt={reply.userName || 'Unknown User'}
                       className="w-8 h-8 rounded-full"
                     />
                     <div>
                       <h4 className="font-medium text-gray-900 dark:text-white">
-                        {reply.user.name}
+                        {reply.userName || userInfo?.userName || 'Unknown User'}
                       </h4>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {reply.timestamp}
@@ -170,7 +247,7 @@ const CourseCommunity = ({ courseId }) => {
                     </div>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300">
-                    {reply.content}
+                    {reply.reply}
                   </p>
                 </div>
               ))}
