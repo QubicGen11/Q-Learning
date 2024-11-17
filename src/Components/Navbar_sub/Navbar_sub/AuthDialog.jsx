@@ -1,193 +1,56 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle, Fade } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowLeft, FaEnvelope, FaGithub, FaGoogle, FaLinkedin } from 'react-icons/fa';
-import { EmailForm } from './EmailForm';
-import { toast, Toaster } from 'react-hot-toast';
-import config from '../../../config/apiConfig';
+import React from 'react';
+import { Dialog } from '@mui/material';
+import useAuthStore from '../../../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
-export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) => {
-  const [showEmailForm, setShowEmailForm] = useState(false);
+export const AuthDialog = ({ open, onClose }) => {
+  const navigate = useNavigate();
+  const { showStayLoggedIn } = useAuthStore();
 
-  const handleSocialAuth = (provider) => {
-    switch (provider) {
-      case 'email':
-        setShowEmailForm(true);
-        break;
-      case 'google':
-        window.location.href = `${config.CURRENT_URL}/qlms/auth/google`;
-        break;
-      case 'github':
-        window.location.href = `${config.CURRENT_URL}/qlms/auth/github`;
-        break;
-      default:
-        toast.error('This login method is not available yet');
-    }
+  const handleStayLoggedIn = async () => {
+    const { refreshSession } = useAuthStore.getState();
+    await refreshSession();
+    onClose(); // Close the dialog after refresh
   };
 
-  const socialProviders = [
-    { id: 'email', name: 'Email', icon: <FaEnvelope className="w-5 h-5" />, primary: true },
-    { id: 'github', name: 'GitHub', icon: <FaGithub className="w-5 h-5" /> },
-    { id: 'google', name: 'Google', icon: <FaGoogle className="w-5 h-5" /> },
-    { id: 'linkedin', name: 'LinkedIn', icon: <FaLinkedin className="w-5 h-5" /> },
-  ];
-
-  const containerVariants = {
-    hidden: { 
-      opacity: 0,
-      scale: 0.98
-    },
-    visible: { 
-      opacity: 1,
-      scale: 1,
-      transition: { 
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-        duration: 0.5,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.98,
-      transition: { 
-        duration: 0.3,
-        ease: [0.4, 0, 1, 1]
-      }
-    }
+  const handleLogout = () => {
+    useAuthStore.getState().logout();
+    navigate('/login');
   };
 
-  const itemVariants = {
-    hidden: { 
-      y: 20, 
-      opacity: 0,
-      scale: 0.95
-    },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    },
-    exit: {
-      y: -20,
-      opacity: 0,
-      transition: {
-        duration: 0.3,
-        ease: [0.4, 0, 1, 1]
-      }
-    }
-  };
-
-  return (
-    <>
+  // Only show the Stay Logged In dialog
+  if (showStayLoggedIn) {
+    return (
       <Dialog 
         open={open} 
         onClose={onClose}
-        TransitionComponent={Fade}
-        TransitionProps={{ timeout: 500 }}
         PaperProps={{
           className: 'rounded-lg overflow-hidden',
-          style: { minWidth: '500px' }
+          style: { minWidth: '400px' }
         }}
       >
-        <motion.div
-          initial={false}
-          animate={{
-            backgroundColor: showEmailForm ? 'rgba(0,0,0,0.02)' : 'transparent'
-          }}
-          transition={{ duration: 0.6 }}
-          className="pb-4"
-        >
-          <DialogTitle className="flex items-center p-6">
-            {showEmailForm && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="mr-2 p-2 hover:bg-gray-100 rounded-full"
-                onClick={() => setShowEmailForm(false)}
-              >
-                <FaArrowLeft className="w-5 h-5" />
-              </motion.button>
-            )}
-            <motion.span 
-              className="text-2xl font-bold flex-grow text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4">Stay Logged In?</h2>
+          <p className="mb-6">Would you like to stay logged in?</p>
+          <div className="flex gap-4">
+            <button
+              onClick={handleStayLoggedIn}
+              className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
             >
-              {showEmailForm ? `${title} with Email` : title}
-            </motion.span>
-          </DialogTitle>
-
-          <DialogContent className="px-6">
-            <AnimatePresence mode="wait">
-              {customContent ? (
-                customContent
-              ) : showEmailForm ? (
-                <EmailForm 
-                  isSignUp={isSignUp} 
-                  onClose={onClose}
-                />
-              ) : (
-                <motion.div
-                  key="social"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="space-y-3"
-                >
-                  {socialProviders.map((provider) => (
-                    <motion.button
-                      key={provider.name}
-                      variants={itemVariants}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`w-full p-4 rounded-lg border flex items-center justify-center space-x-3 
-                        ${provider.primary ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'}`}
-                      onClick={() => handleSocialAuth(provider.id)}
-                    >
-                      {provider.icon}
-                      <span>{title} with {provider.name}</span>
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </DialogContent>
-        </motion.div>
+              Stay Logged In
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </Dialog>
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-        toastOptions={{
-          success: {
-            style: {
-              background: '#4CAF50',
-              color: 'white',
-            },
-            duration: 3000,
-          },
-          error: {
-            style: {
-              background: '#EF5350',
-              color: 'white',
-            },
-            duration: 3000,
-          },
-          style: {
-            borderRadius: '8px',
-            padding: '16px',
-            fontSize: '14px',
-            maxWidth: '500px',
-          },
-        }}
-      />
-    </>
-  );
+    );
+  }
+
+  // Return null if not showing Stay Logged In dialog
+  return null;
 };

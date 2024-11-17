@@ -45,6 +45,20 @@ const Navbar_main = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    const { checkTokenExpiration } = useAuthStore.getState();
+    
+    // Check immediately on mount
+    checkTokenExpiration();
+    
+    // Then check every minute
+    const intervalId = setInterval(() => {
+      checkTokenExpiration();
+    }, 60000); // Check every minute
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
   const handleLogout = () => {
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
@@ -123,6 +137,25 @@ const Navbar_main = () => {
       }
     />
   );
+
+  const simulateTokenExpiration = () => {
+    // Get current token
+    const currentToken = Cookies.get('accessToken');
+    if (currentToken) {
+      // Create an expired token (set expiration to 5 minutes ago)
+      const payload = JSON.parse(atob(currentToken.split('.')[1]));
+      payload.exp = Math.floor(Date.now() / 1000) - 300; // 5 minutes ago
+      
+      // Create new token with expired time
+      const expiredToken = `${currentToken.split('.')[0]}.${btoa(JSON.stringify(payload))}.${currentToken.split('.')[2]}`;
+      
+      // Set the expired token
+      Cookies.set('accessToken', expiredToken);
+      
+      // Trigger check
+      useAuthStore.getState().checkTokenExpiration();
+    }
+  };
 
   return (
     <>
@@ -292,6 +325,12 @@ const Navbar_main = () => {
         title="Sign Up"
         isSignUp={true}
       />
+      {/* <button 
+        onClick={simulateTokenExpiration}
+        className="px-4 py-2 bg-red-500 text-white rounded"
+      >
+        Test Token Expiration
+      </button> */}
     </>
   );
 }
