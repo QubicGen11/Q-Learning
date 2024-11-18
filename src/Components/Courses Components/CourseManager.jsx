@@ -9,6 +9,7 @@ import CourseContent from './CourseContent';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import Questions from './Questions';
 
 // Register modules
 Quill.register('modules/imageResize', ImageResize);
@@ -457,7 +458,7 @@ const CourseManager = () => {
       setIsEditMode(false);
       
       // Navigate to courses page
-      navigate('/courses');
+      // navigate('/courses');
       
     } catch (error) {
       console.error('Error saving course:', error);
@@ -976,6 +977,14 @@ const CourseManager = () => {
                   isActive={activeTab === 'aboutCourse'}
                   onClick={() => {
                     setActiveTab('aboutCourse');
+                    setActiveLesson(null);
+                  }}
+                />
+                <SidebarItem 
+                  label="Questions" 
+                  isActive={activeTab === 'Questions'}
+                  onClick={() => {
+                    setActiveTab('Questions');
                     setActiveLesson(null);
                   }}
                 />
@@ -1739,6 +1748,11 @@ const CourseManager = () => {
                   />
                 </div>
               </div>
+            )}
+
+            {/* Questions Tab */}
+            {activeTab === 'Questions' && (
+              <Questions />
             )}
           </form>
 
