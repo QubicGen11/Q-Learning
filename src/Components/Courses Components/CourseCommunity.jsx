@@ -73,13 +73,11 @@ const CourseCommunity = ({ courseId }) => {
     }
 
     try {
-      // Get comments
       const commentsResponse = await axios.get(
         `${config.CURRENT_URL}/qlms/getAllCourseComments/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Get likes count and replies for each comment
       const commentsWithData = await Promise.all(commentsResponse.data.map(async (comment) => {
         try {
           const [likesResponse, repliesResponse] = await Promise.all([
@@ -90,16 +88,13 @@ const CourseCommunity = ({ courseId }) => {
             axios.get(
               `${config.CURRENT_URL}/qlms/getCommentReplies/${comment.id}`,
               { headers: { Authorization: `Bearer ${token}` } }
-            ).catch(error => {
-              console.warn(`Failed to fetch replies for comment ${comment.id}:`, error);
-              return { data: [] }; // Return empty array if replies fetch fails
-            })
+            ).catch(() => ({ data: [] }))
           ]);
 
           return {
             ...comment,
-            likes: likesResponse.data.numberOfLikes || 0,
-            isLiked: false,
+            likes: likesResponse.data.numberOfLikes,
+            replies: repliesResponse.data || [],
             commentReply: repliesResponse.data || []
           };
         } catch (error) {
@@ -107,7 +102,7 @@ const CourseCommunity = ({ courseId }) => {
           return {
             ...comment,
             likes: 0,
-            isLiked: false,
+            replies: [],
             commentReply: []
           };
         }
@@ -209,73 +204,43 @@ const CourseCommunity = ({ courseId }) => {
     }
 
     try {
-      // First update UI optimistically
-      setDiscussions(prevDiscussions =>
-        prevDiscussions.map(discussion => {
-          if (discussion.id === discussionId) {
-            const newLikeCount = discussion.isLiked ? discussion.likes - 1 : discussion.likes + 1;
-            return {
-              ...discussion,
-              likes: newLikeCount,
-              isLiked: !discussion.isLiked
-            };
-          }
-          return discussion;
-        })
-      );
-
-      // Make API call to like/unlike
-      await axios.post(
+      // 1. Post the like
+      const likeResponse = await axios.post(
         `${config.CURRENT_URL}/qlms/likeAComment`,
-        { commentId: discussionId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          commentId: discussionId
+        },
+        { 
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
-      // Get fresh like count
-      const likesResponse = await axios.get(
+      // 2. Get updated like count
+      const updatedLikesResponse = await axios.get(
         `${config.CURRENT_URL}/qlms/getAllCommentLikes/${discussionId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
-      // Update state with server response
+      // 3. Update the discussions state with new like count
       setDiscussions(prevDiscussions =>
         prevDiscussions.map(discussion => {
           if (discussion.id === discussionId) {
             return {
               ...discussion,
-              likes: likesResponse.data.numberOfLikes,
-              isLiked: !discussion.isLiked
+              likes: updatedLikesResponse.data.numberOfLikes
             };
           }
           return discussion;
         })
       );
 
-      // Update localStorage
-      const likedComments = new Set(JSON.parse(localStorage.getItem(`likedComments_${courseId}`) || '[]'));
-      if (likedComments.has(discussionId)) {
-        likedComments.delete(discussionId);
-      } else {
-        likedComments.add(discussionId);
-      }
-      localStorage.setItem(`likedComments_${courseId}`, JSON.stringify([...likedComments]));
+      // Show success message
+      toast.success(likeResponse.data.message);
 
     } catch (error) {
       console.error("Error liking comment:", error);
-      // Revert optimistic update on error
-      setDiscussions(prevDiscussions =>
-        prevDiscussions.map(discussion => {
-          if (discussion.id === discussionId) {
-            const originalLikeCount = discussion.isLiked ? discussion.likes + 1 : discussion.likes - 1;
-            return {
-              ...discussion,
-              likes: originalLikeCount,
-              isLiked: !discussion.isLiked
-            };
-          }
-          return discussion;
-        })
-      );
       toast.error("Failed to update like");
     }
   };
@@ -394,11 +359,8 @@ const CourseCommunity = ({ courseId }) => {
               <div className="flex items-center gap-6 text-sm mb-4">
                 <button 
                   onClick={() => handleLikeComment(discussion.id)}
-                  className={`flex items-center gap-2 ${
-                    discussion.isLiked
-                      ? 'text-blue-500 dark:text-blue-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400'
-                  }`}
+                  className="flex items-center gap-2 text-gray-500 dark:text-gray-400 
+                           hover:text-blue-500 dark:hover:text-blue-400"
                 >
                   <FiThumbsUp className={discussion.isLiked ? 'fill-current' : ''} />
                   <span>{discussion.likes || 0} Likes</span>
