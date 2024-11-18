@@ -51,20 +51,25 @@ const Welcome = () => {
   }, []);
 
   return (
-    <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex items-center gap-4 mb-4">
-          <div className={`w-14 h-14 rounded-full bg-gradient-to-r ${gradientClass} flex items-center justify-center shadow-lg`}>
-            <span className="text-2xl font-bold text-white">
+    <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 w-full lg:block hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4">
+          <div 
+            className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r ${gradientClass} 
+                       flex items-center justify-center shadow-lg 
+                       transform transition-transform duration-300 hover:scale-105`}
+          >
+            <span className="text-xl sm:text-2xl font-bold text-white">
               {userName.charAt(0)}
             </span>
           </div>
           
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white 
+                           tracking-tight leading-tight">
               Welcome back, {userName}
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-1">
               Ready to continue learning?
             </p>
           </div>

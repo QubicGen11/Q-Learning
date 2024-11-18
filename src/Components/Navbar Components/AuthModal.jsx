@@ -29,8 +29,12 @@ const AuthModal = ({ open, handleClose, mode, userType }) => {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: '16px',
-          p: 2,
+          borderRadius: { xs: '0', sm: '16px' },
+          p: { xs: 2, sm: 3 },
+          m: { xs: 0, sm: 2 },
+          width: '100%',
+          position: { xs: 'absolute', sm: 'relative' },
+          bottom: { xs: 0, sm: 'auto' },
           background: 'linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%)',
         }
       }}
@@ -48,25 +52,41 @@ const AuthModal = ({ open, handleClose, mode, userType }) => {
       </IconButton>
 
       <DialogContent>
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h5" component="h2" fontWeight="bold" color="#0033A1" gutterBottom>
+        <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 4 } }}>
+          <Typography 
+            variant="h5" 
+            component="h2" 
+            fontWeight="bold" 
+            color="#0033A1" 
+            sx={{ 
+              fontSize: { xs: '1.25rem', sm: '1.5rem' },
+              mb: 1 
+            }}
+          >
             {getTitle()}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography 
+            variant="body1" 
+            color="text.secondary"
+            sx={{ 
+              fontSize: { xs: '0.875rem', sm: '1rem' } 
+            }}
+          >
             Choose your preferred way to continue
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
           <Button
             variant="outlined"
             startIcon={<GoogleIcon sx={{ color: '#DB4437' }} />}
             sx={{
-              py: 1.5,
-              px: 2,
+              py: { xs: 1, sm: 1.5 },
+              px: { xs: 1.5, sm: 2 },
               justifyContent: 'flex-start',
               borderColor: '#e0e0e0',
-              '&:hover': { borderColor: '#0033A1', bgcolor: '#f5f5f5' }
+              '&:hover': { borderColor: '#0033A1', bgcolor: '#f5f5f5' },
+              fontSize: { xs: '0.875rem', sm: '1rem' }
             }}
           >
             Continue with Google
@@ -76,11 +96,12 @@ const AuthModal = ({ open, handleClose, mode, userType }) => {
             variant="outlined"
             startIcon={<LinkedInIcon sx={{ color: '#0077b5' }} />}
             sx={{
-              py: 1.5,
-              px: 2,
+              py: { xs: 1, sm: 1.5 },
+              px: { xs: 1.5, sm: 2 },
               justifyContent: 'flex-start',
               borderColor: '#e0e0e0',
-              '&:hover': { borderColor: '#0033A1', bgcolor: '#f5f5f5' }
+              '&:hover': { borderColor: '#0033A1', bgcolor: '#f5f5f5' },
+              fontSize: { xs: '0.875rem', sm: '1rem' }
             }}
           >
             Continue with LinkedIn
@@ -90,36 +111,48 @@ const AuthModal = ({ open, handleClose, mode, userType }) => {
             variant="outlined"
             startIcon={<GitHubIcon />}
             sx={{
-              py: 1.5,
-              px: 2,
+              py: { xs: 1, sm: 1.5 },
+              px: { xs: 1.5, sm: 2 },
               justifyContent: 'flex-start',
               borderColor: '#e0e0e0',
-              '&:hover': { borderColor: '#0033A1', bgcolor: '#f5f5f5' }
+              '&:hover': { borderColor: '#0033A1', bgcolor: '#f5f5f5' },
+              fontSize: { xs: '0.875rem', sm: '1rem' }
             }}
           >
             Continue with GitHub
           </Button>
 
-          <Divider sx={{ my: 1 }}>
-            <Typography color="text.secondary" variant="body2">OR</Typography>
+          <Divider sx={{ my: { xs: 1, sm: 1.5 } }}>
+            <Typography 
+              color="text.secondary" 
+              variant="body2"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            >
+              OR
+            </Typography>
           </Divider>
 
           <Button
             variant="contained"
             startIcon={<EmailIcon />}
             sx={{
-              py: 1.5,
-              px: 2,
+              py: { xs: 1, sm: 1.5 },
+              px: { xs: 1.5, sm: 2 },
               bgcolor: '#0033A1',
-              '&:hover': { bgcolor: '#002280' }
+              '&:hover': { bgcolor: '#002280' },
+              fontSize: { xs: '0.875rem', sm: '1rem' }
             }}
           >
             Continue with Email
           </Button>
         </Box>
 
-        <Box sx={{ mt: 3, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ mt: { xs: 2, sm: 3 }, textAlign: 'center' }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+          >
             {mode === 'signin' ? "Don't have an account? " : "Already have an account? "}
             <Typography
               component="span"
@@ -127,7 +160,8 @@ const AuthModal = ({ open, handleClose, mode, userType }) => {
                 color: '#0033A1',
                 cursor: 'pointer',
                 fontWeight: 'bold',
-                '&:hover': { textDecoration: 'underline' }
+                '&:hover': { textDecoration: 'underline' },
+                fontSize: 'inherit'
               }}
               onClick={() => {
                 // Add logic to switch between signin/signup

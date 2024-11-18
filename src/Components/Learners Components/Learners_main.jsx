@@ -136,8 +136,9 @@ const Learners_main = () => {
       {
         breakpoint: 640,
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 1.1,
           slidesToScroll: 1,
+          arrows: false,
         }
       }
     ]
@@ -158,17 +159,18 @@ const Learners_main = () => {
   };
 
   return (
-    <div className="max-w-[1340px] mx-auto px-12 py-12">
+    <div className="max-w-[1340px] mx-auto px-4 sm:px-12 py-6 sm:py-12">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Learners are viewing</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+          Learners are viewing
+        </h2>
       </div>
 
-      <div className="relative">
+      <div className="relative mx-4 sm:mx-0">
         <Slider {...settings} className="course-slider">
           {courses.map((course) => (
             <div key={course.id} className="px-2">
               <div className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                {/* Image Container */}
                 <div className="relative">
                   <img 
                     src={course.image} 
@@ -177,40 +179,35 @@ const Learners_main = () => {
                   />
                 </div>
 
-                {/* Content Container */}
-                <div className="p-4">
-                  {/* Title */}
-                  <h3 className="font-bold text-base mb-1 line-clamp-2 h-12">
+                <div className="p-3 sm:p-4">
+                  <h3 className="font-bold text-sm sm:text-base mb-1 line-clamp-2 h-12">
                     {course.title}
                   </h3>
 
-                  {/* Instructor */}
-                  <p className="text-sm text-gray-600 mb-1 truncate">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">
                     {course.instructor}
                   </p>
 
-                  {/* Rating */}
                   <div className="flex items-center gap-1 mb-1">
                     <span className="font-bold text-sm">{course.rating}</span>
                     <div className="flex">
                       {renderStars(course.rating)}
                     </div>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-xs sm:text-sm text-gray-600">
                       ({course.reviews.toLocaleString()})
                     </span>
                   </div>
 
-                  {/* Price */}
                   <div className="flex items-center gap-2">
-                    <span className="font-bold">{course.price}</span>
-                    <span className="text-gray-600 line-through text-sm">
+                    <span className="font-bold text-sm sm:text-base">{course.price}</span>
+                    <span className="text-gray-600 line-through text-xs sm:text-sm">
                       {course.originalPrice}
                     </span>
                   </div>
 
-                  {/* Bestseller Badge */}
                   {course.bestseller && (
-                    <span className="inline-block bg-[#eceb98] text-[#3d3c0a] text-xs font-bold px-2 py-1 mt-2">
+                    <span className="inline-block bg-[#eceb98] text-[#3d3c0a] text-[10px] sm:text-xs 
+                                   font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 mt-2">
                       Bestseller
                     </span>
                   )}
@@ -282,6 +279,20 @@ const Learners_main = () => {
         }
 
         @media (max-width: 640px) {
+          .slick-slider {
+            margin: 0 -16px !important;
+            padding: 0 16px !important;
+          }
+          
+          .slick-list {
+            overflow: visible !important;
+            margin: 0 -8px !important;
+          }
+
+          .slick-slide {
+            padding: 0 8px !important;
+          }
+
           .slick-prev,
           .slick-next {
             display: none !important;

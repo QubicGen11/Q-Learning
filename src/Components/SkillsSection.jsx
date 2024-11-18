@@ -16,7 +16,7 @@ const SkillsSection = () => {
   const categoryData = {
     "Web Development": {
       subCategories: [
-        { name: "Web Development", learners: "13.3M+ learners" },
+        // { name: "Web Development", learners: "13.3M+ learners" },
         { name: "Web Development", learners: "13.3M+ learners" },
         { name: "JavaScript", learners: "17.7M+ learners" },
         { name: "React JS", learners: "7M+ learners" },
@@ -235,6 +235,14 @@ const SkillsSection = () => {
         settings: {
           slidesToShow: 3,
         }
+      },
+      {
+        breakpoint: 640,
+        settings: {
+          slidesToShow: 2.5,
+          slidesToScroll: 1,
+          arrows: false,
+        }
       }
     ],
     nextArrow: <NextArrow show={showSubCategoryArrows} />,
@@ -265,7 +273,9 @@ const SkillsSection = () => {
       {
         breakpoint: 640,
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 1.1,
+          slidesToScroll: 1,
+          arrows: false,
         }
       }
     ],
@@ -288,16 +298,19 @@ const SkillsSection = () => {
   };
 
   return (
-    <div className="max-w-[1340px] mx-auto px-12 py-12">
-      <h1 className="text-2xl font-bold mb-2">
-        All the skills you need in one place
-      </h1>
-      <p className="text-gray-600 mb-8">
-        From critical skills to technical topics, Udemy supports your professional development.
-      </p>
+    <div className="max-w-[1340px] mx-auto px-4 sm:px-12 py-6 sm:py-12">
+      {/* Section Header */}
+      <div className="mx-4 sm:mx-0">
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">
+          All the skills you need in one place
+        </h2>
+        <p className="text-gray-600 text-sm sm:text-base">
+          From critical skills to technical topics, Udemy supports your professional development.
+        </p>
+      </div>
 
       {/* Main Categories */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-gray-200 mb-6 mx-4 sm:mx-0 overflow-x-auto">
         {Object.keys(categoryData).map((category) => (
           <button
             key={category}
@@ -305,7 +318,7 @@ const SkillsSection = () => {
               setActiveCategory(category);
               setActiveSubCategory(categoryData[category].subCategories[0].name);
             }}
-            className={`px-4 py-3 mr-4 font-medium relative ${
+            className={`px-4 py-3 mr-4 font-medium relative whitespace-nowrap ${
               activeCategory === category
                 ? 'text-black border-b-2 border-black -mb-[2px]'
                 : 'text-gray-600'
@@ -317,24 +330,24 @@ const SkillsSection = () => {
       </div>
 
       {/* Sub Categories Carousel */}
-      <div className="relative px-2 mb-8">
+      <div className="relative mx-4 sm:mx-0 mb-6">
         <Slider 
           ref={subCategorySliderRef}
           {...subCategorySettings} 
           className="subcategories-slider"
         >
           {categoryData[activeCategory].subCategories.map((category, index) => (
-            <div key={index} className="px-2">
+            <div key={index} className="px-1 sm:px-2">
               <div
                 onClick={() => setActiveSubCategory(category.name)}
-                className={`flex items-center px-4 py-2 rounded-full cursor-pointer
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-full cursor-pointer
                   ${category.name === activeSubCategory 
                     ? 'bg-black text-white' 
                     : 'bg-gray-100 text-gray-700'}`}
               >
-                <div className='flex items-center gap-2 flex-col'>
-                    <span className="font-medium whitespace-nowrap">{category.name}</span>
-                    <span className="text-sm ml-2 opacity-75 whitespace-nowrap">{category.learners}</span>
+                <div className='flex items-center gap-1 sm:gap-2 flex-col'>
+                    <span className="font-medium whitespace-nowrap text-sm">{category.name}</span>
+                    <span className="text-xs opacity-75 whitespace-nowrap">{category.learners}</span>
                 </div>
               </div>
             </div>
@@ -343,7 +356,7 @@ const SkillsSection = () => {
       </div>
 
       {/* Courses Carousel */}
-      <div className="relative px-2">
+      <div className="relative mx-4 sm:mx-0">
         <Slider 
           ref={courseSliderRef}
           {...courseSettings} 
@@ -465,10 +478,22 @@ const SkillsSection = () => {
         }
 
         @media (max-width: 640px) {
-          .course-slider .slick-prev,
-          .course-slider .slick-next,
-          .subcategories-slider .slick-prev,
-          .subcategories-slider .slick-next {
+          .slick-slider {
+            margin: 0 -16px !important;
+            padding: 0 16px !important;
+          }
+          
+          .slick-list {
+            overflow: visible !important;
+            margin: 0 -8px !important;
+          }
+
+          .slick-slide {
+            padding: 0 8px !important;
+          }
+
+          .slick-prev,
+          .slick-next {
             display: none !important;
           }
         }

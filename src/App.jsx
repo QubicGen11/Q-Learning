@@ -90,9 +90,9 @@ function App() {
               <Route 
                 path="/course-manager" 
                 element={
-                  <ProtectedRoute>
+                
                     <CourseManager />
-                  </ProtectedRoute>
+           
                 } 
               />
               <Route path="/" element={<Home />} />

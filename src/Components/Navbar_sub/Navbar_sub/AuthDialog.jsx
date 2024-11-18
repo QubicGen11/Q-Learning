@@ -90,7 +90,7 @@ export const AuthDialog = ({ open, onClose, title, isSignUp, customContent }) =>
         TransitionProps={{ timeout: 500 }}
         PaperProps={{
           className: 'rounded-lg overflow-hidden',
-          style: { minWidth: '500px' }
+          style: { minWidth: '350px' }
         }}
       >
         <motion.div
