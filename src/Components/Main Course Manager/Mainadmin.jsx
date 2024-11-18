@@ -9,12 +9,15 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import BasicInformation from './components/sections/BasicInformation';
 import useCourseStore from '../../store/courseStore';
+import PreviewModal from './components/sections/PreviewModal';
+
 
 const Mainadmin = () => {
   const courseData = useCourseStore((state) => state.courseData);
   const submitCourse = useCourseStore((state) => state.submitCourse);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
   const [activeSection, setActiveSection] = useState('basicInfo');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleSave = async () => {
     try {
@@ -23,6 +26,10 @@ const Mainadmin = () => {
     } catch (error) {
       alert('Failed to create course: ' + error.message);
     }
+  };
+
+  const handlePreview = () => {
+    setIsPreviewOpen(true);
   };
 
   const renderSection = () => {
@@ -52,7 +59,8 @@ const Mainadmin = () => {
       <div className="ml-64 flex-1 min-h-screen">
         <Header 
           activeSection={activeSection} 
-          onSave={handleSave} 
+          onSave={handleSave}
+          onPreview={handlePreview}
         />
         <div className="p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 h-auto">
@@ -62,6 +70,12 @@ const Mainadmin = () => {
           </div>
         </div>
       </div>
+
+      <PreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        courseData={courseData}
+      />
     </div>
   );
 };

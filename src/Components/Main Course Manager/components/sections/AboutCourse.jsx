@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import './quillConfig';
 import useCourseStore from '../../../../store/courseStore';
 import { FiTrash2, FiPlus } from 'react-icons/fi';
 
@@ -15,15 +16,37 @@ const AboutCourse = () => {
   }, []);
 
   const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      ['blockquote', 'code-block'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['link', 'image'],
-      ['clean']
-    ]
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': ['', 'center', 'right', 'justify'] }],
+        ['blockquote', 'code-block'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['link', 'image'],
+        ['clean']
+      ]
+    },
+    imageResize: {
+      modules: ['Resize', 'DisplaySize']
+    }
   };
+
+  const customStyles = `
+    .ql-editor p {
+      margin-bottom: 1em;
+    }
+    .ql-align-center {
+      text-align: center;
+    }
+    .ql-align-right {
+      text-align: right;
+    }
+    .ql-align-justify {
+      text-align: justify;
+    }
+  `;
 
   const handleObjectiveChange = (index, value) => {
     const newObjectives = [...(courseData.objectives || [])];
@@ -61,6 +84,7 @@ const AboutCourse = () => {
 
   return (
     <div className="flex flex-col gap-12">
+      <style>{customStyles}</style>
       {/* Welcome Message */}
       <div className="relative z-10">
         <label className="block text-sm font-medium text-gray-700 mb-2">

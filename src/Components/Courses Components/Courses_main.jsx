@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiMoreVertical, FiClock } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar_main from '../Navbar Components/Navbar_main';
 import config from '../../config/apiConfig';
+import Cookies from 'js-cookie';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,6 +12,8 @@ const Courses_main = () => {
   const [courses, setCourses] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState([]);
+  const [viewMode, setViewMode] = useState('all');
+  const [myCourses, setMyCourses] = useState([]);
 
   const [techLogos, setTechLogos] = useState({
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -133,10 +136,46 @@ const Courses_main = () => {
     fetchCourses();
   }, [techLogos]);
 
-  const filteredCourses = courses.filter(course => 
-    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const fetchMyCourses = async () => {
+    try {
+      console.log("Fetching My Courses API called");
+      const token = Cookies.get('accessToken');
+      const response = await fetch('http://localhost:8089/qlms/getUserCreatedCourse', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      console.log("My Courses Data:", data);
+      setMyCourses(data);
+    } catch (error) {
+      console.error('Error fetching my courses:', error);
+    }
+  };
+
+  const getFilteredCourses = () => {
+    if (viewMode === 'myCourses') {
+      return myCourses.filter(course => 
+        course.courseTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        course.courseType.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    let filtered = courses.filter(course => 
+      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.type.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    switch(viewMode) {
+      case 'teaching':
+        return filtered.filter(course => course.isInstructor);
+      case 'learning':
+        return filtered.filter(course => course.isEnrolled);
+      default:
+        return filtered;
+    }
+  };
+
+  const filteredCourses = getFilteredCourses();
 
   const handleReset = () => {
     setSearchQuery('');
@@ -150,6 +189,18 @@ const Courses_main = () => {
     }
     return 0;
   });
+
+  useEffect(() => {
+    console.log("Current viewMode:", viewMode);
+    if (viewMode === 'myCourses') {
+      fetchMyCourses();
+    } else {
+      // Your existing courses fetch
+      console.log("Fetching All Courses API called");
+    }
+  }, [viewMode]);
+
+  const navigate = useNavigate();
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 bg-white dark:bg-gray-900 transition-all duration-300">
@@ -332,10 +383,36 @@ const Courses_main = () => {
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 
                          bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <div className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-              {filteredCourses.length} Results
+            <div className="flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
+              <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                {filteredCourses.length} Results
+              </span>
+              
+              <div className="flex rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setViewMode('all')}
+                  className={`px-4 py-2 text-sm ${
+                    viewMode === 'all'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  All Courses
+                </button>
+                <button
+                  onClick={() => setViewMode('myCourses')}
+                  className={`px-4 py-2 text-sm ${
+                    viewMode === 'myCourses'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  My Courses
+                </button>
+              </div>
             </div>
-            
+
+            {/* Existing Language and Sort Controls */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
               {/* Language Selector */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -372,69 +449,155 @@ const Courses_main = () => {
           </div>
 
           {/* Course Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {sortedCourses.map((course) => (
-              <Link 
-                to={`/courses/${course.id}`} 
-                key={course.id}
-                className="group"
-              >
-                <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 sm:p-6 
-                              hover:shadow-lg transition-all duration-300 relative">
-                  {/* Main Logo */}
-                  <div className="relative flex items-center justify-center h-12 sm:h-16 mb-6">
-                    <div className="absolute inset-0 dark:bg-blue-500/20 rounded-full blur-xl scale-150 
-                                  opacity-0 dark:opacity-0 dark:group-hover:opacity-75 
-                                  transition-all duration-300 -z-10"></div>
+          {viewMode === 'myCourses' ? (
+            // My Courses View
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {myCourses.map((course) => (
+                <div 
+                  key={course.id}
+                  onClick={() => navigate(`/courses/${course.id}`)}
+                  className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 
+                            hover:shadow-lg transition-all duration-300 relative cursor-pointer"
+                >
+                  {/* Course Banner/Image */}
+                  <div className="relative flex items-center justify-center h-40 mb-4">
                     <img 
-                      src={course.courseImage}
+                      src={course.courseBanner || course.thumbnail || "https://via.placeholder.com/400x300"}
                       alt={course.courseTitle} 
-                      className="max-h-full w-auto object-contain relative z-10
-                               dark:opacity-90 group-hover:opacity-100
-                               transition-all duration-300"
+                      className="max-h-full w-auto object-contain"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = techLogos.html;
+                        e.target.src = "https://via.placeholder.com/400x300";
                       }}
                     />
                   </div>
 
-                
-                  {/* Tech Stack Icons */}
-                  {course.techStackData && course.techStackData.length > 0 && (
-                    <div className="flex gap-2 mb-4">
-                      {course.techStackData.map(tech => (
-                        <img 
-                          key={tech.name}
-                          src={tech.url}
-                          alt={tech.name}
-                          className="w-6 h-6 object-contain"
-                          title={tech.name}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = techLogos.html;
-                          }}
-                        />
-                      ))}
+                  {/* Course Title */}
+                  <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
+                               dark:hover:text-blue-300 mb-4 text-base font-medium line-clamp-2">
+                    {course.courseTitle || "Untitled Course"}
+                  </h3>
+
+                  {/* Course Description */}
+                  <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3"
+                       dangerouslySetInnerHTML={{ __html: course.description || course.aboutCourse || "No description available" }}>
+                  </div>
+
+                  {/* Course Details */}
+                  <div className="flex items-center justify-between mt-auto">
+                    <div className="flex flex-col">
+                      <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                        ${course.price || 0}
+                      </span>
+                      {course.originalPrice && course.originalPrice > course.price && (
+                        <span className="text-sm line-through text-gray-500">
+                          ${course.originalPrice}
+                        </span>
+                      )}
+                      {course.discount && course.discount !== "0%" && (
+                        <span className="text-xs text-green-500">
+                          {course.discount} OFF
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-end text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <FiClock className="w-4 h-4" />
+                        <span>{course.duration || "N/A"} hrs</span>
+                      </div>
+                      {course.language && (
+                        <span className="text-xs">{course.language}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Category & Type */}
+                  {(course.category || course.courseType) && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex flex-wrap gap-2">
+                        {course.category && (
+                          <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+                            {course.category}
+                          </span>
+                        )}
+                        {course.courseType && (
+                          <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+                            {course.courseType}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
-                  
-                  <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
-                               mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
-                    {course.title}
-                  </h3>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
-                      <FiClock className="mr-1" />
-                      <span>{course.duration}</span>
-                    </div>
-                    <span className="text-sm text-gray-500">{course.type}</span>
-                  </div>
                 </div>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            // Your existing All Courses view
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {sortedCourses.map((course) => (
+                <Link 
+                  to={`/courses/${course.id}`} 
+                  key={course.id}
+                  className="group"
+                >
+                  <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 sm:p-6 
+                                hover:shadow-lg transition-all duration-300 relative">
+                    {/* Main Logo */}
+                    <div className="relative flex items-center justify-center h-12 sm:h-16 mb-6">
+                      <div className="absolute inset-0 dark:bg-blue-500/20 rounded-full blur-xl scale-150 
+                                    opacity-0 dark:opacity-0 dark:group-hover:opacity-75 
+                                    transition-all duration-300 -z-10"></div>
+                      <img 
+                        src={course.courseImage}
+                        alt={course.courseTitle} 
+                        className="max-h-full w-auto object-contain relative z-10
+                                 dark:opacity-90 group-hover:opacity-100
+                                 transition-all duration-300"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = techLogos.html;
+                        }}
+                      />
+                    </div>
+
+                  
+                    {/* Tech Stack Icons */}
+                    {course.techStackData && course.techStackData.length > 0 && (
+                      <div className="flex gap-2 mb-4">
+                        {course.techStackData.map(tech => (
+                          <img 
+                            key={tech.name}
+                            src={tech.url}
+                            alt={tech.name}
+                            className="w-6 h-6 object-contain"
+                            title={tech.name}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = techLogos.html;
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    
+                    <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                                 mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
+                      {course.title}
+                    </h3>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+                        <FiClock className="mr-1" />
+                        <span>{course.duration}</span>
+                      </div>
+                      <span className="text-sm text-gray-500">{course.type}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

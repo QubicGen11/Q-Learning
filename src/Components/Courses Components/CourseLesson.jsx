@@ -491,15 +491,17 @@ const CourseLesson = () => {
                   {/* Prerequisites */}
                   {course.aboutCourse?.prerequisites?.length > 0 && (
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">Prerequisites</h3>
-                  
+                      <h3 className="text-lg font-semibold mb-3">Prerequisites</h3>
+                      <ul className="list-disc pl-5 space-y-2">
                         {course.aboutCourse.prerequisites.map((prereq, index) => (
-                            <div className="prose dark:prose-invert mb-6" key={index}>
-                            
+                          <li 
+                            key={index}
+                            className="text-gray-700 dark:text-gray-300"
+                          >
                             {parse(DOMPurify.sanitize(prereq))}
-                          </div>
+                          </li>
                         ))}
-               
+                      </ul>
                     </div>
                   )}
                   

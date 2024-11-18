@@ -209,7 +209,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
             {course.title}
           </h1>
           <p className="text-gray-200 mb-4 max-w-3xl text-sm sm:text-base">
-            {course.description}
+            {parse(DOMPurify.sanitize(course.description))}
           </p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
             <div className="flex items-center gap-2 text-gray-200">
@@ -379,38 +379,43 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
               {/* Curriculum Items */}
               <div className="space-y-3 sm:space-y-4">
-                {[...course.curriculum].reverse().map((item, index) => (
-                  <div key={index} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-red-100 dark:bg-gray-700 rounded-full 
-                                    flex items-center justify-center text-gray-500 dark:text-gray-400">
-                        {item.isCompleted ? '✓' : ''}
-                        <img src={course.logo} alt="" className="w-full h-full object-contain relative z-10" />
-                      </div>
-                      <div className="flex-grow">
-                        <h3 className="font-medium text-gray-900 dark:text-white">{item.title}</h3>
-                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                          <FiClock className="mr-1" />
-                          <span>{item.duration}</span>
-                          {item.type === 'REQUIRED' && (
-                            <span className="ml-2 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 
-                                           px-2 py-0.5 rounded text-xs">
-                              REQUIRED
-                            </span>
-                          )}
+                {Array.isArray(course?.curriculum) ? 
+                  [...course.curriculum].reverse().map((item, index) => (
+                    <div key={index} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 bg-red-100 dark:bg-gray-700 rounded-full 
+                                      flex items-center justify-center text-gray-500 dark:text-gray-400">
+                          {item.isCompleted ? '✓' : ''}
+                          <img src={course.logo} alt="" className="w-full h-full object-contain relative z-10" />
                         </div>
+                        <div className="flex-grow">
+                          <h3 className="font-medium text-gray-900 dark:text-white">{item.title}</h3>
+                          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <FiClock className="mr-1" />
+                            <span>{item.duration}</span>
+                            {item.type === 'REQUIRED' && (
+                              <span className="ml-2 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 
+                                             px-2 py-0.5 rounded text-xs">
+                                REQUIRED
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => !previewMode && navigate(`/courses/${course.id}/lesson/${item.id}`)}
+                          className={`px-6 py-2 border dark:border-gray-600 rounded 
+                                   hover:bg-gray-50 dark:hover:bg-gray-700 
+                                   text-gray-700 dark:text-gray-300 transition-colors duration-300
+                                   ${previewMode ? 'cursor-not-allowed opacity-50' : ''}`}
+                          disabled={previewMode}
+                        >
+                          {item.isCompleted ? 'Resume' : 'Start'}
+                        </button>
                       </div>
-                      <button 
-                        onClick={() => navigate(`/courses/${course.id}/lesson/${item.id}`)}
-                        className="px-6 py-2 border dark:border-gray-600 rounded 
-                                 hover:bg-gray-50 dark:hover:bg-gray-700 
-                                 text-gray-700 dark:text-gray-300 transition-colors duration-300"
-                      >
-                        {item.isCompleted ? 'Resume' : 'Start'}
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  ))
+                  : <p className="text-gray-500 dark:text-gray-400">No curriculum items available</p>
+                }
               </div>
 
               {/* Diploma Section */}

@@ -11,6 +11,8 @@ const BasicInformation = () => {
   const [previewThumbnailImage, setPreviewThumbnailImage] = useState(null);
   const [previewTechImage, setPreviewTechImage] = useState(null);
   const [previewCustomTechImage, setPreviewCustomTechImage] = useState(null);
+  const [showTechModal, setShowTechModal] = useState(false);
+  const [uploadType, setUploadType] = useState(''); // 'local' or 'predefined'
 
   const quillModules = {
     toolbar: [
@@ -320,101 +322,6 @@ const BasicInformation = () => {
         </div>
       </div>
 
-      {/* Thumbnail Type Selection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Thumbnail Type
-        </label>
-        <div className="space-y-2">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="predefined"
-              checked={courseData.thumbnailType === 'predefined'}
-              onChange={(e) => handleInputChange('thumbnailType', e.target.value)}
-              className="h-4 w-4 text-purple-600 focus:ring-purple-500"
-            />
-            <span className="ml-2">Choose from predefined thumbnails</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="custom"
-              checked={courseData.thumbnailType === 'custom'}
-              onChange={(e) => handleInputChange('thumbnailType', e.target.value)}
-              className="h-4 w-4 text-purple-600 focus:ring-purple-500"
-            />
-            <span className="ml-2">Upload custom thumbnail</span>
-          </label>
-        </div>
-      </div>
-
-      {courseData.thumbnailType === 'predefined' && (
-        <div className="mt-4 grid grid-cols-4 gap-4">
-          {Object.entries(techLogos).map(([key, url]) => (
-            <div 
-              key={key}
-              onClick={() => handleInputChange('courseBanner', url)}
-              className={`p-4 border rounded-lg cursor-pointer hover:border-purple-500 transition-all ${
-                courseData.courseBanner === url ? 'border-purple-500 bg-purple-50' : 'border-gray-200'
-              }`}
-            >
-              <div className="flex flex-col items-center gap-2">
-                <img 
-                  src={url} 
-                  alt={key} 
-                  className="w-16 h-16 object-contain"
-                />
-                <span className="text-sm text-gray-600 capitalize">
-                  {key}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {courseData.thumbnailType === 'custom' && (
-        <div className="mt-4">
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-            {previewThumbnailImage ? (
-              <div className="relative">
-                <img
-                  src={previewThumbnailImage}
-                  alt="Course banner"
-                  className="max-h-48 rounded-lg"
-                />
-                <button
-                  onClick={() => removeImage('thumbnail')}
-                  className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-lg hover:bg-gray-100"
-                >
-                  <FiX className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-1 text-center">
-                <FiImage className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="flex text-sm text-gray-600">
-                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
-                    <span>Upload a file</span>
-                    <input
-                      type="file"
-                      className="sr-only"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, 'thumbnail')}
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs text-gray-500">
-                  PNG, JPG, GIF up to 10MB
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Technologies Used */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -434,39 +341,123 @@ const BasicInformation = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Technology Image
         </label>
-        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
           {previewTechImage ? (
             <div className="relative">
               <img
                 src={previewTechImage}
                 alt="Technology"
-                className="mx-auto h-32 w-32 object-cover"
+                className="max-h-48 rounded-lg"
               />
               <button
                 onClick={() => removeImage('technology')}
-                className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-full"
+                className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-lg hover:bg-gray-100"
               >
-                <FiX />
+                <FiX className="w-5 h-5 text-gray-600" />
               </button>
             </div>
           ) : (
-            <>
-              <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
-              <div className="flex text-sm text-gray-600">
-                <label className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500">
-                  <span>Upload a file</span>
-                  <input
-                    type="file"
-                    className="sr-only"
-                    onChange={(e) => handleImageUpload(e, 'technology')}
-                    accept="image/*"
-                  />
-                </label>
-              </div>
-            </>
+            <div className="text-center">
+              <button
+                onClick={() => setShowTechModal(true)}
+                className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500"
+              >
+                <FiUpload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                <span>Upload Image</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
+
+      {/* Tech Image Upload Modal */}
+      {showTechModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[80%] max-w-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Select Technology Image</h3>
+              <button
+                onClick={() => setShowTechModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <FiX className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setUploadType('local')}
+                className={`flex-1 py-2 px-4 rounded ${
+                  uploadType === 'local'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100'
+                }`}
+              >
+                Upload Local File
+              </button>
+              <button
+                onClick={() => setUploadType('predefined')}
+                className={`flex-1 py-2 px-4 rounded ${
+                  uploadType === 'predefined'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100'
+                }`}
+              >
+                Choose Predefined
+              </button>
+            </div>
+
+            {uploadType === 'local' && (
+              <div className="text-center p-4 border-2 border-dashed rounded-lg">
+                <input
+                  type="file"
+                  className="hidden"
+                  id="tech-image-upload"
+                  accept="image/*"
+                  onChange={(e) => {
+                    handleImageUpload(e, 'technology');
+                    setShowTechModal(false);
+                  }}
+                />
+                <label
+                  htmlFor="tech-image-upload"
+                  className="cursor-pointer text-purple-600 hover:text-purple-500"
+                >
+                  <FiUpload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                  <span>Click to upload or drag and drop</span>
+                </label>
+              </div>
+            )}
+
+            {uploadType === 'predefined' && (
+              <div className="grid grid-cols-4 gap-4 max-h-[400px] overflow-y-auto">
+                {Object.entries(techLogos).map(([key, url]) => (
+                  <div
+                    key={key}
+                    onClick={() => {
+                      setPreviewTechImage(url);
+                      handleInputChange('technologyImage', url);
+                      setShowTechModal(false);
+                    }}
+                    className="p-4 border rounded-lg cursor-pointer hover:border-purple-500 transition-all"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <img
+                        src={url}
+                        alt={key}
+                        className="w-16 h-16 object-contain"
+                      />
+                      <span className="text-sm text-gray-600 capitalize">
+                        {key}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Custom Technology */}
       <div>
