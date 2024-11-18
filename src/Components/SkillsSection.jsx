@@ -221,7 +221,7 @@ const SkillsSection = () => {
     infinite: false,
     speed: 500,
     slidesToShow: 6,
-    slidesToScroll: 2,
+    slidesToScroll: 1,
     arrows: true,
     responsive: [
       {
@@ -239,7 +239,7 @@ const SkillsSection = () => {
       {
         breakpoint: 640,
         settings: {
-          slidesToShow: 2.5,
+          slidesToShow: 2.2,
           slidesToScroll: 1,
           arrows: false,
         }
@@ -340,15 +340,18 @@ const SkillsSection = () => {
             <div key={index} className="px-1 sm:px-2">
               <div
                 onClick={() => setActiveSubCategory(category.name)}
-                className={`flex items-center px-3 sm:px-4 py-2 rounded-full cursor-pointer
+                className={`flex flex-col items-center justify-center w-[180px] sm:w-[200px] h-[70px] px-3 py-2 
+                  rounded-full cursor-pointer transition-colors duration-200
                   ${category.name === activeSubCategory 
                     ? 'bg-black text-white' 
                     : 'bg-gray-100 text-gray-700'}`}
               >
-                <div className='flex items-center gap-1 sm:gap-2 flex-col'>
-                    <span className="font-medium whitespace-nowrap text-sm">{category.name}</span>
-                    <span className="text-xs opacity-75 whitespace-nowrap">{category.learners}</span>
-                </div>
+                <span className="font-medium text-sm truncate w-full text-center">
+                  {category.name}
+                </span>
+                <span className="text-xs opacity-75 truncate w-full text-center">
+                  {category.learners}
+                </span>
               </div>
             </div>
           ))}
@@ -495,6 +498,25 @@ const SkillsSection = () => {
           .slick-prev,
           .slick-next {
             display: none !important;
+          }
+        }
+
+        .subcategories-slider .slick-slide {
+          height: auto !important;
+        }
+
+        .subcategories-slider .slick-track {
+          display: flex !important;
+          align-items: center;
+        }
+
+        .subcategories-slider .slick-slide > div {
+          width: 100%;
+        }
+
+        @media (max-width: 640px) {
+          .subcategories-slider .slick-slide {
+            width: auto !important;
           }
         }
       `}</style>
