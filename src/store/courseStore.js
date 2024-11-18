@@ -1,102 +1,87 @@
 import { create } from 'zustand';
+import Cookies from 'js-cookie';
 
-const useCourseStore = create((set) => ({
-  // Basic Information
-  basicInfo: {
+const useCourseStore = create((set, get) => ({
+  courseData: {
+    welcome: '',
+    aboutCourse: '',
+    endObjective: '',
     courseTitle: '',
     description: '',
     duration: '',
     completionTime: '',
-    courseType: 'Frontend',
-    difficultyLevel: 'Intermediate',
+    courseType: '',
+    difficultyLevel: '',
     language: 'English',
-    productCovered: 'Studio',
+    productCovered: '',
     category: '',
-    thumbnailType: 'predefined',
-    bannerImage: null,
-  },
-
-  // About Course
-  aboutCourse: {
-    welcomeMessage: '',
-    courseOverview: '',
-    courseAudience: '',
-    endObjectives: '',
-  },
-
-  // Curriculum and Lessons
-  curriculum: [],
-  lessons: [],
-
-  // Assignments
-  assignments: [],
-
-  // Resources
-  resources: [],
-
-  // Pricing
-  pricing: {
-    price: '',
-    salePrice: '',
+    subCategory: '',
+    price: 0,
+    originalPrice: 0,
     discount: '',
-    pricingModel: 'one-time',
-    subscriptionDetails: {},
-    accessDuration: 'lifetime',
-  },
-
-  // Course Details
-  courseDetails: {
     courseAudience: '',
-    endObjectives: '',
+    learningObjective: '',
+    technologiesUsed: '',
+    technologyImage: '',
+    customTechnology: 'No',
+    coustomTechnologyImg: '',
+    courseBanner: null,
+    thumbnailType: 'predefined',
+    lessons: [],
+    objectives: [],
+    preRequisites: [],
+    learningObjectives: []
   },
 
-  // Actions
-  updateBasicInfo: (data) => 
-    set((state) => ({ basicInfo: { ...state.basicInfo, ...data } })),
-
-  updateAboutCourse: (data) =>
-    set((state) => ({ aboutCourse: { ...state.aboutCourse, ...data } })),
-
-  updateCurriculum: (curriculum) => set({ curriculum }),
+  updateCourseData: (data) => 
+    set((state) => ({
+      courseData: { ...state.courseData, ...data }
+    })),
 
   addLesson: (lesson) =>
-    set((state) => ({ lessons: [...state.lessons, lesson] })),
-
-  updateLesson: (lessonId, data) =>
     set((state) => ({
-      lessons: state.lessons.map((lesson) =>
-        lesson.id === lessonId ? { ...lesson, ...data } : lesson
-      ),
+      courseData: {
+        ...state.courseData,
+        lessons: [...state.courseData.lessons, {
+          lessonTitle: lesson.lessonTitle,
+          lessonDuration: lesson.lessonDuration,
+          lessonContent: lesson.lessonContent
+        }]
+      }
     })),
 
-  deleteLesson: (lessonId) =>
-    set((state) => ({
-      lessons: state.lessons.filter((lesson) => lesson.id !== lessonId),
-    })),
+  submitCourse: async () => {
+    try {
+      const state = get();
+      const { courseData } = state;
+      const token = Cookies.get('accessToken');
 
-  updatePricing: (data) =>
-    set((state) => ({ pricing: { ...state.pricing, ...data } })),
+      if (!token) throw new Error('Authentication token not found');
 
-  // Resources management
-  addResource: (resource) =>
-    set((state) => ({ resources: [...state.resources, resource] })),
+      const courseDataToSubmit = {
+        ...courseData,
+        courseBanner: courseData.courseBanner || null,
+        objectives: courseData.objectives || [],
+        preRequisites: courseData.preRequisites || [],
+        learningObjectives: courseData.learningObjectives || []
+      };
 
-  updateResource: (resourceId, data) =>
-    set((state) => ({
-      resources: state.resources.map((resource) =>
-        resource.id === resourceId ? { ...resource, ...data } : resource
-      ),
-    })),
+      const response = await fetch('http://localhost:8089/qlms/createCourse', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(courseDataToSubmit)
+      });
 
-  deleteResource: (resourceId) =>
-    set((state) => ({
-      resources: state.resources.filter((resource) => resource.id !== resourceId),
-    })),
-
-  updateCourseDetails: (data) =>
-    set((state) => ({
-      courseDetails: { ...state.courseDetails, ...data }
-    })),
+      if (!response.ok) throw new Error('Failed to create course');
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating course:', error);
+      throw error;
+    }
+  }
 }));
 
 export default useCourseStore; 

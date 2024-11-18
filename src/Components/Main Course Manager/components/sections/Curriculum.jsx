@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiMove } from 'react-icons/fi';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import useCourseStore from '../../../../store/courseStore';
 
-const Curriculum = ({ formData, setFormData }) => {
-  const [editingSection, setEditingSection] = useState(null);
+const Curriculum = () => {
+  const courseData = useCourseStore((state) => state.courseData);
+  const updateCourseData = useCourseStore((state) => state.updateCourseData);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
-
-    const sections = Array.from(formData.curriculum);
-    const [reorderedSection] = sections.splice(result.source.index, 1);
-    sections.splice(result.destination.index, 0, reorderedSection);
-
-    setFormData({...formData, curriculum: sections});
+    
+    const items = Array.from(courseData.curriculum);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    updateCourseData({ curriculum: items });
   };
 
   return (
@@ -21,10 +23,9 @@ const Curriculum = ({ formData, setFormData }) => {
         <h2 className="text-lg font-medium">Course Curriculum</h2>
         <button
           onClick={() => {
-            setFormData({
-              ...formData,
+            updateCourseData({
               curriculum: [
-                ...formData.curriculum,
+                ...courseData.curriculum,
                 {
                   id: Date.now(),
                   title: 'New Section',
@@ -43,7 +44,7 @@ const Curriculum = ({ formData, setFormData }) => {
         <Droppable droppableId="curriculum">
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef}>
-              {formData.curriculum.map((section, index) => (
+              {courseData.curriculum.map((section, index) => (
                 <Draggable
                   key={section.id}
                   draggableId={section.id.toString()}
@@ -65,9 +66,9 @@ const Curriculum = ({ formData, setFormData }) => {
                               type="text"
                               value={section.title}
                               onChange={(e) => {
-                                const newCurriculum = [...formData.curriculum];
+                                const newCurriculum = [...courseData.curriculum];
                                 newCurriculum[index].title = e.target.value;
-                                setFormData({...formData, curriculum: newCurriculum});
+                                updateCourseData({ curriculum: newCurriculum });
                               }}
                               onBlur={() => setEditingSection(null)}
                               autoFocus
@@ -86,10 +87,10 @@ const Curriculum = ({ formData, setFormData }) => {
                           </button>
                           <button
                             onClick={() => {
-                              const newCurriculum = formData.curriculum.filter(
+                              const newCurriculum = courseData.curriculum.filter(
                                 (s) => s.id !== section.id
                               );
-                              setFormData({...formData, curriculum: newCurriculum});
+                              updateCourseData({ curriculum: newCurriculum });
                             }}
                             className="text-gray-400 hover:text-red-600"
                           >
@@ -115,11 +116,11 @@ const Curriculum = ({ formData, setFormData }) => {
                               </button>
                               <button
                                 onClick={() => {
-                                  const newCurriculum = [...formData.curriculum];
+                                  const newCurriculum = [...courseData.curriculum];
                                   newCurriculum[index].lessons = section.lessons.filter(
                                     (l) => l.id !== lesson.id
                                   );
-                                  setFormData({...formData, curriculum: newCurriculum});
+                                  updateCourseData({ curriculum: newCurriculum });
                                 }}
                                 className="text-gray-400 hover:text-red-600"
                               >
@@ -130,14 +131,14 @@ const Curriculum = ({ formData, setFormData }) => {
                         ))}
                         <button
                           onClick={() => {
-                            const newCurriculum = [...formData.curriculum];
+                            const newCurriculum = [...courseData.curriculum];
                             newCurriculum[index].lessons.push({
                               id: Date.now(),
                               title: 'New Lesson',
                               content: '',
                               duration: '0:00'
                             });
-                            setFormData({...formData, curriculum: newCurriculum});
+                            updateCourseData({ curriculum: newCurriculum });
                           }}
                           className="text-purple-600 hover:text-purple-700 text-sm"
                         >
