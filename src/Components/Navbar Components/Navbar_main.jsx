@@ -167,9 +167,9 @@ const Navbar_main = () => {
             {/* Left Section */}
             <div className="flex items-center">
               <Link to="/" className="flex-shrink-0 flex items-center">
-                <span className="text-xl sm:text-2xl md:text-3xl font-bold">
-                  <span className="text-[#fa4616]">Q</span>
-                  <span className="dark:text-white">LMS</span>
+                <span className="text-xl sm:text-2xl md:text-3xl font-bold transform hover:scale-105 transition-transform duration-200" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.2)'}}>
+                  <span className="text-[#fa4616]" style={{textShadow: '10px 2px 4px rgba(250,70,22,0.3)'}}>Qubi</span>
+                  <span className="dark:text-white" style={{textShadow: '10px 2px 4px rgba(255,255,255,0.2)'}}>Nest</span>
                 </span>
               </Link>
 

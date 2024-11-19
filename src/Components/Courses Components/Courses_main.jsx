@@ -14,6 +14,7 @@ const Courses_main = () => {
   const [expandedCategories, setExpandedCategories] = useState([]);
   const [viewMode, setViewMode] = useState('all');
   const [myCourses, setMyCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
 
   const [techLogos, setTechLogos] = useState({
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -141,9 +142,7 @@ const Courses_main = () => {
       console.log("Fetching My Courses API called");
       const token = Cookies.get('accessToken');
       const response = await fetch('http://localhost:8089/qlms/getUserCreatedCourse', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+    
       });
       const data = await response.json();
       console.log("My Courses Data:", data);
@@ -153,11 +152,30 @@ const Courses_main = () => {
     }
   };
 
+  const fetchEnrolledCourses = async () => {
+    try {
+      console.log("Fetching Enrolled Courses API called");
+      const token = Cookies.get('accessToken');
+      const response = await fetch('http://localhost:8089/qlms/getUserEnrolledCourse', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      console.log("Enrolled Courses Data:", data);
+      setEnrolledCourses(data);
+    } catch (error) {
+      console.error('Error fetching enrolled courses:', error);
+    }
+  };
+
   const getFilteredCourses = () => {
     if (viewMode === 'myCourses') {
+      if (!Array.isArray(myCourses)) return [];
       return myCourses.filter(course => 
-        course.courseTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.courseType.toLowerCase().includes(searchQuery.toLowerCase())
+        (course.courseTitle?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (course.courseType?.toLowerCase() || '').includes(searchQuery.toLowerCase())
       );
     }
     let filtered = courses.filter(course => 
@@ -194,6 +212,8 @@ const Courses_main = () => {
     console.log("Current viewMode:", viewMode);
     if (viewMode === 'myCourses') {
       fetchMyCourses();
+    } else if (viewMode === 'enrolled') {
+      fetchEnrolledCourses();
     } else {
       // Your existing courses fetch
       console.log("Fetching All Courses API called");
@@ -255,7 +275,7 @@ const Courses_main = () => {
                 <div className="space-y-4">
                   {courseCategories.map((category) => (
                     <div key={category.title} className="space-y-2">
-                      {/* Main Category */}
+                    
                       <div className="flex items-center justify-between group">
                         <label className="flex items-center space-x-2 text-sm cursor-pointer flex-grow">
                           <input 
@@ -384,9 +404,7 @@ const Courses_main = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 
                          bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
             <div className="flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
-              <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-                {filteredCourses.length} Results
-              </span>
+             
               
               <div className="flex rounded-lg overflow-hidden">
                 <button
@@ -397,7 +415,17 @@ const Courses_main = () => {
                       : 'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  All Courses
+                  Available Courses
+                </button>
+                <button
+                  onClick={() => setViewMode('enrolled')}
+                  className={`px-4 py-2 text-sm ${
+                    viewMode === 'enrolled'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  Enrolled Courses
                 </button>
                 <button
                   onClick={() => setViewMode('myCourses')}
@@ -407,7 +435,7 @@ const Courses_main = () => {
                       : 'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  My Courses
+                  My Teachings
                 </button>
               </div>
             </div>
@@ -447,90 +475,228 @@ const Courses_main = () => {
               </div>
             </div>
           </div>
-
+          <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                {filteredCourses.length} Results
+              </span>
           {/* Course Grid */}
           {viewMode === 'myCourses' ? (
-            // My Courses View
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {myCourses.map((course) => (
-                <div 
-                  key={course.id}
-                  onClick={() => navigate(`/courses/${course.id}`)}
-                  className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 
-                            hover:shadow-lg transition-all duration-300 relative cursor-pointer"
-                >
-                  {/* Course Banner/Image */}
-                  <div className="relative flex items-center justify-center h-40 mb-4">
-                    <img 
-                      src={course.courseBanner || course.thumbnail || "https://via.placeholder.com/400x300"}
-                      alt={course.courseTitle} 
-                      className="max-h-full w-auto object-contain"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "https://via.placeholder.com/400x300";
-                      }}
-                    />
-                  </div>
-
-                  {/* Course Title */}
-                  <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
-                               dark:hover:text-blue-300 mb-4 text-base font-medium line-clamp-2">
-                    {course.courseTitle || "Untitled Course"}
+            <div className="w-full">
+              {!Array.isArray(myCourses) || myCourses.length === 0 ? (
+                // Empty state message
+                <div className="text-center py-12 px-4">
+                 
+                  <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    No Courses Found
                   </h3>
-
-                  {/* Course Description */}
-                  <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3"
-                       dangerouslySetInnerHTML={{ __html: course.description || course.aboutCourse || "No description available" }}>
-                  </div>
-
-                  {/* Course Details */}
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className="flex flex-col">
-                      <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                        ${course.price || 0}
-                      </span>
-                      {course.originalPrice && course.originalPrice > course.price && (
-                        <span className="text-sm line-through text-gray-500">
-                          ${course.originalPrice}
-                        </span>
-                      )}
-                      {course.discount && course.discount !== "0%" && (
-                        <span className="text-xs text-green-500">
-                          {course.discount} OFF
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col items-end text-sm text-gray-600 dark:text-gray-400">
-                      <div className="flex items-center gap-1">
-                        <FiClock className="w-4 h-4" />
-                        <span>{course.duration || "N/A"} hrs</span>
-                      </div>
-                      {course.language && (
-                        <span className="text-xs">{course.language}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Category & Type */}
-                  {(course.category || course.courseType) && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex flex-wrap gap-2">
-                        {course.category && (
-                          <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
-                            {course.category}
-                          </span>
-                        )}
-                        {course.courseType && (
-                          <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
-                            {course.courseType}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">
+                    You haven't created any courses yet. Start creating your first course!
+                  </p>
+                  <button
+                    onClick={() => navigate('/mainadmin')}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 
+                               text-white rounded-lg transition-colors duration-200"
+                  >
+                    <span className="mr-2">Become an Instructor</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
                 </div>
-              ))}
+              ) : (
+                // Course grid when courses exist
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  {myCourses.map((course) => (
+                    <div 
+                      key={course.id}
+                      onClick={() => navigate(`/courses/${course.id}`)}
+                      className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 
+                                hover:shadow-lg transition-all duration-300 relative cursor-pointer"
+                    >
+                      {/* Course Banner/Image */}
+                      <div className="relative flex items-center justify-center h-40 mb-4">
+                        <img 
+                          src={course.courseBanner || course.thumbnail || "https://via.placeholder.com/400x300"}
+                          alt={course.courseTitle} 
+                          className="max-h-full w-auto object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://via.placeholder.com/400x300";
+                          }}
+                        />
+                      </div>
+
+                      {/* Course Title */}
+                      <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
+                                   dark:hover:text-blue-300 mb-4 text-base font-medium line-clamp-2">
+                        {course.courseTitle || "Untitled Course"}
+                      </h3>
+
+                      {/* Course Description */}
+                      <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3"
+                           dangerouslySetInnerHTML={{ __html: course.description || course.aboutCourse || "No description available" }}>
+                      </div>
+
+                      {/* Course Details */}
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex flex-col">
+                          <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                            ${course.price || 0}
+                          </span>
+                          {course.originalPrice && course.originalPrice > course.price && (
+                            <span className="text-sm line-through text-gray-500">
+                              ${course.originalPrice}
+                            </span>
+                          )}
+                          {course.discount && course.discount !== "0%" && (
+                            <span className="text-xs text-green-500">
+                              {course.discount} OFF
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col items-end text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <FiClock className="w-4 h-4" />
+                            <span>{course.duration || "N/A"} hrs</span>
+                          </div>
+                          {course.language && (
+                            <span className="text-xs">{course.language}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Category & Type */}
+                      {(course.category || course.courseType) && (
+                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex flex-wrap gap-2">
+                            {course.category && (
+                              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+                                {course.category}
+                              </span>
+                            )}
+                            {course.courseType && (
+                              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+                                {course.courseType}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : viewMode === 'enrolled' ? (
+            <div className="w-full">
+              {!Array.isArray(enrolledCourses) || enrolledCourses.length === 0 ? (
+                // Empty state message for enrolled courses
+                <div className="text-center py-12 px-4">
+                
+                  <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    No Enrolled Courses
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">
+                    You haven't enrolled in any courses yet. Start learning today!
+                  </p>
+                  <button
+                    onClick={() => setViewMode('all')}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 
+                               text-white rounded-lg transition-colors duration-200"
+                  >
+                    <span className="mr-2">Browse Courses</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                // Enrolled courses grid
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  {/* Use the same course card structure as myCourses */}
+                  {enrolledCourses.map((course) => (
+                    <div 
+                      key={course.id}
+                      onClick={() => navigate(`/courses/${course.id}`)}
+                      className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 
+                                hover:shadow-lg transition-all duration-300 relative cursor-pointer"
+                    >
+                      {/* Course Banner/Image */}
+                      <div className="relative flex items-center justify-center h-40 mb-4">
+                        <img 
+                          src={course.courseBanner || course.thumbnail || "https://via.placeholder.com/400x300"}
+                          alt={course.courseTitle} 
+                          className="max-h-full w-auto object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://via.placeholder.com/400x300";
+                          }}
+                        />
+                      </div>
+
+                      {/* Course Title */}
+                      <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
+                                   dark:hover:text-blue-300 mb-4 text-base font-medium line-clamp-2">
+                        {course.courseTitle || "Untitled Course"}
+                      </h3>
+
+                      {/* Course Description */}
+                      <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3"
+                           dangerouslySetInnerHTML={{ __html: course.description || course.aboutCourse || "No description available" }}>
+                      </div>
+
+                      {/* Course Details */}
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex flex-col">
+                          <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                            ${course.price || 0}
+                          </span>
+                          {course.originalPrice && course.originalPrice > course.price && (
+                            <span className="text-sm line-through text-gray-500">
+                              ${course.originalPrice}
+                            </span>
+                          )}
+                          {course.discount && course.discount !== "0%" && (
+                            <span className="text-xs text-green-500">
+                              {course.discount} OFF
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col items-end text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <FiClock className="w-4 h-4" />
+                            <span>{course.duration || "N/A"} hrs</span>
+                          </div>
+                          {course.language && (
+                            <span className="text-xs">{course.language}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Category & Type */}
+                      {(course.category || course.courseType) && (
+                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex flex-wrap gap-2">
+                            {course.category && (
+                              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+                                {course.category}
+                              </span>
+                            )}
+                            {course.courseType && (
+                              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+                                {course.courseType}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             // Your existing All Courses view

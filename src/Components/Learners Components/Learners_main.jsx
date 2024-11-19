@@ -162,7 +162,7 @@ const Learners_main = () => {
     <div className="max-w-[1340px] mx-auto px-4 sm:px-12 py-6 sm:py-12">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-          Learners are viewing
+        Learners are discovering
         </h2>
       </div>
 

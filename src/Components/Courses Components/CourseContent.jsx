@@ -70,10 +70,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
           ?.split('=')[1];
 
         const response = await fetch(`${config.CURRENT_URL}/qlms/getCourseById/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
+        
         });
 
         if (!response.ok) {

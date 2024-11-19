@@ -30,6 +30,8 @@ import BecomeInstructor from './Components/Instructor/BecomeInstructor';
 import Swal from 'sweetalert2';
 import Loader from './Components/Common/Loader';
 import Mainadmin from './Components/Main Course Manager/Mainadmin';
+import SuperAdmin from './Components/SuperAdmin Components/SuperAdmin';
+import Superadminlogin from './Components/SuperAdmin Components/Superadminlogin';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -114,6 +116,8 @@ function App() {
               <Route path="/instructor" element={<BecomeInstructor />} />
               <Route path="/loader" element={<Loader/>} />
               <Route path="/mainadmin" element={<Mainadmin/>} />
+              <Route path="/superadmin" element={<SuperAdmin/>} />
+              <Route path="/superadminlogin" element={<Superadminlogin/>} />
               
               {/* Contact Route - Redirects to external URL */} 
               <Route

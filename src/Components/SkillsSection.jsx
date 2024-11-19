@@ -310,7 +310,7 @@ const SkillsSection = () => {
       </div>
 
       {/* Main Categories */}
-      <div className="border-b border-gray-200 mb-6 mx-4 sm:mx-0 overflow-x-auto">
+      <div className="border-b border-gray-200 mb-6 mx-4 sm:mx-0 overflow-x-auto overflow-y-hidden">
         {Object.keys(categoryData).map((category) => (
           <button
             key={category}
