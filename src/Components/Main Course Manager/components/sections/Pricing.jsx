@@ -18,7 +18,7 @@ const Pricing = () => {
 
   // Calculate discount percentage
   const calculateDiscount = () => {
-    if (!courseData.originalPrice || !courseData.price) return '';
+    if (!courseData.originalPrice || !courseData.price) return null;
     const discount = ((courseData.originalPrice - courseData.price) / courseData.originalPrice) * 100;
     return Math.round(discount);
   };
@@ -27,9 +27,13 @@ const Pricing = () => {
   const updateDiscount = () => {
     if (courseData.originalPrice > 0 && courseData.price >= 0) {
       const discount = ((courseData.originalPrice - courseData.price) / courseData.originalPrice) * 100;
-      updateCourseData({ discount: `${Math.round(discount)}%` });
+      if (discount > 0) {
+        updateCourseData({ discount: `${Math.round(discount)}%` });
+      } else {
+        updateCourseData({ discount: null });
+      }
     } else {
-      updateCourseData({ discount: '0%' });
+      updateCourseData({ discount: null });
     }
   };
 
@@ -84,9 +88,9 @@ const Pricing = () => {
                 </div>
                 <input
                   type="number"
-                  value={courseData.originalPrice}
+                  value={courseData.originalPrice || ''}
                   onChange={(e) => {
-                    handlePricingChange('originalPrice', Number(e.target.value));
+                    handlePricingChange('originalPrice', e.target.value ? Number(e.target.value) : '');
                     updateDiscount();
                   }}
                   className="pl-10 w-full p-3 border rounded-lg"
@@ -107,9 +111,9 @@ const Pricing = () => {
                 </div>
                 <input
                   type="number"
-                  value={courseData.price}
+                  value={courseData.price || ''}
                   onChange={(e) => {
-                    handlePricingChange('price', Number(e.target.value));
+                    handlePricingChange('price', e.target.value ? Number(e.target.value) : '');
                     updateDiscount();
                   }}
                   className="pl-10 w-full p-3 border rounded-lg"
@@ -121,10 +125,12 @@ const Pricing = () => {
           </div>
 
           {/* Discount Display */}
-          <div className="flex items-center gap-2 text-green-600">
-            <FiPercent />
-            <span>Discount: {courseData.discount || '0%'}</span>
-          </div>
+          {courseData.discount && (
+            <div className="flex items-center gap-2 text-green-600">
+              <FiPercent />
+              <span>Discount: {courseData.discount}</span>
+            </div>
+          )}
         </div>
       )}
 

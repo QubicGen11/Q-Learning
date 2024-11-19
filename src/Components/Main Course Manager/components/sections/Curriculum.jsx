@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiMove } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiMove, FiMessageSquare } from 'react-icons/fi';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import useCourseStore from '../../../../store/courseStore';
 
 const Curriculum = () => {
   const courseData = useCourseStore((state) => state.courseData);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
+  const [editingLesson, setEditingLesson] = useState(null);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
     
-    const items = Array.from(courseData.curriculum);
+    const items = Array.from(courseData.lessons || []);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     
-    updateCourseData({ curriculum: items });
+    updateCourseData({ lessons: items });
   };
 
   return (
@@ -24,30 +25,32 @@ const Curriculum = () => {
         <button
           onClick={() => {
             updateCourseData({
-              curriculum: [
-                ...courseData.curriculum,
+              lessons: [
+                ...(courseData.lessons || []),
                 {
                   id: Date.now(),
-                  title: 'New Section',
-                  lessons: []
+                  title: 'New Lesson',
+                  content: '',
+                  duration: '0:00',
+                  feedback: ''
                 }
               ]
             });
           }}
           className="flex items-center gap-2 text-purple-600 hover:text-purple-700"
         >
-          <FiPlus /> Add Section
+          <FiPlus /> Add Lesson
         </button>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="curriculum">
+        <Droppable droppableId="lessons">
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef}>
-              {courseData.curriculum.map((section, index) => (
+              {(courseData.lessons || []).map((lesson, index) => (
                 <Draggable
-                  key={section.id}
-                  draggableId={section.id.toString()}
+                  key={lesson.id}
+                  draggableId={lesson.id.toString()}
                   index={index}
                 >
                   {(provided) => (
@@ -61,36 +64,36 @@ const Curriculum = () => {
                           <div {...provided.dragHandleProps}>
                             <FiMove className="text-gray-400 cursor-move" />
                           </div>
-                          {editingSection === section.id ? (
+                          {editingLesson === lesson.id ? (
                             <input
                               type="text"
-                              value={section.title}
+                              value={lesson.title}
                               onChange={(e) => {
-                                const newCurriculum = [...courseData.curriculum];
-                                newCurriculum[index].title = e.target.value;
-                                updateCourseData({ curriculum: newCurriculum });
+                                const newLessons = [...(courseData.lessons || [])];
+                                newLessons[index].title = e.target.value;
+                                updateCourseData({ lessons: newLessons });
                               }}
-                              onBlur={() => setEditingSection(null)}
+                              onBlur={() => setEditingLesson(null)}
                               autoFocus
                               className="border-b p-1"
                             />
                           ) : (
-                            <h3 className="font-medium">{section.title}</h3>
+                            <h3 className="font-medium">{lesson.title}</h3>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => setEditingSection(section.id)}
+                            onClick={() => setEditingLesson(lesson.id)}
                             className="text-gray-400 hover:text-gray-600"
                           >
                             <FiEdit2 />
                           </button>
                           <button
                             onClick={() => {
-                              const newCurriculum = courseData.curriculum.filter(
-                                (s) => s.id !== section.id
+                              const newLessons = (courseData.lessons || []).filter(
+                                (l) => l.id !== lesson.id
                               );
-                              updateCourseData({ curriculum: newCurriculum });
+                              updateCourseData({ lessons: newLessons });
                             }}
                             className="text-gray-400 hover:text-red-600"
                           >
@@ -99,51 +102,39 @@ const Curriculum = () => {
                         </div>
                       </div>
 
-                      {/* Lessons */}
-                      <div className="pl-8 space-y-2">
-                        {section.lessons.map((lesson, lessonIndex) => (
-                          <div
-                            key={lesson.id}
-                            className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                          >
-                            <span>{lesson.title}</span>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => {/* Handle edit lesson */}}
-                                className="text-gray-400 hover:text-gray-600"
-                              >
-                                <FiEdit2 />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const newCurriculum = [...courseData.curriculum];
-                                  newCurriculum[index].lessons = section.lessons.filter(
-                                    (l) => l.id !== lesson.id
-                                  );
-                                  updateCourseData({ curriculum: newCurriculum });
-                                }}
-                                className="text-gray-400 hover:text-red-600"
-                              >
-                                <FiTrash2 />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => {
-                            const newCurriculum = [...courseData.curriculum];
-                            newCurriculum[index].lessons.push({
-                              id: Date.now(),
-                              title: 'New Lesson',
-                              content: '',
-                              duration: '0:00'
-                            });
-                            updateCourseData({ curriculum: newCurriculum });
+                      {/* Duration Input */}
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600 mb-1">Duration</label>
+                        <input
+                          type="text"
+                          value={lesson.duration}
+                          onChange={(e) => {
+                            const newLessons = [...(courseData.lessons || [])];
+                            newLessons[index].duration = e.target.value;
+                            updateCourseData({ lessons: newLessons });
                           }}
-                          className="text-purple-600 hover:text-purple-700 text-sm"
-                        >
-                          + Add Lesson
-                        </button>
+                          className="border rounded p-2 w-32"
+                          placeholder="HH:MM"
+                        />
+                      </div>
+
+                      {/* Feedback Input */}
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          <FiMessageSquare className="inline mr-2" />
+                          Lesson Feedback
+                        </label>
+                        <textarea
+                          value={lesson.feedback || ''}
+                          onChange={(e) => {
+                            const newLessons = [...(courseData.lessons || [])];
+                            newLessons[index].feedback = e.target.value;
+                            updateCourseData({ lessons: newLessons });
+                          }}
+                          className="border rounded p-2 w-full"
+                          placeholder="Add feedback for this lesson..."
+                          rows={3}
+                        />
                       </div>
                     </div>
                   )}

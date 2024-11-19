@@ -38,8 +38,8 @@ const Mainadmin = () => {
         return <BasicInformation />;
       case 'aboutCourse':
         return <AboutCourse />;
-    //   case 'curriculum':
-    //     return <Curriculum />;
+      case 'curriculum':
+        return <Curriculum />;
       case 'lessons':
         return <Lessons />;
       case 'assignments':

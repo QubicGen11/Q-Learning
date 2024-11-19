@@ -277,24 +277,23 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
                   Prerequisites
                 </h2>
                 
-                <div className=" dark:bg-gray-800 p-4 rounded-lg">
-                  {course?.coursePreRequisites?.map((prereq) => (
-                    <div key={prereq.id} className="mb-4">
+                <div className="dark:bg-gray-800 p-4 rounded-lg">
+                  {/* Show level once at the top */}
+                  {course?.coursePreRequisites?.[0]?.preRequisites?.preRequisiteLevel && (
+                    <div className="mb-4">
+                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 
+                                     dark:bg-blue-900 dark:text-blue-300 rounded inline-block">
+                        Level: {course.coursePreRequisites[0].preRequisites.preRequisiteLevel}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* List all prerequisites without individual levels */}
+                  {course?.coursePreRequisites?.map((prereq, index) => (
+                    <div key={index} className="mb-4 last:mb-0">
                       {prereq?.preRequisites?.preRequisiteRequired && (
-                        <div className="space-y-4">
-                          <div 
-                            className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-200"
-                          >
-                            {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))}
-                          </div>
-                          
-                          {prereq.preRequisites.preRequisiteLevel && (
-                            <div className="mt-2">
-                              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded">
-                                Level: {prereq.preRequisites.preRequisiteLevel}
-                              </span>
-                            </div>
-                          )}
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-200">
+                          {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))}
                         </div>
                       )}
                     </div>
@@ -305,7 +304,21 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
               {/* Course Audience */}
               <div>
                 <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Course Audience</h2>
-                <p className="text-gray-600 dark:text-white">{course.courseAudience}</p>
+                <div 
+                  className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-200 [&_ol]:list-none [&_ol>li]:before:content-none"
+                >
+                  {course?.courseAudience ? (
+                    parse(DOMPurify.sanitize(course.courseAudience, {
+                      USE_PROFILES: { html: true },
+                      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h3', 'h4'],
+                      ALLOWED_ATTR: ['class'],
+                      FORBID_TAGS: ['style'],
+                      FORBID_ATTR: ['style'],
+                    }))
+                  ) : (
+                    <p>No audience information available</p>
+                  )}
+                </div>
               </div>
 
               {/* Learning Objectives */}

@@ -198,17 +198,21 @@ const AboutCourse = () => {
         </div>
       </div>
 
-      <div>
+      {/* Course Audience */}
+      <div className="relative z-10">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Course Audience
         </label>
-        <input
-          type="text"
-          value={courseData.courseAudience || ''}
-          onChange={(e) => updateCourseData({ courseAudience: e.target.value })}
-          className="w-full p-2 border rounded"
-          placeholder="Who is this course for?"
-        />
+        <div className="relative" style={{ height: '250px' }}>
+          <ReactQuill
+            value={courseData.courseAudience || ''}
+            onChange={(content) => updateCourseData({ courseAudience: content })}
+            modules={quillModules}
+            className="h-full"
+            theme="snow"
+            placeholder="Who is this course for? Describe your target audience..."
+          />
+        </div>
       </div>
 
       <style jsx global>{`

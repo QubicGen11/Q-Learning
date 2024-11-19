@@ -492,7 +492,7 @@ const Courses_main = () => {
                     You haven't created any courses yet. Start creating your first course!
                   </p>
                   <button
-                    onClick={() => navigate('/mainadmin')}
+                    onClick={() => navigate('/instructor')}
                     className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 
                                text-white rounded-lg transition-colors duration-200"
                   >
