@@ -1,0 +1,14 @@
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+.ql-editor p {
+  margin-bottom: 1em;
+}
+
+/* Optional: Add resize handles */
+.ql-editor img:hover {
+  box-shadow: 0 0 0 2px #purple-500 !important;
+} 

@@ -1,31 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import { FiPlus } from 'react-icons/fi';
-import useCourseStore from '../../../../store/courseStore';
-
-const quillModules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    ['blockquote', 'code-block'],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    ['link', 'image'],
-    ['clean']
-  ]
-};
+import { FiPlus } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import ReactQuill from "react-quill";
+import useCourseStore from "../../../../store/courseStore";
 
 const Lessons = () => {
   const courseData = useCourseStore((state) => state.courseData);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
-  const [selectedLesson, setSelectedLesson] = useState(null);
+  const fetchCourseById = useCourseStore((state) => state.fetchCourseById);
+  const [selectedLessonId, setSelectedLessonId] = useState(null);
 
+  // Fetch course data when component mounts
   useEffect(() => {
-    // Set first lesson as selected when lessons load
-    if (courseData.lessons?.length > 0 && !selectedLesson) {
-      setSelectedLesson(courseData.lessons[0]);
+    const courseId = new URLSearchParams(window.location.search).get('courseId');
+    if (courseId) {
+      fetchCourseById(courseId);
     }
-  }, [courseData.lessons]);
+  }, [fetchCourseById]);
+
+  // Set first lesson as selected when data loads
+  useEffect(() => {
+    if (courseData.lessons?.length > 0 && !selectedLessonId) {
+      setSelectedLessonId(courseData.lessons[0].id);
+    }
+  }, [courseData.lessons, selectedLessonId]);
+
+  const selectedLesson = courseData.lessons?.find(
+    (lesson) => lesson.id === selectedLessonId
+  );
+
+  const quillModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ header: 1 }, { header: 2 }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ script: 'sub' }, { script: 'super' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      ['link', 'image'],
+      ['clean'],
+    ],
+  };
 
   const handleAddLesson = () => {
     const newLesson = {
@@ -38,22 +52,14 @@ const Lessons = () => {
 
     const updatedLessons = [...(courseData.lessons || []), newLesson];
     updateCourseData({ lessons: updatedLessons });
-    setSelectedLesson(newLesson);
+    setSelectedLessonId(newLesson.id);
   };
 
   const handleLessonUpdate = (id, updates) => {
-    const updatedLessons = courseData.lessons.map(lesson => 
+    const updatedLessons = courseData.lessons.map((lesson) =>
       lesson.id === id ? { ...lesson, ...updates } : lesson
     );
     updateCourseData({ lessons: updatedLessons });
-    setSelectedLesson(prev => prev?.id === id ? { ...prev, ...updates } : prev);
-  };
-
-  const handleDurationChange = (e) => {
-    const duration = e.target.value;
-    if (duration === '' || parseInt(duration) >= 0) {
-      handleLessonUpdate(selectedLesson.id, { duration });
-    }
   };
 
   return (
@@ -62,7 +68,7 @@ const Lessons = () => {
       <div className="w-1/3 border-r pr-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-medium">Lessons</h3>
-          <button
+          <button 
             onClick={handleAddLesson}
             className="text-purple-600 hover:text-purple-700"
           >
@@ -70,12 +76,12 @@ const Lessons = () => {
           </button>
         </div>
         <div className="space-y-2">
-          {(courseData.lessons || []).map(lesson => (
+          {courseData.lessons?.map((lesson) => (
             <button
               key={lesson.id}
-              onClick={() => setSelectedLesson(lesson)}
+              onClick={() => setSelectedLessonId(lesson.id)}
               className={`w-full text-left p-3 rounded-lg ${
-                selectedLesson?.id === lesson.id
+                selectedLessonId === lesson.id
                   ? 'bg-purple-50 text-purple-700'
                   : 'hover:bg-gray-50'
               }`}
@@ -99,23 +105,26 @@ const Lessons = () => {
               </label>
               <input
                 type="text"
-                value={selectedLesson.title || ''}
-                onChange={(e) => handleLessonUpdate(selectedLesson.id, { title: e.target.value })}
+                value={selectedLesson.title}
+                onChange={(e) => 
+                  handleLessonUpdate(selectedLesson.id, { title: e.target.value })
+                }
                 className="w-full p-2 border rounded-lg"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lesson Duration (minutes)*
+                Lesson Duration (minutes)
               </label>
               <input
                 type="number"
                 min="0"
-                value={selectedLesson.duration || ''}
-                onChange={handleDurationChange}
+                value={selectedLesson.duration}
+                onChange={(e) => 
+                  handleLessonUpdate(selectedLesson.id, { duration: e.target.value })
+                }
                 className="w-full p-2 border rounded-lg"
-                placeholder="Enter duration in minutes"
               />
             </div>
 
@@ -125,13 +134,31 @@ const Lessons = () => {
               </label>
               <div className="relative" style={{ height: '250px' }}>
                 <ReactQuill
-                  value={selectedLesson.content || ''}
-                  onChange={(content) => handleLessonUpdate(selectedLesson.id, { content })}
+                  value={selectedLesson.content}
+                  onChange={(content) => 
+                    handleLessonUpdate(selectedLesson.id, { content })
+                  }
                   modules={quillModules}
                   className="h-full"
                   theme="snow"
                 />
               </div>
+            </div>
+
+            {/* Add Save and Delete buttons */}
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => handleRemoveLesson(selectedLesson.id)}
+                className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50"
+              >
+                Delete Lesson
+              </button>
+              <button
+                onClick={() => updateCourseData({ lessons: courseData.lessons })}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                Save Lesson
+              </button>
             </div>
           </div>
         </div>
@@ -140,4 +167,4 @@ const Lessons = () => {
   );
 };
 
-export default Lessons; 
+export default Lessons;

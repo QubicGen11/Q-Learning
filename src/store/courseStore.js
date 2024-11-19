@@ -1,8 +1,29 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 
+// Helper functions for localStorage
+const LOCAL_STORAGE_KEY = 'course_draft';
+
+const getLocalDraft = () => {
+  try {
+    const draft = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return draft ? JSON.parse(draft) : null;
+  } catch (error) {
+    console.error('Error reading from localStorage:', error);
+    return null;
+  }
+};
+
+const saveLocalDraft = (courseData) => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(courseData));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};
+
 const useCourseStore = create((set, get) => ({
-  courseData: {
+  courseData: getLocalDraft() || {
     welcome: '',
     aboutCourse: '',
     endObjective: '',
@@ -34,9 +55,30 @@ const useCourseStore = create((set, get) => ({
   },
 
   updateCourseData: (data) => 
-    set((state) => ({
-      courseData: { ...state.courseData, ...data }
-    })),
+    set((state) => {
+      const updatedCourseData = { ...state.courseData };
+      
+      if (data.lessons) {
+        updatedCourseData.lessons = data.lessons.map(newLesson => {
+          const existingLesson = state.courseData.lessons.find(
+            lesson => lesson.id === newLesson.id
+          );
+          return existingLesson ? { ...existingLesson, ...newLesson } : newLesson;
+        });
+      }
+
+      const newState = {
+        courseData: { 
+          ...updatedCourseData, 
+          ...data,
+          lessons: data.lessons || updatedCourseData.lessons 
+        }
+      };
+
+      // Save to localStorage after every update
+      saveLocalDraft(newState.courseData);
+      return newState;
+    }),
 
   addLesson: (lesson) =>
     set((state) => ({
@@ -183,13 +225,24 @@ const useCourseStore = create((set, get) => ({
 
       const result = await response.json();
       console.log('API Response:', result); // For debugging
+      
+      // Clear localStorage after successful submission
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      
       return result;
-
     } catch (error) {
       console.error('Error submitting course:', error);
       throw error;
     }
-  }
+  },
+
+  removeLesson: (lessonId) =>
+    set((state) => ({
+      courseData: {
+        ...state.courseData,
+        lessons: state.courseData.lessons.filter(lesson => lesson.id !== lessonId)
+      }
+    }))
 }));
 
 export default useCourseStore; 
