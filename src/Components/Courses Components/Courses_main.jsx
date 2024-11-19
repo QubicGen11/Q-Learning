@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FiSearch, FiMoreVertical, FiClock } from 'react-icons/fi';
+import { FiSearch, FiMoreVertical, FiClock, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar_main from '../Navbar Components/Navbar_main';
 import config from '../../config/apiConfig';
 import Cookies from 'js-cookie';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -142,7 +144,10 @@ const Courses_main = () => {
       console.log("Fetching My Courses API called");
       const token = Cookies.get('accessToken');
       const response = await fetch('http://localhost:8089/qlms/getUserCreatedCourse', {
-    
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       const data = await response.json();
       console.log("My Courses Data:", data);
@@ -221,6 +226,25 @@ const Courses_main = () => {
   }, [viewMode]);
 
   const navigate = useNavigate();
+
+  const handleDeleteCourse = async (courseId) => {
+    try {
+      const token = Cookies.get('accessToken');
+      const response = await fetch(`${config.CURRENT_URL}/qlms/deleteCourse/${courseId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (response.ok) {
+        // Refresh the courses list
+        fetchMyCourses();
+      }
+    } catch (error) {
+      console.error('Error deleting course:', error);
+    }
+  };
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 bg-white dark:bg-gray-900 transition-all duration-300">
@@ -509,80 +533,116 @@ const Courses_main = () => {
                   {myCourses.map((course) => (
                     <div 
                       key={course.id}
-                      onClick={() => navigate(`/courses/${course.id}`)}
-                      className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 
-                                hover:shadow-lg transition-all duration-300 relative cursor-pointer"
+                      className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg 
+                                hover:shadow-lg transition-all duration-300 relative"
                     >
-                      {/* Course Banner/Image */}
-                      <div className="relative flex items-center justify-center h-40 mb-4">
-                        <img 
-                          src={course.courseBanner || course.thumbnail || "https://via.placeholder.com/400x300"}
-                          alt={course.courseTitle} 
-                          className="max-h-full w-auto object-contain"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/400x300";
-                          }}
-                        />
+                      {/* Course Actions Dropdown */}
+                      <div className="absolute top-2 right-2 z-10">
+                        <Menu as="div" className="relative inline-block text-left">
+                          <Menu.Button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full 
+                                                 transition-colors duration-200 focus:outline-none">
+                            <FiMoreVertical className="text-gray-600 dark:text-gray-400 w-5 h-5" />
+                          </Menu.Button>
+
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-100"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-75"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
+                          >
+                            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right divide-y divide-gray-100 
+                                                  rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 
+                                                  focus:outline-none dark:divide-gray-700">
+                              <div className="px-1 py-1">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      onClick={() => navigate(`/mainadmin/${course.id}`)}
+                                      className={`${
+                                        active 
+                                          ? 'bg-purple-500 text-white' 
+                                          : 'text-gray-700 dark:text-gray-300'
+                                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                    >
+                                      <FiEdit2 className="mr-2 h-5 w-5" />
+                                      Edit Course
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                                
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      onClick={() => {
+                                        if (window.confirm('Are you sure you want to delete this course?')) {
+                                          handleDeleteCourse(course.id);
+                                        }
+                                      }}
+                                      className={`${
+                                        active 
+                                          ? 'bg-red-500 text-white' 
+                                          : 'text-red-600 dark:text-red-400'
+                                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                    >
+                                      <FiTrash2 className="mr-2 h-5 w-5" />
+                                      Delete Course
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              </div>
+                            </Menu.Items>
+                          </Transition>
+                        </Menu>
                       </div>
 
-                      {/* Course Title */}
-                      <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
-                                   dark:hover:text-blue-300 mb-4 text-base font-medium line-clamp-2">
-                        {course.courseTitle || "Untitled Course"}
-                      </h3>
-
-                      {/* Course Description */}
-                      <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3"
-                           dangerouslySetInnerHTML={{ __html: course.description || course.aboutCourse || "No description available" }}>
-                      </div>
-
-                      {/* Course Details */}
-                      <div className="flex items-center justify-between mt-auto">
-                        <div className="flex flex-col">
-                          <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                            ${course.price || 0}
-                          </span>
-                          {course.originalPrice && course.originalPrice > course.price && (
-                            <span className="text-sm line-through text-gray-500">
-                              ${course.originalPrice}
-                            </span>
-                          )}
-                          {course.discount && course.discount !== "0%" && (
-                            <span className="text-xs text-green-500">
-                              {course.discount} OFF
-                            </span>
-                          )}
+                      {/* Course Content (clickable to view course) */}
+                      <div 
+                        onClick={() => navigate(`/courses/${course.id}`)}
+                        className="cursor-pointer p-4"
+                      >
+                        {/* Course Banner/Image */}
+                        <div className="relative flex items-center justify-center h-40 mb-4">
+                          <img 
+                            src={course.courseBanner || "https://via.placeholder.com/400x300"}
+                            alt={course.courseTitle} 
+                            className="max-h-full w-auto object-contain"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://via.placeholder.com/400x300";
+                            }}
+                          />
                         </div>
 
-                        <div className="flex flex-col items-end text-sm text-gray-600 dark:text-gray-400">
-                          <div className="flex items-center gap-1">
-                            <FiClock className="w-4 h-4" />
-                            <span>{course.duration || "N/A"} hrs</span>
-                          </div>
-                          {course.language && (
-                            <span className="text-xs">{course.language}</span>
-                          )}
-                        </div>
-                      </div>
+                        {/* Course Title */}
+                        <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
+                                     dark:hover:text-blue-300 mb-4 text-base font-medium line-clamp-2">
+                          {course.courseTitle}
+                        </h3>
 
-                      {/* Category & Type */}
-                      {(course.category || course.courseType) && (
-                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                          <div className="flex flex-wrap gap-2">
-                            {course.category && (
-                              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
-                                {course.category}
+                        {/* Course Details */}
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="flex flex-col">
+                            <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                              ${course.price || 0}
+                            </span>
+                            {course.originalPrice && course.originalPrice > course.price && (
+                              <span className="text-sm line-through text-gray-500">
+                                ${course.originalPrice}
                               </span>
                             )}
-                            {course.courseType && (
-                              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">
-                                {course.courseType}
-                              </span>
-                            )}
+                          </div>
+
+                          <div className="flex flex-col items-end text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <FiClock className="w-4 h-4" />
+                              <span>{course.duration || "N/A"}</span>
+                            </div>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>

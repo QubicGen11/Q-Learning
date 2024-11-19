@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { FiPlus } from 'react-icons/fi';
@@ -20,15 +20,23 @@ const Lessons = () => {
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
   const [selectedLesson, setSelectedLesson] = useState(null);
 
+  useEffect(() => {
+    // Set first lesson as selected when lessons load
+    if (courseData.lessons?.length > 0 && !selectedLesson) {
+      setSelectedLesson(courseData.lessons[0]);
+    }
+  }, [courseData.lessons]);
+
   const handleAddLesson = () => {
     const newLesson = {
-      id: Date.now(),
-      lessonTitle: 'New Lesson',
-      lessonContent: '',
-      lessonDuration: ''
+      id: Date.now().toString(),
+      title: 'New Lesson',
+      content: '',
+      duration: '0',
+      feedback: ''
     };
 
-    const updatedLessons = [...courseData.lessons, newLesson];
+    const updatedLessons = [...(courseData.lessons || []), newLesson];
     updateCourseData({ lessons: updatedLessons });
     setSelectedLesson(newLesson);
   };
@@ -38,67 +46,14 @@ const Lessons = () => {
       lesson.id === id ? { ...lesson, ...updates } : lesson
     );
     updateCourseData({ lessons: updatedLessons });
-    setSelectedLesson(prev => ({
-      ...prev,
-      ...updates
-    }));
+    setSelectedLesson(prev => prev?.id === id ? { ...prev, ...updates } : prev);
   };
 
   const handleDurationChange = (e) => {
     const duration = e.target.value;
     if (duration === '' || parseInt(duration) >= 0) {
-      handleLessonUpdate(selectedLesson.id, { lessonDuration: duration });
+      handleLessonUpdate(selectedLesson.id, { duration });
     }
-  };
-
-  const renderLessonContent = () => {
-    if (!selectedLesson) return null;
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Lesson Title
-          </label>
-          <input
-            type="text"
-            value={selectedLesson.lessonTitle}
-            onChange={(e) => handleLessonUpdate(selectedLesson.id, { lessonTitle: e.target.value })}
-            className="w-full p-2 border rounded-lg"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Lesson Duration (minutes)*
-          </label>
-          <input
-            type="number"
-            min="0"
-            value={selectedLesson.lessonDuration}
-            onChange={handleDurationChange}
-            className="w-full p-2 border rounded-lg"
-            placeholder="Enter duration in minutes"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Lesson Content
-          </label>
-          <div className="relative" style={{ height: '250px' }}>
-            <ReactQuill
-              value={selectedLesson.lessonContent}
-              onChange={(content) => handleLessonUpdate(selectedLesson.id, { lessonContent: content })}
-              modules={quillModules}
-              className="h-full"
-              theme="snow"
-              placeholder="Enter lesson content..."
-            />
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -115,7 +70,7 @@ const Lessons = () => {
           </button>
         </div>
         <div className="space-y-2">
-          {courseData.lessons.map(lesson => (
+          {(courseData.lessons || []).map(lesson => (
             <button
               key={lesson.id}
               onClick={() => setSelectedLesson(lesson)}
@@ -126,8 +81,8 @@ const Lessons = () => {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span>{lesson.lessonTitle}</span>
-                <span className="text-sm text-gray-500">{lesson.lessonDuration}</span>
+                <span>{lesson.title}</span>
+                <span className="text-sm text-gray-500">{lesson.duration} min</span>
               </div>
             </button>
           ))}
@@ -137,20 +92,50 @@ const Lessons = () => {
       {/* Lesson Editor */}
       {selectedLesson && (
         <div className="flex-1 pl-6">
-          {renderLessonContent()}
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lesson Title
+              </label>
+              <input
+                type="text"
+                value={selectedLesson.title || ''}
+                onChange={(e) => handleLessonUpdate(selectedLesson.id, { title: e.target.value })}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lesson Duration (minutes)*
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={selectedLesson.duration || ''}
+                onChange={handleDurationChange}
+                className="w-full p-2 border rounded-lg"
+                placeholder="Enter duration in minutes"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lesson Content
+              </label>
+              <div className="relative" style={{ height: '250px' }}>
+                <ReactQuill
+                  value={selectedLesson.content || ''}
+                  onChange={(content) => handleLessonUpdate(selectedLesson.id, { content })}
+                  modules={quillModules}
+                  className="h-full"
+                  theme="snow"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
-
-      <style jsx global>{`
-        .ql-container {
-          height: calc(100% - 42px) !important;
-        }
-        .ql-editor {
-          min-height: 100%;
-          max-height: 100%;
-          overflow-y: auto;
-        }
-      `}</style>
     </div>
   );
 };

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import AboutCourse from './components/sections/AboutCourse';
 import Curriculum from './components/sections/Curriculum';
 import Lessons from './components/sections/Lessons';
@@ -13,18 +14,40 @@ import PreviewModal from './components/sections/PreviewModal';
 
 
 const Mainadmin = () => {
+  const { courseId } = useParams();
+  const navigate = useNavigate();
   const courseData = useCourseStore((state) => state.courseData);
   const submitCourse = useCourseStore((state) => state.submitCourse);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
+  const fetchCourseById = useCourseStore((state) => state.fetchCourseById);
   const [activeSection, setActiveSection] = useState('basicInfo');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadCourse = async () => {
+      if (courseId) {
+        setIsLoading(true);
+        try {
+          await fetchCourseById(courseId);
+        } catch (error) {
+          console.error('Error loading course:', error);
+          alert('Failed to load course details');
+        }
+        setIsLoading(false);
+      }
+    };
+
+    loadCourse();
+  }, [courseId, fetchCourseById]);
 
   const handleSave = async () => {
     try {
-      await submitCourse();
-      alert('Course created successfully!');
+      await submitCourse(courseId);
+      alert(courseId ? 'Course updated successfully!' : 'Course created successfully!');
+      navigate('/courses');
     } catch (error) {
-      alert('Failed to create course: ' + error.message);
+      alert(`Failed to ${courseId ? 'update' : 'create'} course: ${error.message}`);
     }
   };
 
@@ -52,6 +75,14 @@ const Mainadmin = () => {
         return <BasicInformation />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">

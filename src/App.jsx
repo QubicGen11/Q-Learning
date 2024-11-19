@@ -115,7 +115,8 @@ function App() {
               <Route path="/profile" element={<ProfileSettings />} />
               <Route path="/instructor" element={<BecomeInstructor />} />
               <Route path="/loader" element={<Loader/>} />
-              <Route path="/mainadmin" element={<Mainadmin/>} />
+              <Route path="/mainadmin/:courseId?" element={<Mainadmin />} />
+              <Route path="/mainadmin" element={<Mainadmin />} />
               <Route path="/superadmin" element={<SuperAdmin/>} />
               <Route path="/superadminlogin" element={<Superadminlogin/>} />
               
