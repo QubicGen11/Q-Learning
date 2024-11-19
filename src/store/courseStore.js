@@ -114,40 +114,58 @@ const useCourseStore = create((set, get) => ({
     try {
       const state = get();
       const { courseData } = state;
-      
-      // Transform lessons back to API format
+      const token = Cookies.get('accessToken');
+
+      if (!token) throw new Error('Authentication token not found');
+
+      // Transform lessons to match API format
       const transformedLessons = courseData.lessons?.map(lesson => ({
-        id: lesson.id,
-        courseId: courseId,
-        lessonId: lesson.id,
-        lesson: {
-          id: lesson.id,
-          lessonTitle: lesson.title,
-          lessonContent: lesson.content,
-          lessonDuration: `${lesson.duration} minutes`,
-          feedback: lesson.feedback || ''
-        }
+        lessonTitle: lesson.title || lesson.lessonTitle,
+        lessonDuration: `${lesson.duration || lesson.lessonDuration} minutes`,
+        lessonContent: lesson.content || lesson.lessonContent,
+        feedback: lesson.feedback || ''
       }));
 
+      // Transform prerequisites to match API format
+      const transformedPreRequisites = courseData.preRequisites?.map(prereq => ({
+        preRequisiteRequired: prereq.preRequisiteRequired,
+        preRequisiteLevel: prereq.preRequisiteLevel
+      }));
+
+      // Prepare the payload for API
       const courseDataToSubmit = {
-        ...courseData,
-        courseLesson: transformedLessons,
-        courseBanner: courseData.courseBanner || null,
-        coursePreRequisites: courseData.preRequisites?.map(prereq => ({
-          id: prereq.id,
-          courseId: courseId,
-          preRequisiteId: prereq.id,
-          preRequisites: {
-            id: prereq.id,
-            preRequisiteRequired: prereq.preRequisiteRequired,
-            preRequisiteLevel: prereq.preRequisiteLevel
-          }
-        }))
+        welcome: courseData.welcome,
+        aboutCourse: courseData.aboutCourse,
+        endObjective: courseData.endObjective,
+        courseTitle: courseData.courseTitle,
+        description: courseData.description,
+        duration: courseData.duration,
+        completionTime: courseData.completionTime,
+        courseType: courseData.courseType,
+        difficultyLevel: courseData.difficultyLevel,
+        language: courseData.language,
+        productCovered: courseData.productCovered,
+        category: courseData.category,
+        subCategory: courseData.subCategory,
+        price: Number(courseData.price),
+        originalPrice: Number(courseData.originalPrice),
+        discount: courseData.discount,
+        courseAudience: courseData.courseAudience,
+        learningObjective: courseData.learningObjective,
+        technologiesUsed: courseData.technologiesUsed,
+        technologyImage: courseData.technologyImage,
+        customTechnology: courseData.customTechnology,
+        coustomTechnologyImg: courseData.coustomTechnologyImg,
+        courseBanner: courseData.courseBanner,
+        lessons: transformedLessons,
+        preRequisites: transformedPreRequisites
       };
 
       const url = courseId 
         ? `http://localhost:8089/qlms/updateCourse/${courseId}`
         : 'http://localhost:8089/qlms/createCourse';
+
+      console.log('Submitting course data:', courseDataToSubmit); // For debugging
 
       const response = await fetch(url, {
         method: courseId ? 'PUT' : 'POST',
@@ -158,8 +176,15 @@ const useCourseStore = create((set, get) => ({
         body: JSON.stringify(courseDataToSubmit)
       });
 
-      if (!response.ok) throw new Error(`Failed to ${courseId ? 'update' : 'create'} course`);
-      return await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to ${courseId ? 'update' : 'create'} course`);
+      }
+
+      const result = await response.json();
+      console.log('API Response:', result); // For debugging
+      return result;
+
     } catch (error) {
       console.error('Error submitting course:', error);
       throw error;
