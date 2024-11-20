@@ -21,7 +21,7 @@ const Lessons = () => {
     const newLesson = {
       id: Date.now(),
       lessonTitle: "",
-      lessonDuration: 0,
+      lessonDuration: "",
       lessonContent: ""
     };
 
@@ -156,10 +156,13 @@ const Lessons = () => {
                 Duration (minutes)
               </label>
               <input
-                type="number"
+                type="text"
                 value={lesson.lessonDuration}
-                onChange={(e) => handleLessonUpdate(lesson.id, { lessonDuration: parseInt(e.target.value) })}
+                onChange={(e) => handleLessonUpdate(lesson.id, { 
+                  lessonDuration: e.target.value
+                })}
                 className="w-full p-2 border rounded-lg"
+                placeholder="Enter duration"
               />
             </div>
 
