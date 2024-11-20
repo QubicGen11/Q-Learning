@@ -4,8 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar_main from '../Navbar Components/Navbar_main';
 import config from '../../config/apiConfig';
 import Cookies from 'js-cookie';
-import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -538,64 +536,42 @@ const Courses_main = () => {
                     >
                       {/* Course Actions Dropdown */}
                       <div className="absolute top-2 right-2 z-10">
-                        <Menu as="div" className="relative inline-block text-left">
-                          <Menu.Button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full 
-                                                 transition-colors duration-200 focus:outline-none">
-                            <FiMoreVertical className="text-gray-600 dark:text-gray-400 w-5 h-5" />
-                          </Menu.Button>
-
-                          <Transition
-                            as={Fragment}
-                            enter="transition ease-out duration-100"
-                            enterFrom="transform opacity-0 scale-95"
-                            enterTo="transform opacity-100 scale-100"
-                            leave="transition ease-in duration-75"
-                            leaveFrom="transform opacity-100 scale-100"
-                            leaveTo="transform opacity-0 scale-95"
-                          >
-                            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right divide-y divide-gray-100 
-                                                  rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 
-                                                  focus:outline-none dark:divide-gray-700">
-                              <div className="px-1 py-1">
-                                <Menu.Item>
-                                  {({ active }) => (
-                                    <button
-                                      onClick={() => navigate(`/mainadmin/${course.id}`)}
-                                      className={`${
-                                        active 
-                                          ? 'bg-purple-500 text-white' 
-                                          : 'text-gray-700 dark:text-gray-300'
-                                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                                    >
-                                      <FiEdit2 className="mr-2 h-5 w-5" />
-                                      Edit Course
-                                    </button>
-                                  )}
-                                </Menu.Item>
-                                
-                                <Menu.Item>
-                                  {({ active }) => (
-                                    <button
-                                      onClick={() => {
-                                        if (window.confirm('Are you sure you want to delete this course?')) {
-                                          handleDeleteCourse(course.id);
-                                        }
-                                      }}
-                                      className={`${
-                                        active 
-                                          ? 'bg-red-500 text-white' 
-                                          : 'text-red-600 dark:text-red-400'
-                                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                                    >
-                                      <FiTrash2 className="mr-2 h-5 w-5" />
-                                      Delete Course
-                                    </button>
-                                  )}
-                                </Menu.Item>
-                              </div>
-                            </Menu.Items>
-                          </Transition>
-                        </Menu>
+                        <div className="relative group">
+                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
+                            <FiMoreVertical className="text-gray-600 dark:text-gray-400" />
+                          </button>
+                          
+                          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg 
+                                        border dark:border-gray-700 hidden group-hover:block">
+                            <div className="py-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/edit-course/${course.id}`);
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 
+                                       hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                              >
+                                <FiEdit2 />
+                                Edit Course
+                              </button>
+                              
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm('Are you sure you want to delete this course?')) {
+                                    handleDeleteCourse(course.id);
+                                  }
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 
+                                       hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                              >
+                                <FiTrash2 />
+                                Delete Course
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Course Content (clickable to view course) */}

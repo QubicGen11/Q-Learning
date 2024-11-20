@@ -2,6 +2,7 @@ import { FiPlus } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import useCourseStore from "../../../../store/courseStore";
+import "../../styles/scrollbar.css";
 
 const Lessons = () => {
   const courseData = useCourseStore((state) => state.courseData);
@@ -83,8 +84,8 @@ const Lessons = () => {
   ];
 
   return (
-    <div className="flex h-full gap-6">
-      <div className="w-64 sidebar">
+    <div className="flex  gap-6 h-[85vh]">
+      <div className="w-64 sidebar   overflow-y-auto sidebar ">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Lessons</h3>
           <button
@@ -105,14 +106,14 @@ const Lessons = () => {
               }`}
             >
               <div 
-                className="flex justify-between items-center cursor-pointer"
+                className="flex justify-between items-center cursor-pointer "
                 onClick={() => setSelectedLessonId(lesson.id)}
               >
                 <div>
                   <h4 className="font-medium">
-                    Lesson {index + 1}: {lesson.lessonTitle}
+                    Lesson {index + 1}: {lesson.lessonTitle?.length > 14 ? lesson.lessonTitle.substring(0,14) + '..' : lesson.lessonTitle}
                   </h4>
-                  <p className="text-sm text-gray-500">{lesson.lessonDuration} min</p>
+                 
                 </div>
                 <button
                   onClick={(e) => {
@@ -131,7 +132,7 @@ const Lessons = () => {
         </div>
       </div>
 
-      <div className="flex-1 main-content">
+      <div className="flex-1 main-content  h-[85vh]">
         {courseData.lessons?.map((lesson) => (
           <div
             key={lesson.id}
@@ -166,17 +167,17 @@ const Lessons = () => {
               />
             </div>
 
-            <div>
+            <div className="">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Lesson Content
               </label>
-              <div className="relative" style={{ height: '400px' }}>
+              <div className="relative" style={{ height: '800px' }}>
                 <ReactQuill
                   value={lesson.lessonContent}
                   onChange={(content) => handleLessonUpdate(lesson.id, { lessonContent: content })}
                   modules={modules}
                   formats={formats}
-                  className="h-full"
+                  className="h-[550px]"
                   theme="snow"
                 />
               </div>

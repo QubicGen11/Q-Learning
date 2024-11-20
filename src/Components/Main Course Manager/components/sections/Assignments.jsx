@@ -1,331 +1,221 @@
 import React, { useState } from 'react';
-import { FiPlus, FiTrash2, FiClock, FiAward } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiClock, FiAward, FiCheck, FiX } from 'react-icons/fi';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import useCourseStore from "../../../../store/courseStore";
 
-const Assignments = ({ formData, setFormData }) => {
-  const [selectedAssignment, setSelectedAssignment] = useState(null);
+const Assignments = () => {
+  const courseData = useCourseStore((state) => state.courseData);
+  const updateCourseData = useCourseStore((state) => state.updateCourseData);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
 
   const handleAddAssignment = () => {
+    const currentAssignments = courseData?.assignments || [];
+    
     const newAssignment = {
       id: Date.now(),
-      title: 'New Assignment',
-      description: '',
-      dueDate: '',
-      totalPoints: 100,
-      passingScore: 60,
-      instructions: '',
-      submissionType: 'file',
-      allowedFileTypes: ['pdf', 'doc', 'docx'],
-      maxFileSize: 5, // in MB
-      isGroupAssignment: false,
-      rubric: []
+      assignmentTitle: "",
+      assignmentDuration: "",
+      assignmentContent: "",
+      question: "",
+      options: [
+        { id: Date.now() + 1, option: "", isCorrect: false },
+        { id: Date.now() + 2, option: "", isCorrect: false },
+        { id: Date.now() + 3, option: "", isCorrect: false },
+        { id: Date.now() + 4, option: "", isCorrect: false }
+      ]
     };
 
-    setFormData({
-      ...formData,
-      assignments: [...formData.assignments, newAssignment]
+    updateCourseData({
+      ...courseData,
+      assignments: [...currentAssignments, newAssignment]
     });
-    setSelectedAssignment(newAssignment);
+    setSelectedAssignmentId(newAssignment.id);
+  };
+
+  const handleAssignmentUpdate = (assignmentId, updates) => {
+    if (!courseData?.assignments) return;
+    
+    const updatedAssignments = courseData.assignments.map(assignment => 
+      assignment.id === assignmentId ? { ...assignment, ...updates } : assignment
+    );
+
+    updateCourseData({
+      ...courseData,
+      assignments: updatedAssignments
+    });
+  };
+
+  const handleOptionUpdate = (assignmentId, optionIndex, updates) => {
+    if (!courseData?.assignments) return;
+    
+    const updatedAssignments = courseData.assignments.map(assignment => {
+      if (assignment.id === assignmentId) {
+        const updatedOptions = [...assignment.options];
+        updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], ...updates };
+        return { ...assignment, options: updatedOptions };
+      }
+      return assignment;
+    });
+
+    updateCourseData({
+      ...courseData,
+      assignments: updatedAssignments
+    });
+  };
+
+  const handleRemoveAssignment = (assignmentId) => {
+    if (!courseData?.assignments) return;
+    
+    const updatedAssignments = courseData.assignments.filter(
+      assignment => assignment.id !== assignmentId
+    );
+    
+    updateCourseData({
+      ...courseData,
+      assignments: updatedAssignments
+    });
+
+    if (selectedAssignmentId === assignmentId) {
+      setSelectedAssignmentId(updatedAssignments[0]?.id || null);
+    }
   };
 
   return (
     <div className="flex h-full gap-6">
-      {/* Assignments List */}
-      <div className="w-1/3">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium">Assignments</h3>
+      <div className="w-64 sidebar">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium">Assignments</h3>
           <button
             onClick={handleAddAssignment}
-            className="text-purple-600 hover:text-purple-700 p-2 rounded-lg"
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
           >
-            <FiPlus className="w-5 h-5" />
+            <FiPlus />
           </button>
         </div>
-
         <div className="space-y-2">
-          {formData.assignments.map(assignment => (
-            <button
+          {courseData?.assignments?.map((assignment, index) => (
+            <div
               key={assignment.id}
-              onClick={() => setSelectedAssignment(assignment)}
-              className={`w-full text-left p-4 rounded-lg border transition-colors ${
-                selectedAssignment?.id === assignment.id
-                  ? 'border-purple-500 bg-purple-50'
-                  : 'border-gray-200 hover:border-purple-200'
+              className={`p-3 rounded-lg ${
+                selectedAssignmentId === assignment.id
+                  ? "bg-blue-50 text-blue-600"
+                  : "hover:bg-gray-50"
               }`}
             >
-              <div className="flex justify-between items-center">
-                <span className="font-medium">{assignment.title}</span>
-                <span className="text-sm text-gray-500">
-                  {assignment.totalPoints} pts
-                </span>
+              <div 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setSelectedAssignmentId(assignment.id)}
+              >
+                <div>
+                  <h4 className="font-medium">Assignment {index + 1}: {assignment.assignmentTitle}</h4>
+                  <p className="text-sm text-gray-500">{assignment.assignmentDuration}</p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveAssignment(assignment.id);
+                  }}
+                  className="p-1 text-red-500 hover:bg-red-50 rounded"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </button>
               </div>
-              <div className="text-sm text-gray-500 mt-1">
-                Due: {assignment.dueDate || 'Not set'}
-              </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Assignment Editor */}
-      {selectedAssignment && (
-        <div className="flex-1 space-y-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
+      <div className="flex-1 main-content">
+        {courseData?.assignments?.map((assignment) => (
+          <div
+            key={assignment.id}
+            style={{ display: selectedAssignmentId === assignment.id ? 'block' : 'none' }}
+            className="assignment-content space-y-6"
+          >
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Assignment Title
               </label>
               <input
                 type="text"
-                value={selectedAssignment.title}
-                onChange={(e) => {
-                  const updated = formData.assignments.map(a =>
-                    a.id === selectedAssignment.id
-                      ? { ...a, title: e.target.value }
-                      : a
-                  );
-                  setFormData({ ...formData, assignments: updated });
-                }}
-                className="w-full p-3 border rounded-lg"
+                value={assignment.assignmentTitle}
+                onChange={(e) => handleAssignmentUpdate(assignment.id, { 
+                  assignmentTitle: e.target.value 
+                })}
+                className="w-full p-2 border rounded-lg"
+                placeholder="Enter assignment title"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Due Date
+                Question
               </label>
               <input
-                type="datetime-local"
-                value={selectedAssignment.dueDate}
-                onChange={(e) => {
-                  const updated = formData.assignments.map(a =>
-                    a.id === selectedAssignment.id
-                      ? { ...a, dueDate: e.target.value }
-                      : a
-                  );
-                  setFormData({ ...formData, assignments: updated });
-                }}
-                className="w-full p-3 border rounded-lg"
+                type="text"
+                value={assignment.question}
+                onChange={(e) => handleAssignmentUpdate(assignment.id, { 
+                  question: e.target.value 
+                })}
+                className="w-full p-2 border rounded-lg"
+                placeholder="Enter your question"
               />
             </div>
-          </div>
 
-          {/* Points and Passing Score */}
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Total Points
+                Options
               </label>
-              <input
-                type="number"
-                value={selectedAssignment.totalPoints}
-                onChange={(e) => {
-                  const updated = formData.assignments.map(a =>
-                    a.id === selectedAssignment.id
-                      ? { ...a, totalPoints: parseInt(e.target.value) }
-                      : a
-                  );
-                  setFormData({ ...formData, assignments: updated });
-                }}
-                className="w-full p-3 border rounded-lg"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Passing Score (%)
-              </label>
-              <input
-                type="number"
-                value={selectedAssignment.passingScore}
-                onChange={(e) => {
-                  const updated = formData.assignments.map(a =>
-                    a.id === selectedAssignment.id
-                      ? { ...a, passingScore: parseInt(e.target.value) }
-                      : a
-                  );
-                  setFormData({ ...formData, assignments: updated });
-                }}
-                className="w-full p-3 border rounded-lg"
-              />
-            </div>
-          </div>
-
-          {/* Instructions */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Instructions
-            </label>
-            <ReactQuill
-              value={selectedAssignment.instructions}
-              onChange={(content) => {
-                const updated = formData.assignments.map(a =>
-                  a.id === selectedAssignment.id
-                    ? { ...a, instructions: content }
-                    : a
-                );
-                setFormData({ ...formData, assignments: updated });
-              }}
-              className="h-64"
-            />
-          </div>
-
-          {/* Submission Settings */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Submission Settings</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Submission Type
-                </label>
-                <select
-                  value={selectedAssignment.submissionType}
-                  onChange={(e) => {
-                    const updated = formData.assignments.map(a =>
-                      a.id === selectedAssignment.id
-                        ? { ...a, submissionType: e.target.value }
-                        : a
-                    );
-                    setFormData({ ...formData, assignments: updated });
-                  }}
-                  className="w-full p-3 border rounded-lg"
-                >
-                  <option value="file">File Upload</option>
-                  <option value="text">Text Submission</option>
-                  <option value="link">URL Link</option>
-                </select>
+              <div className="space-y-3">
+                {assignment.options?.map((option, index) => (
+                  <div key={option.id} className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={option.option}
+                      onChange={(e) => handleOptionUpdate(assignment.id, index, { 
+                        option: e.target.value 
+                      })}
+                      className="flex-1 p-2 border rounded-lg"
+                      placeholder={`Option ${index + 1}`}
+                    />
+                    <button
+                      onClick={() => handleOptionUpdate(assignment.id, index, { 
+                        isCorrect: !option.isCorrect 
+                      })}
+                      className={`p-2 rounded-lg ${
+                        option.isCorrect 
+                          ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                          : 'bg-red-100 text-red-600 hover:bg-red-200'
+                      }`}
+                    >
+                      {option.isCorrect ? <FiCheck /> : <FiX />}
+                    </button>
+                  </div>
+                ))}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Max File Size (MB)
-                </label>
-                <input
-                  type="number"
-                  value={selectedAssignment.maxFileSize}
-                  onChange={(e) => {
-                    const updated = formData.assignments.map(a =>
-                      a.id === selectedAssignment.id
-                        ? { ...a, maxFileSize: parseInt(e.target.value) }
-                        : a
-                    );
-                    setFormData({ ...formData, assignments: updated });
-                  }}
-                  className="w-full p-3 border rounded-lg"
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Additional Instructions
+              </label>
+              <div className="relative" style={{ height: '200px' }}>
+                <ReactQuill
+                  value={assignment.assignmentContent}
+                  onChange={(content) => handleAssignmentUpdate(assignment.id, { 
+                    assignmentContent: content 
+                  })}
+                  className="h-full"
+                  theme="snow"
                 />
               </div>
             </div>
           </div>
-
-          {/* Rubric */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h4 className="font-medium">Rubric</h4>
-              <button
-                onClick={() => {
-                  const updated = formData.assignments.map(a =>
-                    a.id === selectedAssignment.id
-                      ? {
-                          ...a,
-                          rubric: [
-                            ...a.rubric,
-                            { criteria: '', points: 0, description: '' }
-                          ]
-                        }
-                      : a
-                  );
-                  setFormData({ ...formData, assignments: updated });
-                }}
-                className="text-purple-600 hover:text-purple-700"
-              >
-                <FiPlus className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-2">
-              {selectedAssignment.rubric.map((item, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-start">
-                  <input
-                    className="col-span-4 p-2 border rounded"
-                    placeholder="Criteria"
-                    value={item.criteria}
-                    onChange={(e) => {
-                      const updated = formData.assignments.map(a =>
-                        a.id === selectedAssignment.id
-                          ? {
-                              ...a,
-                              rubric: a.rubric.map((r, i) =>
-                                i === index
-                                  ? { ...r, criteria: e.target.value }
-                                  : r
-                              )
-                            }
-                          : a
-                      );
-                      setFormData({ ...formData, assignments: updated });
-                    }}
-                  />
-                  <input
-                    type="number"
-                    className="col-span-2 p-2 border rounded"
-                    placeholder="Points"
-                    value={item.points}
-                    onChange={(e) => {
-                      const updated = formData.assignments.map(a =>
-                        a.id === selectedAssignment.id
-                          ? {
-                              ...a,
-                              rubric: a.rubric.map((r, i) =>
-                                i === index
-                                  ? { ...r, points: parseInt(e.target.value) }
-                                  : r
-                              )
-                            }
-                          : a
-                      );
-                      setFormData({ ...formData, assignments: updated });
-                    }}
-                  />
-                  <input
-                    className="col-span-5 p-2 border rounded"
-                    placeholder="Description"
-                    value={item.description}
-                    onChange={(e) => {
-                      const updated = formData.assignments.map(a =>
-                        a.id === selectedAssignment.id
-                          ? {
-                              ...a,
-                              rubric: a.rubric.map((r, i) =>
-                                i === index
-                                  ? { ...r, description: e.target.value }
-                                  : r
-                              )
-                            }
-                          : a
-                      );
-                      setFormData({ ...formData, assignments: updated });
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const updated = formData.assignments.map(a =>
-                        a.id === selectedAssignment.id
-                          ? {
-                              ...a,
-                              rubric: a.rubric.filter((_, i) => i !== index)
-                            }
-                          : a
-                      );
-                      setFormData({ ...formData, assignments: updated });
-                    }}
-                    className="col-span-1 p-2 text-red-500 hover:text-red-700"
-                  >
-                    <FiTrash2 />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 };

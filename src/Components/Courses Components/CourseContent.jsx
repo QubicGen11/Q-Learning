@@ -278,22 +278,24 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
                 </h2>
                 
                 <div className="dark:bg-gray-800 p-4 rounded-lg">
-                  {/* Show level once at the top */}
-                  {course?.coursePreRequisites?.[0]?.preRequisites?.preRequisiteLevel && (
-                    <div className="mb-4">
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 
-                                     dark:bg-blue-900 dark:text-blue-300 rounded inline-block">
-                        Level: {course.coursePreRequisites[0].preRequisites.preRequisiteLevel}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* List all prerequisites without individual levels */}
                   {course?.coursePreRequisites?.map((prereq, index) => (
                     <div key={index} className="mb-4 last:mb-0">
                       {prereq?.preRequisites?.preRequisiteRequired && (
-                        <div className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-200">
-                          {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))}
+                        <div className="space-y-4">
+                          <div 
+                            className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-200"
+                          >
+                            {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))}
+                          </div>
+                          
+                          {prereq.preRequisites.preRequisiteLevel && (
+                            <div className="mt-2">
+                              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 
+                                             dark:bg-blue-900 dark:text-blue-300 rounded inline-block">
+                                Level: {prereq.preRequisites.preRequisiteLevel}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

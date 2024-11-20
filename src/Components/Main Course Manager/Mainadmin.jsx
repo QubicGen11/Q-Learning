@@ -88,7 +88,7 @@ const Mainadmin = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center ">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
       </div>
     );
@@ -105,7 +105,7 @@ const Mainadmin = () => {
           isEditing={!!courseId}
         />
         <div className="p-8">
-          <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 h-auto">
+          <div className="max-w-8xl mx-auto  rounded-xl shadow-sm border border-gray-200 h-auto">
             <div className="p-8">
               {renderSection()}
             </div>
