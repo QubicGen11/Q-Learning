@@ -43,10 +43,11 @@ const Mainadmin = () => {
 
   const handleSave = async () => {
     try {
-      await submitCourse(courseId);
+      await submitCourse(courseData);
       alert(courseId ? 'Course updated successfully!' : 'Course created successfully!');
       navigate('/courses');
     } catch (error) {
+      console.error('Save error:', error);
       alert(`Failed to ${courseId ? 'update' : 'create'} course: ${error.message}`);
     }
   };
@@ -94,7 +95,7 @@ const Mainadmin = () => {
           onPreview={handlePreview}
         />
         <div className="p-8">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 h-auto">
+          <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 h-auto">
             <div className="p-8">
               {renderSection()}
             </div>

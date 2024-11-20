@@ -4,81 +4,69 @@ import Cookies from 'js-cookie';
 // Helper functions for localStorage
 const LOCAL_STORAGE_KEY = 'course_draft';
 
-const getLocalDraft = () => {
-  try {
-    const draft = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return draft ? JSON.parse(draft) : null;
-  } catch (error) {
-    console.error('Error reading from localStorage:', error);
-    return null;
-  }
-};
+// Transform the form data to match backend structure
+const transformPayload = (formData) => {
+  // Ensure lessons have the correct structure
+  const transformedLessons = formData.lessons?.map(lesson => ({
+    lessonTitle: lesson.lessonTitle || "",
+    lessonDuration: lesson.lessonDuration || "",
+    lessonContent: lesson.lessonContent || ""
+  })) || [];
 
-const saveLocalDraft = (courseData) => {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(courseData));
-  } catch (error) {
-    console.error('Error saving to localStorage:', error);
-  }
+  // Ensure prerequisites have the correct structure
+  const transformedPreRequisites = formData.preRequisites?.map(prereq => ({
+    preRequisiteRequired: prereq.preRequisiteRequired || "",
+    preRequisiteLevel: prereq.preRequisiteLevel || ""
+  })) || [];
+
+  // Transform the main payload
+  return {
+    welcome: formData.welcome || "",
+    aboutCourse: formData.aboutCourse || "",
+    endObjective: formData.endObjective || "",
+    courseTitle: formData.courseTitle || "",
+    description: formData.description || "",
+    duration: `${formData.duration} weeks`,
+    completionTime: `${formData.completionTime} hours`,
+    courseType: formData.courseType || "",
+    difficultyLevel: formData.difficultyLevel || "",
+    language: formData.language || "",
+    productCovered: formData.productCovered || "",
+    category: formData.category || "",
+    subCategory: formData.subCategory || "",
+    price: Number(formData.price) || 0,
+    originalPrice: Number(formData.originalPrice) || 0,
+    discount: formData.discount || "",
+    courseAudience: formData.courseAudience || "",
+    learningObjective: formData.learningObjective || "",
+    technologiesUsed: formData.technologiesUsed || "",
+    technologyImage: formData.technologyImage || "",
+    customTechnology: formData.customTechnology || "No",
+    coustomTechnologyImg: formData.coustomTechnologyImg || "N/A",
+    courseBanner: formData.courseBanner || "",
+    lessons: transformedLessons,
+    preRequisites: transformedPreRequisites
+  };
 };
 
 const useCourseStore = create((set, get) => ({
-  courseData: getLocalDraft() || {
-    welcome: '',
-    aboutCourse: '',
-    endObjective: '',
-    courseTitle: '',
+  courseData: {
+    title: '',
     description: '',
-    duration: '',
-    completionTime: '',
-    courseType: '',
-    difficultyLevel: '',
-    language: 'English',
-    productCovered: '',
-    category: '',
-    subCategory: '',
-    price: 0,
-    originalPrice: 0,
-    discount: '',
-    courseAudience: '',
-    learningObjective: '',
-    technologiesUsed: '',
-    technologyImage: '',
-    customTechnology: 'No',
-    coustomTechnologyImg: '',
-    courseBanner: null,
-    thumbnailType: 'predefined',
-    lessons: [],
-    objectives: [],
+    welcomeMessage: '',
+    learningObjective: [],
     preRequisites: [],
-    learningObjectives: []
+    courseAudience: '',
+    lessons: []
   },
 
   updateCourseData: (data) => 
-    set((state) => {
-      const updatedCourseData = { ...state.courseData };
-      
-      if (data.lessons) {
-        updatedCourseData.lessons = data.lessons.map(newLesson => {
-          const existingLesson = state.courseData.lessons.find(
-            lesson => lesson.id === newLesson.id
-          );
-          return existingLesson ? { ...existingLesson, ...newLesson } : newLesson;
-        });
+    set((state) => ({
+      courseData: {
+        ...state.courseData,
+        ...data
       }
-
-      const newState = {
-        courseData: { 
-          ...updatedCourseData, 
-          ...data,
-          lessons: data.lessons || updatedCourseData.lessons 
-        }
-      };
-
-      // Save to localStorage after every update
-      saveLocalDraft(newState.courseData);
-      return newState;
-    }),
+    })),
 
   addLesson: (lesson) =>
     set((state) => ({
@@ -152,87 +140,47 @@ const useCourseStore = create((set, get) => ({
     }
   },
 
-  submitCourse: async (courseId) => {
+  submitCourse: async (courseData) => {
     try {
-      const state = get();
-      const { courseData } = state;
-      const token = Cookies.get('accessToken');
+      // Ensure lessons array exists and filter out invalid lessons
+      const filteredLessons = (courseData.lessons || []).filter(lesson => 
+        lesson && 
+        lesson.lessonTitle && 
+        lesson.lessonTitle.trim() !== ''
+      );
 
-      if (!token) throw new Error('Authentication token not found');
-
-      // Transform lessons to match API format
-      const transformedLessons = courseData.lessons?.map(lesson => ({
-        lessonTitle: lesson.title || lesson.lessonTitle,
-        lessonDuration: `${lesson.duration || lesson.lessonDuration} minutes`,
-        lessonContent: lesson.content || lesson.lessonContent,
-        feedback: lesson.feedback || ''
-      }));
-
-      // Transform prerequisites to match API format
-      const transformedPreRequisites = courseData.preRequisites?.map(prereq => ({
-        preRequisiteRequired: prereq.preRequisiteRequired,
-        preRequisiteLevel: prereq.preRequisiteLevel
-      }));
-
-      // Prepare the payload for API
-      const courseDataToSubmit = {
-        welcome: courseData.welcome,
-        aboutCourse: courseData.aboutCourse,
-        endObjective: courseData.endObjective,
-        courseTitle: courseData.courseTitle,
-        description: courseData.description,
-        duration: courseData.duration,
-        completionTime: courseData.completionTime,
-        courseType: courseData.courseType,
-        difficultyLevel: courseData.difficultyLevel,
-        language: courseData.language,
-        productCovered: courseData.productCovered,
-        category: courseData.category,
-        subCategory: courseData.subCategory,
-        price: Number(courseData.price),
-        originalPrice: Number(courseData.originalPrice),
-        discount: courseData.discount,
-        courseAudience: courseData.courseAudience,
-        learningObjective: courseData.learningObjective,
-        technologiesUsed: courseData.technologiesUsed,
-        technologyImage: courseData.technologyImage,
-        customTechnology: courseData.customTechnology,
-        coustomTechnologyImg: courseData.coustomTechnologyImg,
-        courseBanner: courseData.courseBanner,
-        lessons: transformedLessons,
-        preRequisites: transformedPreRequisites
+      // Create new course data object with filtered lessons
+      const cleanedCourseData = {
+        ...courseData,
+        lessons: filteredLessons.length > 0 ? filteredLessons : [{
+          lessonTitle: "Default Lesson",
+          lessonDuration: "1 hour",
+          lessonContent: "Default content"
+        }]
       };
 
-      const url = courseId 
-        ? `http://localhost:8089/qlms/updateCourse/${courseId}`
-        : 'http://localhost:8089/qlms/createCourse';
+      console.log("Submitting course data:", cleanedCourseData);
 
-      console.log('Submitting course data:', courseDataToSubmit); // For debugging
-
-      const response = await fetch(url, {
-        method: courseId ? 'PUT' : 'POST',
+      const token = Cookies.get('accessToken');
+      const response = await fetch("http://localhost:8089/qlms/createCourse", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(courseDataToSubmit)
+        body: JSON.stringify(cleanedCourseData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to ${courseId ? 'update' : 'create'} course`);
+        throw new Error(errorData.error || 'Server error');
       }
 
-      const result = await response.json();
-      console.log('API Response:', result); // For debugging
-      
-      // Clear localStorage after successful submission
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      
-      return result;
+      const responseData = await response.json();
+      return responseData;
     } catch (error) {
-      console.error('Error submitting course:', error);
-      throw error;
+      console.error("Full error details:", error);
+      throw new Error(`Failed to create course: ${error.message}`);
     }
   },
 
