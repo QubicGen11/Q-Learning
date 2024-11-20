@@ -20,6 +20,10 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CreateIcon from '@mui/icons-material/Create';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const Assignments = () => {
   const courseData = useCourseStore((state) => state.courseData);
@@ -27,6 +31,7 @@ const Assignments = () => {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
   const [savedQuestions, setSavedQuestions] = useState([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
 
   useEffect(() => {
     const storedQuestions = JSON.parse(localStorage.getItem('savedQuestions')) || [];
@@ -121,22 +126,63 @@ const Assignments = () => {
 
   const handleSaveQuestion = (assignmentId) => {
     const assignment = courseData.assignments.find(a => a.id === assignmentId);
-    if (assignment && assignment.question && assignment.options.some(option => option.option)) {
-      const newSavedQuestions = [...savedQuestions, { question: assignment.question, options: assignment.options }];
-      setSavedQuestions(newSavedQuestions);
-      localStorage.setItem('savedQuestions', JSON.stringify(newSavedQuestions));
+    if (!assignment || !assignment.question || !assignment.options.some(option => option.option)) {
+      return;
     }
+
+    const newQuestion = {
+      assignmentId,
+      question: assignment.question,
+      options: assignment.options,
+      questionType: assignment.questionType
+    };
+
+    if (editingQuestionIndex !== null) {
+      const updatedQuestions = [...savedQuestions];
+      updatedQuestions[editingQuestionIndex] = newQuestion;
+      setSavedQuestions(updatedQuestions);
+      localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
+    } else {
+      const updatedQuestions = [...savedQuestions, newQuestion];
+      setSavedQuestions(updatedQuestions);
+      localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
+    }
+
+    setEditingQuestionIndex(null);
+    setShowQuestionForm(false);
+    
+    handleAssignmentUpdate(assignmentId, {
+      question: '',
+      options: assignment.options.map(opt => ({ ...opt, option: '', isCorrect: false })),
+      questionType: 'single'
+    });
   };
 
   const handleEditQuestion = (index) => {
     const questionToEdit = savedQuestions[index];
-    // Logic to edit the question, e.g., populate fields for editing
-    // After editing, update the specific question in the savedQuestions array
-    const updatedQuestions = savedQuestions.map((question, i) => 
-      i === index ? { ...question, /* updated fields here */ } : question
-    );
-    setSavedQuestions(updatedQuestions);
-    localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
+    setEditingQuestionIndex(index);
+    setShowQuestionForm(true);
+    setSelectedAssignmentId(questionToEdit.assignmentId);
+    
+    handleAssignmentUpdate(questionToEdit.assignmentId, {
+      question: questionToEdit.question,
+      options: questionToEdit.options,
+      questionType: questionToEdit.questionType
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setShowQuestionForm(false);
+    setEditingQuestionIndex(null);
+    
+    const currentAssignment = courseData.assignments.find(a => a.id === selectedAssignmentId);
+    if (currentAssignment) {
+      handleAssignmentUpdate(selectedAssignmentId, {
+        question: '',
+        options: currentAssignment.options.map(opt => ({ ...opt, option: '', isCorrect: false })),
+        questionType: 'single'
+      });
+    }
   };
 
   const handleQuestionTypeChange = (assignmentId, questionType) => {
@@ -165,6 +211,12 @@ const Assignments = () => {
       questionType,
       options 
     });
+  };
+
+  const handleDeleteQuestion = (index) => {
+    const updatedQuestions = savedQuestions.filter((_, idx) => idx !== index);
+    setSavedQuestions(updatedQuestions);
+    localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
   };
 
   return (
@@ -254,6 +306,7 @@ const Assignments = () => {
             {!showQuestionForm ? (
               <Button
                 variant="outlined"
+                className='float-right'
                 startIcon={<AddIcon />}
                 onClick={() => setShowQuestionForm(true)}
                 size="small"
@@ -326,7 +379,7 @@ const Assignments = () => {
                     <Button
                       variant="outlined"
                       size="small"
-                      onClick={() => setShowQuestionForm(false)}
+                      onClick={handleCancelEdit}
                     >
                       Cancel
                     </Button>
@@ -335,49 +388,52 @@ const Assignments = () => {
               </Card>
             )}
 
-            {savedQuestions.length > 0 && (
-              <div className="mt-6">
-                <Typography variant="h6" className="mb-3">
-                  Saved Questions
-                </Typography>
-                <div className="grid grid-cols-2 gap-4">
-                  {savedQuestions.map((item, index) => (
-                    <Card key={index} variant="outlined">
-                      <CardContent>
-                        <div className="flex justify-between items-start mb-2">
-                          <Typography variant="subtitle1">
-                            Question {index + 1}
-                          </Typography>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEditQuestion(index)}
-                          >
-                           <p>edit</p>
-                          </IconButton>
+            {savedQuestions
+              .filter(item => item.assignmentId === assignment.id)
+              .map((item, index) => (
+                <Card key={index} variant="outlined" className="mb-4">
+                  <CardContent>
+                    <div className="flex justify-between items-start mb-2">
+                      <Typography variant="subtitle1">
+                        Question {index + 1}
+                      </Typography>
+                      <div className="flex gap-1">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEditQuestion(index)}
+                          sx={{ color: '#2196f3' }}
+                        >
+                          <CreateIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteQuestion(index)}
+                          sx={{ color: '#f44336' }}
+                        >
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </div>
+                    </div>
+                    <Typography variant="body2" className="mb-2">
+                      {item.question}
+                    </Typography>
+                    <div className="grid grid-cols-2 gap-2">
+                      {item.options.map((option, idx) => (
+                        <div
+                          key={idx}
+                          className={`p-2 rounded text-sm ${
+                            option.isCorrect 
+                              ? 'bg-green-50 text-green-700' 
+                              : 'bg-gray-50'
+                          }`}
+                        >
+                          {option.option}
                         </div>
-                        <Typography variant="body2" className="mb-2">
-                          {item.question}
-                        </Typography>
-                        <div className="grid grid-cols-2 gap-2">
-                          {item.options.map((option, idx) => (
-                            <div
-                              key={idx}
-                              className={`p-2 rounded text-sm ${
-                                option.isCorrect 
-                                  ? 'bg-green-50 text-green-700' 
-                                  : 'bg-gray-50'
-                              }`}
-                            >
-                              {option.option}
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         ))}
       </div>
@@ -385,4 +441,4 @@ const Assignments = () => {
   );
 };
 
-export default Assignments; 
+export default Assignments;
