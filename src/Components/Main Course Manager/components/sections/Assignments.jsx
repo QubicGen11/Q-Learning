@@ -1,13 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiPlus, FiTrash2, FiClock, FiAward, FiCheck, FiX } from 'react-icons/fi';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+
 import useCourseStore from "../../../../store/courseStore";
+import { 
+  Button, 
+  MenuItem, 
+  Select, 
+  FormControl, 
+  InputLabel,
+  TextField,
+  IconButton,
+  Card,
+  CardContent,
+  Typography 
+} from '@mui/material';
+
+import AddIcon from '@mui/icons-material/Add';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const Assignments = () => {
   const courseData = useCourseStore((state) => state.courseData);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
+  const [savedQuestions, setSavedQuestions] = useState([]);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+
+  useEffect(() => {
+    const storedQuestions = JSON.parse(localStorage.getItem('savedQuestions')) || [];
+    setSavedQuestions(storedQuestions);
+  }, []);
 
   const handleAddAssignment = () => {
     const currentAssignments = courseData?.assignments || [];
@@ -15,15 +39,10 @@ const Assignments = () => {
     const newAssignment = {
       id: Date.now(),
       assignmentTitle: "",
+      lessonLink: "",
       assignmentDuration: "",
-      assignmentContent: "",
-      question: "",
-      options: [
-        { id: Date.now() + 1, option: "", isCorrect: false },
-        { id: Date.now() + 2, option: "", isCorrect: false },
-        { id: Date.now() + 3, option: "", isCorrect: false },
-        { id: Date.now() + 4, option: "", isCorrect: false }
-      ]
+      questions: [],
+      showQuestionForm: false
     };
 
     updateCourseData({
@@ -52,7 +71,26 @@ const Assignments = () => {
     const updatedAssignments = courseData.assignments.map(assignment => {
       if (assignment.id === assignmentId) {
         const updatedOptions = [...assignment.options];
-        updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], ...updates };
+        
+        if (updates.hasOwnProperty('isCorrect')) {
+          switch(assignment.questionType) {
+            case 'single':
+            case 'true-false':
+              updatedOptions.forEach((opt, idx) => {
+                updatedOptions[idx] = { 
+                  ...opt, 
+                  isCorrect: idx === optionIndex ? updates.isCorrect : false 
+                };
+              });
+              break;
+            case 'multiple':
+              updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], ...updates };
+              break;
+          }
+        } else {
+          updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], ...updates };
+        }
+        
         return { ...assignment, options: updatedOptions };
       }
       return assignment;
@@ -79,6 +117,54 @@ const Assignments = () => {
     if (selectedAssignmentId === assignmentId) {
       setSelectedAssignmentId(updatedAssignments[0]?.id || null);
     }
+  };
+
+  const handleSaveQuestion = (assignmentId) => {
+    const assignment = courseData.assignments.find(a => a.id === assignmentId);
+    if (assignment && assignment.question && assignment.options.some(option => option.option)) {
+      const newSavedQuestions = [...savedQuestions, { question: assignment.question, options: assignment.options }];
+      setSavedQuestions(newSavedQuestions);
+      localStorage.setItem('savedQuestions', JSON.stringify(newSavedQuestions));
+    }
+  };
+
+  const handleEditQuestion = (index) => {
+    const questionToEdit = savedQuestions[index];
+    // Logic to edit the question, e.g., populate fields for editing
+    // After editing, update the specific question in the savedQuestions array
+    const updatedQuestions = savedQuestions.map((question, i) => 
+      i === index ? { ...question, /* updated fields here */ } : question
+    );
+    setSavedQuestions(updatedQuestions);
+    localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
+  };
+
+  const handleQuestionTypeChange = (assignmentId, questionType) => {
+    let options;
+    switch(questionType) {
+      case 'true-false':
+        options = [
+          { id: Date.now() + 1, option: "True", isCorrect: false },
+          { id: Date.now() + 2, option: "False", isCorrect: false }
+        ];
+        break;
+      case 'multiple':
+      case 'single':
+        options = [
+          { id: Date.now() + 1, option: "", isCorrect: false },
+          { id: Date.now() + 2, option: "", isCorrect: false },
+          { id: Date.now() + 3, option: "", isCorrect: false },
+          { id: Date.now() + 4, option: "", isCorrect: false }
+        ];
+        break;
+      default:
+        options = [];
+    }
+
+    handleAssignmentUpdate(assignmentId, { 
+      questionType,
+      options 
+    });
   };
 
   return (
@@ -133,86 +219,165 @@ const Assignments = () => {
           <div
             key={assignment.id}
             style={{ display: selectedAssignmentId === assignment.id ? 'block' : 'none' }}
-            className="assignment-content space-y-6"
+            className="space-y-4"
           >
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Assignment Title
-              </label>
-              <input
-                type="text"
+            <div className="grid grid-cols-3 gap-4">
+              <TextField
+                label="Assignment Title"
                 value={assignment.assignmentTitle}
                 onChange={(e) => handleAssignmentUpdate(assignment.id, { 
                   assignmentTitle: e.target.value 
                 })}
-                className="w-full p-2 border rounded-lg"
-                placeholder="Enter assignment title"
+                size="small"
+                fullWidth
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Question
-              </label>
-              <input
-                type="text"
-                value={assignment.question}
+              <TextField
+                label="Lesson Link"
+                value={assignment.lessonLink}
                 onChange={(e) => handleAssignmentUpdate(assignment.id, { 
-                  question: e.target.value 
+                  lessonLink: e.target.value 
                 })}
-                className="w-full p-2 border rounded-lg"
-                placeholder="Enter your question"
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label="Duration"
+                value={assignment.assignmentDuration}
+                onChange={(e) => handleAssignmentUpdate(assignment.id, { 
+                  assignmentDuration: e.target.value 
+                })}
+                size="small"
+                fullWidth
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Options
-              </label>
-              <div className="space-y-3">
-                {assignment.options?.map((option, index) => (
-                  <div key={option.id} className="flex items-center gap-3">
-                    <input
-                      type="text"
-                      value={option.option}
-                      onChange={(e) => handleOptionUpdate(assignment.id, index, { 
-                        option: e.target.value 
-                      })}
-                      className="flex-1 p-2 border rounded-lg"
-                      placeholder={`Option ${index + 1}`}
-                    />
-                    <button
-                      onClick={() => handleOptionUpdate(assignment.id, index, { 
-                        isCorrect: !option.isCorrect 
-                      })}
-                      className={`p-2 rounded-lg ${
-                        option.isCorrect 
-                          ? 'bg-green-100 text-green-600 hover:bg-green-200' 
-                          : 'bg-red-100 text-red-600 hover:bg-red-200'
-                      }`}
+            {!showQuestionForm ? (
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() => setShowQuestionForm(true)}
+                size="small"
+              >
+                Add Question
+              </Button>
+            ) : (
+              <Card variant="outlined" className="mt-4">
+                <CardContent className="space-y-4">
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Question Type</InputLabel>
+                    <Select
+                      value={assignment.questionType || 'single'}
+                      onChange={(e) => handleQuestionTypeChange(assignment.id, e.target.value)}
+                      label="Question Type"
                     >
-                      {option.isCorrect ? <FiCheck /> : <FiX />}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+                      <MenuItem value="single">Choose the Best Answer</MenuItem>
+                      <MenuItem value="multiple">Multiple Correct Answers</MenuItem>
+                      <MenuItem value="true-false">True/False</MenuItem>
+                    </Select>
+                  </FormControl>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Additional Instructions
-              </label>
-              <div className="relative" style={{ height: '200px' }}>
-                <ReactQuill
-                  value={assignment.assignmentContent}
-                  onChange={(content) => handleAssignmentUpdate(assignment.id, { 
-                    assignmentContent: content 
-                  })}
-                  className="h-full"
-                  theme="snow"
-                />
+                  <TextField
+                    fullWidth
+                    label="Question"
+                    value={assignment.question || ''}
+                    onChange={(e) => handleAssignmentUpdate(assignment.id, { 
+                      question: e.target.value 
+                    })}
+                    size="small"
+                  />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {assignment.options?.map((option, index) => (
+                      <div key={option.id} className="flex items-center gap-2">
+                        <TextField
+                          size="small"
+                          value={option.option}
+                          onChange={(e) => handleOptionUpdate(assignment.id, index, { 
+                            option: e.target.value 
+                          })}
+                          disabled={assignment.questionType === 'true-false'}
+                          fullWidth
+                          placeholder={`Option ${index + 1}`}
+                        />
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOptionUpdate(assignment.id, index, { 
+                            isCorrect: !option.isCorrect 
+                          })}
+                          color={option.isCorrect ? "success" : "default"}
+                        >
+                          {option.isCorrect ? <CheckCircleIcon /> : <CancelIcon />}
+                        </IconButton>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => {
+                        handleSaveQuestion(assignment.id);
+                        setShowQuestionForm(false);
+                      }}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setShowQuestionForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {savedQuestions.length > 0 && (
+              <div className="mt-6">
+                <Typography variant="h6" className="mb-3">
+                  Saved Questions
+                </Typography>
+                <div className="grid grid-cols-2 gap-4">
+                  {savedQuestions.map((item, index) => (
+                    <Card key={index} variant="outlined">
+                      <CardContent>
+                        <div className="flex justify-between items-start mb-2">
+                          <Typography variant="subtitle1">
+                            Question {index + 1}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditQuestion(index)}
+                          >
+                           <p>edit</p>
+                          </IconButton>
+                        </div>
+                        <Typography variant="body2" className="mb-2">
+                          {item.question}
+                        </Typography>
+                        <div className="grid grid-cols-2 gap-2">
+                          {item.options.map((option, idx) => (
+                            <div
+                              key={idx}
+                              className={`p-2 rounded text-sm ${
+                                option.isCorrect 
+                                  ? 'bg-green-50 text-green-700' 
+                                  : 'bg-gray-50'
+                              }`}
+                            >
+                              {option.option}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
