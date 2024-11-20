@@ -92,17 +92,27 @@ const useCourseStore = create((set, get) => ({
       if (!response.ok) throw new Error('Failed to fetch course');
       
       const courseData = await response.json();
-      
-      // Transform the lessons data
-      const transformedLessons = courseData.courseLesson?.map(lessonItem => ({
-        id: lessonItem.lessonId,
-        title: lessonItem.lesson?.lessonTitle || '',
-        content: lessonItem.lesson?.lessonContent || '',
-        duration: lessonItem.lesson?.lessonDuration?.replace(/[^0-9]/g, '') || '0', // Extract numbers only
-        feedback: lessonItem.lesson?.feedback || ''
+      console.log('Raw course data:', courseData);
+
+      // Transform the lessons data - modified to handle nested structure
+      const transformedLessons = courseData.courseLesson?.map(courseLessonItem => ({
+        id: courseLessonItem.lesson.id,
+        lessonTitle: courseLessonItem.lesson.lessonTitle || '',
+        lessonDuration: courseLessonItem.lesson.lessonDuration || '',
+        lessonContent: courseLessonItem.lesson.lessonContent || ''
       })) || [];
 
+      // Transform prerequisites - modified to handle nested structure
+      const transformedPreRequisites = courseData.coursePreRequisites?.map(preReqItem => ({
+        id: preReqItem.preRequisites.id,
+        preRequisiteRequired: preReqItem.preRequisites.preRequisiteRequired || '',
+        preRequisiteLevel: preReqItem.preRequisites.preRequisiteLevel || ''
+      })) || [];
+
+      console.log('Transformed lessons:', transformedLessons);
+
       const transformedData = {
+        id: courseData.id,
         welcome: courseData.welcome || '',
         aboutCourse: courseData.aboutCourse || '',
         endObjective: courseData.endObjective || '',
@@ -126,13 +136,10 @@ const useCourseStore = create((set, get) => ({
         customTechnology: courseData.customTechnology || '',
         courseBanner: courseData.courseBanner || null,
         lessons: transformedLessons,
-        preRequisites: courseData.coursePreRequisites?.map(prereq => ({
-          id: prereq.preRequisiteId,
-          preRequisiteRequired: prereq.preRequisites?.preRequisiteRequired || '',
-          preRequisiteLevel: prereq.preRequisites?.preRequisiteLevel || ''
-        })) || []
+        preRequisites: transformedPreRequisites
       };
 
+      console.log('Final transformed data:', transformedData);
       set({ courseData: transformedData });
     } catch (error) {
       console.error('Error fetching course:', error);
@@ -190,7 +197,49 @@ const useCourseStore = create((set, get) => ({
         ...state.courseData,
         lessons: state.courseData.lessons.filter(lesson => lesson.id !== lessonId)
       }
-    }))
+    })),
+
+  updateCourse: async (courseId, courseData) => {
+    try {
+      // Filter out invalid lessons, similar to submitCourse
+      const filteredLessons = (courseData.lessons || []).filter(lesson => 
+        lesson && 
+        lesson.lessonTitle && 
+        lesson.lessonTitle.trim() !== ''
+      );
+
+      // Clean the course data
+      const cleanedCourseData = {
+        ...courseData,
+        lessons: filteredLessons.length > 0 ? filteredLessons : [{
+          lessonTitle: "Default Lesson",
+          lessonDuration: "1 hour",
+          lessonContent: "Default content"
+        }]
+      };
+
+      const token = Cookies.get('accessToken');
+      const response = await fetch(`http://localhost:8089/qlms/updateCourse/${courseId}`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(cleanedCourseData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Server error');
+      }
+
+      const responseData = await response.json();
+      return responseData;
+    } catch (error) {
+      console.error("Error updating course:", error);
+      throw new Error(`Failed to update course: ${error.message}`);
+    }
+  }
 }));
 
 export default useCourseStore; 

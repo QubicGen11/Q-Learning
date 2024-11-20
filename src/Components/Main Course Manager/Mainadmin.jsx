@@ -18,6 +18,7 @@ const Mainadmin = () => {
   const navigate = useNavigate();
   const courseData = useCourseStore((state) => state.courseData);
   const submitCourse = useCourseStore((state) => state.submitCourse);
+  const updateCourse = useCourseStore((state) => state.updateCourse);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
   const fetchCourseById = useCourseStore((state) => state.fetchCourseById);
   const [activeSection, setActiveSection] = useState('basicInfo');
@@ -43,8 +44,13 @@ const Mainadmin = () => {
 
   const handleSave = async () => {
     try {
-      await submitCourse(courseData);
-      alert(courseId ? 'Course updated successfully!' : 'Course created successfully!');
+      if (courseId) {
+        await updateCourse(courseId, courseData);
+        alert('Course updated successfully!');
+      } else {
+        await submitCourse(courseData);
+        alert('Course created successfully!');
+      }
       navigate('/courses');
     } catch (error) {
       console.error('Save error:', error);
@@ -93,6 +99,7 @@ const Mainadmin = () => {
           activeSection={activeSection} 
           onSave={handleSave}
           onPreview={handlePreview}
+          isEditing={!!courseId}
         />
         <div className="p-8">
           <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 h-auto">
