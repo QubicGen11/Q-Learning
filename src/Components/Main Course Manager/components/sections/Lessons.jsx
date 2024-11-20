@@ -1,184 +1,181 @@
 import { FiPlus } from "react-icons/fi";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import useCourseStore from "../../../../store/courseStore";
 
 const Lessons = () => {
   const courseData = useCourseStore((state) => state.courseData);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
-  const fetchCourseById = useCourseStore((state) => state.fetchCourseById);
-  const mainContentRef = useRef(null);
+  const [selectedLessonId, setSelectedLessonId] = useState(null);
 
   useEffect(() => {
-    const courseId = new URLSearchParams(window.location.search).get('courseId');
-    if (courseId) {
-      fetchCourseById(courseId);
+    // Show first lesson by default
+    if (courseData?.lessons?.length > 0 && !selectedLessonId) {
+      setSelectedLessonId(courseData.lessons[0].id);
     }
-  }, [fetchCourseById]);
-
-  const quillModules = {
-    toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],
-      ['blockquote', 'code-block'],
-      [{ header: 1 }, { header: 2 }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      [{ script: 'sub' }, { script: 'super' }],
-      [{ indent: '-1' }, { indent: '+1' }],
-      ['link', 'image'],
-      ['clean'],
-    ],
-  };
-
-  const handleLessonUpdate = (id, updates) => {
-    const updatedLessons = courseData.lessons.map((lesson) => {
-      if (lesson.id === id) {
-        const mappedUpdates = {};
-        if (updates.title) mappedUpdates.lessonTitle = updates.title;
-        if (updates.content) mappedUpdates.lessonContent = updates.content;
-        if (updates.duration) mappedUpdates.lessonDuration = updates.duration;
-        return { ...lesson, ...mappedUpdates };
-      }
-      return lesson;
-    });
-    updateCourseData({ lessons: updatedLessons });
-  };
-
-  const showLesson = (lessonId) => {
-    const mainContent = document.querySelector('.main-content');
-    mainContent.setAttribute('data-current-lesson', lessonId);
-
-    const allLessons = document.querySelectorAll('.lesson-content');
-    allLessons.forEach(lesson => lesson.style.display = 'none');
-    
-    const selectedLesson = document.getElementById(`lesson-${lessonId}`);
-    if (selectedLesson) {
-      selectedLesson.style.display = 'block';
-    }
-
-    const allSidebarItems = document.querySelectorAll('.sidebar-item');
-    allSidebarItems.forEach(item => {
-      item.classList.remove('bg-purple-50', 'text-purple-700');
-      item.classList.add('bg-gray-50');
-    });
-    
-    const selectedSidebarItem = document.getElementById(`sidebar-${lessonId}`);
-    if (selectedSidebarItem) {
-      selectedSidebarItem.classList.remove('bg-gray-50');
-      selectedSidebarItem.classList.add('bg-purple-50', 'text-purple-700');
-    }
-  };
+  }, [courseData?.lessons]);
 
   const handleAddLesson = () => {
+    if (!courseData.lessons) return;
+    
     const newLesson = {
-      id: Date.now().toString(),
-      lessonTitle: 'New Lesson',
-      lessonContent: '',
-      lessonDuration: '0',
-      feedback: ''
+      id: Date.now(),
+      lessonTitle: "",
+      lessonDuration: 0,
+      lessonContent: ""
     };
 
-    const updatedLessons = [...(courseData.lessons || []), newLesson];
-    updateCourseData({ lessons: updatedLessons });
-    showLesson(newLesson.id);
+    updateCourseData({
+      ...courseData,
+      lessons: [...courseData.lessons, newLesson]
+    });
+    setSelectedLessonId(newLesson.id);
   };
 
-  useEffect(() => {
-    if (courseData.lessons?.length > 0) {
-      const mainContent = document.querySelector('.main-content');
-      const currentLessonId = mainContent.getAttribute('data-current-lesson');
-      
-      if (!currentLessonId) {
-        showLesson(courseData.lessons[0].id);
-      } else {
-        showLesson(currentLessonId);
-      }
+  const handleLessonUpdate = (lessonId, updates) => {
+    if (!courseData.lessons) return;
+    
+    const updatedLessons = courseData.lessons.map(lesson => 
+      lesson.id === lessonId ? { ...lesson, ...updates } : lesson
+    );
+
+    updateCourseData({
+      ...courseData,
+      lessons: updatedLessons
+    });
+  };
+
+  const handleRemoveLesson = (lessonId) => {
+    if (!courseData.lessons) return;
+    
+    const updatedLessons = courseData.lessons.filter(lesson => lesson.id !== lessonId);
+    
+    updateCourseData({
+      ...courseData,
+      lessons: updatedLessons
+    });
+
+    // If we removed the selected lesson, select the first available lesson
+    if (selectedLessonId === lessonId && updatedLessons.length > 0) {
+      setSelectedLessonId(updatedLessons[0].id);
+    } else if (updatedLessons.length === 0) {
+      setSelectedLessonId(null);
     }
-  }, [courseData.lessons]);
+  };
+
+  const modules = {
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+        ['link', 'image'],
+        ['clean']
+      ]
+    }
+  };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image'
+  ];
 
   return (
     <div className="flex h-full gap-6">
-      <div className="w-1/4 min-w-[250px] border-r pr-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium">Lessons</h3>
-          <button 
+      <div className="w-64 sidebar">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium">Lessons</h3>
+          <button
             onClick={handleAddLesson}
-            className="text-purple-600 hover:text-purple-700"
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
           >
-            <FiPlus className="w-5 h-5" />
+            <FiPlus />
           </button>
         </div>
-
         <div className="space-y-2">
           {courseData.lessons?.map((lesson, index) => (
             <div
               key={lesson.id}
-              id={`sidebar-${lesson.id}`}
-              onClick={() => showLesson(lesson.id)}
-              className="sidebar-item p-3 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
+              className={`p-3 rounded-lg ${
+                selectedLessonId === lesson.id
+                  ? "bg-blue-50 text-blue-600"
+                  : "hover:bg-gray-50"
+              }`}
             >
-              <div className="flex items-center justify-between">
-                <span className="font-medium">
-                  {index + 1}. {lesson.lessonTitle}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {lesson.lessonDuration} min
-                </span>
+              <div 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setSelectedLessonId(lesson.id)}
+              >
+                <div>
+                  <h4 className="font-medium">
+                    Lesson {index + 1}: {lesson.lessonTitle}
+                  </h4>
+                  <p className="text-sm text-gray-500">{lesson.lessonDuration} min</p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveLesson(lesson.id);
+                  }}
+                  className="p-1 text-red-500 hover:bg-red-50 rounded"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex-1 main-content" data-current-lesson="">
+      <div className="flex-1 main-content">
         {courseData.lessons?.map((lesson) => (
-          <div 
-            id={`lesson-${lesson.id}`}
-            key={lesson.id} 
-            className="lesson-content border p-6 rounded-lg shadow-sm"
-            style={{ display: 'none' }}
+          <div
+            key={lesson.id}
+            style={{ display: selectedLessonId === lesson.id ? 'block' : 'none' }}
+            className="lesson-content space-y-6"
           >
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lesson Title
-                </label>
-                <input
-                  type="text"
-                  value={lesson.lessonTitle}
-                  onChange={(e) => handleLessonUpdate(lesson.id, { title: e.target.value })}
-                  className="w-full p-2 border rounded-lg"
-                  data-lesson-id={lesson.id}
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lesson Title
+              </label>
+              <input
+                type="text"
+                value={lesson.lessonTitle}
+                onChange={(e) => handleLessonUpdate(lesson.id, { lessonTitle: e.target.value })}
+                className="w-full p-2 border rounded-lg"
+                placeholder="Enter lesson title"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Duration (minutes)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={lesson.lessonDuration}
-                  onChange={(e) => handleLessonUpdate(lesson.id, { duration: e.target.value })}
-                  className="w-full p-2 border rounded-lg"
-                  data-lesson-id={lesson.id}
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Duration (minutes)
+              </label>
+              <input
+                type="number"
+                value={lesson.lessonDuration}
+                onChange={(e) => handleLessonUpdate(lesson.id, { lessonDuration: parseInt(e.target.value) })}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lesson Content
-                </label>
-                <div className="relative" style={{ height: '250px' }}>
-                  <ReactQuill
-                    value={lesson.lessonContent || ''}
-                    onChange={(content) => handleLessonUpdate(lesson.id, { content })}
-                    modules={quillModules}
-                    className="h-full"
-                    theme="snow"
-                    data-lesson-id={lesson.id}
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lesson Content
+              </label>
+              <div className="relative" style={{ height: '400px' }}>
+                <ReactQuill
+                  value={lesson.lessonContent}
+                  onChange={(content) => handleLessonUpdate(lesson.id, { lessonContent: content })}
+                  modules={modules}
+                  formats={formats}
+                  className="h-full"
+                  theme="snow"
+                />
               </div>
             </div>
           </div>

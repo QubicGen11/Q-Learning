@@ -21,6 +21,7 @@ const Mainadmin = () => {
   const updateCourse = useCourseStore((state) => state.updateCourse);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
   const fetchCourseById = useCourseStore((state) => state.fetchCourseById);
+  const resetCourseData = useCourseStore((state) => state.resetCourseData);
   const [activeSection, setActiveSection] = useState('basicInfo');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,11 +37,13 @@ const Mainadmin = () => {
           alert('Failed to load course details');
         }
         setIsLoading(false);
+      } else {
+        resetCourseData();
       }
     };
 
     loadCourse();
-  }, [courseId, fetchCourseById]);
+  }, [courseId, fetchCourseById, resetCourseData]);
 
   const handleSave = async () => {
     try {
