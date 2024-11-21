@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart } from 'react-icons/fi';
+import { FiClock, FiHeart, FiUser, FiPlay, FiShoppingCart, FiBook } from 'react-icons/fi';
 import Navbar_main from '../Navbar Components/Navbar_main';
 import CourseCommunity from './CourseCommunity';
 import config from '../../config/apiConfig';
@@ -37,6 +37,8 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
     graphql: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg"
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [savedAssignments, setSavedAssignments] = useState([]);
+  const [assignments, setAssignments] = useState([]);
 
   useEffect(() => {
     const customTechLogos = localStorage.getItem('customTechLogos');
@@ -51,6 +53,23 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
         console.error('Error parsing custom tech logos:', error);
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const savedQuestionsStr = localStorage.getItem('savedQuestions');
+    if (savedQuestionsStr) {
+      try {
+        const questions = JSON.parse(savedQuestionsStr);
+        setSavedAssignments(questions);
+      } catch (error) {
+        console.error('Error parsing saved assignments:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedAssignments = JSON.parse(localStorage.getItem('courseAssignments')) || [];
+    setAssignments(storedAssignments);
   }, []);
 
   useEffect(() => {
@@ -141,6 +160,47 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
   const handleAddToCart = (course) => {
     // Implement add to cart logic here
+  };
+
+  const renderAssignments = () => {
+    const assignments = JSON.parse(localStorage.getItem('courseAssignments')) || [];
+    
+    return (
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4">Course Assignments</h3>
+        <div className="space-y-4">
+          {assignments.map((assignment, index) => (
+            <div 
+              key={assignment.id}
+              className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Assignment {index + 1}: {assignment.assignmentTitle}
+                  </h4>
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <FiClock className="inline" />
+                    <span>{assignment.assignmentDuration} minutes</span>
+                    <span>•</span>
+                    <span>{assignment.questions.length} questions</span>
+                  </div>
+                </div>
+                <button 
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  onClick={() => {
+                    // Handle starting the assignment
+                    console.log('Starting assignment:', assignment.id);
+                  }}
+                >
+                  Start Assignment
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   if (!course) {
@@ -391,44 +451,47 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
               {/* Curriculum Items */}
               <div className="space-y-3 sm:space-y-4">
-                {Array.isArray(course?.curriculum) ? 
-                  [...course.curriculum].reverse().map((item, index) => (
-                    <div key={index} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4">
+                {course?.curriculum?.map((lesson, index) => (
+                  <div key={index} className="space-y-2">
+                    {/* Lesson Card */}
+                    <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 bg-red-100 dark:bg-gray-700 rounded-full 
-                                      flex items-center justify-center text-gray-500 dark:text-gray-400">
-                          {item.isCompleted ? '✓' : ''}
-                          <img src={course.logo} alt="" className="w-full h-full object-contain relative z-10" />
+                        <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full 
+                                      flex items-center justify-center">
+                          <img src={course.logo} alt="" className="w-6 h-6 object-contain" />
                         </div>
                         <div className="flex-grow">
-                          <h3 className="font-medium text-gray-900 dark:text-white">{item.title}</h3>
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            {lesson.title}
+                          </h3>
                           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                             <FiClock className="mr-1" />
-                            <span>{item.duration}</span>
-                            {item.type === 'REQUIRED' && (
-                              <span className="ml-2 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 
-                                             px-2 py-0.5 rounded text-xs">
-                                REQUIRED
-                              </span>
-                            )}
+                            <span>{lesson.duration}</span>
+                            <span className="ml-2 bg-red-100 dark:bg-red-900 text-red-600 
+                                           dark:text-red-300 px-2 py-0.5 rounded text-xs">
+                              REQUIRED
+                            </span>
                           </div>
                         </div>
                         <button 
-                          onClick={() => !previewMode && navigate(`/courses/${course.id}/lesson/${item.id}`)}
-                          className={`px-6 py-2 border dark:border-gray-600 rounded 
+                          onClick={() => !previewMode && navigate(`/courses/${course.id}/lesson/${lesson.id}`)}
+                          className="px-6 py-2 border dark:border-gray-600 rounded 
                                    hover:bg-gray-50 dark:hover:bg-gray-700 
-                                   text-gray-700 dark:text-gray-300 transition-colors duration-300
-                                   ${previewMode ? 'cursor-not-allowed opacity-50' : ''}`}
-                          disabled={previewMode}
+                                   text-gray-700 dark:text-gray-300 transition-colors duration-300"
                         >
-                          {item.isCompleted ? 'Resume' : 'Start'}
+                          {lesson.isCompleted ? 'Resume' : 'Start'}
                         </button>
                       </div>
                     </div>
-                  ))
-                  : <p className="text-gray-500 dark:text-gray-400">No curriculum items available</p>
-                }
+
+                    {/* Render assignments for this lesson */}
+                    {renderAssignments(lesson.id)}
+                  </div>
+                ))}
               </div>
+
+              {/* Add the assignments section */}
+              {renderAssignments()}
 
               {/* Diploma Section */}
               <div className="mt-8 bg-gray-50 dark:bg-gray-800 rounded-lg p-6">

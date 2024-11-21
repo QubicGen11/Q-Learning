@@ -64,6 +64,14 @@ const Lessons = () => {
     }
   };
 
+  const handleSaveToLocalStorage = (lessonId) => {
+    const lessonToSave = courseData.lessons.find(lesson => lesson.id === lessonId);
+    if (lessonToSave) {
+      localStorage.setItem('tempLesson', JSON.stringify(lessonToSave));
+      alert('Lesson saved to temporary storage!');
+    }
+  };
+
   const modules = {
     toolbar: {
       container: [
@@ -165,6 +173,15 @@ const Lessons = () => {
                 className="w-full p-2 border rounded-lg"
                 placeholder="Enter duration"
               />
+            </div>
+
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => handleSaveToLocalStorage(lesson.id)}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Save to Temporary Storage
+              </button>
             </div>
 
             <div className="">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiClock, FiArrowLeft, FiCheck, FiArrowRight } from 'react-icons/fi';
+import { FiClock, FiArrowLeft, FiCheck, FiArrowRight, FiBookmark, FiAlertTriangle } from 'react-icons/fi';
 import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import parse from 'html-react-parser';
@@ -20,6 +20,17 @@ const CourseLesson = () => {
   const [currentSection, setCurrentSection] = useState('about');
   const [readingProgress, setReadingProgress] = useState(0);
   const scrollRef = useRef(null);
+  const [timeRemaining, setTimeRemaining] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [comments, setComments] = useState('');
+  const [reviewLater, setReviewLater] = useState(false);
+  const [isAssessmentActive, setIsAssessmentActive] = useState(false);
+  const [assessmentData, setAssessmentData] = useState(null);
+  const [assignments, setAssignments] = useState([]);
+  const [currentAssignment, setCurrentAssignment] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [pendingAssignment, setPendingAssignment] = useState(null);
 
   const currentIndex = course?.curriculum?.findIndex(
     lesson => lesson.id === lessonId
@@ -116,6 +127,14 @@ const CourseLesson = () => {
     };
   }, [currentLesson, currentSection]);
 
+  useEffect(() => {
+    // Get assignments from localStorage
+    const storedAssignments = localStorage.getItem('courseAssignments');
+    if (storedAssignments) {
+      setAssignments(JSON.parse(storedAssignments));
+    }
+  }, []);
+
   const handleSectionClick = (section) => {
     setCurrentSection(section);
     if (section !== 'about') {
@@ -124,6 +143,49 @@ const CourseLesson = () => {
     } else {
       setCurrentLesson(null);
     }
+  };
+
+  const handleAssessmentClick = (assignment) => {
+    setPendingAssignment(assignment);
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmStart = () => {
+    if (!pendingAssignment) return;
+    
+    setCurrentAssignment(pendingAssignment);
+    setCurrentQuestion(pendingAssignment.questions[0]);
+    setIsAssessmentActive(true);
+    
+    const duration = parseInt(pendingAssignment.assignmentDuration) || 90;
+    setTimeRemaining(`${String(duration).padStart(2, '0')}:00:00`);
+    startTimer(duration);
+    
+    setShowConfirmation(false);
+    setPendingAssignment(null);
+  };
+
+  const startTimer = (duration) => {
+    const endTime = Date.now() + duration * 60 * 1000; // Convert minutes to milliseconds
+
+    const timerInterval = setInterval(() => {
+      const remaining = endTime - Date.now();
+      if (remaining <= 0) {
+        clearInterval(timerInterval);
+        // Handle time up
+        return;
+      }
+
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      const hours = Math.floor(minutes / 60);
+      
+      setTimeRemaining(
+        `${hours.toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      );
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
   };
 
   if (!course) {
@@ -290,6 +352,301 @@ const CourseLesson = () => {
     );
   };
 
+  const renderAssessment = () => {
+    if (!currentAssignment || !currentQuestion) return null;
+
+    return (
+      <div className="fixed inset-0 bg-gray-50 dark:bg-gray-900 z-50 overflow-y-auto">
+        <div className="max-w-4xl mx-auto py-8 px-4">
+          {/* Assessment Header */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+            <div className="border-b p-4 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setIsAssessmentActive(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <FiArrowLeft className="w-6 h-6" />
+                </button>
+                <h2 className="text-xl font-semibold">{currentAssignment.assignmentTitle}</h2>
+              </div>
+              <div className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                <FiClock className="w-5 h-5" />
+                Time Remaining: {timeRemaining}
+              </div>
+            </div>
+          </div>
+
+          {/* Question Card */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div className="p-6">
+              {/* Question Header */}
+              <div className="flex justify-between items-start mb-8">
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl font-bold text-orange-500">
+                    {currentAssignment.questions.indexOf(currentQuestion) + 1}
+                  </span>
+                  <h2 className="text-xl font-medium">{currentQuestion.question}</h2>
+                </div>
+                <button 
+                  onClick={() => setReviewLater(!reviewLater)}
+                  className="flex items-center gap-2 text-orange-500 hover:text-orange-600"
+                >
+                  <FiBookmark className={`w-5 h-5 ${reviewLater ? 'fill-current' : ''}`} />
+                  <span>Review Later</span>
+                </button>
+              </div>
+
+              {/* Options */}
+              <div className="space-y-4 mb-8">
+                {currentQuestion.options.map((option) => (
+                  <label 
+                    key={option.id}
+                    className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all
+                      ${selectedAnswer === option.id 
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' 
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  >
+                    <input
+                      type="radio"
+                      name="answer"
+                      value={option.id}
+                      checked={selectedAnswer === option.id}
+                      onChange={() => setSelectedAnswer(option.id)}
+                      className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-lg">{option.option}</span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Comments Section */}
+              <div className="mb-6">
+                <h3 className="text-gray-600 dark:text-gray-300 mb-2 font-medium">Comments</h3>
+                <textarea
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Add your notes here..."
+                  className="w-full p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-orange-500"
+                  rows="4"
+                />
+              </div>
+            </div>
+
+            {/* Footer Navigation */}
+            <div className="border-t p-4 flex justify-between items-center">
+              <div className="text-gray-600 dark:text-gray-300">
+                Question {currentAssignment.questions.indexOf(currentQuestion) + 1} of {currentAssignment.questions.length}
+              </div>
+              <div className="flex gap-4">
+                <button 
+                  onClick={handlePrevQuestion}
+                  disabled={currentAssignment.questions.indexOf(currentQuestion) === 0}
+                  className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg disabled:opacity-50 
+                    hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Previous
+                </button>
+                <button 
+                  onClick={handleNextQuestion}
+                  className="px-6 py-2.5 bg-orange-500 text-white rounded-lg 
+                    hover:bg-orange-600 transition-colors"
+                >
+                  {currentAssignment.questions.indexOf(currentQuestion) === currentAssignment.questions.length - 1 
+                    ? 'Submit'
+                    : 'Next'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Update navigation handlers
+  const handleNextQuestion = () => {
+    if (!currentAssignment || !currentQuestion) return;
+    
+    const currentIndex = currentAssignment.questions.indexOf(currentQuestion);
+    if (currentIndex < currentAssignment.questions.length - 1) {
+      setCurrentQuestion(currentAssignment.questions[currentIndex + 1]);
+    }
+  };
+
+  const handlePrevQuestion = () => {
+    if (!currentAssignment || !currentQuestion) return;
+    
+    const currentIndex = currentAssignment.questions.indexOf(currentQuestion);
+    if (currentIndex > 0) {
+      setCurrentQuestion(currentAssignment.questions[currentIndex - 1]);
+    }
+  };
+
+  // Modify the sidebar to include assignments
+  const renderSidebar = () => (
+    <div className="px-4 py-4">
+      {/* Introduction Section */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+          <span>INTRODUCTION</span>
+        </div>
+        
+        {/* About this course button */}
+        <button 
+          onClick={() => handleSectionClick('about')}
+          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors
+            ${currentSection === 'about' 
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+        >
+          <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+            <span className="text-sm text-gray-600 dark:text-gray-400">1</span>
+          </div>
+          <span className="text-sm font-medium text-left">About this course</span>
+        </button>
+      </div>
+
+      {/* Course Content Section */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+          <span>COURSE CONTENT</span>
+        </div>
+        
+        {/* Changed from reverse to normal order */}
+        {course?.curriculum?.map((lesson, index) => (
+          <div key={lesson.id} className="relative flex items-center">
+            {/* Progress Circle */}
+            <div className="absolute -left-2 flex items-center justify-center">
+              <div className="relative w-8 h-8">
+                {/* Background Circle */}
+                <svg className="w-full h-full" viewBox="0 0 36 36">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="16"
+                    fill="none"
+                    className="stroke-current text-gray-200 dark:text-gray-700"
+                    strokeWidth="2"
+                  />
+                  {/* Progress Circle */}
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="16"
+                    fill="none"
+                    className="stroke-current text-blue-500"
+                    strokeWidth="2"
+                    strokeDasharray={100}
+                    strokeDashoffset={currentLesson?.id === lesson.id && currentSection !== 'about' 
+                      ? 100 - readingProgress 
+                      : 100}
+                    transform="rotate(-90 18 18)"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Center Number/Check */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {lesson.isCompleted ? (
+                    <FiCheck className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <span className="text-sm text-gray-600">{index + 1}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Lesson Button */}
+            <button
+              onClick={() => handleSectionClick(lesson.id)}
+              className={`w-full ml-8 flex items-center gap-3 p-3 rounded-lg transition-colors
+                ${currentLesson?.id === lesson.id
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+            >
+              <div className="flex flex-col items-start text-left">
+                <div className="text-sm font-medium break-words w-full">{lesson.title}</div>
+                {lesson.duration && (
+                  <div className="text-xs text-gray-500 flex items-center gap-1">
+                    <FiClock className="w-3 h-3" />
+                    <span>{lesson.duration}</span>
+                  </div>
+                )}
+              </div>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Assignments Section */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+          <span>ASSIGNMENTS</span>
+        </div>
+        
+        {assignments.map((assignment, index) => (
+          <button 
+            key={assignment.id}
+            onClick={() => handleAssessmentClick(assignment)}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mb-2
+              ${currentAssignment?.id === assignment.id 
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+          >
+            <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+              <span className="text-sm text-gray-600 dark:text-gray-400">{index + 1}</span>
+            </div>
+            <div className="flex flex-col items-start text-left">
+              <span className="text-sm font-medium">{assignment.assignmentTitle}</span>
+              {assignment.assignmentDuration && (
+                <div className="text-xs text-gray-500 flex items-center gap-1">
+                  <FiClock className="w-3 h-3" />
+                  <span>{assignment.assignmentDuration} minutes</span>
+                </div>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const ConfirmationPopup = () => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex items-center gap-3 mb-4">
+          <FiAlertTriangle className="w-6 h-6 text-orange-500" />
+          <h3 className="text-xl font-semibold">Start Assessment?</h3>
+        </div>
+        
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
+          Once you start the assessment, you cannot pause or return to the course content. 
+          Make sure you're ready to begin.
+        </p>
+        
+        <div className="flex gap-3 justify-end">
+          <button
+            onClick={() => {
+              setShowConfirmation(false);
+              setPendingAssignment(null);
+            }}
+            className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 
+              hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirmStart}
+            className="px-4 py-2 rounded-lg bg-orange-500 text-white
+              hover:bg-orange-600 transition-colors"
+          >
+            Start Assessment
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top Navigation Bar */}
@@ -317,265 +674,97 @@ const CourseLesson = () => {
       {/* Main Content Area with Fixed Sidebar */}
       <div className="flex pt-14">
         {/* Fixed Left Sidebar */}
-        <div className="w-72 bg-gray-100 dark:bg-gray-800 fixed h-[calc(100vh-56px)] overflow-y-auto">
-          {/* Course Banner */}
-          <div className="relative h-48">
-            {courseImage && (
-              <>
-                {/* Main background image with overlay */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <div className="absolute inset-0 bg-black/60 z-10" />
-                  <img 
-                    src={courseImage} 
-                    alt={course?.title}
-                    className="w-full h-full object-cover"
-                    style={{
-                      opacity: `${course?.bannerSettings?.opacity || 70}%`,
-                      objectPosition: `center ${course?.bannerSettings?.yPosition || 50}%`
-                    }}
-                  />
-                </div>
-
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent z-20" />
-              </>
-            )}
-
-            {/* Course Title and Progress */}
-            <div className="relative z-30 p-6">
-              <h1 className="text-xl font-bold text-white mb-2">{course?.title}</h1>
-              <div className="text-sm text-gray-300 mb-4">
-                {progress}% COMPLETE
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 h-1 rounded-full">
-                <div 
-                  className="bg-blue-500 h-1 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Course Navigation */}
-          <div className="px-4 py-4">
-            {/* Introduction Section */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
-                <span>INTRODUCTION</span>
-              </div>
-              
-              {/* About this course button */}
-              <button 
-                onClick={() => handleSectionClick('about')}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors
-                  ${currentSection === 'about' 
-                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-              >
-                <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">1</span>
-                </div>
-                <span className="text-sm font-medium text-left">About this course</span>
-              </button>
-            </div>
-
-            {/* Course Content Section */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
-                <span>COURSE CONTENT</span>
-              </div>
-              
-              {/* Changed from reverse to normal order */}
-              {course?.curriculum?.map((lesson, index) => (
-                <div key={lesson.id} className="relative flex items-center">
-                  {/* Progress Circle */}
-                  <div className="absolute -left-2 flex items-center justify-center">
-                    <div className="relative w-8 h-8">
-                      {/* Background Circle */}
-                      <svg className="w-full h-full" viewBox="0 0 36 36">
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="16"
-                          fill="none"
-                          className="stroke-current text-gray-200 dark:text-gray-700"
-                          strokeWidth="2"
-                        />
-                        {/* Progress Circle */}
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="16"
-                          fill="none"
-                          className="stroke-current text-blue-500"
-                          strokeWidth="2"
-                          strokeDasharray={100}
-                          strokeDashoffset={currentLesson?.id === lesson.id && currentSection !== 'about' 
-                            ? 100 - readingProgress 
-                            : 100}
-                          transform="rotate(-90 18 18)"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      {/* Center Number/Check */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        {lesson.isCompleted ? (
-                          <FiCheck className="w-4 h-4 text-green-500" />
-                        ) : (
-                          <span className="text-sm text-gray-600">{index + 1}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Lesson Button */}
-                  <button
-                    onClick={() => handleSectionClick(lesson.id)}
-                    className={`w-full ml-8 flex items-center gap-3 p-3 rounded-lg transition-colors
-                      ${currentLesson?.id === lesson.id
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                  >
-                    <div className="flex flex-col items-start text-left">
-                      <div className="text-sm font-medium break-words w-full">{lesson.title}</div>
-                      {lesson.duration && (
-                        <div className="text-xs text-gray-500 flex items-center gap-1">
-                          <FiClock className="w-3 h-3" />
-                          <span>{lesson.duration}</span>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className={`w-72 bg-gray-100 dark:bg-gray-800 fixed h-[calc(100vh-56px)] overflow-y-auto
+          ${isAssessmentActive ? 'hidden' : ''}`}>
+          {renderSidebar()}
         </div>
 
         {/* Main Content - Adjusted margin and max-width */}
         <div 
           ref={scrollRef}
-          className="ml-72 flex-1 overflow-y-auto"
+          className={`${isAssessmentActive ? '' : 'ml-72'} flex-1 overflow-y-auto`}
           style={{ height: 'calc(100vh - 56px)' }}
         >
-          {/* Header Section with Gradient */}
-          <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-8 border-b dark:border-gray-700">
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {currentSection === 'about' ? 'About This Course' : currentLesson?.title}
-              </h1>
-              {currentSection !== 'about' && (
-                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                  <FiClock className="w-4 h-4" />
-                  <span>Duration: {currentLesson?.duration}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="p-8">
-            <div className="max-w-4xl mx-auto">
-              {/* About This Course Section */}
-              {currentSection === 'about' && (
-                <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                  <h2 className="text-2xl font-bold mb-4">About This Course</h2>
-                  
-                  {/* Welcome Message */}
-                  {course.aboutCourse?.welcome && (
-                    <div className="prose dark:prose-invert mb-6">
-                      {parse(DOMPurify.sanitize(course.aboutCourse.welcome))}
-                    </div>
-                  )}
-                  
-                  {/* Prerequisites */}
-                  {course.aboutCourse?.prerequisites?.length > 0 && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-3">Prerequisites</h3>
-                      <ul className="list-disc pl-5 space-y-2">
-                        {course.aboutCourse.prerequisites.map((prereq, index) => (
-                          <li 
-                            key={index}
-                            className="text-gray-700 dark:text-gray-300"
-                          >
-                            {parse(DOMPurify.sanitize(prereq))}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {/* Requirements */}
-                  {course.aboutCourse?.requirements?.length > 0 && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">Course Requirements</h3>
-                      <ul className="list-disc list-inside space-y-1">
-                        {course.aboutCourse.requirements.map((req, index) => (
-                          <li key={index}>{req}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {/* What You'll Learn */}
-                  {course.aboutCourse?.whatYoullLearn && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">What You'll Learn</h3>
-                      <div className="prose dark:prose-invert">
-                        {parse(DOMPurify.sanitize(course.aboutCourse.whatYoullLearn))}
+          {isAssessmentActive ? (
+            renderAssessment()
+          ) : (
+            // Regular Content View
+            <div className="p-8">
+              <div className="max-w-4xl mx-auto">
+                {currentSection === 'about' ? (
+                  // About Course Content
+                  <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h2 className="text-2xl font-bold mb-4">About This Course</h2>
+                    
+                    {/* Welcome Message */}
+                    {course.aboutCourse?.welcome && (
+                      <div className="prose dark:prose-invert mb-6">
+                        {parse(DOMPurify.sanitize(course.aboutCourse.welcome))}
                       </div>
-                    </div>
-                  )}
-                  
-                  {/* End Objectives */}
-                  {course.aboutCourse?.endObjectives && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">At the End of This Course, You Should Be Able To:</h3>
-                      <div className="prose dark:prose-invert">
-                        {parse(DOMPurify.sanitize(course.aboutCourse.endObjectives))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Lesson Content */}
-              {currentSection !== 'about' && (
-                <div className="prose prose-lg dark:prose-invert max-w-none">
-                  {renderContent(currentLesson?.content)}
-                </div>
-              )}
-              
-              {/* Navigation Buttons - Updated Style */}
-              <div className="mt-12 flex items-center justify-between border-t dark:border-gray-700 pt-6">
-                {currentSection !== 'about' && (
-                  <>
-                    {!isFirstLesson && previousLessonId && (
-                      <Link 
-                        to={`/courses/${id}/lesson/${previousLessonId}`}
-                        className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-                      >
-                        <FiArrowLeft className="w-4 h-4" />
-                        <span>Previous Lesson</span>
-                      </Link>
                     )}
                     
-                    {!isLastLesson && nextLessonId && (
-                      <Link 
-                        to={`/courses/${id}/lesson/${nextLessonId}`}
-                        className="flex items-center gap-2 text-blue-500 hover:text-blue-600 ml-auto transition-colors"
-                      >
-                        <span>Next Lesson</span>
-                        <FiArrowRight className="w-4 h-4" />
-                      </Link>
+                    {/* Prerequisites */}
+                    {course.aboutCourse?.prerequisites?.length > 0 && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-3">Prerequisites</h3>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {course.aboutCourse.prerequisites.map((prereq, index) => (
+                            <li 
+                              key={index}
+                              className="text-gray-700 dark:text-gray-300"
+                            >
+                              {parse(DOMPurify.sanitize(prereq))}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
-                  </>
+                    
+                    {/* Requirements */}
+                    {course.aboutCourse?.requirements?.length > 0 && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">Course Requirements</h3>
+                        <ul className="list-disc list-inside space-y-1">
+                          {course.aboutCourse.requirements.map((req, index) => (
+                            <li key={index}>{req}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* What You'll Learn */}
+                    {course.aboutCourse?.whatYoullLearn && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">What You'll Learn</h3>
+                        <div className="prose dark:prose-invert">
+                          {parse(DOMPurify.sanitize(course.aboutCourse.whatYoullLearn))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* End Objectives */}
+                    {course.aboutCourse?.endObjectives && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">At the End of This Course, You Should Be Able To:</h3>
+                        <div className="prose dark:prose-invert">
+                          {parse(DOMPurify.sanitize(course.aboutCourse.endObjectives))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // Lesson Content
+                  <div className="prose prose-lg dark:prose-invert max-w-none">
+                    {renderContent(currentLesson?.content)}
+                  </div>
                 )}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
+
+      {showConfirmation && <ConfirmationPopup />}
     </div>
   );
 };

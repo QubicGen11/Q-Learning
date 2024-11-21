@@ -32,15 +32,35 @@ const Assignments = () => {
   const [savedQuestions, setSavedQuestions] = useState([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
+  const [savedLessons, setSavedLessons] = useState([]);
 
   useEffect(() => {
-    const storedQuestions = JSON.parse(localStorage.getItem('savedQuestions')) || [];
-    setSavedQuestions(storedQuestions);
+    const storedAssignments = JSON.parse(localStorage.getItem('courseAssignments')) || [];
+    if (storedAssignments.length > 0) {
+      updateCourseData({
+        ...courseData,
+        assignments: storedAssignments
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const tempLesson = localStorage.getItem('tempLesson');
+    if (tempLesson) {
+      try {
+        const parsedLesson = JSON.parse(tempLesson);
+        setSavedLessons(prev => 
+          prev.some(lesson => lesson.id === parsedLesson.id) 
+            ? prev 
+            : [...prev, parsedLesson]
+        );
+      } catch (error) {
+        console.error('Error parsing saved lesson:', error);
+      }
+    }
   }, []);
 
   const handleAddAssignment = () => {
-    const currentAssignments = courseData?.assignments || [];
-    
     const newAssignment = {
       id: Date.now(),
       assignmentTitle: "",
@@ -50,10 +70,12 @@ const Assignments = () => {
       showQuestionForm: false
     };
 
+    const updatedAssignments = [...(courseData?.assignments || []), newAssignment];
     updateCourseData({
       ...courseData,
-      assignments: [...currentAssignments, newAssignment]
+      assignments: updatedAssignments
     });
+    localStorage.setItem('courseAssignments', JSON.stringify(updatedAssignments));
     setSelectedAssignmentId(newAssignment.id);
   };
 
@@ -130,32 +152,35 @@ const Assignments = () => {
       return;
     }
 
-    const newQuestion = {
-      assignmentId,
-      question: assignment.question,
-      options: assignment.options,
-      questionType: assignment.questionType
-    };
+    const updatedAssignments = courseData.assignments.map(a => {
+      if (a.id === assignmentId) {
+        const newQuestion = {
+          id: Date.now(),
+          question: assignment.question,
+          options: assignment.options,
+          questionType: assignment.questionType
+        };
+        
+        return {
+          ...a,
+          questions: [...(a.questions || []), newQuestion]
+        };
+      }
+      return a;
+    });
 
-    if (editingQuestionIndex !== null) {
-      const updatedQuestions = [...savedQuestions];
-      updatedQuestions[editingQuestionIndex] = newQuestion;
-      setSavedQuestions(updatedQuestions);
-      localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
-    } else {
-      const updatedQuestions = [...savedQuestions, newQuestion];
-      setSavedQuestions(updatedQuestions);
-      localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
-    }
+    updateCourseData({
+      ...courseData,
+      assignments: updatedAssignments
+    });
+    localStorage.setItem('courseAssignments', JSON.stringify(updatedAssignments));
 
-    setEditingQuestionIndex(null);
-    setShowQuestionForm(false);
-    
     handleAssignmentUpdate(assignmentId, {
       question: '',
       options: assignment.options.map(opt => ({ ...opt, option: '', isCorrect: false })),
       questionType: 'single'
     });
+    setShowQuestionForm(false);
   };
 
   const handleEditQuestion = (index) => {
@@ -213,10 +238,22 @@ const Assignments = () => {
     });
   };
 
-  const handleDeleteQuestion = (index) => {
-    const updatedQuestions = savedQuestions.filter((_, idx) => idx !== index);
-    setSavedQuestions(updatedQuestions);
-    localStorage.setItem('savedQuestions', JSON.stringify(updatedQuestions));
+  const handleDeleteQuestion = (assignmentId, questionId) => {
+    const updatedAssignments = courseData.assignments.map(assignment => {
+      if (assignment.id === assignmentId) {
+        return {
+          ...assignment,
+          questions: assignment.questions.filter(q => q.id !== questionId)
+        };
+      }
+      return assignment;
+    });
+
+    updateCourseData({
+      ...courseData,
+      assignments: updatedAssignments
+    });
+    localStorage.setItem('courseAssignments', JSON.stringify(updatedAssignments));
   };
 
   return (
@@ -283,15 +320,25 @@ const Assignments = () => {
                 size="small"
                 fullWidth
               />
-              <TextField
-                label="Lesson Link"
-                value={assignment.lessonLink}
-                onChange={(e) => handleAssignmentUpdate(assignment.id, { 
-                  lessonLink: e.target.value 
-                })}
-                size="small"
-                fullWidth
-              />
+              <FormControl fullWidth size="small">
+                <InputLabel>Lesson Link</InputLabel>
+                <Select
+                  value={assignment.lessonLink}
+                  onChange={(e) => handleAssignmentUpdate(assignment.id, { 
+                    lessonLink: e.target.value 
+                  })}
+                  label="Lesson Link"
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {savedLessons.map((lesson) => (
+                    <MenuItem key={lesson.id} value={lesson.id}>
+                      {lesson.lessonTitle || `Lesson ${lesson.id}`}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <TextField
                 label="Duration"
                 value={assignment.assignmentDuration}
@@ -388,52 +435,50 @@ const Assignments = () => {
               </Card>
             )}
 
-            {savedQuestions
-              .filter(item => item.assignmentId === assignment.id)
-              .map((item, index) => (
-                <Card key={index} variant="outlined" className="mb-4">
-                  <CardContent>
-                    <div className="flex justify-between items-start mb-2">
-                      <Typography variant="subtitle1">
-                        Question {index + 1}
-                      </Typography>
-                      <div className="flex gap-1">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditQuestion(index)}
-                          sx={{ color: '#2196f3' }}
-                        >
-                          <CreateIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeleteQuestion(index)}
-                          sx={{ color: '#f44336' }}
-                        >
-                          <DeleteOutlineIcon fontSize="small" />
-                        </IconButton>
-                      </div>
-                    </div>
-                    <Typography variant="body2" className="mb-2">
-                      {item.question}
+            {assignment.questions && assignment.questions.map((item, index) => (
+              <Card key={item.id} variant="outlined" className="mb-4">
+                <CardContent>
+                  <div className="flex justify-between items-start mb-2">
+                    <Typography variant="subtitle1">
+                      Question {index + 1}
                     </Typography>
-                    <div className="grid grid-cols-2 gap-2">
-                      {item.options.map((option, idx) => (
-                        <div
-                          key={idx}
-                          className={`p-2 rounded text-sm ${
-                            option.isCorrect 
-                              ? 'bg-green-50 text-green-700' 
-                              : 'bg-gray-50'
-                          }`}
-                        >
-                          {option.option}
-                        </div>
-                      ))}
+                    <div className="flex gap-1">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditQuestion(index)}
+                        sx={{ color: '#2196f3' }}
+                      >
+                        <CreateIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteQuestion(assignment.id, item.id)}
+                        sx={{ color: '#f44336' }}
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                  <Typography variant="body2" className="mb-2">
+                    {item.question}
+                  </Typography>
+                  <div className="grid grid-cols-2 gap-2">
+                    {item.options.map((option, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-2 rounded text-sm ${
+                          option.isCorrect 
+                            ? 'bg-green-50 text-green-700' 
+                            : 'bg-gray-50'
+                        }`}
+                      >
+                        {option.option}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         ))}
       </div>
