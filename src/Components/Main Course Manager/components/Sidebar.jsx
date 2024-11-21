@@ -22,7 +22,7 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
       title: 'Content',
       items: [
         { id: 'lessons', label: 'Lessons', icon: <FiBook /> },
-        { id: 'assignments', label: 'Assignments', icon: <FiLayout /> },
+       
         { id: 'resources', label: 'Resources', icon: <FiVideo /> }
       ]
     },
