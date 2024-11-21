@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AboutCourse from './components/sections/AboutCourse';
 import Curriculum from './components/sections/Curriculum';
 import Lessons from './components/sections/Lessons';
-import Assignments from './components/sections/Assignments';
 import Resources from './components/sections/Resources';
 import Pricing from './components/sections/Pricing';
 import Sidebar from './components/Sidebar';
@@ -11,6 +10,7 @@ import Header from './components/Header';
 import BasicInformation from './components/sections/BasicInformation';
 import useCourseStore from '../../store/courseStore';
 import PreviewModal from './components/sections/PreviewModal';
+import ConfirmationModal from './components/ConfirmationModal';
 
 
 const Mainadmin = () => {
@@ -25,6 +25,9 @@ const Mainadmin = () => {
   const [activeSection, setActiveSection] = useState('basicInfo');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -47,22 +50,39 @@ const Mainadmin = () => {
 
   const handleSave = async () => {
     try {
+      setIsUpdating(true);
       if (courseId) {
         await updateCourse(courseId, courseData);
-        alert('Course updated successfully!');
       } else {
         await submitCourse(courseData);
-        alert('Course created successfully!');
       }
-      navigate('/courses');
+      setShowQuestionModal(true);
     } catch (error) {
       console.error('Save error:', error);
       alert(`Failed to ${courseId ? 'update' : 'create'} course: ${error.message}`);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handlePreview = () => {
     setIsPreviewOpen(true);
+  };
+
+  const handleQuestionResponse = (wantToAddQuestions) => {
+    setShowQuestionModal(false);
+    if (wantToAddQuestions) {
+      navigate('/assignmentsadd');
+    } else {
+      setShowExitModal(true);
+    }
+  };
+
+  const handleExitResponse = (confirmExit) => {
+    setShowExitModal(false);
+    if (confirmExit) {
+      navigate('/courses');
+    }
   };
 
   const renderSection = () => {
@@ -75,8 +95,6 @@ const Mainadmin = () => {
         return <Curriculum />;
       case 'lessons':
         return <Lessons />;
-      case 'assignments':
-        return <Assignments />;
       case 'resources':
         return <Resources />;
       case 'pricing':
@@ -95,30 +113,49 @@ const Mainadmin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-      <div className="ml-64 flex-1 min-h-screen">
-        <Header 
-          activeSection={activeSection} 
-          onSave={handleSave}
-          onPreview={handlePreview}
-          isEditing={!!courseId}
-        />
-        <div className="p-8">
-          <div className="max-w-8xl mx-auto  rounded-xl shadow-sm border border-gray-200 h-auto">
-            <div className="p-8">
-              {renderSection()}
+    <>
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+        <div className="ml-64 flex-1 min-h-screen">
+          <Header 
+            activeSection={activeSection} 
+            onSave={handleSave}
+            onPreview={handlePreview}
+            isEditing={!!courseId}
+          />
+          <div className="p-8">
+            <div className="max-w-8xl mx-auto  rounded-xl shadow-sm border border-gray-200 h-auto">
+              <div className="p-8">
+                {renderSection()}
+              </div>
             </div>
           </div>
         </div>
+
+        <PreviewModal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          courseData={courseData}
+        />
       </div>
 
-      <PreviewModal
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        courseData={courseData}
+      <ConfirmationModal
+        isOpen={showQuestionModal}
+        onClose={() => handleQuestionResponse(false)}
+        onConfirm={() => handleQuestionResponse(true)}
+        title="Add Questions"
+        message="Do you want to add questions to this course?"
+        isUpdating={isUpdating}
       />
-    </div>
+
+      <ConfirmationModal
+        isOpen={showExitModal}
+        onClose={() => handleExitResponse(false)}
+        onConfirm={() => handleExitResponse(true)}
+        title="Confirm Exit"
+        message="Are you sure you want to exit without adding questions?"
+      />
+    </>
   );
 };
 
