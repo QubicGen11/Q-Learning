@@ -13,6 +13,11 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloseIcon from '@mui/icons-material/Close';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 import useCourseStore from "../../../../store/courseStore";
 import useQuestionStore from '../../../../store/questionStore';
@@ -60,6 +65,10 @@ const Assignments = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [openQuestionsModal, setOpenQuestionsModal] = useState(false);
   const [editedQuestion, setEditedQuestion] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    open: false,
+    questionId: null
+  });
 
   useEffect(() => {
     fetchCourses();
@@ -365,11 +374,28 @@ const Assignments = () => {
     });
   };
 
-  const handleDeleteQuestion = async (lessonId, questionId) => {
+  const handleDeleteQuestion = async (questionId) => {
     try {
-      await deleteQuestion(lessonId, questionId);
+      const accessToken = Cookies.get('accessToken');
+      const response = await axios.delete(
+        `http://localhost:8089/qlms/deleteQuestion/${questionId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      if (response.data) {
+        toast.success('Question deleted successfully');
+        // Refresh questions list
+        await fetchLessonQuestions(question.lessonId);
+      }
     } catch (error) {
       console.error('Error deleting question:', error);
+      toast.error('Failed to delete question');
+    } finally {
+      setDeleteConfirmation({ open: false, questionId: null });
     }
   };
 
@@ -755,6 +781,7 @@ const Assignments = () => {
                                     fullWidth
                                     size="small"
                                     value={option.option}
+                                    disabled={option.option === "True" || option.option === "False"}
                                     onChange={(e) => {
                                       const updatedOptions = [...editedQuestion.options];
                                       updatedOptions[optIndex] = {
@@ -766,16 +793,20 @@ const Assignments = () => {
                                         options: updatedOptions
                                       });
                                     }}
+                                    sx={{
+                                      "& .Mui-disabled": {
+                                        backgroundColor: "rgba(0, 0, 0, 0.05)",
+                                        WebkitTextFillColor: "rgba(0, 0, 0, 0.6)"
+                                      }
+                                    }}
                                   />
                                   <IconButton
                                     onClick={() => {
                                       const updatedOptions = [...editedQuestion.options];
                                       // For single correct answer questions
-                                      if (true) { // You can add logic here for different question types
-                                        updatedOptions.forEach((opt, idx) => {
-                                          opt.isCorrect = idx === optIndex;
-                                        });
-                                      }
+                                      updatedOptions.forEach((opt, idx) => {
+                                        opt.isCorrect = idx === optIndex;
+                                      });
                                       setEditedQuestion({
                                         ...editedQuestion,
                                         options: updatedOptions
@@ -826,7 +857,10 @@ const Assignments = () => {
                                 </IconButton>
                                 <IconButton
                                   size="small"
-                                  onClick={() => handleDeleteQuestion(question.lessonId, question.id)}
+                                  onClick={() => setDeleteConfirmation({ 
+                                    open: true, 
+                                    questionId: question.id 
+                                  })}
                                   className="text-red-500 hover:bg-red-50"
                                 >
                                   <DeleteIcon fontSize="small" />
@@ -884,6 +918,34 @@ const Assignments = () => {
           </div>
         </Box>
       </Modal>
+
+      <Dialog
+        open={deleteConfirmation.open}
+        onClose={() => setDeleteConfirmation({ open: false, questionId: null })}
+      >
+        <DialogTitle>Delete Question</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this question? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setDeleteConfirmation({ open: false, questionId: null })}
+            color="primary"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => handleDeleteQuestion(deleteConfirmation.questionId)}
+            color="error"
+            variant="contained"
+            startIcon={<DeleteIcon />}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
