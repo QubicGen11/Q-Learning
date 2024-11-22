@@ -72,7 +72,7 @@ const Mainadmin = () => {
   const handleQuestionResponse = (wantToAddQuestions) => {
     setShowQuestionModal(false);
     if (wantToAddQuestions) {
-      navigate('/assignmentsadd');
+      navigate('/assignments');
     } else {
       setShowExitModal(true);
     }

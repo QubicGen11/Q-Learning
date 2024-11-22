@@ -463,7 +463,7 @@ const Assignments = () => {
     if (!currentAssignment?.assignmentTitle || 
         !currentAssignment?.assignmentDuration || 
         !selectedCourse ||
-        !currentAssignment?.lessonLink) {  // Add check for lessonLink
+        !currentAssignment?.lessonLink) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -485,13 +485,13 @@ const Assignments = () => {
       const payload = {
         assignmentTitle: currentAssignment.assignmentTitle,
         assignmentDescription: currentAssignment.assignmentDescription || "",
-        duration: new Date(currentAssignment.assignmentDuration).toISOString(),
+        duration: parseInt(currentAssignment.assignmentDuration) || 60,
         assignmentStatus: "active",
         courseId: selectedCourse,
-        lessonId: selectedLesson.lesson.id  // Add lessonId to payload
+        lessonId: selectedLesson.lesson.id
       };
 
-      console.log('Creating assignment with payload:', payload); // Debug log
+      console.log('Creating assignment with payload:', payload);
 
       const response = await axios.post(
         'http://localhost:8089/qlms/newAssignment',
@@ -661,17 +661,19 @@ const Assignments = () => {
                 />
 
                 <TextField
-                  label="Duration"
-                  type="datetime-local"
+                  label="Duration (in minutes)"
+                  type="number"
                   value={assignment.assignmentDuration}
-                  onChange={(e) => handleAssignmentUpdate(assignment.id, { assignmentDuration: e.target.value })}
+                  onChange={(e) => handleAssignmentUpdate(assignment.id, { 
+                    assignmentDuration: e.target.value 
+                  })}
                   variant="outlined"
                   fullWidth
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  inputProps={{
-                    min: new Date().toISOString().slice(0, 16) // This sets min date to current date
+                  InputProps={{
+                    inputProps: { 
+                      min: 1,
+                      max: 480 // 8 hours max, adjust as needed
+                    }
                   }}
                   className="mb-4"
                 />
