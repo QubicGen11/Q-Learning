@@ -60,6 +60,7 @@ const Assignments = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [openQuestionsModal, setOpenQuestionsModal] = useState(false);
   const [editedQuestion, setEditedQuestion] = useState(null);
+  const [currentAssignmentId, setCurrentAssignmentId] = useState(null);
 
   useEffect(() => {
     fetchCourses();
@@ -129,7 +130,15 @@ const Assignments = () => {
       assignmentTitle: "",
       lessonLink: "",
       assignmentDuration: "",
+      assignmentDescription: "",
       questions: [],
+      questionType: 'single',
+      options: [
+        { id: Date.now() + 1, option: "", isCorrect: false },
+        { id: Date.now() + 2, option: "", isCorrect: false },
+        { id: Date.now() + 3, option: "", isCorrect: false },
+        { id: Date.now() + 4, option: "", isCorrect: false }
+      ],
       showQuestionForm: false
     };
 
@@ -146,8 +155,12 @@ const Assignments = () => {
     if (!courseData?.assignments) return;
     
     const updatedAssignments = courseData.assignments.map(assignment => 
-      assignment.id === assignmentId ? { ...assignment, ...updates } : assignment
+      assignment.id === assignmentId 
+        ? { ...assignment, ...updates } 
+        : assignment
     );
+
+    console.log('Updated Assignment:', updatedAssignments.find(a => a.id === assignmentId));
 
     updateCourseData({
       ...courseData,
@@ -158,27 +171,34 @@ const Assignments = () => {
   const handleOptionUpdate = (assignmentId, optionIndex, updates) => {
     if (!courseData?.assignments) return;
     
+    console.log('Updating option:', { optionIndex, updates }); // Debug log
+    
     const updatedAssignments = courseData.assignments.map(assignment => {
       if (assignment.id === assignmentId) {
         const updatedOptions = [...assignment.options];
         
         if (updates.hasOwnProperty('isCorrect')) {
-          switch(assignment.questionType) {
-            case 'single':
-            case 'true-false':
-              updatedOptions.forEach((opt, idx) => {
-                updatedOptions[idx] = { 
-                  ...opt, 
-                  isCorrect: idx === optionIndex ? updates.isCorrect : false 
-                };
-              });
-              break;
-            case 'multiple':
-              updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], ...updates };
-              break;
+          if (assignment.questionType === 'multiple') {
+            // For multiple choice, just toggle the current option
+            updatedOptions[optionIndex] = {
+              ...updatedOptions[optionIndex],
+              isCorrect: updates.isCorrect
+            };
+          } else {
+            // For single choice, make sure only one is selected
+            updatedOptions.forEach((opt, idx) => {
+              updatedOptions[idx] = {
+                ...opt,
+                isCorrect: idx === optionIndex ? updates.isCorrect : false
+              };
+            });
           }
         } else {
-          updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], ...updates };
+          // Update option text
+          updatedOptions[optionIndex] = {
+            ...updatedOptions[optionIndex],
+            ...updates
+          };
         }
         
         return { ...assignment, options: updatedOptions };
@@ -186,6 +206,8 @@ const Assignments = () => {
       return assignment;
     });
 
+    console.log('Updated assignment:', updatedAssignments.find(a => a.id === assignmentId)); // Debug log
+    
     updateCourseData({
       ...courseData,
       assignments: updatedAssignments
@@ -211,42 +233,28 @@ const Assignments = () => {
 
   const handleSaveQuestion = async (assignmentId) => {
     const currentAssignment = courseData?.assignments?.find(a => a.id === assignmentId);
-    const selectedCourseData = courses.find(c => c.id === selectedCourse);
-    const selectedLesson = selectedCourseData?.courseLesson.find(
-      l => l.lesson.lessonTitle === currentAssignment?.lessonLink
-    );
     
-    if (!currentAssignment || 
-        !currentAssignment.question || 
-        !currentAssignment.options.some(option => option.option) ||
-        !selectedCourse ||
-        !selectedLesson) {
-      toast.error('Please fill in all required fields');
+    if (!currentAssignment?.backendId) {
+      toast.error('Please create the assignment first');
       return;
     }
 
     try {
       const accessToken = Cookies.get('accessToken');
       
-      // Exactly matching your API structure
       const payload = {
-        "questions": [
-          {
-            "questionText": currentAssignment.question,
-            "lessonId": selectedLesson.lesson.id,
-            "courseId": selectedCourse,
-            "isOpenSource": false,
-            "options": currentAssignment.options
-              .filter(opt => opt.option)
-              .map(opt => ({
-                "option": opt.option,
-                "isCorrect": opt.isCorrect
-              }))
-          }
-        ]
+        "questionText": currentAssignment.question,
+        "lessonId": selectedCourse,
+        "courseId": selectedCourse,
+        "assignmentId": currentAssignment.backendId,
+        "isOpenSource": false,
+        "options": currentAssignment.options
+          .filter(opt => opt.option)
+          .map(opt => ({
+            "option": opt.option,
+            "isCorrect": opt.isCorrect
+          }))
       };
-
-      console.log('Sending payload:', payload); // Debug log
 
       const response = await axios.post(
         'http://localhost:8089/qlms/newQuestion',
@@ -259,15 +267,27 @@ const Assignments = () => {
         }
       );
 
-      console.log('API Response:', response.data);
-
-      if (response.data.message === "Questions created successfully") {
+      if (response.data.message === "Question created and associated with assignment successfully") {
         toast.success('Question saved successfully');
         
-        // Fetch updated questions
-        await fetchLessonQuestions(selectedLesson.lesson.id);
-        
-        // Reset form
+        // Update the assignment's questions array with the new question
+        const updatedAssignments = courseData.assignments.map(a => {
+          if (a.id === assignmentId) {
+            return {
+              ...a,
+              questions: [...(a.questions || []), response.data.question]
+            };
+          }
+          return a;
+        });
+
+        // Update course data with new question
+        updateCourseData({
+          ...courseData,
+          assignments: updatedAssignments
+        });
+
+        // Reset the question form
         handleAssignmentUpdate(assignmentId, {
           question: '',
           options: currentAssignment.options.map(opt => ({ 
@@ -276,6 +296,13 @@ const Assignments = () => {
             isCorrect: false 
           }))
         });
+        
+        setShowQuestionForm(false);
+
+        // Refresh the questions list if needed
+        if (selectedCourse) {
+          await fetchLessonQuestions(selectedCourse);
+        }
       }
     } catch (error) {
       console.error('Error saving question:', error);
@@ -430,6 +457,81 @@ const Assignments = () => {
     setEditingQuestionIndex(index);
   };
 
+  const handleCreateAssignment = async (assignmentId) => {
+    const currentAssignment = courseData?.assignments?.find(a => a.id === assignmentId);
+    
+    if (!currentAssignment?.assignmentTitle || 
+        !currentAssignment?.assignmentDuration || 
+        !selectedCourse ||
+        !currentAssignment?.lessonLink) {  // Add check for lessonLink
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const accessToken = Cookies.get('accessToken');
+      
+      // Get the lesson ID from the selected lesson
+      const selectedCourseData = courses.find(c => c.id === selectedCourse);
+      const selectedLesson = selectedCourseData?.courseLesson.find(
+        l => l.lesson.lessonTitle === currentAssignment.lessonLink
+      );
+
+      if (!selectedLesson) {
+        toast.error('Please select a valid lesson');
+        return;
+      }
+
+      const payload = {
+        assignmentTitle: currentAssignment.assignmentTitle,
+        assignmentDescription: currentAssignment.assignmentDescription || "",
+        duration: new Date(currentAssignment.assignmentDuration).toISOString(),
+        assignmentStatus: "active",
+        courseId: selectedCourse,
+        lessonId: selectedLesson.lesson.id  // Add lessonId to payload
+      };
+
+      console.log('Creating assignment with payload:', payload); // Debug log
+
+      const response = await axios.post(
+        'http://localhost:8089/qlms/newAssignment',
+        payload,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data?.assignment?.id) {
+        toast.success('Assignment created successfully');
+        setCurrentAssignmentId(response.data.assignment.id);
+        
+        // Update the assignment in courseData with the backend ID
+        const updatedAssignments = courseData.assignments.map(a => 
+          a.id === assignmentId 
+            ? { 
+                ...a, 
+                backendId: response.data.assignment.id,
+                lessonId: selectedLesson.lesson.id  // Store lessonId in local state too
+              }
+            : a
+        );
+        
+        updateCourseData({
+          ...courseData,
+          assignments: updatedAssignments
+        });
+        
+        return response.data.assignment.id;
+      }
+    } catch (error) {
+      console.error('Error creating assignment:', error);
+      toast.error(error.response?.data?.message || 'Failed to create assignment');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="bg-white rounded-xl shadow-md p-4 mb-6 flex items-center">
@@ -560,12 +662,30 @@ const Assignments = () => {
 
                 <TextField
                   label="Duration"
+                  type="datetime-local"
                   value={assignment.assignmentDuration}
                   onChange={(e) => handleAssignmentUpdate(assignment.id, { assignmentDuration: e.target.value })}
                   variant="outlined"
                   fullWidth
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  inputProps={{
+                    min: new Date().toISOString().slice(0, 16) // This sets min date to current date
+                  }}
                   className="mb-4"
                 />
+
+                <div className="col-span-4 flex justify-end">
+                  <Button
+                    variant="contained"
+                    onClick={() => handleCreateAssignment(selectedAssignmentId)}
+                    disabled={!selectedCourse || !courseData?.assignments?.find(a => a.id === selectedAssignmentId)?.assignmentTitle}
+                    className="bg-green-600 hover:bg-green-700 mr-4"
+                  >
+                    Create Assignment
+                  </Button>
+                </div>
               </div>
 
               {!showQuestionForm ? (
@@ -645,7 +765,13 @@ const Assignments = () => {
                       <Button
                         variant="contained"
                         onClick={() => handleSaveQuestion(assignment.id)}
-                        disabled={!assignment.question || !assignment.options.some(opt => opt.option)}
+                        disabled={
+                          !assignment.question ||
+                          !assignment.options?.some(opt => opt.option.trim() !== '') ||
+                          !assignment.options?.some(opt => opt.isCorrect) ||
+                          !assignment.backendId ||
+                          !selectedCourse
+                        }
                         className="bg-blue-600 hover:bg-blue-700"
                       >
                         Save Question
