@@ -1,8 +1,14 @@
 import { FiPlus } from "react-icons/fi";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import ReactQuill from "react-quill";
 import useCourseStore from "../../../../store/courseStore";
 import "../../styles/scrollbar.css";
+import axios from 'axios';
+import './quiltestl.css'
+// Import Quill directly
+import Quill from 'quill';
+import DOMPurify from 'dompurify';
+import parse from 'html-react-parser';
 
 const Lessons = () => {
   const courseData = useCourseStore((state) => state.courseData);
@@ -64,32 +70,195 @@ const Lessons = () => {
     }
   };
 
-  const handleSaveToLocalStorage = (lessonId) => {
-    const lessonToSave = courseData.lessons.find(lesson => lesson.id === lessonId);
-    if (lessonToSave) {
-      localStorage.setItem('tempLesson', JSON.stringify(lessonToSave));
-      alert('Lesson saved to temporary storage!');
+  const handleFileUpload = async (file, fileType) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileType', fileType);
+
+      const response = await axios.post('http://localhost:8082/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      return response.data.url;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
     }
   };
 
-  const modules = {
+  const imageHandler = (quillRef) => {
+    return async () => {
+      const input = document.createElement('input');
+      input.setAttribute('type', 'file');
+      input.setAttribute('accept', 'image/*');
+      input.click();
+
+      input.onchange = async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        try {
+          const imageUrl = await handleFileUpload(file, 'image');
+          const editor = quillRef.current.getEditor();
+          const range = editor.getSelection(true);
+          
+          editor.insertText(range.index, 'Uploading image...');
+          editor.deleteText(range.index, 'Uploading image...'.length);
+          editor.insertEmbed(range.index, 'image', imageUrl);
+          editor.setSelection(range.index + 1);
+        } catch (error) {
+          console.error('Error handling image upload:', error);
+          alert('Failed to upload image');
+        }
+      };
+    };
+  };
+
+  const videoHandler = (quillRef) => {
+    return async () => {
+      const input = document.createElement('input');
+      input.setAttribute('type', 'file');
+      input.setAttribute('accept', 'video/*');
+      input.click();
+
+      input.onchange = async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        try {
+          const editor = quillRef.current.getEditor();
+          const range = editor.getSelection(true);
+
+          editor.insertText(range.index, 'Uploading video...');
+
+          const videoUrl = await handleFileUpload(file, 'video');
+
+          editor.deleteText(range.index, 'Uploading video...'.length);
+
+          editor.insertEmbed(range.index, 'video', videoUrl);
+          editor.setSelection(range.index + 1);
+        } catch (error) {
+          console.error('Error handling video upload:', error);
+          alert('Failed to upload video');
+        }
+      };
+    };
+  };
+
+  // Create a ref for ReactQuill
+  const quillRef = useRef(null);
+
+  // Custom Blot for Video
+  useEffect(() => {
+    const BlockEmbed = Quill.import('blots/block/embed');
+
+    class VideoBlot extends BlockEmbed {
+      static create(url) {
+        const node = super.create();
+        node.setAttribute('class', 'ql-video');
+        node.setAttribute('src', url);
+        node.setAttribute('controls', true);
+        node.setAttribute('controlsList', 'nodownload');
+        node.setAttribute('style', 'max-width: 100%;');
+        return node;
+      }
+
+      static value(node) {
+        return node.getAttribute('src');
+      }
+    }
+    VideoBlot.blotName = 'video';
+    VideoBlot.tagName = 'video';
+
+    Quill.register(VideoBlot);
+  }, []);
+
+  const modules = useMemo(() => ({
     toolbar: {
       container: [
         [{ 'header': [1, 2, false] }],
         ['bold', 'italic', 'underline', 'strike', 'blockquote'],
         [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-        ['link', 'image'],
+        ['link', 'image', 'video'],
         ['clean']
-      ]
+      ],
+      handlers: {
+        image: imageHandler(quillRef),
+        video: videoHandler(quillRef)
+      }
     }
-  };
+  }), []);
 
   const formats = [
     'header',
     'bold', 'italic', 'underline', 'strike', 'blockquote',
     'list', 'bullet', 'indent',
-    'link', 'image'
+    'link', 'image', 'video'
   ];
+
+  const renderContent = (content) => {
+    const sanitizedContent = DOMPurify.sanitize(content, {
+      ADD_TAGS: ['iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'img', 'span', 'video', 'source'],
+      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow', 'width', 'height', 'controlsList']
+    });
+
+    return (
+      <div className="lesson-content">
+        <style>
+          {`
+            /* ... existing styles ... */
+
+            /* Add these new styles for video */
+            .lesson-content video {
+              max-width: 100%;
+              height: auto;
+              margin: 2rem auto;
+              display: block;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+
+            .ql-video {
+              width: 100%;
+              max-width: 800px;
+              height: auto;
+              margin: 2rem auto;
+              display: block;
+            }
+
+            /* Dark mode styles for video */
+            @media (prefers-color-scheme: dark) {
+              .lesson-content video {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+              }
+            }
+          `}
+        </style>
+        <div className="ql-editor bg-white dark:bg-gray-800">
+          {parse(sanitizedContent, {
+            replace: (domNode) => {
+              // Handle video elements
+              if (domNode.name === 'video') {
+                return (
+                  <video
+                    src={domNode.attribs?.src}
+                    controls
+                    controlsList="nodownload"
+                    className="ql-video"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                );
+              }
+            }
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="flex  gap-6 h-[85vh]">
@@ -175,21 +344,13 @@ const Lessons = () => {
               />
             </div>
 
-            <div className="flex justify-end mb-4">
-              <button
-                onClick={() => handleSaveToLocalStorage(lesson.id)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Save to Temporary Storage
-              </button>
-            </div>
-
             <div className="">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Lesson Content
               </label>
               <div className="relative" style={{ height: '800px' }}>
                 <ReactQuill
+                  ref={quillRef}
                   value={lesson.lessonContent}
                   onChange={(content) => handleLessonUpdate(lesson.id, { lessonContent: content })}
                   modules={modules}
