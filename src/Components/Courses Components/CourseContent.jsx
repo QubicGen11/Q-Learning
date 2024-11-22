@@ -420,74 +420,83 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
               {/* Curriculum Items */}
               <div className="space-y-4">
-                {course?.curriculum.map((lesson, index) => (
-                  <div 
-                    key={lesson.id} 
-                    className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden"
-                  >
-                    {/* Lesson Header */}
-                    <div className="p-4 border-b dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center text-orange-500">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-900 dark:text-white">{lesson.title}</h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                              <FiClock className="w-4 h-4" />
-                              <span>{lesson.duration} minutes</span>
-                            </div>
-                          </div>
-                        </div>
-                        <button 
-                          className="px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-300"
-                          onClick={() => navigate(`/courses/${course.id}/lesson/${lesson.id}`)}
-                        >
-                          Start Lesson
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Assignment Section (if exists) */}
-                    {lesson.assignment && (
-                      <div className="p-4 bg-gray-50 dark:bg-gray-800/50">
+                {course?.curriculum
+                  .sort((a, b) => {
+                    // Extract lesson numbers and compare
+                    const aMatch = a.title.match(/Lesson (\d+):/);
+                    const bMatch = b.title.match(/Lesson (\d+):/);
+                    const aNum = aMatch ? parseInt(aMatch[1]) : 0;
+                    const bNum = bMatch ? parseInt(bMatch[1]) : 0;
+                    return aNum - bNum;
+                  })
+                  .map((lesson, index) => (
+                    <div 
+                      key={lesson.id} 
+                      className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden"
+                    >
+                      {/* Lesson Header */}
+                      <div className="p-4 border-b dark:border-gray-700">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                              <FiBook className="text-orange-500" />
-                              Assignment: {lesson.assignment.assignmentTitle}
-                            </h4>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                              <FiClock className="w-4 h-4" />
-                              <span>{lesson.assignment.duration} minutes</span>
-                              <span>•</span>
-                              <span>{lesson.assignment.assignmentQuestions?.length || 0} questions</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center text-orange-500">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gray-900 dark:text-white">{lesson.title}</h3>
+                              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                <FiClock className="w-4 h-4" />
+                                <span>{lesson.duration} minutes</span>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-1 text-xs rounded ${
-                              lesson.assignment.assignmentStatus === 'COMPLETED' 
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                            }`}>
-                              {lesson.assignment.assignmentStatus || 'PENDING'}
-                            </span>
-                            <button 
-                              className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
-                              onClick={() => {
-                                // Handle starting assignment
-                                console.log('Starting assignment:', lesson.assignment.id);
-                              }}
-                            >
-                              Start Assignment
-                            </button>
-                          </div>
+                          <button 
+                            className="px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-300"
+                            onClick={() => navigate(`/courses/${course.id}/lesson/${lesson.id}`)}
+                          >
+                            Start Lesson
+                          </button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {/* Assignment Section (if exists) */}
+                      {lesson.assignment && (
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800/50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                <FiBook className="text-orange-500" />
+                                Assignment: {lesson.assignment.assignmentTitle}
+                              </h4>
+                              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                <FiClock className="w-4 h-4" />
+                                <span>{lesson.assignment.duration} minutes</span>
+                                <span>•</span>
+                                <span>{lesson.assignment.assignmentQuestions?.length || 0} questions</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 text-xs rounded ${
+                                lesson.assignment.assignmentStatus === 'COMPLETED' 
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                              }`}>
+                                {lesson.assignment.assignmentStatus || 'PENDING'}
+                              </span>
+                              <button 
+                                className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+                                onClick={() => {
+                                  // Handle starting assignment
+                                  console.log('Starting assignment:', lesson.assignment.id);
+                                }}
+                              >
+                                Start Assignment
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
 
               {/* Add the assignments section */}

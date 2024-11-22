@@ -42,8 +42,16 @@ const Lessons = () => {
   const handleLessonUpdate = (lessonId, updates) => {
     if (!courseData.lessons) return;
     
+    const lessonIndex = courseData.lessons.findIndex(lesson => lesson.id === lessonId);
+    const lessonNumber = lessonIndex + 1;
+
+    // Format the lesson title with number if it's a title update
+    const formattedUpdates = updates.lessonTitle 
+      ? { ...updates, lessonTitle: `Lesson ${lessonNumber}: ${updates.lessonTitle.replace(/^Lesson \d+: /, '')}` }
+      : updates;
+    
     const updatedLessons = courseData.lessons.map(lesson => 
-      lesson.id === lessonId ? { ...lesson, ...updates } : lesson
+      lesson.id === lessonId ? { ...lesson, ...formattedUpdates } : lesson
     );
 
     updateCourseData({

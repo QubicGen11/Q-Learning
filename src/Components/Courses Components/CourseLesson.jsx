@@ -79,17 +79,21 @@ const CourseLesson = () => {
           },
           curriculum: courseData.courseLesson
             .sort((a, b) => {
-              return a.lesson.order - b.lesson.order;
+              // Extract lesson numbers from titles
+              const aMatch = a.lesson.lessonTitle.match(/Lesson (\d+):/);
+              const bMatch = b.lesson.lessonTitle.match(/Lesson (\d+):/);
+              const aNum = aMatch ? parseInt(aMatch[1]) : 0;
+              const bNum = bMatch ? parseInt(bMatch[1]) : 0;
+              return aNum - bNum;
             })
-            .map((lessonItem, index) => {
+            .map((lessonItem) => {
               const lessonAssignment = courseData.assignments?.find(
                 assignment => assignment.lessonId === lessonItem.lesson.id
               );
 
               return {
                 id: lessonItem.lesson.id,
-                title: lessonItem.lesson.lessonTitle,
-                lessonNumber: index + 1,
+                title: lessonItem.lesson.lessonTitle, // Keep the original title with lesson number
                 duration: lessonItem.lesson.lessonDuration,
                 content: lessonItem.lesson.lessonContent,
                 order: lessonItem.lesson.order,
@@ -348,13 +352,6 @@ const CourseLesson = () => {
       }
     });
   };
-
-  useEffect(() => {
-    return () => {
-      // Cleanup blob URLs when component unmounts
-      mediaUrls.forEach(url => URL.revokeObjectURL(url));
-    };
-  }, []);
 
   if (!course) {
     return (
@@ -651,7 +648,7 @@ const CourseLesson = () => {
                         <div className="flex items-center gap-2">
                           {/* Remove the progress circle for lessons */}
                           <div className="text-sm font-medium break-words w-full">
-                            Lesson {lesson.lessonNumber}: {lesson.title}
+                            {lesson.title}
                           </div>
                         </div>
                         {lesson.duration && (
