@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FiPlus, FiTrash2, FiClock, FiAward, FiCheck, FiX } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiClock, FiAward, FiCheck, FiX, FiInfo } from 'react-icons/fi';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -796,97 +796,108 @@ const Assignments = () => {
                 </div>
               </div>
 
-              {!showQuestionForm ? (
-                <div className="flex justify-end mb-6">
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setShowQuestionForm(true)}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    Add Question
-                  </Button>
+              {!assignment.backendId ? (
+                <div className="flex items-center text-yellow-600 bg-yellow-50 p-3 rounded-md mb-4">
+                  <FiInfo className="mr-2" />
+                  <span>Please create the assignment first before adding questions</span>
                 </div>
               ) : (
-                <Card variant="outlined" className="mb-8 border-2 border-gray-200">
-                  <CardContent className="space-y-6">
-                    <Typography variant="h6" className="font-semibold text-gray-800">
-                      New Question
-                    </Typography>
+                // Only show question form if assignment exists in backend
+                <div>
+                  {!showQuestionForm ? (
+                    <Button 
+                      onClick={() => setShowQuestionForm(true)}
+                      startIcon={<FiPlus />}
+                      variant="contained"
+                      color="primary"
+                    >
+                      Add Questions
+                    </Button>
+                  ) : (
+                    // Your existing question form
+                    <div>
+                      <Card variant="outlined" className="mb-8 border-2 border-gray-200">
+                        <CardContent className="space-y-6">
+                          <Typography variant="h6" className="font-semibold text-gray-800">
+                            New Question
+                          </Typography>
 
-                    <FormControl fullWidth className="bg-gray-50 rounded">
-                      <InputLabel>Question Type</InputLabel>
-                      <Select
-                        value={assignment.questionType || 'single'}
-                        onChange={(e) => handleQuestionTypeChange(assignment.id, e.target.value)}
-                        label="Question Type"
-                      >
-                        <MenuItem value="single">Choose the Best Answer</MenuItem>
-                        <MenuItem value="multiple">Multiple Correct Answers</MenuItem>
-                        <MenuItem value="true-false">True/False</MenuItem>
-                      </Select>
-                    </FormControl>
+                          <FormControl fullWidth className="bg-gray-50 rounded">
+                            <InputLabel>Question Type</InputLabel>
+                            <Select
+                              value={assignment.questionType || 'single'}
+                              onChange={(e) => handleQuestionTypeChange(assignment.id, e.target.value)}
+                              label="Question Type"
+                            >
+                              <MenuItem value="single">Choose the Best Answer</MenuItem>
+                              <MenuItem value="multiple">Multiple Correct Answers</MenuItem>
+                              <MenuItem value="true-false">True/False</MenuItem>
+                            </Select>
+                          </FormControl>
 
-                    <TextField
-                      fullWidth
-                      label="Question Text"
-                      value={assignment.question || ''}
-                      onChange={(e) => handleAssignmentUpdate(assignment.id, { 
-                        question: e.target.value 
-                      })}
-                      multiline
-                      rows={2}
-                    />
-
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      {assignment.options?.map((option, index) => (
-                        <div key={option.id} className="flex items-center gap-3 bg-gray-50 p-2 rounded">
                           <TextField
-                            value={option.option}
-                            onChange={(e) => handleOptionUpdate(assignment.id, index, { 
-                              option: e.target.value 
-                            })}
-                            disabled={assignment.questionType === 'true-false'}
                             fullWidth
-                            placeholder={`Option ${index + 1}`}
-                          />
-                          <IconButton
-                            onClick={() => handleOptionUpdate(assignment.id, index, { 
-                              isCorrect: !option.isCorrect 
+                            label="Question Text"
+                            value={assignment.question || ''}
+                            onChange={(e) => handleAssignmentUpdate(assignment.id, { 
+                              question: e.target.value 
                             })}
-                            color={option.isCorrect ? "success" : "default"}
-                          >
-                            {option.isCorrect ? <CheckCircleIcon /> : <CancelIcon />}
-                          </IconButton>
-                        </div>
-                      ))}
-                    </div>
+                            multiline
+                            rows={2}
+                          />
 
-                    <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                      <Button
-                        variant="outlined"
-                        onClick={handleCancelEdit}
-                        className="border-gray-300"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleSaveQuestion(assignment.id)}
-                        disabled={
-                          !assignment.question ||
-                          !assignment.options?.some(opt => opt.option.trim() !== '') ||
-                          !assignment.options?.some(opt => opt.isCorrect) ||
-                          !assignment.backendId ||
-                          !selectedCourse
-                        }
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        Save Question
-                      </Button>
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            {assignment.options?.map((option, index) => (
+                              <div key={option.id} className="flex items-center gap-3 bg-gray-50 p-2 rounded">
+                                <TextField
+                                  value={option.option}
+                                  onChange={(e) => handleOptionUpdate(assignment.id, index, { 
+                                    option: e.target.value 
+                                  })}
+                                  disabled={assignment.questionType === 'true-false'}
+                                  fullWidth
+                                  placeholder={`Option ${index + 1}`}
+                                />
+                                <IconButton
+                                  onClick={() => handleOptionUpdate(assignment.id, index, { 
+                                    isCorrect: !option.isCorrect 
+                                  })}
+                                  color={option.isCorrect ? "success" : "default"}
+                                >
+                                  {option.isCorrect ? <CheckCircleIcon /> : <CancelIcon />}
+                                </IconButton>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex justify-end gap-3 pt-4 border-t mt-6">
+                            <Button
+                              variant="outlined"
+                              onClick={handleCancelEdit}
+                              className="border-gray-300"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="contained"
+                              onClick={() => handleSaveQuestion(assignment.id)}
+                              disabled={
+                                !assignment.question ||
+                                !assignment.options?.some(opt => opt.option.trim() !== '') ||
+                                !assignment.options?.some(opt => opt.isCorrect) ||
+                                !assignment.backendId ||
+                                !selectedCourse
+                              }
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Save Question
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                </div>
               )}
 
               <div className="mt-8">

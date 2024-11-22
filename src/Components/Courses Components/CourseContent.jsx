@@ -319,17 +319,12 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
                           <div 
                             className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-200"
                           >
-                            {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))}
+                            <li>
+                              {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))}
+                            </li>
+                            {/* {parse(DOMPurify.sanitize(prereq.preRequisites.preRequisiteRequired))} */}
                           </div>
-                          
-                          {prereq.preRequisites.preRequisiteLevel && (
-                            <div className="mt-2">
-                              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 
-                                             dark:bg-blue-900 dark:text-blue-300 rounded inline-block">
-                                Level: {prereq.preRequisites.preRequisiteLevel}
-                              </span>
-                            </div>
-                          )}
+                     
                         </div>
                       )}
                     </div>
