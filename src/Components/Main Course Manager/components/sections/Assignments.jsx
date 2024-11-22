@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FiPlus, FiTrash2, FiClock, FiAward, FiCheck, FiX } from 'react-icons/fi';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -13,6 +13,7 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloseIcon from '@mui/icons-material/Close';
+import debounce from 'lodash/debounce';
 
 import useCourseStore from "../../../../store/courseStore";
 import useQuestionStore from '../../../../store/questionStore';
@@ -61,6 +62,10 @@ const Assignments = () => {
   const [openQuestionsModal, setOpenQuestionsModal] = useState(false);
   const [editedQuestion, setEditedQuestion] = useState(null);
   const [currentAssignmentId, setCurrentAssignmentId] = useState(null);
+  const [lastFetchedLessonId, setLastFetchedLessonId] = useState(null);
+  const [currentLessonId, setCurrentLessonId] = useState(null);
+  const [selectedLessonId, setSelectedLessonId] = useState(null);
+  const [debugInfo, setDebugInfo] = useState({});
 
   useEffect(() => {
     fetchCourses();
@@ -92,35 +97,45 @@ const Assignments = () => {
 
   const handleLessonChange = async (assignmentId, lessonTitle) => {
     try {
-      setIsLoading(true);
-      setSavedQuestions([]);
+      console.log('handleLessonChange called with:', { assignmentId, lessonTitle });
       
       const selectedCourseData = courses.find(c => c.id === selectedCourse);
+      console.log('selectedCourseData:', selectedCourseData);
+      
       const selectedLesson = selectedCourseData?.courseLesson.find(
         l => l.lesson.lessonTitle === lessonTitle
       );
+      console.log('selectedLesson:', selectedLesson);
 
       if (selectedLesson) {
+        const lessonId = selectedLesson.lesson.id;
+        console.log('Setting lessonId:', lessonId);
+        setSelectedLessonId(lessonId);
+        setDebugInfo(prev => ({ ...prev, currentLessonId: lessonId }));
+
         const accessToken = Cookies.get('accessToken');
+        console.log('Fetching questions for lessonId:', lessonId);
+        
         const response = await axios.get(
-          `http://localhost:8089/qlms/getLessonQuestions/${selectedLesson.lesson.id}`,
+          `http://localhost:8089/qlms/getLessonQuestions/${lessonId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`
             }
           }
         );
+        console.log('Questions response:', response.data);
         setSavedQuestions(response.data.questions || []);
-      }
 
-      handleAssignmentUpdate(assignmentId, {
-        lessonLink: lessonTitle
-      });
+        // Update assignment with correct lessonId
+        handleAssignmentUpdate(assignmentId, {
+          lessonLink: lessonTitle,
+          lessonId: lessonId
+        });
+      }
     } catch (error) {
       console.error('Error in handleLessonChange:', error);
       toast.error('Failed to fetch questions');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -244,7 +259,7 @@ const Assignments = () => {
       
       const payload = {
         "questionText": currentAssignment.question,
-        "lessonId": selectedCourse,
+        "lessonId": currentAssignment.lessonId,
         "courseId": selectedCourse,
         "assignmentId": currentAssignment.backendId,
         "isOpenSource": false,
@@ -270,24 +285,16 @@ const Assignments = () => {
       if (response.data.message === "Question created and associated with assignment successfully") {
         toast.success('Question saved successfully');
         
-        // Update the assignment's questions array with the new question
-        const updatedAssignments = courseData.assignments.map(a => {
-          if (a.id === assignmentId) {
-            return {
-              ...a,
-              questions: [...(a.questions || []), response.data.question]
-            };
+        const lessonResponse = await axios.get(
+          `http://localhost:8089/qlms/getLessonQuestions/${currentAssignment.lessonId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
           }
-          return a;
-        });
-
-        // Update course data with new question
-        updateCourseData({
-          ...courseData,
-          assignments: updatedAssignments
-        });
-
-        // Reset the question form
+        );
+        setSavedQuestions(lessonResponse.data.questions || []);
+        
         handleAssignmentUpdate(assignmentId, {
           question: '',
           options: currentAssignment.options.map(opt => ({ 
@@ -298,11 +305,6 @@ const Assignments = () => {
         });
         
         setShowQuestionForm(false);
-
-        // Refresh the questions list if needed
-        if (selectedCourse) {
-          await fetchLessonQuestions(selectedCourse);
-        }
       }
     } catch (error) {
       console.error('Error saving question:', error);
@@ -410,7 +412,8 @@ const Assignments = () => {
       );
       
       if (selectedLesson) {
-        fetchQuestions(selectedLesson.lesson.id);
+        const accessToken = Cookies.get('accessToken');
+        debouncedFetchQuestions(selectedLesson.lesson.id, accessToken);
       }
     }
   }, [selectedCourse, selectedAssignmentId, courseData]);
@@ -531,6 +534,109 @@ const Assignments = () => {
       toast.error(error.response?.data?.message || 'Failed to create assignment');
     }
   };
+
+  // Create a debounced fetch function
+  const debouncedFetchQuestions = useCallback(
+    debounce(async (lessonId, accessToken) => {
+      if (!lessonId || lastFetchedLessonId === lessonId) return;
+      
+      try {
+        setIsLoading(true);
+        const response = await axios.get(
+          `http://localhost:8089/qlms/getLessonQuestions/${lessonId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
+          }
+        );
+        setSavedQuestions(response.data.questions || []);
+        setLastFetchedLessonId(lessonId);
+      } catch (error) {
+        console.error('Error fetching questions:', error);
+        toast.error('Failed to fetch questions');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300),
+    [lastFetchedLessonId]
+  );
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      debouncedFetchQuestions.cancel();
+    };
+  }, []);
+
+  const handleCreateQuestion = async (assignmentId) => {
+    try {
+      console.log('handleCreateQuestion called with:', { 
+        assignmentId,
+        selectedLessonId,
+        debugInfo 
+      });
+
+      if (!selectedLessonId) {
+        toast.error('Please select a lesson first');
+        return;
+      }
+
+      const currentAssignment = courseData?.assignments?.find(a => a.id === assignmentId);
+      console.log('currentAssignment:', currentAssignment);
+      
+      const questionData = {
+        questionText: currentAssignment.question,
+        lessonId: selectedLessonId,
+        courseId: selectedCourse,
+        assignmentId: currentAssignment.backendId,
+        isOpenSource: false,
+        options: currentAssignment.options.map(opt => ({
+          option: opt.option,
+          isCorrect: opt.isCorrect
+        }))
+      };
+      console.log('Sending question data:', questionData);
+
+      const accessToken = Cookies.get('accessToken');
+      const createResponse = await axios.post(
+        'http://localhost:8089/qlms/newQuestion', 
+        questionData, 
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+      console.log('Create question response:', createResponse.data);
+
+      // Refresh questions
+      console.log('Refreshing questions for lessonId:', selectedLessonId);
+      const getResponse = await axios.get(
+        `http://localhost:8089/qlms/getLessonQuestions/${selectedLessonId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+      console.log('Refresh questions response:', getResponse.data);
+      setSavedQuestions(getResponse.data.questions || []);
+
+    } catch (error) {
+      console.error('Error creating question:', error);
+      toast.error('Failed to create question');
+    }
+  };
+
+  // Add an effect to monitor state changes
+  useEffect(() => {
+    console.log('State updated:', {
+      selectedLessonId,
+      savedQuestions: savedQuestions.length,
+      debugInfo
+    });
+  }, [selectedLessonId, savedQuestions, debugInfo]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

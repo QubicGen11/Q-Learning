@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar_main from '../Navbar Components/Navbar_main';
 import config from '../../config/apiConfig';
 import Cookies from 'js-cookie';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,6 +16,7 @@ const Courses_main = () => {
   const [expandedCategories, setExpandedCategories] = useState([]);
   const [viewMode, setViewMode] = useState('all');
   const [myCourses, setMyCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
   const [techLogos, setTechLogos] = useState({
@@ -90,47 +93,42 @@ const Courses_main = () => {
     }
   ];
 
-  useEffect(() => {
-    const fetchCourses = async () => {
+  useEffect(() => {   
+    const accessToken = Cookies.get('accessToken');
+    const fetchCourses = async () => {  
       try {
-        // Get access token from cookies
-        const accessToken = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('accessToken='))
-          ?.split('=')[1];
-
-        const response = await fetch(`${config.CURRENT_URL}/qlms/allCourses`, {
+        // Remove any authorization headers
+        const response = await axios.get('http://localhost:8089/qlms/allCourses', {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+           
+            // No Authorization header needed
           }
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch courses');
-        }
+        const coursesData = response.data;
+        console.log('Raw courses data:', coursesData);
 
-        const data = await response.json();
-        
-        // Process the courses data
-        const processedCourses = data.map(course => ({
-          id: course.id,
-          title: course.courseTitle,
-          type: course.courseType,
-          duration: course.duration,
-          courseImage: course.courseBanner,
-          createdAt: new Date(), // You might want to add this field in your API
-          techStackData: course.technologiesUsed.split(',').map(tech => ({
-            name: tech.trim(),
-            url: techLogos[tech.toLowerCase().trim()] || techLogos.html
-          })),
-          // Add other fields as needed
+        // Process the data with null checks
+        const processedCourses = coursesData.map(course => ({
+          ...course,
+          categories: course.category ? course.category.split(',').map(cat => cat.trim()) : [],
+          // Add other default values as needed
         }));
 
         setCourses(processedCourses);
+        
+        // Process categories
+        const allCategories = processedCourses
+          .flatMap(course => course.categories)
+          .filter((cat, index, self) => cat && self.indexOf(cat) === index);
+
+        setCategories(allCategories);
+
       } catch (error) {
         console.error('Error fetching courses:', error);
-        setCourses([]);
+        // Show user-friendly error message
+        toast.error('Failed to load courses. Please try again.');
       }
     };
 
@@ -182,8 +180,8 @@ const Courses_main = () => {
       );
     }
     let filtered = courses.filter(course => 
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.type.toLowerCase().includes(searchQuery.toLowerCase())
+      ((course.title || '').toLowerCase()).includes(searchQuery.toLowerCase()) ||
+      ((course.type || '').toLowerCase()).includes(searchQuery.toLowerCase())
     );
 
     switch(viewMode) {
@@ -662,7 +660,7 @@ const Courses_main = () => {
                       {/* Course Banner/Image */}
                       <div className="relative flex items-center justify-center h-40 mb-4">
                         <img 
-                          src={course.courseBanner || course.thumbnail || "https://via.placeholder.com/400x300"}
+                          src={course.courseBanner ||  "https://via.placeholder.com/400x300"}
                           alt={course.courseTitle} 
                           className="max-h-full w-auto object-contain"
                           onError={(e) => {
@@ -751,7 +749,7 @@ const Courses_main = () => {
                                     opacity-0 dark:opacity-0 dark:group-hover:opacity-75 
                                     transition-all duration-300 -z-10"></div>
                       <img 
-                        src={course.courseImage}
+                        src={course.courseBanner}
                         alt={course.courseTitle} 
                         className="max-h-full w-auto object-contain relative z-10
                                  dark:opacity-90 group-hover:opacity-100
