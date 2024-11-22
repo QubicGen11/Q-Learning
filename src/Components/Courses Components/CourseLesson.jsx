@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiClock, FiArrowLeft, FiCheck, FiArrowRight, FiBookmark, FiAlertTriangle } from 'react-icons/fi';
+import { FiClock, FiArrowLeft, FiCheck, FiArrowRight } from 'react-icons/fi';
 import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import parse from 'html-react-parser';
@@ -10,6 +10,14 @@ import Cookies from 'js-cookie';
 import config from '../../config/apiConfig';
 import './Course.css';
 import Loader from '../Common/Loader';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
+
+const SECTIONS = {
+  ABOUT: 'about',
+  LESSON: 'lesson',
+  ASSIGNMENT: 'assignment'
+};
 
 const CourseLesson = () => {
   const { id, lessonId } = useParams();
@@ -17,20 +25,15 @@ const CourseLesson = () => {
   const [currentLesson, setCurrentLesson] = useState(null);
   const [progress, setProgress] = useState(0);
   const [courseImage, setCourseImage] = useState(null);
-  const [currentSection, setCurrentSection] = useState('about');
+  const [currentSection, setCurrentSection] = useState(SECTIONS.LESSON);
   const [readingProgress, setReadingProgress] = useState(0);
   const scrollRef = useRef(null);
-  const [timeRemaining, setTimeRemaining] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [comments, setComments] = useState('');
-  const [reviewLater, setReviewLater] = useState(false);
-  const [isAssessmentActive, setIsAssessmentActive] = useState(false);
-  const [assessmentData, setAssessmentData] = useState(null);
-  const [assignments, setAssignments] = useState([]);
   const [currentAssignment, setCurrentAssignment] = useState(null);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [pendingAssignment, setPendingAssignment] = useState(null);
+  const [assignmentQuestions, setAssignmentQuestions] = useState([]);
+  const [completedLessons, setCompletedLessons] = useState([]);
+  const [isLessonComplete, setIsLessonComplete] = useState(false);
+  const [hasViewedContent, setHasViewedContent] = useState(false);
+  const [activeAssignmentId, setActiveAssignmentId] = useState(null);
 
   const currentIndex = course?.curriculum?.findIndex(
     lesson => lesson.id === lessonId
@@ -53,12 +56,14 @@ const CourseLesson = () => {
         const accessToken = Cookies.get('accessToken');
         const response = await axios.get(`${config.CURRENT_URL}/qlms/getCourseById/${id}`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
           }
         });
 
         const courseData = response.data;
-        
+        console.log('Raw course data:', courseData);
+
         // Transform the API data to match your existing structure
         const transformedCourse = {
           id: courseData.id,
@@ -70,15 +75,34 @@ const CourseLesson = () => {
             whatYoullLearn: courseData.learningObjective,
             endObjectives: courseData.endObjective,
           },
-          curriculum: courseData.courseLesson.map(lessonItem => ({
-            id: lessonItem.lesson.id,
-            title: lessonItem.lesson.lessonTitle,
-            duration: lessonItem.lesson.lessonDuration,
-            content: lessonItem.lesson.lessonContent,
-            isCompleted: false
-          }))
+          curriculum: courseData.courseLesson
+            .sort((a, b) => {
+              return a.lesson.order - b.lesson.order;
+            })
+            .map(lessonItem => {
+              const lessonAssignment = courseData.assignments?.find(
+                assignment => assignment.lessonId === lessonItem.lesson.id
+              );
+
+              return {
+                id: lessonItem.lesson.id,
+                title: lessonItem.lesson.lessonTitle,
+                duration: lessonItem.lesson.lessonDuration,
+                content: lessonItem.lesson.lessonContent,
+                order: lessonItem.lesson.order,
+                isCompleted: false,
+                assignments: lessonAssignment ? [{
+                  id: lessonAssignment.id,
+                  assignmentTitle: lessonAssignment.assignmentTitle,
+                  duration: lessonAssignment.duration,
+                  assignmentStatus: lessonAssignment.assignmentStatus || 'pending',
+                  assignmentQuestions: lessonAssignment.assignmentQuestions || []
+                }] : []
+              };
+            })
         };
 
+        console.log('Transformed course:', transformedCourse);
         setCourse(transformedCourse);
         const lesson = transformedCourse.curriculum?.find(l => l.id === lessonId);
         setCurrentLesson(lesson);
@@ -109,6 +133,7 @@ const CourseLesson = () => {
         setReadingProgress(0);
       } else if (windowScrollTop + element.clientHeight >= element.scrollHeight - 10) {
         setReadingProgress(100);
+        setIsLessonComplete(true);
       } else {
         const progress = (windowScrollTop / totalHeight) * 100;
         setReadingProgress(Math.round(progress));
@@ -128,12 +153,16 @@ const CourseLesson = () => {
   }, [currentLesson, currentSection]);
 
   useEffect(() => {
-    // Get assignments from localStorage
-    const storedAssignments = localStorage.getItem('courseAssignments');
-    if (storedAssignments) {
-      setAssignments(JSON.parse(storedAssignments));
+    if (currentSection === SECTIONS.LESSON && currentLesson) {
+      // Mark as viewed after 3 seconds (adjust timing as needed)
+      const timer = setTimeout(() => {
+        setHasViewedContent(true);
+        setIsLessonComplete(true);
+      }, 3000);
+
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [currentLesson, currentSection]);
 
   const handleSectionClick = (section) => {
     setCurrentSection(section);
@@ -145,47 +174,123 @@ const CourseLesson = () => {
     }
   };
 
-  const handleAssessmentClick = (assignment) => {
-    setPendingAssignment(assignment);
-    setShowConfirmation(true);
-  };
-
-  const handleConfirmStart = () => {
-    if (!pendingAssignment) return;
-    
-    setCurrentAssignment(pendingAssignment);
-    setCurrentQuestion(pendingAssignment.questions[0]);
-    setIsAssessmentActive(true);
-    
-    const duration = parseInt(pendingAssignment.assignmentDuration) || 90;
-    setTimeRemaining(`${String(duration).padStart(2, '0')}:00:00`);
-    startTimer(duration);
-    
-    setShowConfirmation(false);
-    setPendingAssignment(null);
-  };
-
-  const startTimer = (duration) => {
-    const endTime = Date.now() + duration * 60 * 1000; // Convert minutes to milliseconds
-
-    const timerInterval = setInterval(() => {
-      const remaining = endTime - Date.now();
-      if (remaining <= 0) {
-        clearInterval(timerInterval);
-        // Handle time up
-        return;
-      }
-
-      const minutes = Math.floor(remaining / 60000);
-      const seconds = Math.floor((remaining % 60000) / 1000);
-      const hours = Math.floor(minutes / 60);
+  const handleStartAssignment = (lessonId) => {
+    try {
+      console.log('Starting assignment for lesson:', lessonId);
+      const currentLesson = course?.curriculum?.find(l => l.id === lessonId);
       
-      setTimeRemaining(
-        `${hours.toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-      );
-    }, 1000);
+      if (currentLesson?.assignments && currentLesson.assignments.length > 0) {
+        const assignment = currentLesson.assignments[0];
+        console.log('Found assignment:', assignment);
+        
+        setCurrentAssignment(assignment);
+        setActiveAssignmentId(assignment.id);
+        setAssignmentQuestions(assignment.assignmentQuestions.filter(q => q.questions !== null));
+        setCurrentSection(SECTIONS.ASSIGNMENT);
+        
+        // Scroll the sidebar to show the active assignment
+        const assignmentElement = document.getElementById(`assignment-${assignment.id}`);
+        if (assignmentElement) {
+          assignmentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        toast.error('No assignment found for this lesson');
+      }
+    } catch (error) {
+      console.error('Error handling assignment:', error);
+      toast.error('Failed to load assignment');
+    }
+  };
 
-    return () => clearInterval(timerInterval);
+  useEffect(() => {
+    console.log('State changed:', {
+      currentSection,
+      currentAssignment,
+      assignmentQuestions: assignmentQuestions?.length
+    });
+  }, [currentSection, currentAssignment, assignmentQuestions]);
+
+  useEffect(() => {
+    if (currentSection === SECTIONS.ASSIGNMENT) {
+      console.log('Assignment View Active:', {
+        currentSection,
+        assignmentTitle: currentAssignment?.assignmentTitle,
+        questions: assignmentQuestions
+      });
+    }
+  }, [currentSection, currentAssignment, assignmentQuestions]);
+
+  const canAccessLesson = (lessonIndex) => {
+    if (lessonIndex === 0) return true; // First lesson is always accessible
+    
+    // Get all previous lessons
+    const previousLessons = course?.curriculum.slice(0, lessonIndex);
+    // Check if all previous lessons are completed
+    return previousLessons.every(lesson => completedLessons.includes(lesson.id));
+  };
+
+  const handleLessonComplete = () => {
+    try {
+      // Update local state
+      setCompletedLessons(prev => [...prev, currentLesson.id]);
+      
+      // Update course state to reflect completion
+      setCourse(prevCourse => ({
+        ...prevCourse,
+        curriculum: prevCourse.curriculum.map(lesson => ({
+          ...lesson,
+          isCompleted: lesson.id === currentLesson.id ? true : lesson.isCompleted
+        }))
+      }));
+
+      // Save to localStorage to persist the data
+      const savedCompletedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+      localStorage.setItem('completedLessons', JSON.stringify([...savedCompletedLessons, currentLesson.id]));
+
+      toast.success('Lesson completed!');
+
+      // If there's an assignment, prompt to start it
+      if (currentLesson?.assignments?.length > 0) {
+        Swal.fire({
+          title: 'Lesson Completed!',
+          text: 'Would you like to start the assignment?',
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'Start Assignment',
+          cancelButtonText: 'Stay here'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            handleStartAssignment(currentLesson.id);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error marking lesson as complete:', error);
+      toast.error('Failed to mark lesson as complete');
+    }
+  };
+
+  useEffect(() => {
+    const savedCompletedLessons = localStorage.getItem('completedLessons');
+    if (savedCompletedLessons) {
+      setCompletedLessons(JSON.parse(savedCompletedLessons));
+    }
+  }, []);
+
+  const handleAssignmentSubmit = async () => {
+    try {
+      // Your submission logic here
+      
+      // After successful submission, mark the lesson as completed
+      if (currentLesson?.id) {
+        handleLessonComplete();
+        toast.success('Assignment completed successfully!');
+        setCurrentSection(SECTIONS.LESSON);
+      }
+    } catch (error) {
+      console.error('Error submitting assignment:', error);
+      toast.error('Failed to submit assignment');
+    }
   };
 
   if (!course) {
@@ -352,300 +457,139 @@ const CourseLesson = () => {
     );
   };
 
-  const renderAssessment = () => {
-    if (!currentAssignment || !currentQuestion) return null;
+  const renderAboutContent = () => {
+    if (!course?.aboutCourse) return null;
 
     return (
-      <div className="fixed inset-0 bg-gray-50 dark:bg-gray-900 z-50 overflow-y-auto">
-        <div className="max-w-4xl mx-auto py-8 px-4">
-          {/* Assessment Header */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
-            <div className="border-b p-4 flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => setIsAssessmentActive(false)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  <FiArrowLeft className="w-6 h-6" />
-                </button>
-                <h2 className="text-xl font-semibold">{currentAssignment.assignmentTitle}</h2>
-              </div>
-              <div className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                <FiClock className="w-5 h-5" />
-                Time Remaining: {timeRemaining}
-              </div>
+      <div className="space-y-8">
+        {/* Welcome Message */}
+        {course.aboutCourse.welcome && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Welcome Message
+            </h3>
+            <div className="prose prose-lg dark:prose-invert">
+              {parse(course.aboutCourse.welcome)}
             </div>
           </div>
+        )}
 
-          {/* Question Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <div className="p-6">
-              {/* Question Header */}
-              <div className="flex justify-between items-start mb-8">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl font-bold text-orange-500">
-                    {currentAssignment.questions.indexOf(currentQuestion) + 1}
-                  </span>
-                  <h2 className="text-xl font-medium">{currentQuestion.question}</h2>
-                </div>
-                <button 
-                  onClick={() => setReviewLater(!reviewLater)}
-                  className="flex items-center gap-2 text-orange-500 hover:text-orange-600"
-                >
-                  <FiBookmark className={`w-5 h-5 ${reviewLater ? 'fill-current' : ''}`} />
-                  <span>Review Later</span>
-                </button>
-              </div>
-
-              {/* Options */}
-              <div className="space-y-4 mb-8">
-                {currentQuestion.options.map((option) => (
-                  <label 
-                    key={option.id}
-                    className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all
-                      ${selectedAnswer === option.id 
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' 
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                  >
-                    <input
-                      type="radio"
-                      name="answer"
-                      value={option.id}
-                      checked={selectedAnswer === option.id}
-                      onChange={() => setSelectedAnswer(option.id)}
-                      className="w-4 h-4 text-orange-500 focus:ring-orange-500"
-                    />
-                    <span className="text-lg">{option.option}</span>
-                  </label>
-                ))}
-              </div>
-
-              {/* Comments Section */}
-              <div className="mb-6">
-                <h3 className="text-gray-600 dark:text-gray-300 mb-2 font-medium">Comments</h3>
-                <textarea
-                  value={comments}
-                  onChange={(e) => setComments(e.target.value)}
-                  placeholder="Add your notes here..."
-                  className="w-full p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-orange-500"
-                  rows="4"
-                />
-              </div>
+        {/* What you'll learn */}
+        {course.aboutCourse.whatYoullLearn && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              What you'll learn
+            </h3>
+            <div className="prose prose-lg dark:prose-invert">
+              {parse(course.aboutCourse.whatYoullLearn)}
             </div>
+          </div>
+        )}
 
-            {/* Footer Navigation */}
-            <div className="border-t p-4 flex justify-between items-center">
-              <div className="text-gray-600 dark:text-gray-300">
-                Question {currentAssignment.questions.indexOf(currentQuestion) + 1} of {currentAssignment.questions.length}
-              </div>
-              <div className="flex gap-4">
-                <button 
-                  onClick={handlePrevQuestion}
-                  disabled={currentAssignment.questions.indexOf(currentQuestion) === 0}
-                  className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg disabled:opacity-50 
-                    hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+        {/* Prerequisites */}
+        {course.aboutCourse.prerequisites?.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Prerequisites
+            </h3>
+            <ul className="space-y-2">
+              {course.aboutCourse.prerequisites.map((prerequisite, index) => (
+                <li 
+                  key={index} 
+                  className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
                 >
-                  Previous
-                </button>
-                <button 
-                  onClick={handleNextQuestion}
-                  className="px-6 py-2.5 bg-orange-500 text-white rounded-lg 
-                    hover:bg-orange-600 transition-colors"
-                >
-                  {currentAssignment.questions.indexOf(currentQuestion) === currentAssignment.questions.length - 1 
-                    ? 'Submit'
-                    : 'Next'}
-                </button>
-              </div>
+                  <span className="text-blue-500 mt-1">•</span>
+                  <span>{prerequisite}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* End Objectives */}
+        {course.aboutCourse.endObjectives && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Course Objectives
+            </h3>
+            <div className="prose prose-lg dark:prose-invert">
+              {parse(course.aboutCourse.endObjectives)}
             </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const LessonFooter = () => {
+    const hasAssignment = currentLesson?.assignments?.length > 0;
+
+    return (
+      <div className="mt-8 border-t pt-6 dark:border-gray-700">
+        <div className="flex justify-between items-center">
+          <div className="flex gap-4">
+            {previousLessonId && (
+              <Link
+                to={`/courses/${id}/lesson/${previousLessonId}`}
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-300 
+                         hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                <FiArrowLeft className="w-4 h-4" />
+                Previous Lesson
+              </Link>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4">
+            {!completedLessons.includes(currentLesson?.id) && (
+              <button
+                onClick={handleLessonComplete}
+                disabled={!hasViewedContent}
+                className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2
+                  ${hasViewedContent 
+                    ? 'bg-green-500 hover:bg-green-600 text-white' 
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+              >
+                {hasViewedContent ? (
+                  <>
+                    <FiCheck className="w-4 h-4" />
+                    Complete Lesson
+                  </>
+                ) : (
+                  <>
+                    <FiClock className="w-4 h-4" />
+                    Viewing Lesson...
+                  </>
+                )}
+              </button>
+            )}
+
+            {hasAssignment && completedLessons.includes(currentLesson?.id) && (
+              <button
+                onClick={() => handleStartAssignment(currentLesson.id)}
+                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white 
+                         rounded-lg transition-colors flex items-center gap-2"
+              >
+                Start Assignment
+                <FiArrowRight className="w-4 h-4" />
+              </button>
+            )}
+
+            {!hasAssignment && nextLessonId && (
+              <Link
+                to={`/courses/${id}/lesson/${nextLessonId}`}
+                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white 
+                         rounded-lg transition-colors flex items-center gap-2"
+              >
+                Next Lesson
+                <FiArrowRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
     );
   };
-
-  // Update navigation handlers
-  const handleNextQuestion = () => {
-    if (!currentAssignment || !currentQuestion) return;
-    
-    const currentIndex = currentAssignment.questions.indexOf(currentQuestion);
-    if (currentIndex < currentAssignment.questions.length - 1) {
-      setCurrentQuestion(currentAssignment.questions[currentIndex + 1]);
-    }
-  };
-
-  const handlePrevQuestion = () => {
-    if (!currentAssignment || !currentQuestion) return;
-    
-    const currentIndex = currentAssignment.questions.indexOf(currentQuestion);
-    if (currentIndex > 0) {
-      setCurrentQuestion(currentAssignment.questions[currentIndex - 1]);
-    }
-  };
-
-  // Modify the sidebar to include assignments
-  const renderSidebar = () => (
-    <div className="px-4 py-4">
-      {/* Introduction Section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
-          <span>INTRODUCTION</span>
-        </div>
-        
-        {/* About this course button */}
-        <button 
-          onClick={() => handleSectionClick('about')}
-          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors
-            ${currentSection === 'about' 
-              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-        >
-          <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-            <span className="text-sm text-gray-600 dark:text-gray-400">1</span>
-          </div>
-          <span className="text-sm font-medium text-left">About this course</span>
-        </button>
-      </div>
-
-      {/* Course Content Section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
-          <span>COURSE CONTENT</span>
-        </div>
-        
-        {/* Changed from reverse to normal order */}
-        {course?.curriculum?.map((lesson, index) => (
-          <div key={lesson.id} className="relative flex items-center">
-            {/* Progress Circle */}
-            <div className="absolute -left-2 flex items-center justify-center">
-              <div className="relative w-8 h-8">
-                {/* Background Circle */}
-                <svg className="w-full h-full" viewBox="0 0 36 36">
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="16"
-                    fill="none"
-                    className="stroke-current text-gray-200 dark:text-gray-700"
-                    strokeWidth="2"
-                  />
-                  {/* Progress Circle */}
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="16"
-                    fill="none"
-                    className="stroke-current text-blue-500"
-                    strokeWidth="2"
-                    strokeDasharray={100}
-                    strokeDashoffset={currentLesson?.id === lesson.id && currentSection !== 'about' 
-                      ? 100 - readingProgress 
-                      : 100}
-                    transform="rotate(-90 18 18)"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                {/* Center Number/Check */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {lesson.isCompleted ? (
-                    <FiCheck className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <span className="text-sm text-gray-600">{index + 1}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Lesson Button */}
-            <button
-              onClick={() => handleSectionClick(lesson.id)}
-              className={`w-full ml-8 flex items-center gap-3 p-3 rounded-lg transition-colors
-                ${currentLesson?.id === lesson.id
-                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-            >
-              <div className="flex flex-col items-start text-left">
-                <div className="text-sm font-medium break-words w-full">{lesson.title}</div>
-                {lesson.duration && (
-                  <div className="text-xs text-gray-500 flex items-center gap-1">
-                    <FiClock className="w-3 h-3" />
-                    <span>{lesson.duration}</span>
-                  </div>
-                )}
-              </div>
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* Assignments Section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
-          <span>ASSIGNMENTS</span>
-        </div>
-        
-        {assignments.map((assignment, index) => (
-          <button 
-            key={assignment.id}
-            onClick={() => handleAssessmentClick(assignment)}
-            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mb-2
-              ${currentAssignment?.id === assignment.id 
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-          >
-            <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">{index + 1}</span>
-            </div>
-            <div className="flex flex-col items-start text-left">
-              <span className="text-sm font-medium">{assignment.assignmentTitle}</span>
-              {assignment.assignmentDuration && (
-                <div className="text-xs text-gray-500 flex items-center gap-1">
-                  <FiClock className="w-3 h-3" />
-                  <span>{assignment.assignmentDuration} minutes</span>
-                </div>
-              )}
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const ConfirmationPopup = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex items-center gap-3 mb-4">
-          <FiAlertTriangle className="w-6 h-6 text-orange-500" />
-          <h3 className="text-xl font-semibold">Start Assessment?</h3>
-        </div>
-        
-        <p className="text-gray-600 dark:text-gray-300 mb-6">
-          Once you start the assessment, you cannot pause or return to the course content. 
-          Make sure you're ready to begin.
-        </p>
-        
-        <div className="flex gap-3 justify-end">
-          <button
-            onClick={() => {
-              setShowConfirmation(false);
-              setPendingAssignment(null);
-            }}
-            className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 
-              hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleConfirmStart}
-            className="px-4 py-2 rounded-lg bg-orange-500 text-white
-              hover:bg-orange-600 transition-colors"
-          >
-            Start Assessment
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -674,97 +618,339 @@ const CourseLesson = () => {
       {/* Main Content Area with Fixed Sidebar */}
       <div className="flex pt-14">
         {/* Fixed Left Sidebar */}
-        <div className={`w-72 bg-gray-100 dark:bg-gray-800 fixed h-[calc(100vh-56px)] overflow-y-auto
-          ${isAssessmentActive ? 'hidden' : ''}`}>
-          {renderSidebar()}
+        <div className="w-72 bg-gray-100 dark:bg-gray-800 fixed h-[calc(100vh-56px)] overflow-y-auto">
+          {/* Course Banner */}
+          <div className="relative h-48">
+            {courseImage && (
+              <>
+                {/* Main background image with overlay */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-black/60 z-10" />
+                  <img 
+                    src={courseImage} 
+                    alt={course?.title}
+                    className="w-full h-full object-cover"
+                    style={{
+                      opacity: `${course?.bannerSettings?.opacity || 70}%`,
+                      objectPosition: `center ${course?.bannerSettings?.yPosition || 50}%`
+                    }}
+                  />
+                </div>
+
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent z-20" />
+              </>
+            )}
+
+            {/* Course Title and Progress */}
+            <div className="relative z-30 p-6">
+              <h1 className="text-xl font-bold text-white mb-2">{course?.title}</h1>
+              <div className="text-sm text-gray-300 mb-4">
+                {progress}% COMPLETE
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 h-1 rounded-full">
+                <div 
+                  className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Course Navigation */}
+          <div className="px-4 py-4">
+            {/* Introduction Section */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <span>INTRODUCTION</span>
+              </div>
+              
+              {/* About this course button */}
+              <button 
+                onClick={() => handleSectionClick('about')}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors
+                  ${currentSection === 'about' 
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+              >
+                <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">1</span>
+                </div>
+                <span className="text-sm font-medium text-left">About this course</span>
+              </button>
+            </div>
+
+            {/* Course Content Section */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <span>COURSE CONTENT</span>
+              </div>
+              
+              {course?.curriculum?.map((lesson, index) => (
+                <div key={lesson.id}>
+                  {/* Existing lesson content */}
+                  <div className="relative flex items-center">
+                    {/* Progress Circle */}
+                    <div className="absolute -left-2 flex items-center justify-center">
+                      <div className="relative w-8 h-8">
+                        {/* Background Circle */}
+                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                          <circle
+                            cx="18"
+                            cy="18"
+                            r="16"
+                            fill="none"
+                            className="stroke-current text-gray-200 dark:text-gray-700"
+                            strokeWidth="2"
+                          />
+                          {/* Progress Circle */}
+                          <circle
+                            cx="18"
+                            cy="18"
+                            r="16"
+                            fill="none"
+                            className="stroke-current text-blue-500"
+                            strokeWidth="2"
+                            strokeDasharray={100}
+                            strokeDashoffset={currentLesson?.id === lesson.id && currentSection !== 'about' 
+                              ? 100 - readingProgress 
+                              : 100}
+                            transform="rotate(-90 18 18)"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        {/* Center Number/Check */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          {lesson.isCompleted ? (
+                            <FiCheck className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <span className="text-sm text-gray-600">{index + 1}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Lesson Button */}
+                    <button
+                      onClick={() => handleSectionClick(lesson.id)}
+                      className={`w-full ml-8 flex items-center gap-3 p-3 rounded-lg transition-colors
+                        ${currentLesson?.id === lesson.id
+                          ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                    >
+                      <div className="flex flex-col items-start text-left">
+                        <div className="flex items-center gap-2">
+                          {/* Remove the progress circle for lessons */}
+                          <div className="text-sm font-medium break-words w-full">
+                            {lesson.title}
+                          </div>
+                        </div>
+                        {lesson.duration && (
+                          <div className="text-xs text-gray-500 flex items-center gap-1">
+                            <FiClock className="w-3 h-3" />
+                            <span>{lesson.duration}</span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Assignment Section */}
+                  {lesson.assignments && lesson.assignments.length > 0 && (
+                    <div className="ml-12 space-y-2 mt-2">
+                      {lesson.assignments.map((assignment) => {
+                        const isActive = activeAssignmentId === assignment.id;
+                        
+                        return (
+                          <div 
+                            key={assignment.id}
+                            id={`assignment-${assignment.id}`}
+                            className={`p-3 rounded-lg border transition-all duration-200 ${
+                              isActive 
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 shadow-sm' 
+                                : 'bg-gray-50 dark:bg-gray-750 border-gray-200 dark:border-gray-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              {/* Add progress circle for assignment */}
+                              <div className="flex items-center gap-2">
+                                <div className="relative w-5 h-5">
+                                  <svg className="w-5 h-5" viewBox="0 0 36 36">
+                                    <circle
+                                      cx="18"
+                                      cy="18"
+                                      r="16"
+                                      fill="none"
+                                      className="stroke-current text-gray-200 dark:text-gray-700"
+                                      strokeWidth="2"
+                                    />
+                                    <circle
+                                      cx="18"
+                                      cy="18"
+                                      r="16"
+                                      fill="none"
+                                      className="stroke-current text-blue-500"
+                                      strokeWidth="2"
+                                      strokeDasharray={100}
+                                      strokeDashoffset={isActive ? 0 : 100}
+                                      transform="rotate(-90 18 18)"
+                                      strokeLinecap="round"
+                                    />
+                                  </svg>
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    {isActive ? (
+                                      <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                                    ) : (
+                                      <span className="text-xs text-gray-500">A</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div>
+                                  <h4 className={`text-sm font-medium ${
+                                    isActive 
+                                      ? 'text-blue-600 dark:text-blue-400'
+                                      : 'text-gray-900 dark:text-gray-100'
+                                  }`}>
+                                    {assignment.assignmentTitle || 'Assignment'}
+                                  </h4>
+                                  <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                    <FiClock className="w-3 h-3" />
+                                    <span>{assignment.duration} minutes</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Main Content - Adjusted margin and max-width */}
         <div 
           ref={scrollRef}
-          className={`${isAssessmentActive ? '' : 'ml-72'} flex-1 overflow-y-auto`}
+          className="ml-72 flex-1 overflow-y-auto"
           style={{ height: 'calc(100vh - 56px)' }}
         >
-          {isAssessmentActive ? (
-            renderAssessment()
-          ) : (
-            // Regular Content View
-            <div className="p-8">
-              <div className="max-w-4xl mx-auto">
-                {currentSection === 'about' ? (
-                  // About Course Content
-                  <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                    <h2 className="text-2xl font-bold mb-4">About This Course</h2>
-                    
-                    {/* Welcome Message */}
-                    {course.aboutCourse?.welcome && (
-                      <div className="prose dark:prose-invert mb-6">
-                        {parse(DOMPurify.sanitize(course.aboutCourse.welcome))}
-                      </div>
-                    )}
-                    
-                    {/* Prerequisites */}
-                    {course.aboutCourse?.prerequisites?.length > 0 && (
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-3">Prerequisites</h3>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {course.aboutCourse.prerequisites.map((prereq, index) => (
-                            <li 
-                              key={index}
-                              className="text-gray-700 dark:text-gray-300"
-                            >
-                              {parse(DOMPurify.sanitize(prereq))}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {/* Requirements */}
-                    {course.aboutCourse?.requirements?.length > 0 && (
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-2">Course Requirements</h3>
-                        <ul className="list-disc list-inside space-y-1">
-                          {course.aboutCourse.requirements.map((req, index) => (
-                            <li key={index}>{req}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {/* What You'll Learn */}
-                    {course.aboutCourse?.whatYoullLearn && (
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-2">What You'll Learn</h3>
-                        <div className="prose dark:prose-invert">
-                          {parse(DOMPurify.sanitize(course.aboutCourse.whatYoullLearn))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* End Objectives */}
-                    {course.aboutCourse?.endObjectives && (
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-2">At the End of This Course, You Should Be Able To:</h3>
-                        <div className="prose dark:prose-invert">
-                          {parse(DOMPurify.sanitize(course.aboutCourse.endObjectives))}
-                        </div>
-                      </div>
-                    )}
+          {/* Header Section with Gradient */}
+          <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-8 border-b dark:border-gray-700">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {currentSection === 'about' ? 'About This Course' : currentLesson?.title}
+              </h1>
+              {currentSection !== 'about' && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <FiClock className="w-4 h-4" />
+                  <span>Duration: {currentLesson?.duration}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="p-8">
+            <div className="max-w-4xl mx-auto">
+              <button
+                onClick={() => {
+                  console.log('Current state:', {
+                    currentSection,
+                    hasAssignment: !!currentAssignment,
+                    questionCount: assignmentQuestions?.length
+                  });
+                  setCurrentSection(SECTIONS.ASSIGNMENT);
+                }}
+                className="fixed top-0 right-0 bg-red-500 text-white p-2"
+              >
+                Debug Switch
+              </button>
+              {currentSection === SECTIONS.ASSIGNMENT ? (
+                // Assignment Content
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {currentAssignment?.assignmentTitle || 'Assignment'}
+                    </h2>
+                    <button
+                      onClick={() => {
+                        setCurrentSection(SECTIONS.LESSON);
+                        setCurrentAssignment(null);
+                        setAssignmentQuestions([]);
+                      }}
+                      className="text-gray-600 hover:text-gray-900 dark:text-gray-400 
+                               dark:hover:text-white flex items-center gap-2"
+                    >
+                      <FiArrowLeft /> Back to Lesson
+                    </button>
                   </div>
-                ) : (
-                  // Lesson Content
+
+                  {assignmentQuestions.map((item, index) => (
+                    item.questions && (
+                      <div 
+                        key={item.id}
+                        className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
+                      >
+                        <div className="mb-4">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            Question {index + 1}
+                          </span>
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-white mt-1">
+                            {item.questions.question}
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3">
+                          {item.questions?.options?.map((option) => (
+                            <label
+                              key={option.id}
+                              className="flex items-center p-3 rounded-lg border border-gray-200 
+                                       dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 
+                                       cursor-pointer transition-colors duration-150"
+                            >
+                              <input
+                                type="radio"
+                                name={`question-${item.questions.id}`}
+                                value={option.id}
+                                className="w-4 h-4 text-blue-600"
+                              />
+                              <span className="ml-3">{option.option}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  ))}
+
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      onClick={handleAssignmentSubmit}
+                      className="px-6 py-2 bg-blue-500 text-white rounded-lg 
+                               hover:bg-blue-600 transition-colors"
+                    >
+                      Submit Assignment
+                    </button>
+                  </div>
+                </div>
+              ) : currentSection === SECTIONS.ABOUT ? (
+                // About Content
+                renderAboutContent()
+              ) : (
+                // Lesson Content
+                <div className="space-y-6">
                   <div className="prose prose-lg dark:prose-invert max-w-none">
                     {renderContent(currentLesson?.content)}
                   </div>
-                )}
-              </div>
+                  <LessonFooter />
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
-
-      {showConfirmation && <ConfirmationPopup />}
     </div>
   );
 };
