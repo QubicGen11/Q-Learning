@@ -783,7 +783,7 @@ const Courses_main = () => {
                     
                     <h3 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                                  mb-4 sm:mb-6 text-sm sm:text-base font-normal line-clamp-2">
-                      {course.title}
+                      {course.courseTitle || course.title}
                     </h3>
                     
                     <div className="flex items-center justify-between">

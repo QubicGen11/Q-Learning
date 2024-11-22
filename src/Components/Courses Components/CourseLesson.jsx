@@ -34,6 +34,8 @@ const CourseLesson = () => {
   const [isLessonComplete, setIsLessonComplete] = useState(false);
   const [hasViewedContent, setHasViewedContent] = useState(false);
   const [activeAssignmentId, setActiveAssignmentId] = useState(null);
+  const mediaCache = useRef(new Map());
+  const [mediaUrls, setMediaUrls] = useState(new Map());
 
   const currentIndex = course?.curriculum?.findIndex(
     lesson => lesson.id === lessonId
@@ -79,7 +81,7 @@ const CourseLesson = () => {
             .sort((a, b) => {
               return a.lesson.order - b.lesson.order;
             })
-            .map(lessonItem => {
+            .map((lessonItem, index) => {
               const lessonAssignment = courseData.assignments?.find(
                 assignment => assignment.lessonId === lessonItem.lesson.id
               );
@@ -87,6 +89,7 @@ const CourseLesson = () => {
               return {
                 id: lessonItem.lesson.id,
                 title: lessonItem.lesson.lessonTitle,
+                lessonNumber: index + 1,
                 duration: lessonItem.lesson.lessonDuration,
                 content: lessonItem.lesson.lessonContent,
                 order: lessonItem.lesson.order,
@@ -293,6 +296,66 @@ const CourseLesson = () => {
     }
   };
 
+  useEffect(() => {
+    // Only fetch media content once when lesson content changes
+    if (currentLesson?.content) {
+      const mediaElements = document.querySelectorAll('video, audio');
+      mediaElements.forEach(async (element) => {
+        const sourceUrl = element.getAttribute('src');
+        if (sourceUrl && !mediaCache.current.has(sourceUrl)) {
+          try {
+            const response = await axios.get(sourceUrl, {
+              responseType: 'blob',
+              headers: {
+                'Cache-Control': 'max-age=3600',
+                'Pragma': 'cache'
+              }
+            });
+            
+            const blobUrl = URL.createObjectURL(response.data);
+            mediaCache.current.set(sourceUrl, blobUrl);
+            setMediaUrls(prev => new Map(prev).set(sourceUrl, blobUrl));
+          } catch (error) {
+            console.error('Error loading media:', error);
+          }
+        }
+      });
+    }
+  }, [currentLesson?.content]);
+
+  // Use this function to render media content
+  const renderContent = (content) => {
+    const sanitizedContent = DOMPurify.sanitize(content, {
+      ADD_TAGS: ['video', 'source'],
+      ADD_ATTR: ['src', 'controls']
+    });
+
+    return parse(sanitizedContent, {
+      replace: (domNode) => {
+        if (domNode.name === 'video' && domNode.attribs?.src) {
+          const cachedUrl = mediaUrls.get(domNode.attribs.src);
+          if (cachedUrl) {
+            return (
+              <video 
+                controls
+                src={cachedUrl}
+                className="max-w-full"
+              />
+            );
+          }
+        }
+        return domNode;
+      }
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup blob URLs when component unmounts
+      mediaUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
+
   if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -302,160 +365,6 @@ const CourseLesson = () => {
       </div>
     );
   }
-
-  const renderContent = (content) => {
-    const sanitizedContent = DOMPurify.sanitize(content, {
-      ADD_TAGS: ['iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'img', 'span', 'video', 'source'],
-      ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style', 'controls', 'allowfullscreen', 'frameborder', 'allow', 'width', 'height']
-    });
-
-    return (
-      <div className="lesson-content">
-        <style>
-          {`
-            .lesson-content {
-              font-size: 16px;
-              line-height: 1.6;
-            }
-
-            .lesson-content p {
-              margin-bottom: 1.5rem;
-            }
-
-            .lesson-content h1, 
-            .lesson-content h2, 
-            .lesson-content h3 {
-              margin-top: 2rem;
-              margin-bottom: 1rem;
-              font-weight: 600;
-            }
-
-            .lesson-content img {
-              max-width: 100%;
-              height: auto;
-              margin: 2rem auto;
-              display: block;
-            }
-
-            .lesson-content ul, 
-            .lesson-content ol {
-              margin-left: 1.5rem;
-              margin-bottom: 1.5rem;
-            }
-
-            .lesson-content li {
-              margin-bottom: 0.5rem;
-            }
-
-            .lesson-content table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 1.5rem;
-            }
-
-            .lesson-content td, 
-            .lesson-content th {
-              border: 1px solid #e2e8f0;
-              padding: 0.75rem;
-            }
-
-            .lesson-content code {
-              background-color: #f1f5f9;
-              padding: 0.2em 0.4em;
-              border-radius: 0.25rem;
-              font-size: 0.875em;
-            }
-
-            /* Preserve whitespace in certain elements */
-            .lesson-content pre,
-            .lesson-content code {
-              white-space: pre-wrap;
-            }
-
-            /* Fix spacing between inline elements */
-            .lesson-content span {
-              display: inline;
-              margin: 0;
-              padding: 0;
-            }
-
-            /* Code block styling */
-            .lesson-content pre,
-            .lesson-content code {
-              background-color: #f6f8fa;  /* Light gray background */
-              border: 1px solid #e1e4e8;  /* Light border */
-              border-radius: 6px;
-              padding: 16px;
-              margin: 8px 0;
-              font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-              font-size: 14px;
-              line-height: 1.45;
-              overflow-x: auto;
-              color: #24292e;  /* Dark text color */
-            }
-
-            /* Dark mode styles */
-            @media (prefers-color-scheme: dark) {
-              .lesson-content pre,
-              .lesson-content code {
-                background-color: #1f2937;  /* Dark background */
-                border-color: #374151;
-                color: #e5e7eb;  /* Light text color */
-              }
-            }
-
-            /* Inline code styling */
-            .lesson-content code:not(pre code) {
-              background-color: rgba(175, 184, 193, 0.2);
-              padding: 0.2em 0.4em;
-              border-radius: 6px;
-              font-size: 85%;
-            }
-
-            /* Code block header (for language name) */
-            .lesson-content pre::before {
-              content: attr(data-language);
-              display: block;
-              background-color: #f1f5f9;
-              padding: 4px 16px;
-              margin: -16px -16px 16px -16px;
-              border-bottom: 1px solid #e1e4e8;
-              border-radius: 6px 6px 0 0;
-              font-size: 12px;
-              color: #57606a;
-            }
-
-            /* Copy button styles */
-            .code-block-header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              background-color: #f1f5f9;
-              padding: 8px 16px;
-              border-bottom: 1px solid #e1e4e8;
-            }
-
-            .copy-button {
-              padding: 4px 8px;
-              background-color: transparent;
-              border: 1px solid #d1d5db;
-              border-radius: 4px;
-              cursor: pointer;
-              font-size: 12px;
-              color: #57606a;
-            }
-
-            .copy-button:hover {
-              background-color: #f3f4f6;
-            }
-          `}
-        </style>
-        <div className="ql-editor bg-white dark:bg-gray-800">
-          {parse(sanitizedContent)}
-        </div>
-      </div>
-    );
-  };
 
   const renderAboutContent = () => {
     if (!course?.aboutCourse) return null;
@@ -742,7 +651,7 @@ const CourseLesson = () => {
                         <div className="flex items-center gap-2">
                           {/* Remove the progress circle for lessons */}
                           <div className="text-sm font-medium break-words w-full">
-                            {lesson.title}
+                            Lesson {lesson.lessonNumber}: {lesson.title}
                           </div>
                         </div>
                         {lesson.duration && (
@@ -839,7 +748,7 @@ const CourseLesson = () => {
         >
           {/* Header Section with Gradient */}
           <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-8 border-b dark:border-gray-700">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-9xl mx-auto">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {currentSection === 'about' ? 'About This Course' : currentLesson?.title}
               </h1>
@@ -854,7 +763,7 @@ const CourseLesson = () => {
 
           {/* Main Content Area */}
           <div className="p-8">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-8xl mx-auto">
               <button
                 onClick={() => {
                   console.log('Current state:', {
