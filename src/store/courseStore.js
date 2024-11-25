@@ -10,7 +10,13 @@ const transformPayload = (formData) => {
   const transformedLessons = formData.lessons?.map(lesson => ({
     lessonTitle: lesson.lessonTitle || "",
     lessonDuration: lesson.lessonDuration || "",
-    lessonContent: lesson.lessonContent || ""
+    lessonContent: lesson.lessonContent || "",
+    resources: lesson.resources?.map(resource => ({
+      resourceTitle: resource.resourceTitle || "",
+      resourceDescription: resource.resourceDescription || "",
+      resourceLink: resource.resourceLink || "",
+      resourceType: resource.resourceType || "PDF"
+    })) || []
   })) || [];
 
   // Ensure prerequisites have the correct structure
@@ -57,7 +63,8 @@ const useCourseStore = create((set, get) => ({
     learningObjective: [],
     preRequisites: [],
     courseAudience: '',
-    lessons: []
+    lessons: [],
+    resources: []
   },
 
   updateCourseData: (data) => 
@@ -75,7 +82,8 @@ const useCourseStore = create((set, get) => ({
         lessons: [...state.courseData.lessons, {
           lessonTitle: lesson.lessonTitle,
           lessonDuration: lesson.lessonDuration,
-          lessonContent: lesson.lessonContent
+          lessonContent: lesson.lessonContent,
+          resources: lesson.resources || []
         }]
       }
     })),
@@ -99,7 +107,13 @@ const useCourseStore = create((set, get) => ({
         id: courseLessonItem.lesson.id,
         lessonTitle: courseLessonItem.lesson.lessonTitle || '',
         lessonDuration: courseLessonItem.lesson.lessonDuration || '',
-        lessonContent: courseLessonItem.lesson.lessonContent || ''
+        lessonContent: courseLessonItem.lesson.lessonContent || '',
+        resources: courseLessonItem.lesson.resources?.map(resource => ({
+          resourceTitle: resource.resourceTitle || '',
+          resourceDescription: resource.resourceDescription || '',
+          resourceLink: resource.resourceLink || '',
+          resourceType: resource.resourceType || 'PDF'
+        })) || []
       })) || [];
 
       // Transform prerequisites - modified to handle nested structure
@@ -162,7 +176,8 @@ const useCourseStore = create((set, get) => ({
         lessons: filteredLessons.length > 0 ? filteredLessons : [{
           lessonTitle: "Default Lesson",
           lessonDuration: "1 hour",
-          lessonContent: "Default content"
+          lessonContent: "Default content",
+          resources: []
         }]
       };
 
@@ -214,7 +229,8 @@ const useCourseStore = create((set, get) => ({
         lessons: filteredLessons.length > 0 ? filteredLessons : [{
           lessonTitle: "Default Lesson",
           lessonDuration: "1 hour",
-          lessonContent: "Default content"
+          lessonContent: "Default content",
+          resources: []
         }]
       };
 

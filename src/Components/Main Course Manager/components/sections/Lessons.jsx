@@ -9,11 +9,20 @@ import './quiltestl.css'
 import Quill from 'quill';
 import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
 const Lessons = () => {
   const courseData = useCourseStore((state) => state.courseData);
   const updateCourseData = useCourseStore((state) => state.updateCourseData);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
+  const [openResourceModal, setOpenResourceModal] = useState(false);
+  const [newResource, setNewResource] = useState({
+    resourceTitle: '',
+    resourceDescription: '',
+    resourceLink: '',
+    resourceType: 'PDF',
+    uploadType: 'link'
+  });
 
   useEffect(() => {
     // Show first lesson by default
@@ -268,6 +277,64 @@ const Lessons = () => {
     );
   };
 
+  const handleResourceFileUpload = async (file) => {
+    try {
+      if (!file) return;
+
+      // Validate file type
+      const fileType = file.name.split('.').pop().toLowerCase();
+      if (!['pdf', 'xlsx', 'xls'].includes(fileType)) {
+        alert('Please upload only PDF or Excel files');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileType', fileType === 'pdf' ? 'pdf' : 'excel'); // Specify file type for backend
+
+      // Update to your S3 upload endpoint
+      const response = await axios.post('http://localhost:8082/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      // Assuming the response includes the S3 URL
+      const s3Url = response.data.url; // This should be the full S3 URL
+
+      setNewResource({
+        ...newResource,
+        resourceLink: s3Url,
+        resourceType: fileType === 'pdf' ? 'PDF' : 'Excel'
+      });
+    } catch (error) {
+      console.error('Error uploading resource:', error);
+      alert('Failed to upload resource');
+    }
+  };
+
+  const handleAddResource = () => {
+    if (!courseData.lessons) return;
+    
+    const lessonIndex = courseData.lessons.findIndex(lesson => lesson.id === selectedLessonId);
+    const currentLesson = courseData.lessons[lessonIndex];
+    
+    const updatedLesson = {
+      ...currentLesson,
+      resources: [...(currentLesson.resources || []), newResource]
+    };
+
+    handleLessonUpdate(selectedLessonId, updatedLesson);
+    setNewResource({
+      resourceTitle: '',
+      resourceDescription: '',
+      resourceLink: '',
+      resourceType: 'PDF',
+      uploadType: 'link'
+    });
+    setOpenResourceModal(false);
+  };
+
   return (
     <div className="flex  gap-6 h-[85vh]">
       <div className="w-64 sidebar   overflow-y-auto sidebar ">
@@ -350,6 +417,168 @@ const Lessons = () => {
                 className="w-full p-2 border rounded-lg"
                 placeholder="Enter duration"
               />
+            </div>
+            <div>
+              <div className="flex justify-between items-center">
+                <label className="block text-sm font-medium text-gray-700">Resources</label>
+                <button
+                  onClick={() => setOpenResourceModal(true)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                >
+                  <FiPlus />
+                </button>
+              </div>
+              
+              {/* Display existing resources */}
+              <div className="mt-2 space-y-2">
+                {courseData.lessons?.find(l => l.id === selectedLessonId)?.resources?.map((resource, index) => (
+                  <div key={index} className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-medium text-lg">{resource.resourceTitle}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{resource.resourceDescription}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-sm ${
+                        resource.resourceType === 'PDF' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {resource.resourceType}
+                      </span>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between">
+                      <a 
+                        href={resource.resourceLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-500 hover:text-blue-600"
+                        download={`${resource.resourceTitle}.${resource.resourceType.toLowerCase()}`}
+                      >
+                        <span>Download {resource.resourceType}</span>
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </a>
+                      {/* Optional: Add delete button */}
+                      <button
+                        onClick={() => handleDeleteResource(index)}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Resource Modal */}
+              <div className={`fixed inset-0 z-50 ${openResourceModal ? 'flex' : 'hidden'} items-center justify-center`}>
+                <div className="absolute inset-0 bg-black opacity-50" onClick={() => setOpenResourceModal(false)}></div>
+                
+                <div className="bg-white rounded-lg p-6 w-full max-w-md z-50 relative">
+                  <h2 className="text-2xl font-bold mb-4">Add Resource</h2>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Resource Title</label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        value={newResource.resourceTitle}
+                        onChange={(e) => setNewResource({...newResource, resourceTitle: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Resource Description</label>
+                      <textarea
+                        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        rows="3"
+                        value={newResource.resourceDescription}
+                        onChange={(e) => setNewResource({...newResource, resourceDescription: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Resource Type</label>
+                      <select
+                        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        value={newResource.resourceType}
+                        onChange={(e) => setNewResource({...newResource, resourceType: e.target.value})}
+                      >
+                        <MenuItem value="PDF">PDF</MenuItem>
+                        <MenuItem value="Excel">Excel</MenuItem>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Upload Type</label>
+                      <div className="flex gap-4 mb-4">
+                        <button
+                          className={`px-4 py-2 rounded ${newResource.uploadType === 'link' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                          onClick={() => setNewResource({...newResource, uploadType: 'link'})}
+                        >
+                          Link
+                        </button>
+                        <button
+                          className={`px-4 py-2 rounded ${newResource.uploadType === 'file' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                          onClick={() => setNewResource({...newResource, uploadType: 'file'})}
+                        >
+                          File Upload
+                        </button>
+                      </div>
+
+                      {newResource.uploadType === 'link' ? (
+                        <input
+                          type="text"
+                          className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter resource URL"
+                          value={newResource.resourceLink}
+                          onChange={(e) => setNewResource({...newResource, resourceLink: e.target.value})}
+                        />
+                      ) : (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                          <input
+                            type="file"
+                            accept=".pdf,.xlsx,.xls"
+                            onChange={(e) => handleResourceFileUpload(e.target.files[0])}
+                            className="hidden"
+                            id="resource-file"
+                          />
+                          <label htmlFor="resource-file" className="cursor-pointer">
+                            <div className="text-blue-500 hover:text-blue-600">
+                              Click to upload or drag and drop
+                            </div>
+                            <p className="text-sm text-gray-500">PDF or Excel files only</p>
+                            {newResource.resourceLink && (
+                              <p className="text-sm text-green-500 mt-2">
+                                File uploaded successfully! ✓
+                              </p>
+                            )}
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-4 mt-6">
+                    <button
+                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                      onClick={() => setOpenResourceModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      onClick={handleAddResource}
+                    >
+                      Add Resource
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="">

@@ -98,6 +98,13 @@ const CourseLesson = () => {
                 content: lessonItem.lesson.lessonContent,
                 order: lessonItem.lesson.order,
                 isCompleted: false,
+                resources: lessonItem.lesson.lessonResources?.map(resource => ({
+                  id: resource.resources.id,
+                  title: resource.resources.resourceTitle,
+                  description: resource.resources.resourceDescription,
+                  link: resource.resources.resourceLink,
+                  type: resource.resources.resourceType
+                })) || [],
                 assignments: lessonAssignment ? [{
                   id: lessonAssignment.id,
                   assignmentTitle: lessonAssignment.assignmentTitle,
@@ -497,6 +504,58 @@ const CourseLesson = () => {
     );
   };
 
+  const renderLessonResources = (resources) => {
+    if (!resources || resources.length === 0) return null;
+
+    return (
+      <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+          Lesson Resources
+        </h3>
+        <div className="space-y-4">
+          {resources.map((resource) => (
+            <div 
+              key={resource.id}
+              className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-medium text-lg text-gray-900 dark:text-white">
+                    {resource.title}
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {resource.description}
+                  </p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-sm ${
+                  resource.type === 'PDF' 
+                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                }`}>
+                  {resource.type}
+                </span>
+              </div>
+              <div className="mt-4">
+                <a 
+                  href={resource.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                  download
+                >
+                  <span>Download {resource.type}</span>
+                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top Navigation Bar */}
@@ -845,6 +904,7 @@ const CourseLesson = () => {
                   <div className="prose prose-lg dark:prose-invert max-w-none">
                     {renderContent(currentLesson?.content)}
                   </div>
+                  {renderLessonResources(currentLesson?.resources)}
                   <LessonFooter />
                 </div>
               )}
