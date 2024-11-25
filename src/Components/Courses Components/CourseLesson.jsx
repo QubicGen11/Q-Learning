@@ -651,12 +651,7 @@ const CourseLesson = () => {
                             {lesson.title}
                           </div>
                         </div>
-                        {lesson.duration && (
-                          <div className="text-xs text-gray-500 flex items-center gap-1">
-                            <FiClock className="w-3 h-3" />
-                            <span>{lesson.duration}</span>
-                          </div>
-                        )}
+                   
                       </div>
                     </button>
                   </div>
@@ -845,7 +840,7 @@ const CourseLesson = () => {
                 // About Content
                 renderAboutContent()
               ) : (
-                // Lesson Content
+                // Lesson Contentbra
                 <div className="space-y-6">
                   <div className="prose prose-lg dark:prose-invert max-w-none">
                     {renderContent(currentLesson?.content)}
