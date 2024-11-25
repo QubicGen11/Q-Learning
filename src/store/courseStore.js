@@ -15,7 +15,8 @@ const transformPayload = (formData) => {
       resourceTitle: resource.resourceTitle || "",
       resourceDescription: resource.resourceDescription || "",
       resourceLink: resource.resourceLink || "",
-      resourceType: resource.resourceType || "PDF"
+      resourceType: resource.resourceType || "PDF",
+      uploadType: resource.uploadType || "link"
     })) || []
   })) || [];
 
@@ -102,19 +103,36 @@ const useCourseStore = create((set, get) => ({
       const courseData = await response.json();
       console.log('Raw course data:', courseData);
 
-      // Transform the lessons data - modified to handle nested structure
-      const transformedLessons = courseData.courseLesson?.map(courseLessonItem => ({
-        id: courseLessonItem.lesson.id,
-        lessonTitle: courseLessonItem.lesson.lessonTitle || '',
-        lessonDuration: courseLessonItem.lesson.lessonDuration || '',
-        lessonContent: courseLessonItem.lesson.lessonContent || '',
-        resources: courseLessonItem.lesson.resources?.map(resource => ({
-          resourceTitle: resource.resourceTitle || '',
-          resourceDescription: resource.resourceDescription || '',
-          resourceLink: resource.resourceLink || '',
-          resourceType: resource.resourceType || 'PDF'
-        })) || []
-      })) || [];
+      // Transform the lessons data with nested resources
+      const transformedLessons = courseData.courseLesson?.map(courseLessonItem => {
+        console.log('Processing lesson:', courseLessonItem);
+
+        // Extract resources from lessonResources
+        const resources = courseLessonItem.lesson.lessonResources?.map(resourceItem => {
+          console.log('Processing resource:', resourceItem);
+          
+          return {
+            id: resourceItem.resources.id,
+            resourceTitle: resourceItem.resources.resourceTitle || '',
+            resourceDescription: resourceItem.resources.resourceDescription || '',
+            resourceLink: resourceItem.resources.resourceLink || '',
+            resourceType: resourceItem.resources.resourceType || 'PDF',
+            uploadType: 'link' // default to link since it's not in the original data
+          };
+        }) || [];
+
+        console.log('Transformed resources:', resources);
+
+        return {
+          id: courseLessonItem.lesson.id,
+          lessonTitle: courseLessonItem.lesson.lessonTitle || '',
+          lessonDuration: courseLessonItem.lesson.lessonDuration || '',
+          lessonContent: courseLessonItem.lesson.lessonContent || '',
+          resources: resources
+        };
+      }) || [];
+
+      console.log('Transformed lessons:', transformedLessons);
 
       // Transform prerequisites - modified to handle nested structure
       const transformedPreRequisites = courseData.coursePreRequisites?.map(preReqItem => ({
@@ -123,7 +141,7 @@ const useCourseStore = create((set, get) => ({
         preRequisiteLevel: preReqItem.preRequisites.preRequisiteLevel || ''
       })) || [];
 
-      console.log('Transformed lessons:', transformedLessons);
+      console.log('Transformed prerequisites:', transformedPreRequisites);
 
       const transformedData = {
         id: courseData.id,
@@ -255,7 +273,37 @@ const useCourseStore = create((set, get) => ({
       console.error("Error updating course:", error);
       throw new Error(`Failed to update course: ${error.message}`);
     }
-  }
+  },
+
+  addResourceToLesson: (lessonId, resource) =>
+    set((state) => ({
+      courseData: {
+        ...state.courseData,
+        lessons: state.courseData.lessons.map(lesson =>
+          lesson.id === lessonId
+            ? {
+                ...lesson,
+                resources: [...(lesson.resources || []), resource]
+              }
+            : lesson
+        )
+      }
+    })),
+
+  removeResourceFromLesson: (lessonId, resourceIndex) =>
+    set((state) => ({
+      courseData: {
+        ...state.courseData,
+        lessons: state.courseData.lessons.map(lesson =>
+          lesson.id === lessonId
+            ? {
+                ...lesson,
+                resources: lesson.resources.filter((_, index) => index !== resourceIndex)
+              }
+            : lesson
+        )
+      }
+    })),
 }));
 
 export default useCourseStore; 

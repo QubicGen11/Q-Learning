@@ -10,6 +10,7 @@ import Quill from 'quill';
 import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import Cookies from 'js-cookie';
 
 const Lessons = () => {
   const courseData = useCourseStore((state) => state.courseData);
@@ -316,15 +317,30 @@ const Lessons = () => {
   const handleAddResource = () => {
     if (!courseData.lessons) return;
     
+    // Update local state
     const lessonIndex = courseData.lessons.findIndex(lesson => lesson.id === selectedLessonId);
     const currentLesson = courseData.lessons[lessonIndex];
     
+    const newResourceWithId = {
+      ...newResource,
+      id: Date.now() // Add a temporary ID for frontend handling
+    };
+    
     const updatedLesson = {
       ...currentLesson,
-      resources: [...(currentLesson.resources || []), newResource]
+      resources: [...(currentLesson.resources || []), newResourceWithId]
     };
 
-    handleLessonUpdate(selectedLessonId, updatedLesson);
+    const updatedLessons = courseData.lessons.map(lesson => 
+      lesson.id === selectedLessonId ? updatedLesson : lesson
+    );
+
+    updateCourseData({
+      ...courseData,
+      lessons: updatedLessons
+    });
+
+    // Reset form and close modal
     setNewResource({
       resourceTitle: '',
       resourceDescription: '',
@@ -333,6 +349,25 @@ const Lessons = () => {
       uploadType: 'link'
     });
     setOpenResourceModal(false);
+  };
+
+  const handleDeleteResource = (lessonId, resourceId) => {
+    // Update local state
+    const updatedLessons = courseData.lessons.map(lesson => {
+      if (lesson.id === lessonId) {
+        return {
+          ...lesson,
+          resources: lesson.resources.filter(resource => resource.id !== resourceId)
+        };
+      }
+      return lesson;
+    });
+
+    // Update course data
+    updateCourseData({
+      ...courseData,
+      lessons: updatedLessons
+    });
   };
 
   return (
@@ -426,13 +461,26 @@ const Lessons = () => {
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                 >
                   <FiPlus />
+                  
                 </button>
+              </div>
+
+
+              <div>
+              
+                {
+                  lesson.resources?.map((resource, index) => (
+                    <div key={index}>
+                     {console.log(resource)}
+                    </div>
+                  ))
+                }
               </div>
               
               {/* Display existing resources */}
               <div className="mt-2 space-y-2">
-                {courseData.lessons?.find(l => l.id === selectedLessonId)?.resources?.map((resource, index) => (
-                  <div key={index} className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                {courseData.lessons?.find(l => l.id === selectedLessonId)?.resources?.map((resource) => (
+                  <div key={resource.id} className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between">
                       <div>
                         <h4 className="font-medium text-lg">{resource.resourceTitle}</h4>
@@ -459,9 +507,8 @@ const Lessons = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                       </a>
-                      {/* Optional: Add delete button */}
                       <button
-                        onClick={() => handleDeleteResource(index)}
+                        onClick={() => handleDeleteResource(selectedLessonId, resource.id)}
                         className="text-red-500 hover:text-red-600"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
