@@ -95,7 +95,7 @@ const Lessons = () => {
       formData.append('file', file);
       formData.append('fileType', fileType);
 
-      const response = await axios.post(`http://localhost:8082/upload`, formData, {
+      const response = await axios.post(`http://localhost:8082/upload `, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -549,17 +549,7 @@ const Lessons = () => {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Resource Type</label>
-                      <select
-                        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                        value={newResource.resourceType}
-                        onChange={(e) => setNewResource({...newResource, resourceType: e.target.value})}
-                      >
-                        <MenuItem value="PDF">PDF</MenuItem>
-                        <MenuItem value="Excel">Excel</MenuItem>
-                      </select>
-                    </div>
+                  
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Upload Type</label>

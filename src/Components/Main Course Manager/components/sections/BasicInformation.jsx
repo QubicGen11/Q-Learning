@@ -460,37 +460,10 @@ const BasicInformation = () => {
       )}
 
       {/* Custom Technology */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Custom Technology
-        </label>
-        <select
-          value={courseData.customTechnology || 'No'}
-          onChange={(e) => handleInputChange('customTechnology', e.target.value)}
-          className="w-full p-2 border rounded"
-        >
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-        </select>
-      </div>
-
-      {courseData.customTechnology === 'Yes' && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Custom Technology Image
-          </label>
-          <input
-            type="text"
-            value={courseData.coustomTechnologyImg || ''}
-            onChange={(e) => handleInputChange('coustomTechnologyImg', e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="URL for custom technology image"
-          />
-        </div>
-      )}
+    
 
       {/* Course Type */}
-      <div>
+      {/* <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Course Type
         </label>
@@ -504,7 +477,7 @@ const BasicInformation = () => {
           <option value="Premium">Premium</option>
           <option value="Enterprise">Enterprise</option>
         </select>
-      </div>
+      </div> */}
 
       {/* Difficulty Level */}
       <div>

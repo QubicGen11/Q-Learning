@@ -15,6 +15,17 @@ const getSectionTitle = (section) => {
 };
 
 const Header = ({ activeSection, onSave, onPreview, isEditing }) => {
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
       <h1 className="text-2xl font-semibold text-gray-800">
@@ -29,10 +40,14 @@ const Header = ({ activeSection, onSave, onPreview, isEditing }) => {
           Preview
         </button>
         <button 
-          onClick={onSave}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-70"
         >
-          {isEditing ? 'Update Course' : 'Save Course'}
+          {isEditing ? 
+            (isSaving ? 'Updating...' : 'Update Course') : 
+            (isSaving ? 'Saving...' : 'Save Course')
+          }
         </button>
       </div>
     </header>

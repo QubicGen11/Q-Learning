@@ -11,6 +11,7 @@ import BasicInformation from './components/sections/BasicInformation';
 import useCourseStore from '../../store/courseStore';
 import PreviewModal from './components/sections/PreviewModal';
 import ConfirmationModal from './components/ConfirmationModal';
+import ScrollToTop from '../Common/ScrollToTop.jsx';
 
 
 const Mainadmin = () => {
@@ -47,6 +48,13 @@ const Mainadmin = () => {
 
     loadCourse();
   }, [courseId, fetchCourseById, resetCourseData]);
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [activeSection]);
 
   const handleSave = async () => {
     try {
@@ -155,6 +163,8 @@ const Mainadmin = () => {
         title="Confirm Exit"
         message="Are you sure you want to exit without adding questions?"
       />
+
+      <ScrollToTop />
     </>
   );
 };
