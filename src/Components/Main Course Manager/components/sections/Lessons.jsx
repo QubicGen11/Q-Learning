@@ -95,7 +95,7 @@ const Lessons = () => {
       formData.append('file', file);
       formData.append('fileType', fileType);
 
-      const response = await axios.post(`${config.CURRENT_URL}/upload`, formData, {
+      const response = await axios.post(`http://localhost:8082/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -295,7 +295,7 @@ const Lessons = () => {
       formData.append('fileType', fileType === 'pdf' ? 'pdf' : 'excel'); // Specify file type for backend
 
       // Update to your S3 upload endpoint
-      const response = await axios.post(`${config.CURRENT_URL}/upload`, formData, {
+      const response = await axios.post(`http://localhost:8082/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

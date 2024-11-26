@@ -15,21 +15,22 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
       items: [
         { id: 'basicInfo', label: 'Basic Information', icon: <FiBook /> },
         { id: 'aboutCourse', label: 'About This Course', icon: <FiLayout /> },
-        { id: 'curriculum', label: 'Curriculum', icon: <FiVideo /> }
+        // { id: 'curriculum', label: 'Curriculum', icon: <FiVideo /> }
       ]
     },
     {
       title: 'Content',
       items: [
         { id: 'lessons', label: 'Lessons', icon: <FiBook /> },
+        { id: 'pricing', label: 'Pricing', icon: <FiDollarSign /> },
        
-        { id: 'resources', label: 'Resources', icon: <FiVideo /> }
+        // { id: 'resources', label: 'Resources', icon: <FiVideo /> }
       ]
     },
     {
       title: 'Settings',
       items: [
-        { id: 'pricing', label: 'Pricing', icon: <FiDollarSign /> },
+  
         { id: 'access', label: 'Access Control', icon: <FiUsers /> },
         { id: 'settings', label: 'Course Settings', icon: <FiSettings /> }
       ]

@@ -39,6 +39,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [savedAssignments, setSavedAssignments] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [isInCart, setIsInCart] = useState(false);
 
   useEffect(() => {
     const customTechLogos = localStorage.getItem('customTechLogos');
@@ -153,6 +154,51 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
     fetchCourse();
   }, [id, previewMode, previewData, techLogos]);
 
+  useEffect(() => {
+    // You'll need to implement this API endpoint to check cart status
+    const checkCartStatus = async () => {
+      try {
+        const accessToken = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('accessToken='))
+          ?.split('=')[1];
+
+        if (!accessToken) return;
+
+        // Add your API call here to check if course is in cart
+        // setIsInCart based on response
+      } catch (error) {
+        console.error('Error checking cart status:', error);
+      }
+    };
+
+    if (!previewMode && id) {
+      checkCartStatus();
+    }
+  }, [id, previewMode]);
+
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      try {
+        const accessToken = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('accessToken='))
+          ?.split('=')[1];
+
+        if (!accessToken) return;
+
+        // Add your API call here to check if course is favorited
+        // setIsFavorite based on response
+      } catch (error) {
+        console.error('Error checking favorite status:', error);
+      }
+    };
+
+    if (!previewMode && id) {
+      checkFavoriteStatus();
+    }
+  }, [id, previewMode]);
+
   const handleResume = () => {
     if (previewMode) return;
     if (course?.curriculum && course.curriculum.length > 0) {
@@ -163,8 +209,144 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
     }
   };
 
-  const handleAddToCart = (course) => {
-    // Implement add to cart logic here
+  const handleAddToCart = async () => {
+    try {
+      const accessToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+        ?.split('=')[1];
+
+      if (!accessToken) {
+        toast.error('Please login to add to cart');
+        return;
+      }
+
+      const response = await fetch(`${config.CURRENT_URL}/qlms/addToCart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          courseId: id
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add to cart');
+      }
+
+      setIsInCart(true);
+      toast.success('Course added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart');
+    }
+  };
+
+  const handleRemoveFromCart = async () => {
+    try {
+      const accessToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+        ?.split('=')[1];
+
+      if (!accessToken) {
+        toast.error('Please login to remove from cart');
+        return;
+      }
+
+      const response = await fetch(`${config.CURRENT_URL}/qlms/deleteFromCart/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove from cart');
+      }
+
+      setIsInCart(false);
+      toast.success('Course removed from cart successfully');
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      toast.error('Failed to remove from cart');
+    }
+  };
+
+  const handleAddToFavorite = async () => {
+    try {
+      const accessToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+        ?.split('=')[1];
+
+      if (!accessToken) {
+        toast.error('Please login to add to favorites');
+        return;
+      }
+
+      const response = await fetch(`${config.CURRENT_URL}/qlms/addToFavorite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          courseId: id
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add to favorites');
+      }
+
+      setIsFavorite(true);
+      toast.success('Course added to favorites successfully');
+    } catch (error) {
+      console.error('Error adding to favorites:', error);
+      toast.error('Failed to add to favorites');
+    }
+  };
+
+  const handleRemoveFromFavorite = async () => {
+    try {
+      const accessToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+        ?.split('=')[1];
+
+      if (!accessToken) {
+        toast.error('Please login to remove from favorites');
+        return;
+      }
+
+      const response = await fetch(`${config.CURRENT_URL}/qlms/removeFromFavorite/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove from favorites');
+      }
+
+      setIsFavorite(false);
+      toast.success('Course removed from favorites successfully');
+    } catch (error) {
+      console.error('Error removing from favorites:', error);
+      toast.error('Failed to remove from favorites');
+    }
+  };
+
+  const handleFavoriteClick = () => {
+    if (isFavorite) {
+      handleRemoveFromFavorite();
+    } else {
+      handleAddToFavorite();
+    }
   };
 
   const renderAssignments = () => {
@@ -576,12 +758,12 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
             <div className="flex flex-col gap-3">
               {/* Add to Cart Button */}
               <button 
-                onClick={() => handleAddToCart(course)}
+                onClick={isInCart ? handleRemoveFromCart : handleAddToCart}
                 className="w-full bg-[#A435F0] hover:bg-[#8710ED] text-white 
                            py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium 
                            transition-colors duration-300 flex items-center justify-center gap-2">
                 <FiShoppingCart />
-                ADD TO CART
+                {isInCart ? 'REMOVE FROM CART' : 'ADD TO CART'}
               </button>
 
               {/* Favorite Button */}
@@ -590,10 +772,10 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
                          flex items-center justify-center gap-2 text-sm sm:text-base 
                          hover:bg-gray-50 dark:hover:bg-gray-700 
                          text-gray-700 dark:text-gray-300 transition-colors duration-300"
-                onClick={() => setIsFavorite(!isFavorite)}
+                onClick={handleFavoriteClick}
               >
                 <FiHeart className={isFavorite ? "text-red-500 fill-current" : ""} />
-                FAVORITE
+                {isFavorite ? 'FAVORITED' : 'FAVORITE'}
               </button>
 
               {/* Price Display */}
