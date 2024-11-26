@@ -37,6 +37,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CreateIcon from '@mui/icons-material/Create';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import config from '../../../../config/apiConfig';
 
 
 const Assignments = () => {
@@ -75,7 +76,7 @@ const Assignments = () => {
     try {
       setIsLoading(true);
       const accessToken = Cookies.get('accessToken');
-      const response = await axios.get('http://localhost:8089/qlms/getUserCreatedCourse', {
+      const response = await axios.get(`${config.apiUrl}/qlms/getUserCreatedCourse`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
@@ -117,7 +118,7 @@ const Assignments = () => {
         console.log('Fetching questions for lessonId:', lessonId);
         
         const response = await axios.get(
-          `http://localhost:8089/qlms/getLessonQuestions/${lessonId}`,
+          `${config.apiUrl}/qlms/getLessonQuestions/${lessonId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`
@@ -272,7 +273,7 @@ const Assignments = () => {
       };
 
       const response = await axios.post(
-        'http://localhost:8089/qlms/newQuestion',
+        `${config.apiUrl}/qlms/newQuestion`,
         payload,
         {
           headers: {
@@ -286,7 +287,7 @@ const Assignments = () => {
         toast.success('Question saved successfully');
         
         const lessonResponse = await axios.get(
-          `http://localhost:8089/qlms/getLessonQuestions/${currentAssignment.lessonId}`,
+          `${config.apiUrl}/qlms/getLessonQuestions/${currentAssignment.lessonId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`
@@ -329,7 +330,7 @@ const Assignments = () => {
       console.log('Sending update payload:', payload); // Debug log
 
       const response = await axios.put(
-        `http://localhost:8089/qlms/updateQuestion/${questionId}`,
+        `${config.apiUrl}/qlms/updateQuestion/${questionId}`,
         payload,
         {
           headers: {
@@ -423,7 +424,7 @@ const Assignments = () => {
     try {
       const accessToken = Cookies.get('accessToken');
       const response = await axios.get(
-        `http://localhost:8089/qlms/getLessonQuestions/${lessonId}`,
+        `${config.apiUrl}/qlms/getLessonQuestions/${lessonId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -497,7 +498,7 @@ const Assignments = () => {
       console.log('Creating assignment with payload:', payload);
 
       const response = await axios.post(
-        'http://localhost:8089/qlms/newAssignment',
+        `${config.apiUrl}/qlms/newAssignment`,
         payload,
         {
           headers: {
@@ -543,7 +544,7 @@ const Assignments = () => {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          `http://localhost:8089/qlms/getLessonQuestions/${lessonId}`,
+          `${config.apiUrl}/qlms/getLessonQuestions/${lessonId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`
@@ -600,7 +601,7 @@ const Assignments = () => {
 
       const accessToken = Cookies.get('accessToken');
       const createResponse = await axios.post(
-        'http://localhost:8089/qlms/newQuestion', 
+        `${config.apiUrl}/qlms/newQuestion`, 
         questionData, 
         {
           headers: {
@@ -613,7 +614,7 @@ const Assignments = () => {
       // Refresh questions
       console.log('Refreshing questions for lessonId:', selectedLessonId);
       const getResponse = await axios.get(
-        `http://localhost:8089/qlms/getLessonQuestions/${selectedLessonId}`,
+        `${config.apiUrl}/qlms/getLessonQuestions/${selectedLessonId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
+import config from '../config/apiConfig';
 
 // Helper functions for localStorage
 const LOCAL_STORAGE_KEY = 'course_draft';
@@ -92,7 +93,7 @@ const useCourseStore = create((set, get) => ({
   fetchCourseById: async (courseId) => {
     try {
       const token = Cookies.get('accessToken');
-      const response = await fetch(`http://localhost:8089/qlms/getCourseById/${courseId}`, {
+      const response = await fetch(`${config.apiUrl}/qlms/getCourseById/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -202,7 +203,7 @@ const useCourseStore = create((set, get) => ({
       console.log("Submitting course data:", cleanedCourseData);
 
       const token = Cookies.get('accessToken');
-      const response = await fetch("http://localhost:8089/qlms/createCourse", {
+      const response = await fetch(`${config.apiUrl}/qlms/createCourse`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -253,7 +254,7 @@ const useCourseStore = create((set, get) => ({
       };
 
       const token = Cookies.get('accessToken');
-      const response = await fetch(`http://localhost:8089/qlms/updateCourse/${courseId}`, {
+      const response = await fetch(`${config.apiUrl}/qlms/updateCourse/${courseId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`,

@@ -11,6 +11,7 @@ import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Cookies from 'js-cookie';
+import config from "../../../../config/apiConfig";
 
 const Lessons = () => {
   const courseData = useCourseStore((state) => state.courseData);
@@ -94,7 +95,7 @@ const Lessons = () => {
       formData.append('file', file);
       formData.append('fileType', fileType);
 
-      const response = await axios.post('http://localhost:8082/upload', formData, {
+      const response = await axios.post(`${config.apiUrl}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -294,7 +295,7 @@ const Lessons = () => {
       formData.append('fileType', fileType === 'pdf' ? 'pdf' : 'excel'); // Specify file type for backend
 
       // Update to your S3 upload endpoint
-      const response = await axios.post('http://localhost:8082/upload', formData, {
+      const response = await axios.post(`${config.apiUrl}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

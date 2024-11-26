@@ -10,6 +10,7 @@ import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import Questions from './Questions';
+import config from '../../config/apiConfig';
 
 // Register modules
 Quill.register('modules/imageResize', ImageResize);
@@ -428,8 +429,8 @@ const CourseManager = () => {
       // Determine if we're creating or updating
       const isUpdating = currentCourse?.id;
       const url = isUpdating 
-        ? `http://localhost:8089/qlms/updateCourse/${currentCourse.id}`
-        : 'http://localhost:8089/qlms/createCourse/';
+        ? `${config.apiUrl}/qlms/updateCourse/${currentCourse.id}`
+        : `${config.apiUrl}/qlms/createCourse/`;
 
       const response = await fetch(url, {
         method: isUpdating ? 'PUT' : 'POST',
@@ -707,7 +708,7 @@ const CourseManager = () => {
     const fetchCourses = async () => {
       try {
         const accessToken = Cookies.get('accessToken');
-        const response = await fetch('http://localhost:8089/qlms/allCourses', {
+        const response = await fetch(`${config.apiUrl}/qlms/allCourses`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
@@ -790,7 +791,7 @@ const CourseManager = () => {
   const handleEditCourse = async (courseId) => {
     try {
       const accessToken = Cookies.get('accessToken');
-      const response = await fetch(`http://localhost:8089/qlms/getCourseById/${courseId}`, {
+      const response = await fetch(`${config.apiUrl}/qlms/getCourseById/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -896,7 +897,7 @@ const CourseManager = () => {
       if (result.isConfirmed) {
         try {
           const accessToken = Cookies.get('accessToken');
-          const response = await fetch(`http://localhost:8089/qlms/deleteCourse/${courseId}`, {
+          const response = await fetch(`${config.apiUrl}/qlms/deleteCourse/${courseId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${accessToken}`

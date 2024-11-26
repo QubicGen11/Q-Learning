@@ -98,7 +98,7 @@ const Courses_main = () => {
     const fetchCourses = async () => {  
       try {
         // Remove any authorization headers
-        const response = await axios.get('http://localhost:8089/qlms/allCourses', {
+        const response = await axios.get(`${config.apiUrl}/qlms/allCourses`, {
           headers: {
             'Content-Type': 'application/json',
            
@@ -139,7 +139,7 @@ const Courses_main = () => {
     try {
       console.log("Fetching My Courses API called");
       const token = Cookies.get('accessToken');
-      const response = await fetch('http://localhost:8089/qlms/getUserCreatedCourse', {
+      const response = await fetch(`${config.apiUrl}/qlms/getUserCreatedCourse`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -157,7 +157,7 @@ const Courses_main = () => {
     try {
       console.log("Fetching Enrolled Courses API called");
       const token = Cookies.get('accessToken');
-      const response = await fetch('http://localhost:8089/qlms/getUserEnrolledCourse', {
+      const response = await fetch(`${config.apiUrl}/qlms/getUserEnrolledCourse`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
