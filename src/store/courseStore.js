@@ -93,7 +93,7 @@ const useCourseStore = create((set, get) => ({
   fetchCourseById: async (courseId) => {
     try {
       const token = Cookies.get('accessToken');
-      const response = await fetch(`${config.apiUrl}/qlms/getCourseById/${courseId}`, {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/getCourseById/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -203,7 +203,7 @@ const useCourseStore = create((set, get) => ({
       console.log("Submitting course data:", cleanedCourseData);
 
       const token = Cookies.get('accessToken');
-      const response = await fetch(`${config.apiUrl}/qlms/createCourse`, {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/createCourse`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -254,7 +254,7 @@ const useCourseStore = create((set, get) => ({
       };
 
       const token = Cookies.get('accessToken');
-      const response = await fetch(`${config.apiUrl}/qlms/updateCourse/${courseId}`, {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/updateCourse/${courseId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`,

@@ -97,38 +97,45 @@ const Courses_main = () => {
     const accessToken = Cookies.get('accessToken');
     const fetchCourses = async () => {  
       try {
-        // Remove any authorization headers
-        const response = await axios.get(`${config.apiUrl}/qlms/allCourses`, {
+        const response = await axios.get(`${config.CURRENT_URL}/qlms/allCourses`, {
           headers: {
             'Content-Type': 'application/json',
-           
-            // No Authorization header needed
           }
         });
 
-        const coursesData = response.data;
+        // Ensure we're working with an array of courses
+        const coursesData = Array.isArray(response.data) ? response.data : 
+                           response.data.courses || response.data.data || [];
+        
         console.log('Raw courses data:', coursesData);
 
-        // Process the data with null checks
-        const processedCourses = coursesData.map(course => ({
-          ...course,
-          categories: course.category ? course.category.split(',').map(cat => cat.trim()) : [],
-          // Add other default values as needed
-        }));
+        // Only process if we have an array
+        if (Array.isArray(coursesData)) {
+          const processedCourses = coursesData.map(course => ({
+            ...course,
+            categories: course.category ? course.category.split(',').map(cat => cat.trim()) : [],
+          }));
 
-        setCourses(processedCourses);
-        
-        // Process categories
-        const allCategories = processedCourses
-          .flatMap(course => course.categories)
-          .filter((cat, index, self) => cat && self.indexOf(cat) === index);
+          setCourses(processedCourses);
+          
+          // Process categories
+          const allCategories = processedCourses
+            .flatMap(course => course.categories)
+            .filter((cat, index, self) => cat && self.indexOf(cat) === index);
 
-        setCategories(allCategories);
+          setCategories(allCategories);
+        } else {
+          console.error('Courses data is not in expected format:', response.data);
+          toast.error('Unable to load courses: Invalid data format');
+          setCourses([]);
+          setCategories([]);
+        }
 
       } catch (error) {
         console.error('Error fetching courses:', error);
-        // Show user-friendly error message
         toast.error('Failed to load courses. Please try again.');
+        setCourses([]);
+        setCategories([]);
       }
     };
 
@@ -139,7 +146,7 @@ const Courses_main = () => {
     try {
       console.log("Fetching My Courses API called");
       const token = Cookies.get('accessToken');
-      const response = await fetch(`${config.apiUrl}/qlms/getUserCreatedCourse`, {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/getUserCreatedCourse`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -157,7 +164,7 @@ const Courses_main = () => {
     try {
       console.log("Fetching Enrolled Courses API called");
       const token = Cookies.get('accessToken');
-      const response = await fetch(`${config.apiUrl}/qlms/getUserEnrolledCourse`, {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/getUserEnrolledCourse`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

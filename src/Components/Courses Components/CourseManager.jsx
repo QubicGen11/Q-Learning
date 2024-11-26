@@ -429,8 +429,8 @@ const CourseManager = () => {
       // Determine if we're creating or updating
       const isUpdating = currentCourse?.id;
       const url = isUpdating 
-        ? `${config.apiUrl}/qlms/updateCourse/${currentCourse.id}`
-        : `${config.apiUrl}/qlms/createCourse/`;
+        ? `${config.CURRENT_URL}/qlms/updateCourse/${currentCourse.id}`
+        : `${config.CURRENT_URL}/qlms/createCourse/`;
 
       const response = await fetch(url, {
         method: isUpdating ? 'PUT' : 'POST',
@@ -708,7 +708,7 @@ const CourseManager = () => {
     const fetchCourses = async () => {
       try {
         const accessToken = Cookies.get('accessToken');
-        const response = await fetch(`${config.apiUrl}/qlms/allCourses`, {
+        const response = await fetch(`${config.CURRENT_URL}/qlms/allCourses`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
@@ -791,7 +791,7 @@ const CourseManager = () => {
   const handleEditCourse = async (courseId) => {
     try {
       const accessToken = Cookies.get('accessToken');
-      const response = await fetch(`${config.apiUrl}/qlms/getCourseById/${courseId}`, {
+      const response = await fetch(`${config.CURRENT_URL}/qlms/getCourseById/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -897,7 +897,7 @@ const CourseManager = () => {
       if (result.isConfirmed) {
         try {
           const accessToken = Cookies.get('accessToken');
-          const response = await fetch(`${config.apiUrl}/qlms/deleteCourse/${courseId}`, {
+          const response = await fetch(`${config.CURRENT_URL}/qlms/deleteCourse/${courseId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${accessToken}`
