@@ -255,8 +255,10 @@ const ApprovalsComponent = () => {
   const getStatusColor = (status = 'pending') => {
     const colors = {
       pending: "bg-yellow-100 text-yellow-800",
-      approved: "bg-green-100 text-green-800",
-      rejected: "bg-red-100 text-red-800"
+      published: "bg-green-100 text-green-800",
+      rejected: "bg-red-100 text-red-800",
+      declined: "bg-red-100 text-red-800",
+      draft: "bg-gray-100 text-gray-800"
     };
     return colors[status.toLowerCase()] || colors.pending;
   };
@@ -338,7 +340,9 @@ const ApprovalsComponent = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(course.status)}`}>
-                          {course.status || 'Pending'}
+                          {course.status === 'published' ? 'Published' :
+                           course.status === 'rejected' || course.status === 'declined' ? 'Declined' :
+                           'Pending'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -396,6 +400,7 @@ const ApprovalsComponent = () => {
                 <div className="space-y-3">
                   <DetailItem label="Request ID" value={selectedCourse.id || 'N/A'} />
                   <DetailItem label="Course Title" value={selectedCourse.courseTitle || 'N/A'} />
+                  <DetailItem label="Status" value={selectedCourse.status || 'pending'} isStatus={true} />
                   <DetailItem label="Course ID" value={selectedCourse.id || 'N/A'} />
                   <DetailItem label="Change Description" value={selectedCourse.aboutCourse || 'No description provided'} />
                   <DetailItem label="Reason" value={selectedCourse.reason || 'No reason provided'} />
@@ -428,11 +433,34 @@ const ApprovalsComponent = () => {
 };
 
 // Helper component for detail items
-const DetailItem = ({ label, value }) => (
-  <div>
-    <dt className="text-sm font-medium text-gray-500">{label}</dt>
-    <dd className="mt-1 text-sm text-gray-900">{value}</dd>
-  </div>
-);
+const DetailItem = ({ label, value, isStatus }) => {
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: "text-yellow-800 bg-yellow-100",
+      published: "text-green-800 bg-green-100",
+      rejected: "text-red-800 bg-red-100",
+      declined: "text-red-800 bg-red-100",
+      draft: "text-gray-800 bg-gray-100"
+    };
+    return colors[status.toLowerCase()] || colors.pending;
+  };
+
+  return (
+    <div>
+      <dt className="text-sm font-medium text-gray-500">{label}</dt>
+      <dd className="mt-1 text-sm">
+        {isStatus ? (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(value)}`}>
+            {value === 'published' ? 'Published' :
+             value === 'rejected' || value === 'declined' ? 'Declined' :
+             'Pending'}
+          </span>
+        ) : (
+          <span className="text-gray-900">{value}</span>
+        )}
+      </dd>
+    </div>
+  );
+};
 
 export default ApprovalsComponent;
