@@ -287,13 +287,81 @@ const Courses_main = () => {
     }
   };
 
+  // Add new function to fetch under review courses
+  const fetchUnderReviewCourses = async () => {
+    try {
+      const token = Cookies.get('accessToken');
+      const response = await axios.get(`${config.CURRENT_URL}/qlms/allUnderReviewCourses`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log("Under Review Courses Data:", response.data);
+      setMyCourses(response.data); // Update myCourses state with under review courses
+    } catch (error) {
+      console.error('Error fetching under review courses:', error);
+      toast.error('Failed to load courses under review');
+    }
+  };
+
+  // Add new function to fetch published courses
+  const fetchPublishedCourses = async () => {
+    try {
+      const token = Cookies.get('accessToken');
+      const response = await axios.get(`${config.CURRENT_URL}/qlms/allPublishedCourses`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log("Published Courses Data:", response.data);
+      setMyCourses(response.data); // Update myCourses state with published courses
+    } catch (error) {
+      console.error('Error fetching published courses:', error);
+      toast.error('Failed to load published courses');
+    }
+  };
+
+  // Add new function to fetch rejected courses
+  const fetchRejectedCourses = async () => {
+    try {
+      const token = Cookies.get('accessToken');
+      const response = await axios.get(`${config.CURRENT_URL}/qlms/allRejectedCourses`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log("Rejected Courses Data:", response.data);
+      setMyCourses(response.data); // Update myCourses state with rejected courses
+    } catch (error) {
+      console.error('Error fetching rejected courses:', error);
+      toast.error('Failed to load rejected courses');
+    }
+  };
+
   // Modify useEffect to handle different teaching filters
   useEffect(() => {
     if (viewMode === 'myCourses') {
-      if (teachingFilter === 'draft') {
-        fetchDraftCourses();
-      } else {
-        fetchMyCourses();
+      switch(teachingFilter) {
+        case 'draft':
+          fetchDraftCourses();
+          break;
+        case 'review':
+          fetchUnderReviewCourses();
+          break;
+        case 'published':
+          fetchPublishedCourses();
+          break;
+        case 'rejected':
+          fetchRejectedCourses();
+          break;
+        default:
+          fetchMyCourses();
       }
     }
   }, [viewMode, teachingFilter]);
@@ -550,19 +618,22 @@ const Courses_main = () => {
 
               {/* Add Teaching Filter Dropdown */}
               {viewMode === 'myCourses' && (
-                <select
-                  value={teachingFilter}
-                  onChange={(e) => setTeachingFilter(e.target.value)}
-                  className="ml-4 border rounded-lg px-3 py-2 text-sm
-                           bg-white dark:bg-gray-700
-                           border-gray-300 dark:border-gray-600
-                           text-gray-900 dark:text-white"
-                >
-                 
-                  <option value="draft">Draft Courses</option>
-                  <option value="review">Under Review</option>
-                  <option value="published">Published</option>
-                </select>
+                <div className="flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
+                  <select
+                    value={teachingFilter}
+                    onChange={(e) => setTeachingFilter(e.target.value)}
+                    className="ml-4 border rounded-lg px-3 py-2 text-sm
+                             bg-white dark:bg-gray-700
+                             border-gray-300 dark:border-gray-600
+                             text-gray-900 dark:text-white"
+                  >
+                    <option value="all">All Courses</option>
+                    <option value="draft">Draft Courses</option>
+                    <option value="review">Under Review</option>
+                    <option value="published">Published</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
               )}
             </div>
 
@@ -638,7 +709,41 @@ const Courses_main = () => {
                       className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg 
                                 hover:shadow-lg transition-all duration-300 relative"
                     >
-                      {/* Course Actions Dropdown */}
+                      {/* Status Badge - Show for all states */}
+                      {teachingFilter === 'draft' && (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium 
+                                         bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            Draft
+                          </span>
+                        </div>
+                      )}
+                      {teachingFilter === 'review' && (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium 
+                                         bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                            Under Review
+                          </span>
+                        </div>
+                      )}
+                      {teachingFilter === 'published' && (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium 
+                                         bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            Published
+                          </span>
+                        </div>
+                      )}
+                      {teachingFilter === 'rejected' && (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium 
+                                         bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                            Rejected
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Course Actions Menu */}
                       <div className="absolute top-2 right-2 z-10">
                         <IconButton
                           onClick={(e) => handleMenuOpen(e, course.id)}
@@ -711,17 +816,7 @@ const Courses_main = () => {
                         </Menu>
                       </div>
 
-                      {/* Status Badge - Only show when viewing drafts */}
-                      {teachingFilter === 'draft' && (
-                        <div className="absolute top-2 left-2 z-10">
-                          <span className="px-2 py-1 rounded-full text-xs font-medium 
-                                         bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                            Draft
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Course Content (clickable to view course) */}
+                      {/* Course Content */}
                       <div 
                         onClick={() => navigate(`/courses/${course.id}`)}
                         className="cursor-pointer p-4"

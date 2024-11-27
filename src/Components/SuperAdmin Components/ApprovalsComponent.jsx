@@ -204,6 +204,54 @@ const ApprovalsComponent = () => {
     }
   };
 
+  const handleRejectCourse = async (courseId) => {
+    try {
+      const token = Cookies.get('superadminToken');
+      
+      const response = await axios.put(
+        `http://localhost:8089/qlms/rejectCourse/${courseId}`,
+        {}, // empty body as we're just updating status
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        // Update the local state to reflect the change
+        setCourses(prevCourses => 
+          prevCourses.map(course => 
+            course.id === courseId 
+              ? { ...course, status: 'rejected' }
+              : course
+          )
+        );
+
+        // Show success message
+        toast.success('Course has been rejected successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      }
+    } catch (error) {
+      console.error("Error rejecting course:", error);
+      toast.error(error.response?.data?.message || 'Failed to reject course. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  };
+
   const getStatusColor = (status = 'pending') => {
     const colors = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -323,11 +371,13 @@ const ApprovalsComponent = () => {
                             data-tooltip-content="Reject Request"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusUpdate(course.id, 'rejected');
+                              if (window.confirm('Are you sure you want to reject this course?')) {
+                                handleRejectCourse(course.id);
+                              }
                             }}
-                            className="text-red-600 hover:bg-red-50 p-2 rounded-full"
+                            className="text-red-600 hover:bg-red-50 p-2 rounded-full transition-colors duration-200"
                           >
-                            <FiX />
+                            <FiX className="w-5 h-5" />
                           </button>
                         </div>
                       </td>
