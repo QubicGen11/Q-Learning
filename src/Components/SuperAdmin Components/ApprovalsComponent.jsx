@@ -3,6 +3,8 @@ import Cookies from "js-cookie";
 import { FiInfo, FiCheck, FiX, FiEye } from "react-icons/fi";
 import { Tooltip } from 'react-tooltip';
 import CourseContent from "../Courses Components/CourseContent";
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 // Add Modal Component
 const PreviewModal = ({ isOpen, onClose, course }) => {
@@ -120,7 +122,7 @@ const ApprovalsComponent = () => {
       setLoading(true);
       try {
         const token = Cookies.get('superadminToken');
-        const response = await fetch("http://localhost:8089/qlms/allCourses", {
+        const response = await fetch("http://localhost:8089/qlms/getUserCreatedCourse", {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -143,8 +145,63 @@ const ApprovalsComponent = () => {
   }, []);
 
   const handleStatusUpdate = async (courseId, newStatus) => {
-    // Implement status update logic here
-    console.log(`Updating status for course ${courseId} to ${newStatus}`);
+    try {
+      const token = Cookies.get('superadminToken');
+      
+      // Only proceed with API call if it's an approval action
+      if (newStatus === 'approved') {
+        const response = await axios.put(
+          `http://localhost:8089/qlms/approveCourse/${courseId}`,
+          {
+            approverId: "406d53ed-97bb-4964-a058-4ff1da8e5bfc",
+            approverName: "shaik Hussain",
+            status: "published"
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.status === 200) {
+          // Update the local state to reflect the change
+          setCourses(prevCourses => 
+            prevCourses.map(course => 
+              course.id === courseId 
+                ? { 
+                    ...course, 
+                    status: 'published',
+                    approverId: "406d53ed-97bb-4964-a058-4ff1da8e5bfc",
+                    approverName: "shaik Hussain"
+                  }
+                : course
+            )
+          );
+
+          // Show success message
+          toast.success('Course has been approved successfully!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error updating course status:", error);
+      toast.error(error.response?.data?.message || 'Failed to approve course. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
   };
 
   const getStatusColor = (status = 'pending') => {
@@ -257,9 +314,9 @@ const ApprovalsComponent = () => {
                               e.stopPropagation();
                               handleStatusUpdate(course.id, 'approved');
                             }}
-                            className="text-green-600 hover:bg-green-50 p-2 rounded-full"
+                            className="text-green-600 hover:bg-green-50 p-2 rounded-full transition-colors duration-200"
                           >
-                            <FiCheck />
+                            <FiCheck className="w-5 h-5" />
                           </button>
                           <button
                             data-tooltip-id="reject-tip"

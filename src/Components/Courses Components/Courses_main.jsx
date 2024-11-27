@@ -6,6 +6,10 @@ import config from '../../config/apiConfig';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { IconButton, Menu, MenuItem } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Courses_main = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,6 +23,8 @@ const Courses_main = () => {
   const [categories, setCategories] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [teachingFilter, setTeachingFilter] = useState('all');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
 
   const [techLogos, setTechLogos] = useState({
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -313,6 +319,18 @@ const Courses_main = () => {
     }
   };
 
+  const handleMenuOpen = (event, courseId) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedCourseId(courseId);
+  };
+
+  const handleMenuClose = (event) => {
+    event.stopPropagation();
+    setAnchorEl(null);
+    setSelectedCourseId(null);
+  };
+
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 bg-white dark:bg-gray-900 transition-all duration-300">
 
@@ -540,7 +558,7 @@ const Courses_main = () => {
                            border-gray-300 dark:border-gray-600
                            text-gray-900 dark:text-white"
                 >
-                  <option value="all">All Courses</option>
+                 
                   <option value="draft">Draft Courses</option>
                   <option value="review">Under Review</option>
                   <option value="published">Published</option>
@@ -622,42 +640,75 @@ const Courses_main = () => {
                     >
                       {/* Course Actions Dropdown */}
                       <div className="absolute top-2 right-2 z-10">
-                        <div className="relative group">
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
-                            <FiMoreVertical className="text-gray-600 dark:text-gray-400" />
-                          </button>
+                        <IconButton
+                          onClick={(e) => handleMenuOpen(e, course.id)}
+                          size="small"
+                          sx={{ 
+                            color: 'text.secondary',
+                            '&:hover': { 
+                              backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                            }
+                          }}
+                        >
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                        
+                        <Menu
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl) && selectedCourseId === course.id}
+                          onClose={handleMenuClose}
+                          onClick={(e) => e.stopPropagation()}
+                          PaperProps={{
+                            elevation: 0,
+                            sx: {
+                              overflow: 'visible',
+                              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                              mt: 1.5,
+                              '& .MuiMenuItem-root': {
+                                px: 2,
+                                py: 1,
+                                fontSize: '0.875rem',
+                              },
+                            },
+                          }}
+                          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                        >
+                          <MenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditCourse(course.id);
+                              handleMenuClose(e);
+                            }}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                            Edit Course
+                          </MenuItem>
                           
-                          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg 
-                                        border dark:border-gray-700 hidden group-hover:block">
-                            <div className="py-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditCourse(course.id);
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 
-                                       hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                              >
-                                <FiEdit2 />
-                                Edit Course
-                              </button>
-                              
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (window.confirm('Are you sure you want to delete this course?')) {
-                                    handleDeleteCourse(course.id);
-                                  }
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 
-                                       hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                              >
-                                <FiTrash2 />
-                                Delete Course
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                          <MenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm('Are you sure you want to delete this course?')) {
+                                handleDeleteCourse(course.id);
+                              }
+                              handleMenuClose(e);
+                            }}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                              color: 'error.main',
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                            Delete Course
+                          </MenuItem>
+                        </Menu>
                       </div>
 
                       {/* Status Badge - Only show when viewing drafts */}

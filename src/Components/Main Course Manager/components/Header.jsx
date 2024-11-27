@@ -46,7 +46,7 @@ const Header = ({ activeSection, onSave, onPreview, isEditing }) => {
         >
           {isEditing ? 
             (isSaving ? 'Updating...' : 'Update Course') : 
-            (isSaving ? 'Saving...' : 'Save Course')
+            (isSaving ? 'Submitting...' : 'Submit for Review')
           }
         </button>
       </div>
