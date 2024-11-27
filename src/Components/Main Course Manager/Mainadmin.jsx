@@ -12,6 +12,7 @@ import useCourseStore from '../../store/courseStore';
 import PreviewModal from './components/sections/PreviewModal';
 import ConfirmationModal from './components/ConfirmationModal';
 import ScrollToTop from '../Common/ScrollToTop.jsx';
+import useDraftStore from '../../store/draftStore';
 
 
 const Mainadmin = () => {
@@ -29,6 +30,8 @@ const Mainadmin = () => {
   const [showQuestionModal, setShowQuestionModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const saveDraft = useDraftStore((state) => state.saveDraft);
+  const isEditing = !!courseId;
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -93,18 +96,42 @@ const Mainadmin = () => {
     }
   };
 
+  const handleNextSection = () => {
+    const sections = ['basicInfo', 'aboutCourse', 'curriculum', 'lessons', 'resources', 'pricing'];
+    const currentIndex = sections.indexOf(activeSection);
+    if (currentIndex < sections.length - 1) {
+      setActiveSection(sections[currentIndex + 1]);
+    }
+  };
+
+  const handlePreviousSection = () => {
+    const sections = ['basicInfo', 'aboutCourse', 'curriculum', 'lessons', 'resources', 'pricing'];
+    const currentIndex = sections.indexOf(activeSection);
+    if (currentIndex > 0) {
+      setActiveSection(sections[currentIndex - 1]);
+    }
+  };
+
+  const handleSaveAsDraft = async () => {
+    try {
+      await saveDraft(courseData);
+      alert('Course saved as draft successfully!');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      alert('Failed to save draft');
+    }
+  };
+
   const renderSection = () => {
     switch (activeSection) {
       case 'basicInfo':
         return <BasicInformation />;
       case 'aboutCourse':
         return <AboutCourse />;
-      case 'curriculum':
-        return <Curriculum />;
+
       case 'lessons':
         return <Lessons />;
-      case 'resources':
-        return <Resources />;
+
       case 'pricing':
         return <Pricing />;
       default:
@@ -129,12 +156,49 @@ const Mainadmin = () => {
             activeSection={activeSection} 
             onSave={handleSave}
             onPreview={handlePreview}
-            isEditing={!!courseId}
+            isEditing={isEditing}
           />
           <div className="p-8">
-            <div className="max-w-8xl mx-auto  rounded-xl shadow-sm border border-gray-200 h-auto">
+            <div className="max-w-8xl mx-auto rounded-xl shadow-sm border border-gray-200 h-auto">
               <div className="p-8">
                 {renderSection()}
+              </div>
+              
+              <div className="flex justify-between items-center p-6 border-t border-gray-200">
+                <button
+                  onClick={handlePreviousSection}
+                  className={`px-4 py-2 text-gray-600 border border-gray-300 rounded-md ${
+                    activeSection === 'basicInfo' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
+                  }`}
+                  disabled={activeSection === 'basicInfo'}
+                >
+                  Previous
+                </button>
+                
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleSaveAsDraft}
+                    className="px-4 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50"
+                  >
+                    Save as Draft
+                  </button>
+                  
+                  {activeSection === 'pricing' ? (
+                    <button
+                      onClick={handleSave}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      {isEditing ? 'Update Course' : 'Create Course'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleNextSection}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
