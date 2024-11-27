@@ -18,6 +18,7 @@ const Courses_main = () => {
   const [myCourses, setMyCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [teachingFilter, setTeachingFilter] = useState('all');
 
   const [techLogos, setTechLogos] = useState({
     html: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -181,10 +182,22 @@ const Courses_main = () => {
   const getFilteredCourses = () => {
     if (viewMode === 'myCourses') {
       if (!Array.isArray(myCourses)) return [];
-      return myCourses.filter(course => 
+      let filtered = myCourses.filter(course => 
         (course.courseTitle?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
         (course.courseType?.toLowerCase() || '').includes(searchQuery.toLowerCase())
       );
+
+      // Apply teaching filter
+      switch(teachingFilter) {
+        case 'draft':
+          return filtered.filter(course => course.status === 'draft');
+        case 'review':
+          return filtered.filter(course => course.status === 'review');
+        case 'published':
+          return filtered.filter(course => course.status === 'published');
+        default:
+          return filtered;
+      }
     }
     let filtered = courses.filter(course => 
       ((course.title || '').toLowerCase()).includes(searchQuery.toLowerCase()) ||
@@ -246,6 +259,57 @@ const Courses_main = () => {
       }
     } catch (error) {
       console.error('Error deleting course:', error);
+    }
+  };
+
+  // Add new function to fetch draft courses
+  const fetchDraftCourses = async () => {
+    try {
+      const token = Cookies.get('accessToken');
+      const response = await axios.get(`${config.CURRENT_URL}/qlms/getAllCourseDrafts`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log("Draft Courses Data:", response.data);
+      setMyCourses(response.data); // Update myCourses state with draft courses
+    } catch (error) {
+      console.error('Error fetching draft courses:', error);
+      toast.error('Failed to load draft courses');
+    }
+  };
+
+  // Modify useEffect to handle different teaching filters
+  useEffect(() => {
+    if (viewMode === 'myCourses') {
+      if (teachingFilter === 'draft') {
+        fetchDraftCourses();
+      } else {
+        fetchMyCourses();
+      }
+    }
+  }, [viewMode, teachingFilter]);
+
+  // Modify handleEditCourse function
+  const handleEditCourse = async (courseId) => {
+    try {
+      const token = Cookies.get('accessToken');
+      const response = await axios.get(`${config.CURRENT_URL}/qlms/getAllCourseDrafts`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Navigate to edit page with course data
+      navigate(`/mainadmin/${courseId}`, { 
+        state: { courseData: response.data }
+      });
+    } catch (error) {
+      console.error('Error fetching course drafts:', error);
+      toast.error('Failed to load course drafts');
     }
   };
 
@@ -465,6 +529,23 @@ const Courses_main = () => {
                   My Teachings
                 </button>
               </div>
+
+              {/* Add Teaching Filter Dropdown */}
+              {viewMode === 'myCourses' && (
+                <select
+                  value={teachingFilter}
+                  onChange={(e) => setTeachingFilter(e.target.value)}
+                  className="ml-4 border rounded-lg px-3 py-2 text-sm
+                           bg-white dark:bg-gray-700
+                           border-gray-300 dark:border-gray-600
+                           text-gray-900 dark:text-white"
+                >
+                  <option value="all">All Courses</option>
+                  <option value="draft">Draft Courses</option>
+                  <option value="review">Under Review</option>
+                  <option value="published">Published</option>
+                </select>
+              )}
             </div>
 
             {/* Existing Language and Sort Controls */}
@@ -552,7 +633,7 @@ const Courses_main = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigate(`/mainadmin/${course.id}`);
+                                  handleEditCourse(course.id);
                                 }}
                                 className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 
                                        hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
@@ -578,6 +659,16 @@ const Courses_main = () => {
                           </div>
                         </div>
                       </div>
+
+                      {/* Status Badge - Only show when viewing drafts */}
+                      {teachingFilter === 'draft' && (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium 
+                                         bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            Draft
+                          </span>
+                        </div>
+                      )}
 
                       {/* Course Content (clickable to view course) */}
                       <div 
