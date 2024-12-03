@@ -89,11 +89,10 @@ const Lessons = () => {
     }
   };
 
-  const handleFileUpload = async (file, fileType) => {
+  const handleFileUpload = async (file) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('fileType', fileType);
 
       const response = await axios.post(`http://localhost:8082/upload `, formData, {
         headers: {

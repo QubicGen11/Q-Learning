@@ -457,6 +457,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        
         {/* Left Content */}
         <div className="lg:col-span-2">
           {activeTab === 'OVERVIEW' && (
@@ -704,7 +705,7 @@ const CourseContent = ({ previewMode = false, previewData = null }) => {
           )}
 
           {activeTab === 'RELATED_COURSES' && (
-            // ... existing related courses content ...
+          
             <div>
               <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                 Related Courses

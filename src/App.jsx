@@ -35,6 +35,8 @@ import Superadminlogin from './Components/SuperAdmin Components/Superadminlogin'
 import TestLesson from './Components/Main Course Manager/components/sections/TestLesson';
 import AssignmentManager from './Components/Main Course Manager/components/sections/Assignments';
 import Assignments from './Components/Main Course Manager/components/sections/Assignments';
+import Newlogin from './Components/New Login Components/Newlogin';
+import NewRegister from './Components/New Login Components/NewRegister';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -91,16 +93,8 @@ function App() {
            
         
             <Routes>
-              {/* <Route path="/login" element={<div>Login Page</div>} /> */}
-              <Route path="/login" element={<Login />} />
-              <Route 
-                path="/course-manager" 
-                element={
-                
-                    <CourseManager />
            
-                } 
-              />
+         
               <Route path="/" element={<Home />} />
               <Route path="/courses" element={<Courses_main />} />
               <Route path="/about" element={<About />} />
@@ -125,7 +119,8 @@ function App() {
               <Route path="/tetslessons" element={<TestLesson/>} />
               {/* <Route path="/assignmentsadd" element={<AssignmentManager/>} /> */}
               <Route path="/assignments" element={<Assignments/>} />
-              
+              <Route path="/login" element={<Newlogin/>} />
+              <Route path="/register" element={<NewRegister/>} />
               {/* Contact Route - Redirects to external URL */} 
               <Route
                 path="/contact"
