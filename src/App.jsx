@@ -37,6 +37,7 @@ import AssignmentManager from './Components/Main Course Manager/components/secti
 import Assignments from './Components/Main Course Manager/components/sections/Assignments';
 import Newlogin from './Components/New Login Components/Newlogin';
 import NewRegister from './Components/New Login Components/NewRegister';
+import Landingpage from './Components/New Landingpage/Landingpage';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -121,6 +122,7 @@ function App() {
               <Route path="/assignments" element={<Assignments/>} />
               <Route path="/login" element={<Newlogin/>} />
               <Route path="/register" element={<NewRegister/>} />
+              <Route path="/landingpage" element={<Landingpage/>} />
               {/* Contact Route - Redirects to external URL */} 
               <Route
                 path="/contact"

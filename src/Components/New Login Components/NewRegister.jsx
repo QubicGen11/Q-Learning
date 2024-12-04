@@ -30,13 +30,19 @@ const NewRegister = () => {
           </div>
 
           {/* Login/Register Tabs */}
-          <div className="flex gap-6 mb-8">
-            <Link to="/login" className="text-gray-500 hover:text-gray-700">
+          <div className="flex w-full border-b border-gray-200 mb-8">
+            <Link 
+              to="/login" 
+              className="flex-1 text-center text-[#6B7280] hover:text-gray-700 pb-4"
+            >
               Login
             </Link>
-            <button className="text-gray-900 border-b-2 border-blue-600 pb-1 font-medium">
+            <Link 
+              to="/register" 
+              className="flex-1 text-center text-[#0056B3] font-medium relative pb-4 after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[2px] after:bg-[#0056B3]"
+            >
               Register
-            </button>
+            </Link>
           </div>
 
           {/* Register Form */}
