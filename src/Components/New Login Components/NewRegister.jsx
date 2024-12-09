@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiEye, FiEyeOff, FiUser, FiMail } from 'react-icons/fi';
+import Newnavbar from '../New Landingpage/New Navbar Components/Newnavbar';
 
 const NewRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
+    <>
+    <Newnavbar/>
     <div className="flex h-screen overflow-hidden">
       {/* Left Side - Illustration */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#0056B3] items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
         <img 
           src="https://res.cloudinary.com/devewerw3/image/upload/v1732785413/illustration_1_pxlnzy.png" 
           alt="Learning Illustration" 
@@ -21,13 +24,13 @@ const NewRegister = () => {
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-6 lg:px-16 py-12">
         <div className="w-full max-w-[440px] min-h-[600px] flex flex-col">
           {/* Logo */}
-          <div className="flex items-center gap-2 mb-8  justify-center">
+          {/* <div className="flex items-center gap-2 mb-8  justify-center">
             <img 
               src="https://res.cloudinary.com/devewerw3/image/upload/v1732785466/logo_5_jqibzq.png" 
               alt="QubiNest Logo" 
               className="h-[44px]"
             />
-          </div>
+          </div> */}
 
           {/* Login/Register Tabs */}
           <div className="flex w-full border-b border-gray-200 mb-8">
@@ -132,6 +135,7 @@ const NewRegister = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
