@@ -5,7 +5,7 @@ const Newnavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-[64px] bg-white z-20 shadow-md">
+    <nav className="top-0 left-0 right-0 h-[64px] bg-white z-20 shadow-md">
       <div className="flex items-center justify-between px-6 py-4 bg-white rounded-lg border border-blue-300">
         {/* Logo */}
         <div className="flex items-center">
@@ -50,6 +50,7 @@ const Newnavbar = () => {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
+                  
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

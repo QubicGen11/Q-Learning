@@ -320,11 +320,11 @@ const NewRegister = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Newnavbar />
-      <div className="min-h-[calc(100vh-64px)] flex mt-[64px]">
+      <div className="flex flex-1">
         {/* Left Side - Illustration */}
-        <div className="hidden h-screen lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
           <img
             src="https://res.cloudinary.com/devewerw3/image/upload/v1733812760/Frame_178_a8ta4s.png"
             alt="Learning Illustration"
@@ -587,7 +587,7 @@ const NewRegister = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

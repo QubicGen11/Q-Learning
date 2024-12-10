@@ -207,10 +207,9 @@ const Newlogin = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Newnavbar />
-
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex flex-1">
         {/* Left Side - Gradient Background */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
           <img
@@ -221,7 +220,7 @@ const Newlogin = () => {
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-6 lg:px-16 py-12 bg-white">
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-16 py-8 overflow-y-auto">
           <div className="w-full max-w-[350px]">
             {/* Login/Register Tabs */}
             <div className="flex w-full border-b border-gray-200 mb-8">
@@ -417,7 +416,7 @@ const Newlogin = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
