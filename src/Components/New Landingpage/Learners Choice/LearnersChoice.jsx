@@ -66,14 +66,14 @@ const LearnersChoice = () => {
   
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {courses.map((course, index) => (
-              <div key={index} className="border rounded-lg p-4 hover:shadow-lg transition-shadow duration-300">
+              <div key={index} className="group border rounded-lg p-4 hover:shadow-lg transition-shadow duration-300">
                 <div className="flex gap-4">
                   {/* Left side - Image */}
-                  <div className="relative w-48 h-32">
+                  <div className="relative w-48 h-32 overflow-hidden rounded">
                     <img 
                       src={course.image} 
                       alt={course.title}
-                      className="w-full h-full object-cover rounded"
+                      className="w-full h-full object-cover rounded transition-transform duration-500 ease-in-out group-hover:scale-110"
                     />
                     <span className="absolute top-2 left-2 text-white text-sm px-3 py-1 rounded bg-blue-600">
                       Course Category
@@ -82,7 +82,9 @@ const LearnersChoice = () => {
   
                   {/* Right side - Content */}
                   <div className="flex-1">
-                    <h3 className="font-medium text-sm mb-1">{course.title}</h3>
+                    <h3 className="font-medium text-sm mb-1 group-hover:text-blue-600 transition-colors duration-300">
+                      {course.title}
+                    </h3>
                     <p className="text-gray-600 text-sm mb-2">{course.instructor}</p>
                     
                     <div className="flex items-center gap-2 mb-2">

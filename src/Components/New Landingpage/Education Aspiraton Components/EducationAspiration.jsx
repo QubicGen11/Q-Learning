@@ -28,17 +28,20 @@ const EducationAspiration = () => {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {aspirations.map((item, index) => (
-            <div key={index} className="p-6 border border-gray-200 rounded-lg hover:shadow-lg transition-all duration-300">
+            <div 
+              key={index} 
+              className="group p-6 border border-gray-200 rounded-lg hover:shadow-xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 bg-white"
+            >
               <div className="flex justify-center mb-4">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
+                <div className="w-24 h-24 bg-gray-50 group-hover:bg-blue-50 rounded-full flex items-center justify-center overflow-hidden transition-all duration-500 ease-in-out transform group-hover:scale-110">
                   <img 
                     src={item.image} 
                     alt={item.title}
-                    className="w-12 h-12 object-contain"
+                    className="w-12 h-12 object-contain transition-all duration-700 ease-in-out transform group-hover:rotate-[360deg]"
                   />
                 </div>
               </div>
-              <h3 className="text-center text-lg font-medium">
+              <h3 className="text-center text-lg font-medium group-hover:text-blue-600 transition-colors duration-300">
                 {item.title}
               </h3>
             </div>

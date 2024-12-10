@@ -68,17 +68,19 @@ const SkillsHomepage = () => {
         {designCourses.map((course, index) => (
           <div 
             key={index} 
-            className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+            className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
           >
-            <div className="aspect-w-16 aspect-h-9">
+            <div className="aspect-w-16 aspect-h-9 overflow-hidden">
               <img 
                 src={course.image} 
                 alt={course.title}
-                className="w-full h-40 object-cover"
+                className="w-full h-40 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
               />
             </div>
             <div className="p-4">
-              <h4 className="text-center text-gray-800 text-sm font-medium">{course.title}</h4>
+              <h4 className="text-center text-gray-800 text-sm font-medium group-hover:text-blue-600 transition-colors duration-300">
+                {course.title}
+              </h4>
             </div>
           </div>
         ))}

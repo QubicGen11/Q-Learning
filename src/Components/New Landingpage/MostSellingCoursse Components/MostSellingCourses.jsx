@@ -47,12 +47,15 @@ const MostSellingCourses = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course, index) => (
-              <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
-                <div className="relative">
+              <div 
+                key={index} 
+                className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div className="relative overflow-hidden">
                   <img 
                     src={course.image} 
                     alt={course.title} 
-                    className="w-full h-48 object-cover"
+                    className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
                   />
                   <div className="absolute top-4 left-4 bg-[#0056b3] text-white px-3 py-1 rounded-md text-sm">
                     Course Category
@@ -71,7 +74,9 @@ const MostSellingCourses = () => {
                     <span className="ml-2 text-sm">({course.rating} | {course.reviews})</span>
                   </div>
                   
-                  <h3 className="font-medium text-lg mb-2">{course.title}</h3>
+                  <h3 className="font-medium text-lg mb-2 group-hover:text-[#0056b3] transition-colors duration-300">
+                    {course.title}
+                  </h3>
                   <p className="text-gray-600 text-sm mb-2">{course.instructor}</p>
                   
                   <div className="flex items-center justify-between">
@@ -79,7 +84,7 @@ const MostSellingCourses = () => {
                       <span className="text-[#0056b3] font-bold">₹{course.currentPrice}</span>
                       <span className="ml-2 text-gray-400 line-through">₹{course.originalPrice}</span>
                     </div>
-                    <span className={`${course.tagColor} text-white text-sm px-2 py-1 rounded`}>
+                    <span className={`${course.tagColor} text-white text-sm px-2 py-1 rounded transition-transform duration-300 group-hover:scale-105`}>
                       {course.tag}
                     </span>
                   </div>

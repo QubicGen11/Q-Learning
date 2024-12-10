@@ -39,7 +39,7 @@ const Landingpage = () => {
 
       {/* Main Content - Starts after Latestdeals */}
       <div className="w-full mt-4" > {/* Adjust 64px to match navbar height */}
-        {/* <HeroSection /> */}
+        <HeroSection />
       </div>
       <Whatyougetcom />
       <SkillsHomepage />
