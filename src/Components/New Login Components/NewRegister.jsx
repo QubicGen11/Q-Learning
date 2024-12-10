@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FiEye, FiEyeOff, FiUser, FiMail } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { FiEye, FiEyeOff, FiUser, FiMail } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
+import Swal from "sweetalert2";
+import "react-toastify/dist/ReactToastify.css";
 
-import Newnavbar from '../New Landingpage/New Navbar Components/Newnavbar';
+import Newnavbar from "../New Landingpage/New Navbar Components/Newnavbar";
 
 const NewRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,26 +15,111 @@ const NewRegister = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    registrationCode: '30IR9d',
-    otpCode: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    registrationCode: "",
+  });
+  const [timer, setTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
+  useEffect(() => {
+    let interval;
+    if (showOtpModal && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true);
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtpModal, timer]);
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
+  const validateField = (name, value) => {
+    let error = "";
+    switch (name) {
+      case "firstName":
+        error = !value.trim() ? "First name is required" : "";
+        break;
+      case "lastName":
+        error = !value.trim() ? "Last name is required" : "";
+        break;
+      case "email":
+        error = !value.trim()
+          ? "Email is required"
+          : !validateEmail(value)
+          ? "Please enter a valid email"
+          : "";
+        break;
+      case "password":
+        error = !value
+          ? "Password is required"
+          : !validatePassword(value)
+          ? "Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number and 1 special character"
+          : "";
+        break;
+      case "confirmPassword":
+        error = !value
+          ? "Please confirm password"
+          : value !== formData.password
+          ? "Passwords do not match"
+          : "";
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+
+    if (name === "password") {
+      const confirmError = validateField(
+        "confirmPassword",
+        formData.confirmPassword
+      );
+      setErrors((prev) => ({ ...prev, confirmPassword: confirmError }));
+    }
   };
 
   const handleOtpChange = (element, index) => {
-    const value = element.value.toUpperCase(); // Convert to uppercase
+    let value = element.value;
 
-    if (!/^[A-Z0-9]*$/.test(value)) return; // Allow only alphanumeric
+    // Allow both uppercase and lowercase letters
+    if (!/^[a-zA-Z0-9]*$/.test(value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = value;
-
     setOtp(newOtp);
 
     // Focus next input
@@ -43,7 +130,7 @@ const NewRegister = () => {
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasteData = e.clipboardData.getData('text').toUpperCase().slice(0, 6);
+    const pasteData = e.clipboardData.getData("text").slice(0, 6);
     const newOtp = [...otp];
 
     for (let i = 0; i < pasteData.length; i++) {
@@ -53,25 +140,85 @@ const NewRegister = () => {
     setOtp(newOtp);
   };
 
+  const clearStates = () => {
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      registrationCode: "",
+    });
+    setErrors({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+    setOtp(new Array(6).fill(""));
+    setShowOtpModal(false);
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      if (key !== "registrationCode") {
+        newErrors[key] = validateField(key, formData[key]);
+      }
+    });
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some((error) => error)) {
+      return;
+    }
+
     setIsRegistering(true);
     try {
-      const response = await fetch('http://localhost:8089/qlms/register', {
-        method: 'POST',
+      const registrationData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      const response = await fetch("http://localhost:8089/qlms/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(registrationData),
       });
 
       if (response.ok) {
         setShowOtpModal(true);
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "OTP sent successfully!",
+          position: "center",
+          confirmButtonColor: "#0056B3",
+          iconColor: "#0056B3",
+        });
       } else {
-        console.error('Registration failed');
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: "Please try again",
+          position: "center",
+          confirmButtonColor: "#0056B3",
+        });
       }
     } catch (error) {
-      console.error('Error:', error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong during registration",
+        position: "center",
+      });
     } finally {
       setIsRegistering(false);
     }
@@ -80,35 +227,102 @@ const NewRegister = () => {
   const handleVerifyOtp = async () => {
     setIsVerifying(true);
     try {
-      const verificationResponse = await fetch('http://localhost:8089/qlms/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...formData, otpCode: otp.join('') }),
-      });
+      const verificationData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        registrationCode: otp.join(""),
+      };
+
+      const verificationResponse = await fetch(
+        "http://localhost:8089/qlms/verifyRegistration",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(verificationData),
+        }
+      );
 
       if (verificationResponse.ok) {
-        setShowOtpModal(false);
+        await Swal.fire({
+          icon: "success",
+          title: "Registration Successful!",
+          text: "You can now login to your account",
+          position: "center",
+          confirmButtonColor: "#0056B3",
+          iconColor: "#0056B3",
+        });
+        clearStates();
       } else {
-        console.error('OTP verification failed');
+        Swal.fire({
+          icon: "error",
+          title: "Verification Failed",
+          text: "Please try again",
+          position: "center",
+          confirmButtonColor: "#0056B3",
+        });
       }
     } catch (error) {
-      console.error('Error:', error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong during verification",
+        position: "center",
+      });
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleResendOtp = () => {
-    // Implement resend OTP logic here
-    console.log('Resend OTP');
+  const handleResendOtp = async () => {
+    if (!canResend) return;
+
+    try {
+      const registrationData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      const response = await fetch("http://localhost:8089/qlms/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      if (response.ok) {
+        setTimer(30);
+        setCanResend(false);
+        setOtp(new Array(6).fill(""));
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "OTP resent successfully!",
+          position: "center",
+          confirmButtonColor: "#0056B3",
+          iconColor: "#0056B3",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong resending OTP",
+        position: "center",
+      });
+    }
   };
 
   return (
     <>
       <Newnavbar />
-      <div className="flex h-screen overflow-hidden">
+      <div className="min-h-[calc(100vh-64px)] flex mt-[64px]">
         {/* Left Side - Illustration */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
           <img
@@ -119,26 +333,26 @@ const NewRegister = () => {
         </div>
 
         {/* Right Side - Register Form */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-6 lg:px-16 py-12">
-          <div className="w-full max-w-[440px] min-h-[600px] flex flex-col">
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-16 py-8 overflow-y-auto">
+          <div className="w-full max-w-[350px]">
             {/* Login/Register Tabs */}
-            <div className="flex w-full border-b border-gray-200 mb-8">
+            <div className="flex w-full border-b border-gray-200 mb-6">
               <Link
                 to="/login"
-                className="flex-1 text-center text-[#6B7280] hover:text-gray-700 pb-4"
+                className="flex-1 text-center text-[#6B7280] hover:text-gray-700 py-2"
               >
                 Login
               </Link>
               <Link
                 to="/register"
-                className="flex-1 text-center text-[#0056B3] font-medium relative pb-4 after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[2px] after:bg-[#0056B3]"
+                className="flex-1 text-center text-[#0056B3] font-medium relative py-2 after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[2px] after:bg-[#0056B3]"
               >
                 Register
               </Link>
             </div>
 
             {/* Register Form */}
-            <form className="space-y-6 flex-1 flex flex-col" onSubmit={handleRegister}>
+            <form onSubmit={handleRegister} className="space-y-3">
               {/* First Name Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -148,13 +362,21 @@ const NewRegister = () => {
                   <input
                     type="text"
                     name="firstName"
-                    placeholder="Enter First Name"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Enter your first name"
+                    className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
-                  <FiUser className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <FiUser
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                 </div>
+                {errors.firstName && (
+                  <p className="text-red-500 text-xs mt-0.5">
+                    {errors.firstName}
+                  </p>
+                )}
               </div>
 
               {/* Last Name Field */}
@@ -166,13 +388,21 @@ const NewRegister = () => {
                   <input
                     type="text"
                     name="lastName"
-                    placeholder="Enter Last Name"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Enter your last name"
+                    className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
-                  <FiUser className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <FiUser
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                 </div>
+                {errors.lastName && (
+                  <p className="text-red-500 text-xs mt-0.5">
+                    {errors.lastName}
+                  </p>
+                )}
               </div>
 
               {/* Email Field */}
@@ -184,18 +414,22 @@ const NewRegister = () => {
                   <input
                     type="email"
                     name="email"
-                    placeholder="Enter Email Address"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Enter your email"
+                    className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FiMail size={20} />
-                  </span>
+                  <FiMail
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                 </div>
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
+                )}
               </div>
 
-              {/* Set Password Field */}
+              {/* Password Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Set Password
@@ -204,18 +438,24 @@ const NewRegister = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
-                    placeholder="Enter Password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Enter your password"
+                    className="w-full pl-4 pr-12 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-gray-600"
-                  >
-                    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                  </span>
+                  <div className="absolute right-3 top-[50%] -translate-y-[50%] w-[20px] h-[20px] flex items-center justify-center pointer-events-none">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-400 hover:text-gray-600 w-full h-full flex items-center justify-center pointer-events-auto"
+                    >
+                      {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                    </button>
+                  </div>
                 </div>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-0.5">{errors.password}</p>
+                )}
               </div>
 
               {/* Confirm Password Field */}
@@ -226,55 +466,64 @@ const NewRegister = () => {
                 <div className="relative">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Enter Password"
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    className="w-full pl-4 pr-12 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
-                  <span
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-gray-600"
-                  >
-                    {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                  </span>
+                  <div className="absolute right-3 top-[50%] -translate-y-[50%] w-[20px] h-[20px] flex items-center justify-center pointer-events-none">
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="text-gray-400 hover:text-gray-600 w-full h-full flex items-center justify-center pointer-events-auto"
+                    >
+                      {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                    </button>
+                  </div>
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-xs mt-0.5">{errors.confirmPassword}</p>
+                )}
               </div>
 
-              {/* Register Button */}
-              <div className="mt-auto pt-6">
+              {/* Register Button - Fixed at bottom */}
+              <div className="mt-6">
                 <button
                   type="submit"
                   disabled={isRegistering}
-                  className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70"
+                  className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70 transition-colors"
                 >
-                  {isRegistering ? 'Registering...' : 'Register'}
+                  {isRegistering ? "Registering..." : "Register"}
                 </button>
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center my-6">
+                <hr className="flex-1 border-gray-300" />
+                <span className="px-4 text-sm text-gray-400">OR</span>
+                <hr className="flex-1 border-gray-300" />
+              </div>
+
+              {/* Social Login */}
+              <div>
+                <p className="text-sm text-center text-gray-600 mb-4">
+                  GET STARTED USING
+                </p>
+                <div className="flex justify-center gap-4">
+                  <button className="p-2 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors">
+                    <FcGoogle size={20} />
+                  </button>
+                  <button className="p-2 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
+                      alt="LinkedIn"
+                      className="w-5 h-5"
+                    />
+                  </button>
+                </div>
               </div>
             </form>
-
-            {/* Add Divider */}
-            <div className="flex items-center my-6">
-              <hr className="flex-1 border-gray-300" />
-              <span className="px-4 text-sm text-gray-400">OR</span>
-              <hr className="flex-1 border-gray-300" />
-            </div>
-
-            {/* Add Social Login */}
-            <div>
-              <p className="text-sm text-center text-gray-600 mb-4">
-                GET STARTED USING
-              </p>
-              <div className="flex justify-center gap-4">
-                <button className="p-2 border border-gray-300 rounded-full hover:bg-gray-100">
-                  <FcGoogle size={20} />
-                </button>
-                <button className="p-2 border border-gray-300 rounded-full hover:bg-gray-100">
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
-                    alt="LinkedIn"
-                    className="w-5 h-5"
-                  />
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -300,29 +549,40 @@ const NewRegister = () => {
                   onChange={(e) => handleOtpChange(e.target, index)}
                   onPaste={handlePaste}
                   onKeyUp={(e) => {
-                    if (e.key === 'Backspace' && !e.target.value && e.target.previousSibling) {
+                    if (
+                      e.key === "Backspace" &&
+                      !e.target.value &&
+                      e.target.previousSibling
+                    ) {
                       e.target.previousSibling.focus();
                     }
                   }}
-                  className="w-12 h-12 border-2 rounded text-center text-xl font-medium uppercase
+                  className="w-12 h-12 border-2 rounded text-center text-xl font-medium
                            focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
                            transition-all"
                 />
               ))}
             </div>
+            {timer > 0 && (
+              <div className="text-center text-sm text-gray-600 mb-4">
+                Time remaining: {timer} seconds
+              </div>
+            )}
             <button
               onClick={handleVerifyOtp}
               disabled={isVerifying}
               className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70"
             >
-              {isVerifying ? 'Verifying...' : 'Verify OTP'}
+              {isVerifying ? "Verifying..." : "Verify OTP"}
             </button>
             <button
               onClick={handleResendOtp}
-              disabled={isVerifying}
-              className="mt-4 text-sm text-blue-500 hover:underline disabled:opacity-70 w-full text-center"
+              disabled={!canResend || isVerifying}
+              className={`mt-4 text-sm ${
+                canResend ? "text-blue-500 hover:underline" : "text-gray-400"
+              } disabled:opacity-70 w-full text-center`}
             >
-              Resend OTP
+              {canResend ? "Resend OTP" : "Wait to resend OTP"}
             </button>
           </div>
         </div>
@@ -331,4 +591,4 @@ const NewRegister = () => {
   );
 };
 
-export default NewRegister; 
+export default NewRegister;
