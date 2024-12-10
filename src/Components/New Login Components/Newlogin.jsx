@@ -107,7 +107,9 @@ const Newlogin = () => {
             icon: 'success',
             title: 'Login Successful!',
             text: 'Welcome back!',
-            confirmButtonColor: '#0056B3'
+           
+               confirmButtonColor: '#0056B3',
+            iconColor: '#0056B3'
           }).then(() => {
             clearStates();
             // Add navigation logic here
