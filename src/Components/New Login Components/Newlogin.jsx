@@ -173,8 +173,8 @@ const Newlogin = () => {
 
         {/* OTP Modal */}
         {showOtpModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-96 relative">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+            <div className="bg-white p-8 rounded-lg  w-96 relative shadow-2xl" style={{border:"solid 2px black"}}>
               {/* Close button */}
               <button 
                 onClick={() => setShowOtpModal(false)}
