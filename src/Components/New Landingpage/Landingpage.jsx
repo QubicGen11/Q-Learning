@@ -5,11 +5,12 @@ import HeroSection from './Landing Page Section Components/HeroSection'
 import Whatyougetcom from './What You Get Components/Whatyougetcom'
 import SkillsHomepage from './Skills HomePage/SkillsHomepage'
 import MostSellingCourses from './MostSellingCoursse Components/MostSellingCourses'
-import EducationAspiration from './Education Aspiraton Components/EducationAspiration'
+
 import Testimonials from './Testimonials Homepage/Testimonials'
 import LearnersChoice from './Learners Choice/LearnersChoice'
 import Exploretopskills from './ExploreTopskills/Exploretopskills'
 import Footer from './Footer/Footer'
+import EducationAspiration from './Education Aspiraton Componenst/EducationAspiration'
 
 const Landingpage = () => {
   useEffect(() => {

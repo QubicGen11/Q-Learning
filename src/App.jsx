@@ -4,7 +4,7 @@ import Navbar_main from './Components/Navbar Components/Navbar_main';
 import Hero_Heading from './Components/Hero Components/Hero Components/Hero_Heading';
 import Hero_Features from './Components/Hero Components/Hero Components/Hero_Skills';
 import Paths from './Components/Hero Components/Hero Components/Paths';
-import Educational_Ecosystem from './Components/Ecosystem Components/Ecosystem';
+// import Educational_Ecosystem from './Components/Ecosystem Components/Ecosystem';
 import Testimonial from './Components/Testimonial Components/Testimonial';
 import Courses_main from './Components/Courses Components/Courses_main';
 import Careerpaths_main from './Components/Career Path Components/Careerpaths_main';
@@ -16,7 +16,7 @@ import CourseContent from './Components/Courses Components/CourseContent';
 import CourseLesson from './Components/Courses Components/CourseLesson';
 import ProtectedRoute from './Components/Auth/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
-import Carousel_main from './Components/Carousel Components/Carousel_main';
+// import Carousel_main from './Components/Carousel Components/Carousel_main';
 import SkillsSection from './Components/SkillsSection';
 import Learners_main from './Components/Learners Components/Learners_main';
 import ContactSection from './Components/Contact Us Home/Contact_usmain';
@@ -58,18 +58,18 @@ const Home = () => {
       {token && (
         <div className="welcome-carousel-container">
           <Welcome />
-          <Carousel_main />
+          {/* <Carousel_main /> */}
         </div>
       )}
       {!token && (
         <div className="mt-4">
-          <Carousel_main />
+          {/* <Carousel_main /> */}
         </div>
       )}
       <SkillsSection />
       <Learners_main />
       <Hero_Features />
-      <Educational_Ecosystem />
+      {/* <Educational_Ecosystem /> */}
       <ContactSection />
       <Testimonial />
 
