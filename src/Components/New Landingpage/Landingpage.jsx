@@ -2,6 +2,14 @@ import React, { useEffect } from 'react'
 import Latestdeals from './LatestDeals Componnets/Latestdeals'
 import Newnavbar from './New Navbar Components/Newnavbar'
 import HeroSection from './Landing Page Section Components/HeroSection'
+import Whatyougetcom from './What You Get Components/Whatyougetcom'
+import SkillsHomepage from './Skills HomePage/SkillsHomepage'
+import MostSellingCourses from './MostSellingCoursse Components/MostSellingCourses'
+import EducationAspiration from './Education Aspiraton Components/EducationAspiration'
+import Testimonials from './Testimonials Homepage/Testimonials'
+import LearnersChoice from './Learners Choice/LearnersChoice'
+import Exploretopskills from './ExploreTopskills/Exploretopskills'
+import Footer from './Footer/Footer'
 
 const Landingpage = () => {
   useEffect(() => {
@@ -25,14 +33,23 @@ const Landingpage = () => {
       </div>
 
       {/* Navbar - Fixed position after Latestdeals */}
-      <div className="fixed w-full bg-white shadow-sm navbar-section">
+      <div className="w-full bg-white shadow-sm navbar-section">
         <Newnavbar />
       </div>
 
       {/* Main Content - Starts after Latestdeals */}
-      <div className="w-full" style={{ marginTop: '64px' }}> {/* Adjust 64px to match navbar height */}
-        <HeroSection />
+      <div className="w-full mt-4" > {/* Adjust 64px to match navbar height */}
+        {/* <HeroSection /> */}
       </div>
+      <Whatyougetcom />
+      <SkillsHomepage />
+      <MostSellingCourses/>
+      <EducationAspiration/>
+      <Testimonials/>
+      <LearnersChoice/>
+      <Exploretopskills/>
+      <Footer/>
+      
     </div>
   )
 }
