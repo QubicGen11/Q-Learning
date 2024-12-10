@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiEye, FiEyeOff, FiUser, FiMail } from 'react-icons/fi';
+import { FcGoogle } from "react-icons/fc";
+
 import Newnavbar from '../New Landingpage/New Navbar Components/Newnavbar';
 
 const NewRegister = () => {
@@ -14,9 +16,9 @@ const NewRegister = () => {
       {/* Left Side - Illustration */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
         <img 
-          src="https://res.cloudinary.com/devewerw3/image/upload/v1732785413/illustration_1_pxlnzy.png" 
+          src="https://res.cloudinary.com/devewerw3/image/upload/v1733812760/Frame_178_a8ta4s.png" 
           alt="Learning Illustration" 
-          className="max-w-[600px] w-full object-contain"
+          className="max-w-[500px] w-full object-contain"
         />
       </div>
 
@@ -122,7 +124,7 @@ const NewRegister = () => {
               </div>
             </div>
 
-            {/* Register Button - Move to bottom */}
+            {/* Register Button */}
             <div className="mt-auto pt-6">
               <button
                 type="submit"
@@ -132,6 +134,32 @@ const NewRegister = () => {
               </button>
             </div>
           </form>
+
+          {/* Add Divider */}
+          <div className="flex items-center my-6">
+            <hr className="flex-1 border-gray-300" />
+            <span className="px-4 text-sm text-gray-400">OR</span>
+            <hr className="flex-1 border-gray-300" />
+          </div>
+
+          {/* Add Social Login */}
+          <div>
+            <p className="text-sm text-center text-gray-600 mb-4">
+              GET STARTED USING
+            </p>
+            <div className="flex justify-center gap-4">
+              <button className="p-2 border border-gray-300 rounded-full hover:bg-gray-100">
+                <FcGoogle size={20} />
+              </button>
+              <button className="p-2 border border-gray-300 rounded-full hover:bg-gray-100">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
+                  alt="LinkedIn"
+                  className="w-5 h-5"
+                />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
