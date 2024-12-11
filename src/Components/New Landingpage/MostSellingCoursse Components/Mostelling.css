@@ -1,0 +1,78 @@
+/* Reset default slick arrows */
+.slick-prev:before,
+.slick-next:before {
+  display: none !important;
+}
+
+/* Custom arrow styling */
+.custom-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: white !important;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.custom-arrow:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.custom-arrow svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  margin: auto;
+}
+
+.custom-arrow.next {
+  right: -20px !important;
+}
+
+.custom-arrow.prev {
+  left: -20px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .custom-arrow.next {
+    right: 0 !important;
+  }
+  
+  .custom-arrow.prev {
+    left: 0 !important;
+  }
+}
+
+/* Add padding to container for arrow space */
+.slick-slider {
+  padding: 0 20px !important;
+}
+
+/* Hide disabled arrows */
+.slick-disabled {
+  display: none !important;
+}
+
+/* Slide spacing */
+.slick-track {
+  display: flex !important;
+  gap: 1.5rem;
+  margin-left: 0 !important;
+}
+
+.slick-slide {
+  height: inherit !important;
+}
+
+.slick-slide > div {
+  height: 100%;
+}
