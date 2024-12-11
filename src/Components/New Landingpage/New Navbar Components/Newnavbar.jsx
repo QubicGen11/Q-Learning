@@ -1,6 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FiShoppingCart, FiMenu, FiX, FiBell, FiHeart } from 'react-icons/fi';
 import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import { IoMdLogOut } from "react-icons/io";
+import { FaRegUser } from 'react-icons/fa';
+
+const useClickOutside = (ref, handler) => {
+  useEffect(() => {
+    const listener = (event) => {
+      if (!ref.current || ref.current.contains(event.target)) {
+        return;
+      }
+      handler(event);
+    };
+
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [ref, handler]);
+};
 
 const Newnavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,7 +32,9 @@ const Newnavbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
-
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak67etRi_Ly1NApIiKr4VjhVC2ZehmrdxW0JsKo0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89'); // Default avatar URL
   useEffect(() => {
     const accessToken = Cookies.get('accessToken');
     const refreshToken = Cookies.get('refreshToken');
@@ -25,6 +50,10 @@ const Newnavbar = () => {
       }
     }
   }, []);
+
+  useClickOutside(dropdownRef, () => {
+    setIsProfileDropdownOpen(false);
+  });
 
   const categories = [
     { 
@@ -290,6 +319,52 @@ const Newnavbar = () => {
     setSelectedCategory(null);
   };
 
+  const handleLogout = () => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You will be logged out of your account",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#0056B3',
+      
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, logout!',
+          
+            iconColor: '#0056B3'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Clear cookies
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
+        
+        Swal.fire({
+          title: 'Logged Out!',
+          text: 'You have been successfully logged out.',
+          icon: 'success',
+          iconColor: '#0056B3',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => {
+          // Refresh the page after the alert closes
+          window.location.reload();
+        });
+      }
+    });
+  };
+
+  const profileMenuItems = [
+    { label: 'My Learning', link: '/my-learning' },
+    { label: 'My Cart', link: '/cart' },
+    { label: 'Wishlist', link: '/wishlist' },
+    { label: 'Teach on QubiNest', link: '/teach' },
+    { label: 'Notifications', link: '/notifications' },
+    { label: 'Account Settings', link: '/settings' },
+    { label: 'Edit Profile', link: '/profile/edit' },
+    { label: 'Purchase History', link: '/purchases' },
+    { label: 'Subscriptions', link: '/subscriptions' },
+    { label: 'Help and Support', link: '/support' },
+  ];
+
   return (
     <nav className="top-0 left-0 right-0 h-[64px] bg-white z-20 shadow-md">
       <div className="flex items-center justify-between px-6 py-4 bg-white rounded-lg border border-blue-300">
@@ -474,17 +549,57 @@ const Newnavbar = () => {
             <FiBell size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
             <FiHeart size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
             <FiShoppingCart size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
-            <div className="flex items-center">
-              <img
-                src="https://via.placeholder.com/32"
-                alt="User"
-                className="w-8 h-8 rounded-full"
-              />
-              <div className="ml-2 text-gray-600">
-                <span>{userName}</span>
-                <br />
-                <span className="text-sm">{userEmail}</span>
+            <div ref={dropdownRef} className="relative">
+              <div 
+                className="flex items-center cursor-pointer"
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+              >
+                {userImage ? (
+                  <img
+                    src={userImage}
+                    alt="User"
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <FaRegUser size={25} className="text-gray-600 hover:text-gray-900"/>
+                )}
+
+
+                <div className="ml-2 text-gray-600">
+                  <span>{userName}</span>
+                  <br />
+                  <span className="text-sm">{userEmail}</span>
+                </div>
               </div>
+
+              {/* Profile Dropdown */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-[#f3f4f6] rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="py-2">
+                    {profileMenuItems.map((item, index) => (
+                      <React.Fragment key={index}>
+                        <a
+                          href={item.link}
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          {item.label}
+                        </a>
+                        {/* Add divider after specific items */}
+                        {(index === 2 || index === 3 || index === 8) && (
+                          <hr className="my-1 border-gray-200" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-white bg-[#6b7280] flex items-center"
+                    >
+                      <span className="mr-2"><IoMdLogOut />
+                      </span> Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (

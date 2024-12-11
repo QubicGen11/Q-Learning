@@ -38,6 +38,7 @@ import Assignments from './Components/Main Course Manager/components/sections/As
 import Newlogin from './Components/New Login Components/Newlogin';
 import NewRegister from './Components/New Login Components/NewRegister';
 import Landingpage from './Components/New Landingpage/Landingpage';
+import Afterlogin from './Components/After login landing page/Afterlogin';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -130,6 +131,7 @@ function App() {
               />
 
               <Route path="/cart" element={<Cart />} />
+              <Route path="/afterlogin" element={<Afterlogin/>} />
 
               <Route path="*" element={<div>404 Not Found</div>} />
             </Routes>

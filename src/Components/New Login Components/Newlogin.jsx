@@ -96,11 +96,15 @@ const Newlogin = () => {
             title: 'Login Successful!',
             text: 'Welcome back!',
             confirmButtonColor: '#0056B3',
-            iconColor: '#0056B3'
+            iconColor: '#0056B3',
+            timer: 1000,
+            showConfirmButton: false
           }).then(() => {
             clearStates();
-            // Add navigation logic here
-            // For example: navigate('/dashboard');
+            // Add a delay before refreshing
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           });
         }
       } else {
@@ -110,17 +114,26 @@ const Newlogin = () => {
         });
         
         if (response.status === 200) {
+          const { accessToken, refreshToken } = response.data;
+          
+          // Set tokens in cookies
+          Cookies.set('accessToken', accessToken, { expires: 7 });
+          Cookies.set('refreshToken', refreshToken, { expires: 7 });
+
           Swal.fire({
             icon: 'success',
             title: 'Login Successful!',
             text: 'Welcome back!',
-           
-               confirmButtonColor: '#0056B3',
-            iconColor: '#0056B3'
+            confirmButtonColor: '#0056B3',
+            iconColor: '#0056B3',
+            timer: 1000,
+            showConfirmButton: false
           }).then(() => {
             clearStates();
-            // Add navigation logic here
-            // For example: navigate('/dashboard');
+            // Add a delay before refreshing
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           });
         }
       }
