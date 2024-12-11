@@ -4,16 +4,11 @@ import { motion } from 'framer-motion';
 const HeroSection = () => {
   return (
     <div 
-      className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-[#0056B3] to-[#00254D]"
+      className="relative w-full h-auto overflow-hidden  flex justify-center items-center " style={{backgroundImage:"url('https://res.cloudinary.com/defsu5bfc/image/upload/v1733895183/Landing_Page_ki7ywx.png')"}}
     >
       {/* Background pattern - using CSS instead of image */}
-      <div 
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.2) 1px, transparent 0)`,
-          backgroundSize: '30px 30px',
-        }}
-      />
+
+      
 
       {/* Main content */}
       <div className="relative z-20 container mx-auto px-6 py-20 flex items-center justify-between">
@@ -49,7 +44,7 @@ const HeroSection = () => {
               alt="Teaching illustration"
               width="450"
               height="auto"
-              className="w-[450px] h-auto"
+              className="w-[550px] h-auto"
               loading="eager"
               decoding="async"
             />

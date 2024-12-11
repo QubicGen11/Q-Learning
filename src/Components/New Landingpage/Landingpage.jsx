@@ -11,6 +11,7 @@ import LearnersChoice from './Learners Choice/LearnersChoice'
 import Exploretopskills from './ExploreTopskills/Exploretopskills'
 import Footer from './Footer/Footer'
 import EducationAspiration from './Education Aspiraton Componenst/EducationAspiration'
+import Toptrending from './Top Trending Skills/Toptrending'
 
 const Landingpage = () => {
   useEffect(() => {
@@ -48,6 +49,7 @@ const Landingpage = () => {
       <EducationAspiration/>
       <Testimonials/>
       <LearnersChoice/>
+      <Toptrending/>
       <Exploretopskills/>
       <Footer/>
       
