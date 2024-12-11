@@ -25,7 +25,7 @@ const Logoutherosec = () => {
       <div className="w-full md:w-1/2 px-4 md:px-8 md:mr-[120px]">
         <div className="rounded-2xl overflow-hidden">
           <img
-            src="https://res.cloudinary.com/devewerw3/image/upload/v1733910167/image_21_k1nsh4.png"
+            src="https://res.cloudinary.com/defsu5bfc/image/upload/v1733937661/image_nqapir.png"
             alt="Study Materials"
             className="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover object-center"
             style={{

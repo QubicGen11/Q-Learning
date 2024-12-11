@@ -37,7 +37,7 @@ const Topcategories = () => {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`whitespace-nowrap  hover:bg-[#f2f9ff] hover:p-2 rounded-2xl text-sm font-medium ${
+              className={`whitespace-nowrap hover:bg-[#f2f9ff] hover:transition-all duration-300 ease-in-out rounded-2xl text-sm font-medium ${
                 activeCategory === category
                 ? 'text-[#0056B3] border-b-2 border-[#0056B3]'
                 : 'text-gray-500 hover:text-gray-700'

@@ -5,9 +5,10 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { IoMdLogOut } from "react-icons/io";
 import { FaRegUser } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 const useClickOutside = (ref, handler) => {
+  
   useEffect(() => {
     const listener = (event) => {
       if (!ref.current || ref.current.contains(event.target)) {
@@ -27,6 +28,7 @@ const useClickOutside = (ref, handler) => {
 };
 
 const Newnavbar = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -347,7 +349,7 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
           showConfirmButton: false
         }).then(() => {
           // Refresh the page after the alert closes
-          window.location.reload();
+          navigate('/whenuserlogout');
         });
       }
     });
@@ -371,11 +373,13 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
       <div className="flex items-center justify-between px-6 py-4 bg-white rounded-lg border border-gray-300">
         {/* Logo */}
         <div className="flex items-center">
+          <Link to="/">
           <img
             src="https://res.cloudinary.com/devewerw3/image/upload/v1732785466/logo_5_jqibzq.png"
             alt="QubiNest"
             className="h-7"
           />
+          </Link>
         </div>
 
         {/* Search Bar with Explore Dropdown */}

@@ -1,0 +1,29 @@
+/* Custom styles for slick slider */
+.slick-slide {
+    padding: 0;
+  }
+  
+  .slick-slide > div {
+    margin: 0;
+  }
+  
+  .slick-track {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Add smooth transition for the fade effect */
+  .slick-slider .slick-slide {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .slick-slider .slick-slide.slick-active {
+    opacity: 1;
+  }
+
+  /* Custom button hover effects */
+  .nav-button:hover {
+    background-color: white;
+    border-color: #e5e7eb;
+  }
