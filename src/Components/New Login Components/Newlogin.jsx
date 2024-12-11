@@ -5,6 +5,7 @@ import { FcGoogle } from 'react-icons/fc';
 import Newnavbar from '../New Landingpage/New Navbar Components/Newnavbar';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Cookies from 'js-cookie';
 
 const Newlogin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -83,6 +84,12 @@ const Newlogin = () => {
         console.log('Login Response:', response);
         
         if (response.status === 200) {
+          const { accessToken, refreshToken } = response.data;
+          
+          // Set tokens in cookies
+          Cookies.set('accessToken', accessToken, { expires: 7 });
+          Cookies.set('refreshToken', refreshToken, { expires: 7 });
+
           setShowOtpModal(false);
           Swal.fire({
             icon: 'success',

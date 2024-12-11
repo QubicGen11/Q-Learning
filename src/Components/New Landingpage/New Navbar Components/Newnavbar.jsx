@@ -1,10 +1,30 @@
-import React, { useState } from 'react';
-import { FiShoppingCart, FiMenu, FiX } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiShoppingCart, FiMenu, FiX, FiBell, FiHeart } from 'react-icons/fi';
+import Cookies from 'js-cookie';
 
 const Newnavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    const accessToken = Cookies.get('accessToken');
+    const refreshToken = Cookies.get('refreshToken');
+    
+    if (accessToken && refreshToken) {
+      try {
+        const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+        setIsLoggedIn(true);
+        setUserName(tokenPayload.userName);
+        setUserEmail('firstname@gmail.com'); // Replace with actual email if available
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+  }, []);
 
   const categories = [
     { 
@@ -446,18 +466,37 @@ const Newnavbar = () => {
           </div>
         </div>
 
-        {/* Rest of your existing navbar code */}
-        <div className="hidden md:flex items-center gap-4 lg:gap-8">
-          <a href="#" className="text-gray-600 hover:text-gray-900">Teach Online</a>
-          <a href="#" className="text-gray-600 hover:text-gray-900">About Platform</a>
-          <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
-          <a href="#" className="text-gray-600 hover:text-gray-900">
-            <FiShoppingCart size={20} />
-          </a>
-          <button className="bg-[#0056B3] text-white px-4 py-2 rounded-md">
-            Get Started
-          </button>
-        </div>
+        {/* User Info and Icons */}
+        {isLoggedIn ? (
+          <div className="hidden md:flex items-center gap-4 lg:gap-8">
+            <a href="#" className="text-gray-600 hover:text-gray-900">Teach Online</a>
+            <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
+            <FiBell size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
+            <FiHeart size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
+            <FiShoppingCart size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
+            <div className="flex items-center">
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User"
+                className="w-8 h-8 rounded-full"
+              />
+              <div className="ml-2 text-gray-600">
+                <span>{userName}</span>
+                <br />
+                <span className="text-sm">{userEmail}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="hidden md:flex items-center gap-4 lg:gap-8">
+            <a href="#" className="text-gray-600 hover:text-gray-900">Teach Online</a>
+            <a href="#" className="text-gray-600 hover:text-gray-900">About Platform</a>
+            <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
+            <button className="bg-[#0056B3] text-white px-4 py-2 rounded-md">
+              Get Started
+            </button>
+          </div>
+        )}
 
         {/* Mobile menu button */}
         <button
@@ -472,12 +511,38 @@ const Newnavbar = () => {
       {isMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-t border-gray-200">
           <div className="px-4 py-2">
-            <a href="#" className="block py-2 text-gray-600">Teach Online</a>
-            <a href="#" className="block py-2 text-gray-600">About Platform</a>
-            <a href="#" className="block py-2 text-gray-600">Contact</a>
-            <button className="w-full mt-2 bg-[#0056B3] text-white px-4 py-2 rounded-md">
-              Get Started
-            </button>
+            {isLoggedIn ? (
+              <>
+                <a href="#" className="block py-2 text-gray-600">Teach Online</a>
+                <a href="#" className="block py-2 text-gray-600">Contact</a>
+                <div className="flex items-center gap-4 py-2">
+                  <FiBell size={20} className="text-gray-600 hover:text-gray-900" />
+                  <FiHeart size={20} className="text-gray-600 hover:text-gray-900" />
+                  <FiShoppingCart size={20} className="text-gray-600 hover:text-gray-900" />
+                </div>
+                <div className="flex items-center mt-2">
+                  <img
+                    src="https://via.placeholder.com/32"
+                    alt="User"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="ml-2 text-gray-600">
+                    <span>{userName}</span>
+                    <br />
+                    <span className="text-sm">{userEmail}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <a href="#" className="block py-2 text-gray-600">Teach Online</a>
+                <a href="#" className="block py-2 text-gray-600">About Platform</a>
+                <a href="#" className="block py-2 text-gray-600">Contact</a>
+                <button className="w-full mt-2 bg-[#0056B3] text-white px-4 py-2 rounded-md">
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
