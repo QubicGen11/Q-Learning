@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { IoMdLogOut } from "react-icons/io";
 import { FaRegUser } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const useClickOutside = (ref, handler) => {
   useEffect(() => {
@@ -607,9 +608,11 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
             <a href="#" className="text-gray-600 hover:text-gray-900">Teach Online</a>
             <a href="#" className="text-gray-600 hover:text-gray-900">About Platform</a>
             <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
+            <Link to="/login" className="text-gray-600 hover:text-gray-900">
             <button className="bg-[#0056B3] text-white px-4 py-2 rounded-md">
               Get Started
             </button>
+            </Link>
           </div>
         )}
 

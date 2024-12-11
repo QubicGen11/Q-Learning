@@ -101,10 +101,8 @@ const Newlogin = () => {
             showConfirmButton: false
           }).then(() => {
             clearStates();
-            // Add a delay before refreshing
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            // Redirect to afterlogin page
+            window.location.href = '/afterlogin';
           });
         }
       } else {
@@ -130,10 +128,8 @@ const Newlogin = () => {
             showConfirmButton: false
           }).then(() => {
             clearStates();
-            // Add a delay before refreshing
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            // Redirect to afterlogin page
+            window.location.href = '/afterlogin';
           });
         }
       }

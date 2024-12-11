@@ -39,6 +39,7 @@ import Newlogin from './Components/New Login Components/Newlogin';
 import NewRegister from './Components/New Login Components/NewRegister';
 import Landingpage from './Components/New Landingpage/Landingpage';
 import Afterlogin from './Components/After login landing page/Afterlogin';
+import Whenuserlogout from './Components/When User Logout/Whenuserlogout';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -97,7 +98,7 @@ function App() {
             <Routes>
            
          
-              <Route path="/" element={<Home />} />
+              {/* <Route path="/" element={<Home />} /> */}
               <Route path="/courses" element={<Courses_main />} />
               <Route path="/about" element={<About />} />
               <Route path="/courses/:id" element={<CourseContent />} />
@@ -123,7 +124,7 @@ function App() {
               <Route path="/assignments" element={<Assignments/>} />
               <Route path="/login" element={<Newlogin/>} />
               <Route path="/register" element={<NewRegister/>} />
-              <Route path="/landingpage" element={<Landingpage/>} />
+              <Route path="/" element={<Landingpage/>} />
               {/* Contact Route - Redirects to external URL */} 
               <Route
                 path="/contact"
@@ -132,7 +133,7 @@ function App() {
 
               <Route path="/cart" element={<Cart />} />
               <Route path="/afterlogin" element={<Afterlogin/>} />
-
+              <Route path="/whenuserlogout" element={<Whenuserlogout/>} />
               <Route path="*" element={<div>404 Not Found</div>} />
             </Routes>
             <ScrollToTopButton />
