@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Logoutherosec = () => {
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center px-4 md:px-6 py-8 md:py-12 w-full md:w-[100vw] mx-auto shadow-xl">
+    <div className="flex flex-col md:flex-row items-center justify-center px-4 md:px-6 py-8 md:py-12 w-full md:w-[100vw] mx-auto shadow-md">
       {/* Left Section - Text Content */}
       <div className="w-full md:w-1/2 px-4 md:ml-[120px] text-center md:text-left mb-8 md:mb-0">
         <h1 className="text-4xl md:text-5xl lg:text-[64px] font-bold text-[#1B1B1B] mb-4 md:mb-6 leading-tight">
