@@ -367,7 +367,7 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
 
   return (
     <nav className="top-0 left-0 right-0 h-[64px] bg-white z-20 shadow-md">
-      <div className="flex items-center justify-between px-6 py-4 bg-white rounded-lg border border-blue-300">
+      <div className="flex items-center justify-between px-6 py-4 bg-white rounded-lg border border-gray-300">
         {/* Logo */}
         <div className="flex items-center">
           <img
