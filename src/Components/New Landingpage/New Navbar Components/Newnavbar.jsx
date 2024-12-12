@@ -369,8 +369,8 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
   ];
 
   return (
-    <nav className="top-0 left-0 right-0 h-[64px] bg-white z-20 shadow-md">
-      <div className="flex items-center justify-between px-6 py-4 bg-white rounded-lg border border-gray-300">
+    <nav className="relative bg-white z-50">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-white border-b border-gray-300">
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/">
@@ -414,6 +414,7 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
                 >
                   <div className="flex">
                     {/* Categories List - keep width proportional */}
+                    <a href="/categories">
                     <div className="w-[250px] border-r border-gray-200 py-2">
                       {categories.map((category, index) => (
                         <div 
@@ -442,6 +443,7 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
                         </div>
                       ))}
                     </div>
+                    </a>
 
                     {/* Course Preview - updated layout */}
                     {selectedCategory?.courses && (
@@ -621,48 +623,90 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
         )}
 
         {/* Mobile menu button */}
-        <button
-          className="md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-        </button>
+        <div className="md:hidden">
+          <button
+            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu - Updated */}
       {isMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-t border-gray-200">
-          <div className="px-4 py-2">
+        <div className="absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-200 md:hidden">
+          <div className="px-4 py-3 space-y-3">
+            {/* Search bar for mobile */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search courses..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
+              />
+            </div>
+
+            {/* Mobile Navigation Items */}
             {isLoggedIn ? (
               <>
-                <a href="#" className="block py-2 text-gray-600">Teach Online</a>
-                <a href="#" className="block py-2 text-gray-600">Contact</a>
-                <div className="flex items-center gap-4 py-2">
-                  <FiBell size={20} className="text-gray-600 hover:text-gray-900" />
-                  <FiHeart size={20} className="text-gray-600 hover:text-gray-900" />
-                  <FiShoppingCart size={20} className="text-gray-600 hover:text-gray-900" />
-                </div>
-                <div className="flex items-center mt-2">
+                <div className="flex items-center space-x-3 py-3 border-b border-gray-200">
                   <img
-                    src="https://via.placeholder.com/32"
-                    alt="User"
-                    className="w-8 h-8 rounded-full"
+                    src={userImage}
+                    alt={userName}
+                    className="w-10 h-10 rounded-full"
                   />
-                  <div className="ml-2 text-gray-600">
-                    <span>{userName}</span>
-                    <br />
-                    <span className="text-sm">{userEmail}</span>
+                  <div>
+                    <p className="font-medium text-gray-900">{userName}</p>
+                    <p className="text-sm text-gray-500">{userEmail}</p>
                   </div>
+                </div>
+
+                {/* Navigation Links */}
+                <div className="space-y-2">
+                  <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                    My Learning
+                  </a>
+                  <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                    My Cart
+                  </a>
+                  <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                    Wishlist
+                  </a>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                    Teach Online
+                  </a>
+                  <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                    Notifications
+                  </a>
+                  <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                    Account Settings
+                  </a>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-3 py-2 text-left text-red-600 hover:bg-red-50 rounded-md flex items-center"
+                  >
+                    <IoMdLogOut className="mr-2" /> Logout
+                  </button>
                 </div>
               </>
             ) : (
               <>
-                <a href="#" className="block py-2 text-gray-600">Teach Online</a>
-                <a href="#" className="block py-2 text-gray-600">About Platform</a>
-                <a href="#" className="block py-2 text-gray-600">Contact</a>
-                <button className="w-full mt-2 bg-[#0056B3] text-white px-4 py-2 rounded-md">
-                  Get Started
-                </button>
+                <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                  Teach Online
+                </a>
+                <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                  About Platform
+                </a>
+                <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                  Contact
+                </a>
+                <Link to="/login">
+                  <button className="w-full mt-2 bg-[#0056B3] text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Get Started
+                  </button>
+                </Link>
               </>
             )}
           </div>

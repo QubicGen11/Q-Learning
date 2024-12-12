@@ -185,9 +185,9 @@ const AllCourses = () => {
                   )}
                 </div>
                 <div className="absolute bottom-3 right-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-white">{course.currentPrice}</span>
-                    <span className="text-xs text-gray-300 line-through">{course.originalPrice}</span>
+                  <div className="flex items-center gap-2 bg-[#f3f4f6] p-2">
+                    <span className="text-sm font-bold text-[#0056B3] shadow-2xl">{course.currentPrice}</span>
+                    <span className="text-xs text-[#0056B3] font-bold line-through">{course.originalPrice}</span>
                   </div>
                 </div>
               </div>
