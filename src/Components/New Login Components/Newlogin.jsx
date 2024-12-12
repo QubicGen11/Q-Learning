@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff, FiMail } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import Newnavbar from '../New Landingpage/New Navbar Components/Newnavbar';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
+import useAuthStore from '../../stores/authStore';
 
 const Newlogin = () => {
+  const { login, sendOtp, verifyOtp, loading } = useAuthStore();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [otpLogin, setOtpLogin] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState(new Array(6).fill(""));
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const navigate = useNavigate();
 
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return;
@@ -31,119 +33,49 @@ const Newlogin = () => {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const response = await axios.post('http://localhost:8089/qlms/sendOtp', {
-        email: email
-      });
-      
-      console.log('OTP Response:', response);
-      
-      if (response.status === 200) {
-        setShowOtpModal(true);
-        setTimer(30);
-        setCanResend(false);
-        setOtp(new Array(6).fill(""));
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'OTP Sent!',
-          text: 'Please check your email for the OTP',
-          confirmButtonColor: '#0056B3',
-            iconColor: '#0056B3'
-        });
-        
-        console.log('ShowOtpModal state after setting:', true);
-      }
-    } catch (error) {
-      console.error('OTP Error:', error);
-      
+    if (!email) {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.message || 'Failed to send OTP'
+        title: 'Email Required',
+        text: 'Please enter your email address',
+        confirmButtonColor: '#0056B3'
       });
-    } finally {
-      setLoading(false);
+      return;
+    }
+
+    console.log('Sending OTP to:', email);
+    const success = await sendOtp(email);
+    console.log('Send OTP result:', success); // Debug log
+    
+    if (success) {
+      console.log('Setting showOtpModal to true');
+      setShowOtpModal(true);
+      setTimer(30);
+      setCanResend(false);
+      setOtp(new Array(6).fill(""));
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
     
-    try {
-      let response;
-      if (otpLogin) {
-        response = await axios.post('http://localhost:8089/qlms/loginWithOtp', {
-          email: email,
-          otpCode: otp.join('')
-        });
-        
-        console.log('Login Response:', response);
-        
-        if (response.status === 200) {
-          const { accessToken, refreshToken } = response.data;
-          
-          // Set tokens in cookies
-          Cookies.set('accessToken', accessToken, { expires: 7 });
-          Cookies.set('refreshToken', refreshToken, { expires: 7 });
-
-          setShowOtpModal(false);
-          Swal.fire({
-            icon: 'success',
-            title: 'Login Successful!',
-            text: 'Welcome back!',
-            confirmButtonColor: '#0056B3',
-            iconColor: '#0056B3',
-            timer: 1000,
-            showConfirmButton: false
-          }).then(() => {
-            clearStates();
-            // Redirect to afterlogin page
-            window.location.href = '/afterlogin';
-          });
-        }
-      } else {
-        response = await axios.post('http://localhost:8089/qlms/loginWithPassword', {
-          email: email,
-          password: password
-        });
-        
-        if (response.status === 200) {
-          const { accessToken, refreshToken } = response.data;
-          
-          // Set tokens in cookies
-          Cookies.set('accessToken', accessToken, { expires: 7 });
-          Cookies.set('refreshToken', refreshToken, { expires: 7 });
-
-          Swal.fire({
-            icon: 'success',
-            title: 'Login Successful!',
-            text: 'Welcome back!',
-            confirmButtonColor: '#0056B3',
-            iconColor: '#0056B3',
-            timer: 1000,
-            showConfirmButton: false
-          }).then(() => {
-            clearStates();
-            // Redirect to afterlogin page
-            window.location.href = '/afterlogin';
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Login Error:', error);
-      
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: error.response?.data?.message || 'Invalid credentials',
-        confirmButtonColor: '#0056B3'
+    if (otpLogin && showOtpModal) {
+      const otpString = otp.join('');
+      console.log('Attempting OTP verification with:', {
+        email,
+        otpCode: otpString
       });
-    } finally {
-      setLoading(false);
+      
+      const success = await verifyOtp(email, otp);
+      if (success) {
+        setShowOtpModal(false);
+        navigate('/afterlogin');
+      }
+    } else if (!otpLogin) {
+      const success = await login(email, password);
+      if (success) {
+        navigate('/afterlogin');
+      }
     }
   };
 
@@ -161,31 +93,11 @@ const Newlogin = () => {
 
   const handleResendOtp = async () => {
     if (!canResend) return;
-    
-    setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:8089/qlms/sendOtp', {
-        email: email
-      });
-      
-      if (response.data.success) {
-        setTimer(30);
-        setCanResend(false);
-        setOtp(new Array(6).fill(""));
-        Swal.fire({
-          icon: 'success',
-          title: 'OTP Resent!',
-          text: 'Please check your email for the new OTP'
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.message || 'Failed to resend OTP'
-      });
-    } finally {
-      setLoading(false);
+    const success = await sendOtp(email);
+    if (success) {
+      setTimer(30);
+      setCanResend(false);
+      setOtp(new Array(6).fill(""));
     }
   };
 
@@ -210,17 +122,9 @@ const Newlogin = () => {
     console.log('ShowOtpModal state changed:', showOtpModal);
   }, [showOtpModal]);
 
-  const clearStates = () => {
-    setEmail('');
-    setPassword('');
-    setOtp(new Array(6).fill(""));
-    setShowOtpModal(false);
-    setOtpLogin(false);
-    setShowPassword(false);
-    setLoading(false);
-    setTimer(30);
-    setCanResend(false);
-  };
+  useEffect(() => {
+    console.log('OTP Modal State:', showOtpModal);
+  }, [showOtpModal]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -382,7 +286,10 @@ const Newlogin = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg w-96 relative">
             <button
-              onClick={() => setShowOtpModal(false)}
+              onClick={() => {
+                console.log('Closing OTP Modal');
+                setShowOtpModal(false);
+              }}
               className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
             >
               ✕
@@ -405,6 +312,7 @@ const Newlogin = () => {
                   className="w-12 h-12 border-2 rounded text-center text-xl font-medium
                            focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
                            transition-all"
+                  autoFocus={index === 0}
                 />
               ))}
             </div>
@@ -414,8 +322,11 @@ const Newlogin = () => {
               </div>
             )}
             <button
-              onClick={handleLogin}
-              disabled={loading}
+              onClick={(e) => {
+                e.preventDefault();
+                handleLogin(e);
+              }}
+              disabled={loading || otp.some(digit => digit === "")}
               className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70"
             >
               {loading ? "Verifying..." : "Verify OTP"}
@@ -427,7 +338,7 @@ const Newlogin = () => {
                 canResend ? "text-blue-500 hover:underline" : "text-gray-400"
               } disabled:opacity-70 w-full text-center`}
             >
-              {canResend ? "Resend OTP" : "Wait to resend OTP"}
+              {canResend ? "Resend OTP" : `Wait ${timer} seconds to resend OTP`}
             </button>
           </div>
         </div>

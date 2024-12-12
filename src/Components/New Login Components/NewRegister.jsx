@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiUser, FiMail } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import Swal from "sweetalert2";
 import "react-toastify/dist/ReactToastify.css";
 
 import Newnavbar from "../New Landingpage/New Navbar Components/Newnavbar";
+import useRegisterStore from "../../stores/registerStore";
+
 
 const NewRegister = () => {
+  const {
+    formData,
+    otp,
+    showOtpModal,
+    loading,
+    timer,
+    canResend,
+    updateForm,
+    updateOtp,
+    register,
+    startTimer,
+    resetForm,
+    verifyRegistration
+  } = useRegisterStore();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otp, setOtp] = useState(new Array(6).fill(""));
-  const [isRegistering, setIsRegistering] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    registrationCode: "",
-  });
-  const [timer, setTimer] = useState(30);
-  const [canResend, setCanResend] = useState(false);
   const [errors, setErrors] = useState({
     firstName: "",
     lastName: "",
@@ -31,6 +35,8 @@ const NewRegister = () => {
     password: "",
     confirmPassword: "",
   });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     let interval;
@@ -98,7 +104,7 @@ const NewRegister = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    updateForm(name, value);
 
     const error = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: error }));
@@ -118,9 +124,7 @@ const NewRegister = () => {
     // Allow both uppercase and lowercase letters
     if (!/^[a-zA-Z0-9]*$/.test(value)) return;
 
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
+    updateOtp(index, value);
 
     // Focus next input
     if (value && element.nextSibling) {
@@ -137,141 +141,23 @@ const NewRegister = () => {
       newOtp[i] = pasteData[i];
     }
 
-    setOtp(newOtp);
+    updateOtp(newOtp);
   };
 
-  const clearStates = () => {
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      registrationCode: "",
-    });
-    setErrors({
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
-    setOtp(new Array(6).fill(""));
-    setShowOtpModal(false);
-  };
-
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newErrors = {};
-    Object.keys(formData).forEach((key) => {
-      if (key !== "registrationCode") {
-        newErrors[key] = validateField(key, formData[key]);
-      }
-    });
-
-    setErrors(newErrors);
-
-    if (Object.values(newErrors).some((error) => error)) {
-      return;
-    }
-
-    setIsRegistering(true);
-    try {
-      const registrationData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-      };
-
-      const response = await fetch("http://localhost:8089/qlms/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registrationData),
-      });
-
-      if (response.ok) {
-        setShowOtpModal(true);
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "OTP sent successfully!",
-          position: "center",
-          confirmButtonColor: "#0056B3",
-          iconColor: "#0056B3",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Registration Failed",
-          text: "Please try again",
-          position: "center",
-          confirmButtonColor: "#0056B3",
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Something went wrong during registration",
-        position: "center",
-      });
-    } finally {
-      setIsRegistering(false);
-    }
+    await register();
   };
 
   const handleVerifyOtp = async () => {
     setIsVerifying(true);
     try {
-      const verificationData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        registrationCode: otp.join(""),
-      };
-
-      const verificationResponse = await fetch(
-        "http://localhost:8089/qlms/verifyRegistration",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(verificationData),
-        }
-      );
-
-      if (verificationResponse.ok) {
-        await Swal.fire({
-          icon: "success",
-          title: "Registration Successful!",
-          text: "You can now login to your account",
-          position: "center",
-          confirmButtonColor: "#0056B3",
-          iconColor: "#0056B3",
-        });
-        clearStates();
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Verification Failed",
-          text: "Please try again",
-          position: "center",
-          confirmButtonColor: "#0056B3",
-        });
+      const success = await verifyRegistration();
+      if (success) {
+        navigate('/login');
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Something went wrong during verification",
-        position: "center",
-      });
+      console.error('Verification error:', error);
     } finally {
       setIsVerifying(false);
     }
@@ -299,7 +185,7 @@ const NewRegister = () => {
       if (response.ok) {
         setTimer(30);
         setCanResend(false);
-        setOtp(new Array(6).fill(""));
+        updateOtp(new Array(6).fill(""));
         Swal.fire({
           icon: "success",
           title: "Success!",
@@ -352,7 +238,7 @@ const NewRegister = () => {
             </div>
 
             {/* Register Form */}
-            <form onSubmit={handleRegister} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* First Name Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -491,10 +377,10 @@ const NewRegister = () => {
               <div className="mt-6">
                 <button
                   type="submit"
-                  disabled={isRegistering}
+                  disabled={loading}
                   className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70 transition-colors"
                 >
-                  {isRegistering ? "Registering..." : "Register"}
+                  {loading ? "Registering..." : "Register"}
                 </button>
               </div>
 

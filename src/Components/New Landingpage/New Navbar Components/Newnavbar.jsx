@@ -6,9 +6,10 @@ import Swal from 'sweetalert2';
 import { IoMdLogOut } from "react-icons/io";
 import { FaRegUser } from 'react-icons/fa';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import useNavbarStore from '../../../stores/navbarStore';
+import useAuthStore from '../../../stores/authStore';
 
 const useClickOutside = (ref, handler) => {
-  
   useEffect(() => {
     const listener = (event) => {
       if (!ref.current || ref.current.contains(event.target)) {
@@ -29,15 +30,33 @@ const useClickOutside = (ref, handler) => {
 
 const Newnavbar = () => {
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isExploreOpen, setIsExploreOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const {
+    isMenuOpen,
+    isExploreOpen,
+    isProfileDropdownOpen,
+    selectedCategory,
+    toggleMenu,
+    toggleExplore,
+    toggleProfileDropdown,
+    setSelectedCategory,
+    closeAll
+  } = useNavbarStore();
+
+  const {
+    isLoggedIn,
+    userName,
+    userEmail,
+    userImage,
+    logout,
+    checkAuth
+  } = useAuthStore();
+
   const dropdownRef = useRef(null);
-const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak67etRi_Ly1NApIiKr4VjhVC2ZehmrdxW0JsKo0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89'); // Default avatar URL
+
+  useEffect(() => {
+    checkAuth(); // Check authentication status when component mounts
+  }, [checkAuth]);
+
   useEffect(() => {
     const accessToken = Cookies.get('accessToken');
     const refreshToken = Cookies.get('refreshToken');
@@ -55,7 +74,9 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
   }, []);
 
   useClickOutside(dropdownRef, () => {
-    setIsProfileDropdownOpen(false);
+    if (isProfileDropdownOpen) {
+      toggleProfileDropdown(false);
+    }
   });
 
   const categories = [
@@ -318,8 +339,7 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
   ];
 
   const handleMouseLeave = () => {
-    setIsExploreOpen(false);
-    setSelectedCategory(null);
+    closeAll();
   };
 
   const handleLogout = () => {
@@ -329,26 +349,22 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#0056B3',
-      
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, logout!',
-          
-            iconColor: '#0056B3'
+      iconColor: '#0056B3'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Clear cookies
-        Cookies.remove('accessToken');
-        Cookies.remove('refreshToken');
-        
+        logout();
         Swal.fire({
           title: 'Logged Out!',
           text: 'You have been successfully logged out.',
           icon: 'success',
+          confirmButtonColor: '#0056B3',
           iconColor: '#0056B3',
-          timer: 1500,
+          timer: 2000,
+          timerProgressBar: true,
           showConfirmButton: false
         }).then(() => {
-          // Refresh the page after the alert closes
           navigate('/whenuserlogout');
         });
       }
@@ -387,12 +403,15 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
           <div className="relative flex items-center w-[70%]">
             <div className="relative">
               <button 
-                className="flex items-center px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-l-full hover:bg-gray-50"
-                onClick={() => setIsExploreOpen(!isExploreOpen)}
+                className="flex items-center px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-l-full 
+                hover:bg-gray-50 hover:border-[#0056B3] hover:text-[#0056B3] transition-all duration-200"
+                onClick={toggleExplore}
               >
                 Explore
                 <svg
-                  className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${isExploreOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${
+                    isExploreOpen ? 'rotate-180' : ''
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -539,11 +558,12 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
               )}
             </div>
 
-            {/* Search Input */}
+            {/* Search Input with matching hover effect */}
             <input
               type="text"
               placeholder="Type anything..."
-              className="w-full px-4 py-2 border-y border-r border-gray-300 rounded-r-full focus:outline-none focus:border-blue-400"
+              className="w-full px-4 py-2 border-y border-r border-gray-300 rounded-r-full 
+              focus:outline-none focus:border-[#0056B3] hover:border-[#0056B3] transition-all duration-200"
             />
           </div>
         </div>
@@ -551,47 +571,65 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
         {/* User Info and Icons */}
         {isLoggedIn ? (
           <div className="hidden md:flex items-center gap-4 lg:gap-8">
-            <a href="#" className="text-gray-600 hover:text-gray-900">Teach Online</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
-            <FiBell size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
-            <FiHeart size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
-            <FiShoppingCart size={20} className="text-gray-600 hover:text-gray-900 cursor-pointer" />
+            <a href="#" className="text-gray-600 hover:text-[#0056B3] hover:scale-110 transform transition-transform duration-200 ">
+              Teach Online
+            </a>
+            <a href="#" className="text-gray-600 hover:text-[#0056B3] hover:scale-110 transform transition-transform duration-200 ">
+              Contact
+            </a>
+            <FiBell 
+              size={20} 
+              className="text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
+            />
+            <FiHeart 
+              size={20} 
+              className="text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
+            />
+            <FiShoppingCart 
+              size={20} 
+              className="text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
+            />
             <div ref={dropdownRef} className="relative">
-              <div 
-                className="flex items-center cursor-pointer"
-                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+              <button 
+                className="flex items-center cursor-pointer hover:text-[#0056B3] transition-colors duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleProfileDropdown(!isProfileDropdownOpen);
+                }}
               >
                 {userImage ? (
                   <img
                     src={userImage}
                     alt="User"
-                    className="w-8 h-8 rounded-full"
+                    className="w-8 h-8 rounded-full transform transition-transform hover:scale-110 duration-200"
                   />
                 ) : (
-                  <FaRegUser size={25} className="text-gray-600 hover:text-gray-900"/>
+                  <FaRegUser 
+                    size={25} 
+                    className="text-gray-600 hover:text-[#0056B3] transform transition-transform hover:scale-125 duration-200"
+                  />
                 )}
-
-
                 <div className="ml-2 text-gray-600">
                   <span>{userName}</span>
                   <br />
                   <span className="text-sm">{userEmail}</span>
                 </div>
-              </div>
+              </button>
 
-              {/* Profile Dropdown */}
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-[#f3f4f6] rounded-lg shadow-lg border border-gray-200 z-50">
+                <div 
+                  className="absolute right-0 mt-2 w-64 bg-[#f3f4f6] rounded-lg shadow-lg border border-gray-200 z-50"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="py-2">
                     {profileMenuItems.map((item, index) => (
                       <React.Fragment key={index}>
                         <a
                           href={item.link}
-                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          className="block px-4 py-2 text-gray-700 hover:bg-[#0056B3] hover:text-white transition-colors duration-200"
                         >
                           {item.label}
                         </a>
-                        {/* Add divider after specific items */}
                         {(index === 2 || index === 3 || index === 8) && (
                           <hr className="my-1 border-gray-200" />
                         )}
@@ -599,10 +637,9 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
                     ))}
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-white bg-[#6b7280] flex items-center"
+                      className="w-full text-left px-4 py-2 text-white bg-[#6b7280] hover:bg-[#0056B3] flex items-center transition-colors duration-200"
                     >
-                      <span className="mr-2"><IoMdLogOut />
-                      </span> Logout
+                      <span className="mr-2"><IoMdLogOut /></span> Logout
                     </button>
                   </div>
                 </div>
@@ -611,13 +648,19 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
           </div>
         ) : (
           <div className="hidden md:flex items-center gap-4 lg:gap-8">
-            <a href="#" className="text-gray-600 hover:text-gray-900">Teach Online</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">About Platform</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
-            <Link to="/login" className="text-gray-600 hover:text-gray-900">
-            <button className="bg-[#0056B3] text-white px-4 py-2 rounded-md">
-              Get Started
-            </button>
+            <a href="#" className="text-gray-600 hover:text-[#0056B3] transition-colors duration-200">
+              Teach Online
+            </a>
+            <a href="#" className="text-gray-600 hover:text-[#0056B3] transition-colors duration-200">
+              About Platform
+            </a>
+            <a href="#" className="text-gray-600 hover:text-[#0056B3] transition-colors duration-200">
+              Contact
+            </a>
+            <Link to="/login">
+              <button className="bg-[#0056B3] text-white px-4 py-2 rounded-md hover:bg-[#004494] transition-colors duration-200">
+                Get Started
+              </button>
             </Link>
           </div>
         )}
@@ -625,8 +668,8 @@ const [userImage, setUserImage] = useState('https://imgs.search.brave.com/oB7Ak6
         {/* Mobile menu button */}
         <div className="md:hidden">
           <button
+            onClick={toggleMenu}
             className="p-2 rounded-md hover:bg-gray-100"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
