@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -11,6 +11,8 @@ import ScrollToTopButton from './Components/ScrollToTopButton';
 import './App.css';
 import Notfound from './Components/Not Found Page/Notfound';
 import Categoriesmain from './Components/Categories Components/Categoriesmain';
+import useAuthStore from './stores/authStore';
+import Cookies from 'js-cookie';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -25,6 +27,11 @@ Swal.mixin({
 
 
 function App() {
+  useEffect(() => {
+    const cleanup = useAuthStore.getState().initializeTokenListener();
+    return () => cleanup();
+  }, []);
+
   return (
  
         <Router>

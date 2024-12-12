@@ -87,7 +87,7 @@ const Exploretopskills = () => {
                   >
                     <span className="text-xs sm:text-sm pr-2">{item}</span>
                     <svg 
-                      className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" 
+                      className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 opacity-100 transition-opacity duration-200 flex-shrink-0" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -121,7 +121,7 @@ const Exploretopskills = () => {
                   >
                     <span className="text-xs sm:text-sm pr-2">{item}</span>
                     <svg 
-                      className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" 
+                      className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 opacity-100 transition-opacity duration-200 flex-shrink-0" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"

@@ -3,6 +3,8 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+const tokenExpirationEvent = new Event('tokenExpired');
+
 const useAuthStore = create((set) => ({
   isLoggedIn: false,
   userName: '',
@@ -37,7 +39,9 @@ const useAuthStore = create((set) => ({
           icon: 'success',
           title: 'Login Successful!',
           text: 'Welcome back!',
-          confirmButtonColor: '#0056B3',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
           iconColor: '#0056B3'
         });
         return true;
@@ -174,6 +178,80 @@ const useAuthStore = create((set) => ({
         Cookies.remove('refreshToken');
       }
     }
+  },
+
+  showSessionExpiredPopup: async () => {
+    if (!useAuthStore.getState().loading && useAuthStore.getState().isLoggedIn) {
+      set({ loading: true });
+      
+      await Swal.fire({
+        title: 'Session Expired',
+        text: 'Your session has expired. Please login again.',
+        icon: 'warning',
+        confirmButtonText: 'Login',
+        confirmButtonColor: '#0056B3',
+        showCloseButton: true,
+        closeButtonHtml: '&times;',
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown animate__faster'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp animate__faster'
+        },
+        customClass: {
+          closeButton: 'swal2-close-button',
+          popup: 'swal2-popup-custom'
+        },
+        didOpen: (popup) => {
+          const closeButton = popup.querySelector('.swal2-close');
+          if (closeButton) {
+            closeButton.style.position = 'absolute';
+            closeButton.style.right = '8px';
+            closeButton.style.top = '8px';
+            closeButton.style.fontSize = '22px';
+            closeButton.style.color = '#666';
+            closeButton.style.transition = 'color 0.2s';
+            closeButton.addEventListener('mouseover', () => {
+              closeButton.style.color = '#333';
+            });
+            closeButton.addEventListener('mouseout', () => {
+              closeButton.style.color = '#666';
+            });
+          }
+        }
+      }).then((result) => {
+        set({
+          isLoggedIn: false,
+          userName: '',
+          userEmail: '',
+          loading: false
+        });
+        
+        window.location.href = '/whenuserlogout';
+      });
+    }
+  },
+
+  initializeTokenListener: () => {
+    let isChecking = false;
+    
+    const checkToken = () => {
+      if (isChecking) return;
+      isChecking = true;
+      
+      const state = useAuthStore.getState();
+      if (state.isLoggedIn && !Cookies.get('accessToken') && !state.loading) {
+        useAuthStore.getState().showSessionExpiredPopup();
+      }
+      
+      isChecking = false;
+    };
+
+    const intervalCheck = setInterval(checkToken, 5000);
+
+    return () => {
+      clearInterval(intervalCheck);
+    };
   }
 }));
 
