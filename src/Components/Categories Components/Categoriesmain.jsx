@@ -6,6 +6,7 @@ import EducationAspiration from '../New Landingpage/Education Aspiraton Componen
 import Featuredsection from './Featuredsection'
 import PopularTopics from './PopularTopics'
 import AllCourses from './AllCourses'
+import PopularInstructors from './PopularInstructors'
 
 const Categoriesmain = () => {
   return (
@@ -17,6 +18,7 @@ const Categoriesmain = () => {
         <EducationAspiration/>
         <PopularTopics/>
         <AllCourses/>
+        <PopularInstructors/>
         <Footer/>
         </div>
       

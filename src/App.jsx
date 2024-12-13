@@ -13,6 +13,7 @@ import Notfound from './Components/Not Found Page/Notfound';
 import Categoriesmain from './Components/Categories Components/Categoriesmain';
 import useAuthStore from './stores/authStore';
 import Cookies from 'js-cookie';
+import Coursepagemain from './Components/CoursePage Components/Coursepagemain';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -84,6 +85,7 @@ function App() {
               <Route path="/whenuserlogout" element={<Whenuserlogout/>} />
               <Route path="*" element={<Notfound/>} />
               <Route path="/categories" element={<Categoriesmain/>} />
+              <Route path="/course/:id" element={<Coursepagemain/>} />
             </Routes>
             <ScrollToTopButton />
           </div>
