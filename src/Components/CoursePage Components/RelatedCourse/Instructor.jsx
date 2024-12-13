@@ -13,7 +13,7 @@ const Instructor = () => {
   const instructorCourses = [
     {
       title: "Basic Fundamentals of User Experience Design",
-      image: "https://images.unsplash.com/photo-1587440871875-191322ee64b0",
+    //   image: "https://images.unsplash.com/photo-1587440871875-191322ee64b0",
       price: "₹399/-",
       originalPrice: "₹3,999/-",
       rating: 4.7,
@@ -23,7 +23,7 @@ const Instructor = () => {
     },
     {
       title: "Basic Fundamentals of User Experience Design",
-      image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c",
+    //   image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c",
       price: "₹399/-",
       originalPrice: "₹3,999/-",
       rating: 4.7,
@@ -33,7 +33,7 @@ const Instructor = () => {
     },
     {
       title: "Basic Fundamentals of User Experience Design",
-      image: "https://images.unsplash.com/photo-1587614382346-4ec70e388b28",
+    //   image: "https://images.unsplash.com/photo-1587614382346-4ec70e388b28",
       price: "₹399/-",
       originalPrice: "₹3,999/-",
       rating: 4.7,

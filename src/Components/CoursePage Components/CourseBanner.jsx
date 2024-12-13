@@ -140,22 +140,40 @@ const CourseBanner = () => {
           ref={compactContentRef} 
           className="relative z-20 max-w-7xl mx-auto px-4 h-full hidden"
         >
-          <div className="h-full flex items-center justify-between">
+          <div className="h-full flex items-center justify-between space-x-56">
             <div className="flex-1">
               <h1 className="text-xl font-bold text-white truncate pr-4">
                 Real World UX | Learn User Experience & Start Your Career
               </h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
+                <div className="bg-[#dc3545] px-3 py-1 rounded">
+                  Highest Rated
+                </div>
+                <div className='text-white bg-[#4B5563] px-3 py-1 rounded'>Last updated 07/2023</div>
+                
+                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-300">
+                
+              
+              </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-yellow-400">★★★★★</span>
+                  <span>(1,858 Ratings)</span>
+                </div>
+                <div>15,490 students</div>
+              </div>
+              
             </div>
+            
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-white">₹649</span>
                 <span className="text-green-500 text-sm">79% off</span>
               </div>
-              <button className="bg-[#0056b3] text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+              <button className="bg-[#0056b3] text-white px- py-2 rounded hover:bg-blue-700 text-sm">
                 Add to Cart
               </button>
-              <button className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 text-sm">
+              <button className="bg-white text-blue-600 px- py-2 rounded hover:bg-gray-100 text-sm">
                 Buy Now
               </button>
             </div>
