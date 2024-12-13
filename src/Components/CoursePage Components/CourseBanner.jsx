@@ -159,7 +159,7 @@ const CourseBanner = () => {
                   <span className="text-yellow-400">★★★★★</span>
                   <span>(1,858 Ratings)</span>
                 </div>
-                <div>15,490 students</div>
+                {/* <div>15,490 students</div> */}
               </div>
               
             </div>
@@ -170,10 +170,10 @@ const CourseBanner = () => {
                 <span className="text-2xl font-bold text-white">₹649</span>
                 <span className="text-green-500 text-sm">79% off</span>
               </div>
-              <button className="bg-[#0056b3] text-white px- py-2 rounded hover:bg-blue-700 text-sm">
+              <button className="bg-[#0056b3] text-white w-64 px- py-2 rounded hover:bg-blue-700 text-sm">
                 Add to Cart
               </button>
-              <button className="bg-white text-blue-600 px- py-2 rounded hover:bg-gray-100 text-sm">
+              <button className="bg-white text-blue-600 w-64 px- py-2 rounded hover:bg-gray-100 text-sm">
                 Buy Now
               </button>
             </div>
