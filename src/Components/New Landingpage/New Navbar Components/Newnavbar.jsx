@@ -8,6 +8,8 @@ import { FaRegUser } from 'react-icons/fa';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import useNavbarStore from '../../../stores/navbarStore';
 import useAuthStore from '../../../stores/authStore';
+import NotificationPopup from './NotificationPopup';
+import WishlistPopup from './WishlistPopup';
 
 const useClickOutside = (ref, handler) => {
   useEffect(() => {
@@ -52,6 +54,8 @@ const Newnavbar = () => {
   } = useAuthStore();
 
   const dropdownRef = useRef(null);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
 
   useEffect(() => {
     checkAuth(); // Check authentication status when component mounts
@@ -577,18 +581,31 @@ const Newnavbar = () => {
             <a href="#" className="text-gray-600 hover:text-[#0056B3] hover:scale-110 transform transition-transform duration-200 ">
               Contact
             </a>
-            <FiBell 
-              size={20} 
-              className="text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
-            />
-            <FiHeart 
-              size={20} 
-              className="text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
-            />
-            <FiShoppingCart 
-              size={20} 
-              className="text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
-            />
+            <div className="relative">
+              <FiBell 
+                size={20} 
+                className="notification-bell text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              />
+              <NotificationPopup 
+                isOpen={isNotificationOpen} 
+                onClose={() => setIsNotificationOpen(false)}
+              />
+            </div>
+            <div className="relative">
+              <FiHeart 
+                size={20} 
+                className="wishlist-icon text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
+                onClick={() => setIsWishlistOpen(!isWishlistOpen)}
+              />
+              <WishlistPopup 
+                isOpen={isWishlistOpen} 
+                onClose={() => setIsWishlistOpen(false)}
+              />
+            </div>
+            <Link to="/cart">
+              <FiShoppingCart size={20} />
+            </Link>
             <div ref={dropdownRef} className="relative">
               <button 
                 className="flex items-center cursor-pointer hover:text-[#0056B3] transition-colors duration-200"
