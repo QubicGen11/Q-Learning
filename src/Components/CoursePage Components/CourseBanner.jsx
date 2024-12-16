@@ -9,12 +9,14 @@ const CourseBanner = () => {
   const compactContentRef = useRef(null);
 
   useEffect(() => {
-    // Set initial states
+    const spacer = document.getElementById('banner-spacer');
     gsap.set(compactContentRef.current, { opacity: 0, display: 'none' });
     
     const handleScroll = () => {
       const scrollY = window.scrollY;
       if (scrollY > 100) {
+        spacer.style.display = 'block';
+        
         gsap.to(bannerRef.current, {
           height: '80px',
           position: 'fixed',
@@ -35,6 +37,8 @@ const CourseBanner = () => {
           duration: 0.3 
         });
       } else {
+        spacer.style.display = 'none';
+        
         gsap.to(bannerRef.current, {
           height: '400px',
           position: 'relative',
@@ -59,7 +63,7 @@ const CourseBanner = () => {
 
   return (
     <>
-      <div id="banner-spacer" style={{ height: '400px', display: 'none' }}></div>
+      <div id="banner-spacer" style={{ height: '80px', display: 'none' }}></div>
       <div ref={bannerRef} className="relative h-[400px] w-full bg-black">
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black/75 z-10"></div>
