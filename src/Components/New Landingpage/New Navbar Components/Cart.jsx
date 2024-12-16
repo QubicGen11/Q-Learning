@@ -31,7 +31,7 @@ const Cart = () => {
         {/* Header with count and total */}
         <div className="flex justify-between items-start mb-6  w-full p-3">
           <div className="flex items-center">
-            <span className="bg-[#0056B3] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2">1</span>
+            <span className="bg-[#0056B3] text-3xl text-white rounded-full w-10 h-10 flex items-center justify-center  mr-2">1</span>
             <h1 className="text-3xl font-semibold " >Course(s) in Cart</h1>
           </div>
           <div className="flex items-center gap-4">
