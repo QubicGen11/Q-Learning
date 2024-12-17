@@ -1,8 +1,23 @@
-import React from 'react'
+import React from 'react';
+import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
 
-const LearnersChoice = ({ courses }) => {
+
+const LearnersChoice = () => {
+  const learnersChoice = usePreLoginFeedStore((state) => state.learnersChoice || []);
+  
   // Take only the first 4 courses
-  const limitedCourses = courses.slice(0, 4);
+  const limitedCourses = learnersChoice?.slice(0, 4) || [];
+
+  if (!learnersChoice || learnersChoice.length === 0) {
+    return (
+      <div className="bg-white py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Learners Choice</h2>
+          <p className="mt-4 text-gray-600">No courses available at the moment.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white py-8 sm:py-12">
@@ -13,7 +28,7 @@ const LearnersChoice = ({ courses }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {limitedCourses.map((course, index) => (
+          {limitedCourses.map((course) => (
             <div key={course.id} className="group bg-white border rounded-xl p-4 hover:shadow-lg transition-shadow duration-300">
               <div className="flex gap-4">
                 {/* Left side - Image */}

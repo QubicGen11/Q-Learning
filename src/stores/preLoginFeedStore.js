@@ -17,36 +17,11 @@ const usePreLoginFeedStore = create((set) => ({
   fetchPreLoginFeed: async () => {
     set({ isLoading: true });
     try {
-      const accessToken = Cookies.get('accessToken');
-
       const response = await fetch('http://localhost:8089/qlms/preLoginFeed', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         }
       });
-
-      if (response.status === 403) {
-        // Token expired or invalid
-        Swal.fire({
-          title: 'Session Expired',
-          text: 'Your session has expired. Please login again.',
-          icon: 'warning',
-          confirmButtonColor: '#0056B3',
-          confirmButtonText: 'Login',
-          iconColor: '#0056B3',
-          allowOutsideClick: false
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Clear cookies
-            Cookies.remove('accessToken');
-            Cookies.remove('refreshToken');
-            // Redirect to login page
-            window.location.href = '/login';
-          }
-        });
-        throw new Error('Session expired');
-      }
 
       if (!response.ok) {
         throw new Error('Failed to fetch data');
@@ -66,6 +41,12 @@ const usePreLoginFeedStore = create((set) => ({
       });
     } catch (error) {
       set({ 
+        categories: [],
+        mostSelling: [],
+        topTrendingSkills: [],
+        topSkillsAndCertifications: {},
+        learnersChoice: [],
+        testimonials: [],
         error: 'Failed to fetch pre-login feed data',
         isLoading: false 
       });
