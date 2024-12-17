@@ -22,6 +22,7 @@ const Landingpage = () => {
     topTrendingSkills,
     topSkillsAndCertifications,
     learnersChoice,
+    testimonials,
     isLoading,
     error,
     fetchPreLoginFeed 
@@ -71,7 +72,7 @@ const Landingpage = () => {
       <SkillsHomepage categories={categories} />
       <MostSellingCourses courses={mostSelling} />
       <EducationAspiration/>
-      <Testimonials/>
+      <Testimonials testimonials={testimonials} />
       <LearnersChoice courses={learnersChoice}/>
       <Toptrending skills={topTrendingSkills} />
       <Exploretopskills topSkillsAndCertifications={topSkillsAndCertifications}/>

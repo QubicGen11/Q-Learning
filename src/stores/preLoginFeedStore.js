@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const usePreLoginFeedStore = create((set) => ({
   categories: [],
@@ -7,6 +9,7 @@ const usePreLoginFeedStore = create((set) => ({
   topTrendingSkills: [],
   topSkillsAndCertifications: {},
   learnersChoice: [],
+  testimonials: [],
   isLoading: false,
   error: null,
 
@@ -23,6 +26,28 @@ const usePreLoginFeedStore = create((set) => ({
         }
       });
 
+      if (response.status === 403) {
+        // Token expired or invalid
+        Swal.fire({
+          title: 'Session Expired',
+          text: 'Your session has expired. Please login again.',
+          icon: 'warning',
+          confirmButtonColor: '#0056B3',
+          confirmButtonText: 'Login',
+          iconColor: '#0056B3',
+          allowOutsideClick: false
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Clear cookies
+            Cookies.remove('accessToken');
+            Cookies.remove('refreshToken');
+            // Redirect to login page
+            window.location.href = '/login';
+          }
+        });
+        throw new Error('Session expired');
+      }
+
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -35,6 +60,7 @@ const usePreLoginFeedStore = create((set) => ({
         topTrendingSkills: data.topTrendingSkills || [],
         topSkillsAndCertifications: data.topSkillsAndCertifications || {},
         learnersChoice: data.learnersChoice || [],
+        testimonials: data.testimonials || [],
         isLoading: false,
         error: null
       });
@@ -55,6 +81,7 @@ const usePreLoginFeedStore = create((set) => ({
       topTrendingSkills: [],
       topSkillsAndCertifications: {},
       learnersChoice: [],
+      testimonials: [],
       isLoading: false,
       error: null
     });
