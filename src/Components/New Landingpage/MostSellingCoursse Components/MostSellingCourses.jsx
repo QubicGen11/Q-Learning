@@ -4,91 +4,13 @@ import './Mostelling.css'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const MostSellingCourses = () => {
-  const courses = [
-    {
-      title: "Basic Fundamentals of programming languages",
-      image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-      rating: 4.7,
-      reviews: 121,
-      currentPrice: "299/-",
-      originalPrice: "3299/-",
-      enrolled: "32,000",
-      instructor: "Instructor Name, Degree/Qualification",
-      tag: "Best Seller",
-      tagColor: "bg-emerald-500"
-    },
-    {
-      title: "Fundamentals of Arts & Crafts by professional",
-      image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-      rating: 4.8,
-      reviews: 1128,
-      currentPrice: "99/-",
-      originalPrice: "1499/-",
-      enrolled: "32,000",
-      instructor: "Instructor Name, Degree/Qualification",
-      tag: "40% Off | Black Friday Sale",
-      tagColor: "bg-gray-800"
-    },
-    {
-      title: "Concepts of book content creation, writing & publishing methods",
-      image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-      rating: 3.8,
-      reviews: 106,
-      currentPrice: "459/-",
-      originalPrice: "1499/-",
-      enrolled: "32,000",
-      instructor: "Instructor Name, Degree/Qualification",
-      tag: "Trending 🔥",
-      tagColor: "bg-purple-600"
-    },
-    {
-      title: "Concepts of book content creation, writing & publishing methods",
-      image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-      rating: 3.8,
-      reviews: 106,
-      currentPrice: "459/-",
-      originalPrice: "1499/-",
-      enrolled: "32,000",
-      instructor: "Instructor Name, Degree/Qualification",
-      tag: "Trending 🔥",
-      tagColor: "bg-purple-600"
-    },
-    {
-      title: "Concepts of book content creation, writing & publishing methods",
-      image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-      rating: 3.8,
-      reviews: 106,
-      currentPrice: "459/-",
-      originalPrice: "1499/-",
-      enrolled: "32,000",
-      instructor: "Instructor Name, Degree/Qualification",
-      tag: "Trending 🔥",
-      tagColor: "bg-purple-600"
-    },
-  ];
-
+const MostSellingCourses = ({ courses }) => {
   // Custom arrow components
   const NextArrow = ({ className, style, onClick }) => {
     return (
-      <div
-        className={`custom-arrow next ${className}`}
-        style={style}
-        onClick={onClick}
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor"
-          className="text-gray-600"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M9 5l7 7-7 7" 
-          />
+      <div className={`custom-arrow next ${className}`} style={style} onClick={onClick}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-600">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </div>
     );
@@ -96,30 +18,14 @@ const MostSellingCourses = () => {
 
   const PrevArrow = ({ className, style, onClick }) => {
     return (
-      <div
-        className={`custom-arrow prev ${className}`}
-        style={style}
-        onClick={onClick}
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor"
-          className="text-gray-600"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15 19l-7-7 7-7" 
-          />
+      <div className={`custom-arrow prev ${className}`} style={style} onClick={onClick}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-600">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </div>
     );
   };
 
-  // Slider settings
   const settings = {
     dots: false,
     infinite: false,
@@ -153,21 +59,21 @@ const MostSellingCourses = () => {
         
         <div className="relative">
           <Slider {...settings}>
-            {courses.map((course, index) => (
-              <div key={index} className="px-3">
+            {courses.map((course) => (
+              <div key={course.id} className="px-3">
                 <div className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                   <div className="relative overflow-hidden">
                     <img 
-                      src={course.image} 
-                      alt={course.title} 
+                      src={course.courseBanner || course.technologyImage || 'https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png'} 
+                      alt={course.courseTitle} 
                       className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
                     />
                     <div className="absolute top-4 left-4 bg-[#0056b3] text-white px-3 py-1 rounded-md text-sm">
-                      Course Category
+                      {course.category}
                     </div>
                     <div className="absolute top-4 right-4 bg-white rounded-md px-2 py-1 flex items-center text-sm">
                       <span className="mr-1">👥</span>
-                      <span>{course.enrolled} Enrolled</span>
+                      <span>{course.viewsCount || '1,000+'} Views</span>
                     </div>
                   </div>
                   
@@ -176,21 +82,23 @@ const MostSellingCourses = () => {
                       {[...Array(5)].map((_, i) => (
                         <span key={i} className="text-yellow-400">★</span>
                       ))}
-                      <span className="ml-2 text-sm">({course.rating} | {course.reviews})</span>
+                      <span className="ml-2 text-sm">(4.5 | {course.salesCount || '100+'})</span>
                     </div>
                     
                     <h3 className="font-medium text-lg mb-2 group-hover:text-[#0056b3] transition-colors duration-300">
-                      {course.title}
+                      {course.courseTitle}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-2">{course.instructor}</p>
+                    <p className="text-gray-600 text-sm mb-2">{course.courseOwner}</p>
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <span className="text-[#0056b3] font-bold">₹{course.currentPrice}</span>
-                        <span className="ml-2 text-gray-400 line-through">₹{course.originalPrice}</span>
+                        <span className="text-[#0056b3] font-bold">₹{course.price || 'Free'}</span>
+                        {course.originalPrice && (
+                          <span className="ml-2 text-gray-400 line-through">₹{course.originalPrice}</span>
+                        )}
                       </div>
-                      <span className={`${course.tagColor} text-white text-sm px-2 py-1 rounded transition-transform duration-300 group-hover:scale-105`}>
-                        {course.tag}
+                      <span className={`bg-emerald-500 text-white text-sm px-2 py-1 rounded transition-transform duration-300 group-hover:scale-105`}>
+                        {course.difficultyLevel}
                       </span>
                     </div>
                   </div>

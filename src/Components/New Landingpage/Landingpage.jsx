@@ -12,8 +12,21 @@ import Exploretopskills from './ExploreTopskills/Exploretopskills'
 import Footer from './Footer/Footer'
 import EducationAspiration from './Education Aspiraton Componenst/EducationAspiration'
 import Toptrending from './Top Trending Skills/Toptrending'
+import usePreLoginFeedStore from '../../stores/preLoginFeedStore'
+import SuperLoader from '../Common/SuperLoader'
 
 const Landingpage = () => {
+  const { 
+    categories,
+    mostSelling,
+    topTrendingSkills,
+    topSkillsAndCertifications,
+    learnersChoice,
+    isLoading,
+    error,
+    fetchPreLoginFeed 
+  } = usePreLoginFeedStore();
+
   useEffect(() => {
     // Get the height of Latestdeals after component mounts
     const dealsElement = document.querySelector('.deals-section');
@@ -25,7 +38,18 @@ const Landingpage = () => {
         navbar.style.top = `${height}px`;
       }
     }
-  }, []);
+
+    // Fetch pre-login feed data
+    fetchPreLoginFeed();
+  }, [fetchPreLoginFeed]);
+
+  if (isLoading) {
+    return <SuperLoader />;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>; // Or your error component
+  }
 
   return (
     <div className="min-h-screen">
@@ -44,13 +68,13 @@ const Landingpage = () => {
         <HeroSection />
       </div>
       <Whatyougetcom />
-      <SkillsHomepage />
-      <MostSellingCourses/>
+      <SkillsHomepage categories={categories} />
+      <MostSellingCourses courses={mostSelling} />
       <EducationAspiration/>
       <Testimonials/>
-      <LearnersChoice/>
-      <Toptrending/>
-      <Exploretopskills/>
+      <LearnersChoice courses={learnersChoice}/>
+      <Toptrending skills={topTrendingSkills} />
+      <Exploretopskills topSkillsAndCertifications={topSkillsAndCertifications}/>
       <Footer/>
       
     </div>

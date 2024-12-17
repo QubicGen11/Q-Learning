@@ -1,69 +1,33 @@
-const Exploretopskills = () => {
-  const sections = [
-    {
-      title: "CERTIFICATIONS BY ISSUER",
-      items: [
-        "Six Sigma Certifications",
-        "Microsoft Certifications",
-        "Amazon Web Services (AWS) Certifications",
-        "Six Sigma Certifications",
-        "Six Sigma Certifications"
-      ]
-    },
-    {
-      title: "COMMUNICATION",
-      items: [
-        "Six Sigma Certifications",
-        "Microsoft Certifications",
-        "Amazon Web Services (AWS) Certifications",
-        "Six Sigma Certifications",
-        "Six Sigma Certifications"
-      ]
-    },
-    {
-      title: "LEADERSHIP",
-      items: [
-        "Six Sigma Certifications",
-        "Microsoft Certifications",
-        "Amazon Web Services (AWS) Certifications",
-        "Six Sigma Certifications",
-        "Six Sigma Certifications"
-      ]
-    }
-  ];
+const Exploretopskills = ({topSkillsAndCertifications}) => {
+  // Get categories and their data
+  const categories = Object.keys(topSkillsAndCertifications || {});
+  
+  // Create sections using first 3 categories
+  const sections = categories.slice(0, 3).map(category => ({
+    title: category.toUpperCase(),
+    items: topSkillsAndCertifications[category].map(item => item.courseTitle)
+  }));
 
-  const bottomSections = [
-    {
-      title: "CERTIFICATIONS BY SKILL",
-      items: [
-        "Six Sigma Certifications",
-        "Microsoft Certifications",
-        "Amazon Web Services (AWS) Certifications",
-        "Six Sigma Certifications",
-        "Six Sigma Certifications"
-      ]
-    },
-    {
-      title: "DATA SCIENCE",
-      items: [
-        "Six Sigma Certifications",
-        "Microsoft Certifications",
-        "Amazon Web Services (AWS) Certifications",
-        "Six Sigma Certifications",
-        "Six Sigma Certifications"
-      ]
-    },
-    {
-      title: "BUSINESS ANALYTICS & INTELLIGENCE",
-      items: [
-        "Six Sigma Certifications",
-        "Microsoft Certifications",
-        "Amazon Web Services (AWS) Certifications",
-        "Six Sigma Certifications",
-        "Six Sigma Certifications"
-      ]
-    }
-  ];
+  // Create bottom sections using next 3 categories
+  const bottomSections = categories.slice(3, 6).map(category => ({
+    title: category.toUpperCase(),
+    items: topSkillsAndCertifications[category].map(item => item.courseTitle)
+  }));
+
+  // If there aren't enough categories, fill with defaults
+  while (sections.length < 3) {
+    sections.push({
+      title: "ADDITIONAL SKILLS",
+      items: ["No courses available"]
+    });
+  }
+
+  while (bottomSections.length < 3) {
+    bottomSections.push({
+      title: "ADDITIONAL SKILLS",
+      items: ["No courses available"]
+    });
+  }
 
   return (
     <div className="bg-[#374151] py-8 sm:py-12 lg:py-16">

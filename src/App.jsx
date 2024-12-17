@@ -15,6 +15,7 @@ import useAuthStore from './stores/authStore';
 import Cookies from 'js-cookie';
 import Coursepagemain from './Components/CoursePage Components/Coursepagemain';
 import Cart from './Components/New Landingpage/New Navbar Components/Cart';
+import SuperLoader from './Components/Common/SuperLoader';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -88,6 +89,7 @@ function App() {
               <Route path="/categories" element={<Categoriesmain/>} />
               <Route path="/course/:id" element={<Coursepagemain/>} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/loader" element={<SuperLoader />} />
             </Routes>
             <ScrollToTopButton />
           </div>
