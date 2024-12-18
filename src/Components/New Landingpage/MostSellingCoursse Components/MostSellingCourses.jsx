@@ -1,10 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
 import './Mostelling.css'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const MostSellingCourses = ({ courses }) => {
+  const navigate = useNavigate();
+
+  // Handle card click
+  const handleCourseClick = (courseId) => {
+    navigate(`/course/${courseId}`);
+  };
+
   // Custom arrow components
   const NextArrow = ({ className, style, onClick }) => {
     return (
@@ -61,10 +69,19 @@ const MostSellingCourses = ({ courses }) => {
           <Slider {...settings}>
             {courses.map((course) => (
               <div key={course.id} className="px-3">
-                <div className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div 
+                  className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                  onClick={(e) => {
+                    // Prevent navigation if clicking on a button or link inside the card
+                    if (e.target.tagName.toLowerCase() !== 'button' && 
+                        !e.target.closest('a')) {
+                      handleCourseClick(course.id);
+                    }
+                  }}
+                >
                   <div className="relative overflow-hidden">
                     <img 
-                      src={course.courseBanner || course.technologyImage || 'https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png'} 
+                      src={course.thumbnail || course.technologyImage || 'https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png'} 
                       alt={course.courseTitle} 
                       className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
                     />

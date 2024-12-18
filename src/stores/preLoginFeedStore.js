@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
-const usePreLoginFeedStore = create((set) => ({
+const usePreLoginFeedStore = create((set, get) => ({
   categories: [],
   mostSelling: [],
   topTrendingSkills: [],
@@ -12,6 +12,13 @@ const usePreLoginFeedStore = create((set) => ({
   testimonials: [],
   isLoading: false,
   error: null,
+
+  // Add this new selector
+  getCourseById: (id) => {
+    const { mostSelling, learnersChoice } = get();
+    // Search in both mostSelling and learnersChoice arrays
+    return [...mostSelling, ...learnersChoice].find(course => course.id === id);
+  },
 
   // Action to fetch and set the pre-login feed data
   fetchPreLoginFeed: async () => {
