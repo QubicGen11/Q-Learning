@@ -27,13 +27,16 @@ const useAuthStore = create((set) => ({
         Cookies.set('refreshToken', response.data.refreshToken);
         
         const tokenPayload = JSON.parse(atob(response.data.accessToken.split('.')[1]));
-        
+        console.log('Decoded Token:', tokenPayload);
+
         set({ 
           isLoggedIn: true,
-          userName: tokenPayload.userName || email.split('@')[0],
-          userEmail: email,
+          userName: tokenPayload.name || tokenPayload.sub || email.split('@')[0],
+          userEmail: tokenPayload.email || email,
           loading: false
         });
+
+        console.log('State after login:', useAuthStore.getState());
 
         Swal.fire({
           icon: 'success',
@@ -63,6 +66,7 @@ const useAuthStore = create((set) => ({
   },
 
   sendOtp: async (email) => {
+    
     set({ loading: true });
     try {
       const response = await axios.post('http://localhost:8089/qlms/sendOtp', { 

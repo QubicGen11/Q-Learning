@@ -54,10 +54,8 @@ const Coursepagemain = () => {
         courseRating={courseData.courseRating}
       />
       <Coursebarsec 
-        difficultyLevel={courseData.difficultyLevel}
-        duration={courseData.duration}
-        language={courseData.language}
-        courseType={courseData.courseType}
+       
+        courseId={courseData.id}
       />
     
       

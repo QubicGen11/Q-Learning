@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import CourseContent from './CourseContent';
-import CourseContentsec from './CourseContentsec';
-import CourseDesc from './CourseDesc';
 import Coursecontentmain from './Coursecontentmain';
 import RelatedCoursesmain from './RelatedCourse/RelatedCoursesmain';
 import Community from './Community Section/Community';
+import usePreLoginFeedStore from '../../stores/preLoginFeedStore';
 
-const Coursebarsec = () => {
+const Coursebarsec = ({ courseId }) => {
   const [activeLink, setActiveLink] = useState('Course Content');
 
   const navLinks = [
@@ -19,15 +17,11 @@ const Coursebarsec = () => {
   const renderContent = () => {
     switch (activeLink) {
       case 'Course Content':
-        return (
-          <>
-         <Coursecontentmain/>
-          </>
-        );
+        return <Coursecontentmain courseId={courseId} />;
       case 'Related Courses & About Instructor':
-        return <RelatedCoursesmain/>;
+        return <RelatedCoursesmain courseId={courseId} />;
       case 'Community Support':
-        return <Community/>;
+        return <Community courseId={courseId} />;
       default:
         return null;
     }

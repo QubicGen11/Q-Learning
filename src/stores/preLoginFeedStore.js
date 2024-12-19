@@ -13,17 +13,30 @@ const usePreLoginFeedStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
-  // Add this new selector
+  // Modified getCourseById to handle string IDs and add console.log
   getCourseById: (id) => {
     const { mostSelling, learnersChoice } = get();
-    // Search in both mostSelling and learnersChoice arrays
-    return [...mostSelling, ...learnersChoice].find(course => course.id === id);
+    console.log('Looking for course with ID:', id);
+    
+    // Debug: Log the first few courses and their IDs
+    const allCourses = [...mostSelling, ...learnersChoice];
+    console.log('First few courses:', allCourses.slice(0, 3).map(c => ({ id: c.id, title: c.courseTitle })));
+    
+    // Convert id to string for comparison
+    const stringId = String(id);
+    const course = allCourses.find(course => {
+      console.log('Comparing:', String(course.id), stringId, String(course.id) === stringId);
+      return String(course.id) === stringId;
+    });
+
+    return course;
   },
 
-  // Action to fetch and set the pre-login feed data
+  // Modified fetchPreLoginFeed to include better error handling
   fetchPreLoginFeed: async () => {
     set({ isLoading: true });
     try {
+      console.log('Fetching pre-login feed...');
       const response = await fetch('http://localhost:8089/qlms/preLoginFeed', {
         headers: {
           'Content-Type': 'application/json'
@@ -31,10 +44,11 @@ const usePreLoginFeedStore = create((set, get) => ({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch data');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Received data:', data);
       
       set({
         categories: data.categories || [],
@@ -47,6 +61,7 @@ const usePreLoginFeedStore = create((set, get) => ({
         error: null
       });
     } catch (error) {
+      console.error('Error in fetchPreLoginFeed:', error);
       set({ 
         categories: [],
         mostSelling: [],
@@ -54,10 +69,9 @@ const usePreLoginFeedStore = create((set, get) => ({
         topSkillsAndCertifications: {},
         learnersChoice: [],
         testimonials: [],
-        error: 'Failed to fetch pre-login feed data',
+        error: error.message,
         isLoading: false 
       });
-      console.error('Error fetching pre-login feed:', error);
     }
   },
 

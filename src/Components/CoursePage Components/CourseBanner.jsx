@@ -53,7 +53,7 @@ const CourseBanner = ({
 
   return (
     <div className="relative">
-      <div className={`h-[300px] ${isCompact ? 'block' : 'hidden'}`} />
+      <div className={`h-[200px] ${isCompact ? 'block' : 'hidden'}`} />
       
       <div 
         ref={bannerRef}
@@ -116,14 +116,16 @@ const CourseBanner = ({
                   </div>
                   <div className="bg-green-600 px-2 py-1 rounded">English</div>
                   <div className="flex items-center gap-1">
-                    <FaVolumeMute />
-                    <span>CC</span>
+                    
+                    {/* <span></span> */}
                   </div>
                 </div>
               </div>
 
               <div className="w-full md:w-80 rounded-lg shadow-lg p-6 mx-auto my-auto">
+                
                 <div className="flex items-center justify-between mb-4">
+              
                   <span className="text-3xl font-bold text-white">₹{price}</span>
                   {originalPrice && (
                     <span className="text-gray-500 line-through text-white font-light">₹{originalPrice}</span>
@@ -131,13 +133,17 @@ const CourseBanner = ({
                   {discount && (
                     <span className="text-green-600 font-semibold text-white font-light">{discount}% off</span>
                   )}
+                    <FaVolumeMute size={30} color='white'/>
                 </div>
+                
                 <button className="w-full bg-[#0056b3] text-white py-3 rounded font-semibold mb-3 hover:bg-blue-700 transition-colors">
                   Add to Cart
                 </button>
                 <button className="w-full bg-[#f3f4f6] text-blue-600 border-2 py-3 rounded font-semibold hover:bg-blue-50 transition-colors">
                   Buy Now
                 </button>
+
+                
               </div>
             </div>
           </div>
