@@ -23,6 +23,8 @@
     "@react-three/drei": "9.88.17",
     "@react-three/fiber": "8.13.7",
     "@react-three/postprocessing": "2.15.1",
+    "@splinetool/react-spline": "^4.0.0",
+    "@splinetool/runtime": "^1.9.53",
     "@types/video.js": "^7.3.58",
     "aos": "^2.3.4",
     "axios": "^1.7.7",

@@ -17,6 +17,13 @@ import Coursepagemain from './Components/CoursePage Components/Coursepagemain';
 import Cart from './Components/New Landingpage/New Navbar Components/Cart';
 import SuperLoader from './Components/Common/SuperLoader';
 import CourseLearnInterface from './Components/CoursePage Components/LearnCourse Components/CourseLearnInterface';
+import SplineScene from './Components/SplineScene';
+import InstructorLayout from './Components/Instructor Module/InstructorLayout';
+import CoursesPage from './Components/Instructor Module/Courses/CoursesPage';
+import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
+import CourseContent from './Components/Instructor Module/Courses/CreateCourse/CourseContent';
+import FAQ from './Components/Instructor Module/Courses/CreateCourse/Steps/FAQ';
+// import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
 Swal.mixin({
@@ -92,6 +99,14 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/loader" element={<SuperLoader />} />
               <Route path="/course/:id/learn" element={<CourseLearnInterface/>} />
+              <Route path="/spline" element={<SplineScene/>} />
+              <Route path="/instructor" element={<InstructorLayout />}>
+                <Route path="courses" element={<CoursesPage />} />
+                <Route path="courses/create" element={<CreateCourse />} />
+                <Route path="courses/content" element={<CourseContent />} />
+                <Route path="courses/faq" element={<FAQ />} />
+                {/* Other routes */}
+              </Route>
             </Routes>
             <ScrollToTopButton />
           </div>
