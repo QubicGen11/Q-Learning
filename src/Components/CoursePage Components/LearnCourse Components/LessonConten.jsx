@@ -3,6 +3,18 @@ import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import SuperLoader from '../../Common/SuperLoader';
 import CaptionControls from './CaptionControls';
 
+const videoStyles = `
+  video::-webkit-media-controls-panel,
+  video::-webkit-media-controls-enclosure {
+    display: flex !important;
+    opacity: 1 !important;
+  }
+  
+  video::-webkit-media-controls-overflow-menu-list {
+    display: flex !important;
+  }
+`;
+
 const LessonContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const videoUrl = 'https://d2vg68qr0mu2pv.cloudfront.net/1734603232822_videoplayback.mp4';
@@ -81,6 +93,7 @@ And feel free to pause and practice concepts`;
 
   return (
     <div className="w-full">
+      <style>{videoStyles}</style>
       {/* Navigation Bar */}
       <div className="flex items-center justify-between px-6 py-3 bg-[#e5e7eb] border-b border-gray-200">
         <button className="flex items-center gap-2 text-blue-600 border border-blue-700 px-4 py-2 rounded-md hover:text-blue-700 transition-colors duration-200">
@@ -125,11 +138,7 @@ And feel free to pause and practice concepts`;
           </video>
           {/* <CaptionControls /> */}
         </div>
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-opacity-50">
-            <SuperLoader />
-          </div>
-        )}
+     
       </div>
 
       {/* Transcript Section */}
