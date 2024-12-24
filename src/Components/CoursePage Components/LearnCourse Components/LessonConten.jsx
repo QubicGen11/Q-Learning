@@ -1,198 +1,141 @@
 import React, { useEffect, useRef, useState } from 'react';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
- 
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import SuperLoader from '../../Common/SuperLoader';
- 
+import CaptionControls from './CaptionControls';
+
 const LessonContent = () => {
-  const videoRef = useRef(null);
-  const playerRef = useRef(null);
-  const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
- 
   const videoUrl = 'https://d2vg68qr0mu2pv.cloudfront.net/1734603232822_videoplayback.mp4';
- 
+  
+  // Test VTT content
+  const testCaptionsVtt = `WEBVTT
+
+00:00:00.000 --> 00:00:03.000
+Welcome to the UX course!
+
+00:00:03.000 --> 00:00:06.000
+User Experience is all about making things better for users
+
+00:00:06.000 --> 00:00:09.000
+Let's learn how to create amazing experiences
+
+00:00:09.000 --> 00:00:12.000
+In this course, we'll cover the fundamentals
+
+00:00:12.000 --> 00:00:15.000
+From user research to prototyping
+
+00:00:15.000 --> 00:00:18.000
+We'll explore different UX methodologies
+
+00:00:18.000 --> 00:00:21.000
+Understanding user needs is crucial
+
+00:00:21.000 --> 00:00:24.000
+We'll learn about user personas and journeys
+
+00:00:24.000 --> 00:00:27.000
+And how to conduct effective user interviews
+
+00:00:27.000 --> 00:00:30.000
+Design thinking will be a key focus
+
+00:00:30.000 --> 00:00:33.000
+Along with usability testing principles
+
+00:00:33.000 --> 00:00:36.000
+We'll also cover information architecture
+
+00:00:36.000 --> 00:00:39.000
+And learn about wireframing best practices
+
+00:00:39.000 --> 00:00:42.000
+Interactive prototyping will be covered
+
+00:00:42.000 --> 00:00:45.000
+Finally, we'll look at UX analytics
+
+00:00:45.000 --> 00:00:48.000
+And how to measure design success
+
+00:00:48.000 --> 00:01:51.000
+Let's begin our UX journey together
+
+00:01:51.000 --> 00:02:54.000
+Remember to take notes as we proceed
+
+00:02:54.000 --> 00:03:22.000
+And feel free to pause and practice concepts`;
+
+  // Create a Blob URL for the VTT content
+  const captionsUrl = URL.createObjectURL(
+    new Blob([testCaptionsVtt], { type: 'text/vtt' })
+  );
+
+  // Cleanup Blob URL on unmount
   useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
- 
-  useEffect(() => {
-    if (!mounted) return;
- 
-    if (!playerRef.current) {
-      const videoElement = videoRef.current;
-     
-      if (!videoElement) return;
- 
-      const options = {
-        autoplay: false,
-        controls: true,
-        responsive: true,
-        fluid: true,
-        aspectRatio: '16:9',
-        playbackRates: [0.5, 1, 1.5, 2],
-        sources: [{
-          src: videoUrl,
-          type: 'video/mp4',
-          label: '1080p',
-          selected: true
-        }],
-        controlBar: {
-          children: [
-            'playToggle',
-            'volumePanel',
-            'currentTimeDisplay',
-            'timeDivider',
-            'durationDisplay',
-            'progressControl',
-            'playbackRateMenuButton',
-            'subsCapsButton',
-            'qualitySelector',
-            'fullscreenToggle'
-          ]
-        },
-        html5: {
-          nativeTextTracks: false
-        },
-        tracks: [
-          {
-            kind: 'captions',
-            src: 'path/to/captions.vtt',
-            srclang: 'en',
-            label: 'English',
-            default: true
-          }
-        ]
-      };
- 
-      const player = videojs(videoElement, options, function onPlayerReady() {
-        console.log('Player is ready');
-        this.show();
-       
-        if ('webkitSpeechRecognition' in window) {
-          const recognition = new webkitSpeechRecognition();
-          recognition.continuous = true;
-          recognition.interimResults = true;
- 
-          this.on('play', () => {
-            recognition.start();
-          });
- 
-          this.on('pause', () => {
-            recognition.stop();
-          });
- 
-          this.on('ended', () => {
-            recognition.stop();
-          });
- 
-          recognition.onresult = (event) => {
-            const transcript = Array.from(event.results)
-              .map(result => result[0].transcript)
-              .join('');
-           
-            if (!this.textTracks().length) {
-              this.addTextTrack('captions', 'English', 'en');
-            }
-           
-            const track = this.textTracks()[0];
-            if (track) {
-              const cue = new VTTCue(
-                this.currentTime(),
-                this.currentTime() + 2,
-                transcript
-              );
-              track.addCue(cue);
-            }
-          };
-        }
- 
-        this.src({
-          src: videoUrl,
-          type: 'video/mp4',
-          label: '1080p'
-        });
-        this.load();
- 
-        this.on('loadeddata', () => {
-          setIsLoading(false);
-        });
- 
-        this.on('waiting', () => {
-          setIsLoading(true);
-        });
- 
-        this.on('playing', () => {
-          setIsLoading(false);
-        });
-      });
- 
-      playerRef.current = player;
-    }
- 
     return () => {
-      if (playerRef.current) {
-        try {
-          playerRef.current.dispose();
-          playerRef.current = null;
-        } catch (e) {
-          console.error("Error disposing video player:", e);
-        }
-      }
+      URL.revokeObjectURL(captionsUrl);
     };
-  }, [mounted, videoUrl]);
- 
+  }, []);
+
   return (
-    <div className="w-full bg-black">
+    <div className="w-full">
       {/* Navigation Bar */}
       <div className="flex items-center justify-between px-6 py-3 bg-[#e5e7eb] border-b border-gray-200">
         <button className="flex items-center gap-2 text-blue-600 border border-blue-700 px-4 py-2 rounded-md hover:text-blue-700 transition-colors duration-200">
           <IoIosArrowBack className="text-xl" />
           <span className="text-sm font-medium">Previous</span>
         </button>
-       
-<div className="flex  items-start mr-auto ml-6 space-x-2">
-  <h2 className="text-base font-bold text-black">
-    Chapter: What&apos;s &quot;Discovery&quot;?
-  </h2>
-  <span className="text-xs text-gray-500 mt-1 bg-[#F2F9FF] px-2 py-1 rounded-md">Playing</span>
-</div>
- 
+        
+        <div className="flex items-start mr-auto ml-6 space-x-2">
+          <h2 className="text-base font-bold text-black">
+            Chapter: What&apos;s &quot;Discovery&quot;?
+          </h2>
+          <span className="text-xs text-gray-500 mt-1 bg-[#F2F9FF] px-2 py-1 rounded-md">Playing</span>
+        </div>
+
         <button className="flex items-center gap-2 text-blue-600 border border-blue-700 px-4 py-2 rounded-md hover:text-blue-700 transition-colors duration-200">
           <span className="text-sm font-medium">Next</span>
           <IoIosArrowForward className="text-xl" />
         </button>
       </div>
- 
+
       {/* Video Container */}
-      <div className="w-full  flex items-center justify-center bg-black ">
-     
+      <div className="w-full h-[600px] p-2">
+        <div className="w-full h-full relative">
           <video
-            ref={videoRef}
-            className="video-js vjs-big-play-centered vjs-theme-city "
+            className="w-full h-full object-cover"
+            controls
+            playsInline
+            onLoadedData={() => setIsLoading(false)}
           >
-            <source
-              src={videoUrl}
-              type="video/mp4"
-              label="1080p"
-              className=""
-   
+            <source src={videoUrl} type="video/mp4" />
+            
+            {/* Test Captions */}
+            <track 
+              src={captionsUrl}
+              label="English" 
+              kind="captions" 
+              srcLang="en-us" 
+              default 
             />
-            <p className="vjs-no-js">
-              To view this video please enable JavaScript, and consider upgrading to a
-              web browser that supports HTML5 video
-            </p>
+
+            Your browser does not support the video tag.
           </video>
-        
-     
-   
+          {/* <CaptionControls /> */}
+        </div>
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-opacity-50">
+            <SuperLoader />
+          </div>
+        )}
       </div>
+
+      {/* Transcript Section */}
       
     </div>
-    
   );
 };
- 
+
 export default LessonContent;
