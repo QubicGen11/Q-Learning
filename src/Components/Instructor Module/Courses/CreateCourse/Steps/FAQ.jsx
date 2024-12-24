@@ -45,7 +45,7 @@ function FAQ() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-gray-200 mb-6 flex justify-between items-center bg-white px-4 rounded-lg">
         <div className="flex gap-8">
           <button className="py-4 px-1 text-gray-500">
             Basic Information
@@ -57,6 +57,22 @@ function FAQ() {
             Settings
           </button>
         </div>
+        <div className="flex justify-between space-x-4">
+        <button
+          onClick={() => navigate('/instructor/courses/content')}
+          className="flex items-center gap-2 text-[#0056B3] bg-[#F3F4F6] px-2 py-2 rounded-lg"
+        >
+          <span className="material-icons">arrow_back</span>
+          Previous
+        </button>
+        <button
+          onClick={() => navigate('/instructor/courses/settings')}
+          className="flex items-center gap-2 text-[#0056B3] bg-[#F3F4F6] px-2 py-2 rounded-lg"
+        >
+          Next Settings
+          <span className="material-icons">arrow_forward</span>
+        </button>
+      </div>
       </div>
 
       {/* Steps Progress */}
@@ -140,22 +156,7 @@ function FAQ() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={() => navigate('/instructor/courses/content')}
-          className="flex items-center gap-2 text-blue-600"
-        >
-          <span className="material-icons">arrow_back</span>
-          Previous
-        </button>
-        <button
-          onClick={() => navigate('/instructor/courses/settings')}
-          className="flex items-center gap-2 text-blue-600"
-        >
-          Next Settings
-          <span className="material-icons">arrow_forward</span>
-        </button>
-      </div>
+     
     </div>
   );
 }

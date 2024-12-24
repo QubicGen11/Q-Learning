@@ -13,7 +13,7 @@ const AddMedia = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-[700px] mx-auto space-y-4">
       {/* Banner Upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">

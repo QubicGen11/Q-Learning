@@ -12,9 +12,9 @@ const BasicInformation = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-[700px] mx-auto space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Name *
         </label>
         <input
@@ -23,12 +23,12 @@ const BasicInformation = () => {
           value={basicInfo.courseName}
           onChange={handleChange}
           placeholder="Real World UX Learn User Experience & Start Your Career"
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Tagline *
         </label>
         <textarea
@@ -41,9 +41,9 @@ const BasicInformation = () => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Course Duration *
           </label>
           <input
@@ -51,19 +51,19 @@ const BasicInformation = () => {
             name="courseDuration"
             value={basicInfo.courseDuration}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Difficulty Level *
           </label>
           <select
             name="difficultyLevel"
             value={basicInfo.difficultyLevel}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select</option>
             <option value="beginner">Beginner</option>
@@ -73,16 +73,16 @@ const BasicInformation = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Category *
           </label>
           <select
             name="category"
             value={basicInfo.category}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select</option>
             {/* Add your categories */}
@@ -90,14 +90,14 @@ const BasicInformation = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Sub Category *
           </label>
           <select
             name="subCategory"
             value={basicInfo.subCategory}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select</option>
             {/* Add your sub-categories */}
@@ -105,16 +105,16 @@ const BasicInformation = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Teaching Language *
           </label>
           <select
             name="teachingLanguage"
             value={basicInfo.teachingLanguage}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">MultiSelect</option>
             {/* Add your languages */}
@@ -122,14 +122,14 @@ const BasicInformation = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Hashtags *
           </label>
           <input
             type="text"
             name="hashtags"
             placeholder="Hashtag1"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>

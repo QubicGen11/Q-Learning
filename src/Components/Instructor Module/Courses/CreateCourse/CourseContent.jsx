@@ -99,7 +99,7 @@ function CourseContent() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-gray-200 mb-6 bg-white p-2 rounded-lg flex justify-between items-center">
         <div className="flex gap-8">
           <button className="py-4 px-1 text-gray-500">
             Basic Information
@@ -111,6 +111,22 @@ function CourseContent() {
             Settings
           </button>
         </div>
+        <div className="flex justify-between space-x-4">
+        <button
+          onClick={handlePrevious}
+          className="flex items-center gap-2 text-[#0056B3] hover:text-blue-700 bg-[#F3F4F6] px-3 py-1.5 rounded-lg"
+        >
+          <span className="material-icons">arrow_back</span>
+          Previous
+        </button>
+        <button
+          onClick={handleNext}
+          className="flex items-center gap-2 text-[#0056B3] hover:text-blue-700 bg-[#F3F4F6] px-3 py-1.5 rounded-lg"
+        >
+          Next
+          <span className="material-icons">arrow_forward</span>
+        </button>
+      </div>
       </div>
 
       {/* Steps Progress */}
@@ -288,22 +304,7 @@ function CourseContent() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={handlePrevious}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-        >
-          <span className="material-icons">arrow_back</span>
-          Previous
-        </button>
-        <button
-          onClick={handleNext}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-        >
-          Next
-          <span className="material-icons">arrow_forward</span>
-        </button>
-      </div>
+     
     </div>
   );
 }
