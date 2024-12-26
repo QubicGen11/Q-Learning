@@ -84,19 +84,13 @@ const Navbar = () => {
           <input
             type="text"
             placeholder="Type anything..."
-            className="w-full px-4 py-2 pl-10 pr-4 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
+            className="w-full px-4 py-2 pl-10 pr-4  border rounded-3xl border-gray-300 focus:outline-none focus:border-blue-500"
           />
           <BiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
         </div>
 
         {/* Create New Course Button */}
-        <button 
-          onClick={() => navigate('/instructor/courses/create')}
-          className="flex items-center gap-1 bg-[#0056B3] text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-        >
-          <span className="material-icons text-[20px]">add</span>
-          <span className="text-sm font-medium">Create New Course</span>
-        </button>
+   
       </div>
 
       {/* Right Section - Notifications and Profile */}

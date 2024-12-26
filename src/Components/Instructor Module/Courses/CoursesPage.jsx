@@ -135,7 +135,7 @@ const CoursesPage = () => {
               </span>
             </div>
             <button 
-              onClick={() => navigate('/instructor/courses/basic-info')}
+              onClick={() => navigate('/instructor/courses/create')}
               className="flex items-center gap-1 bg-[#0056B3] text-white px-4 py-2 rounded-md text-sm"
             >
               <span className="material-icons text-sm">add</span>
