@@ -1,257 +1,245 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import SuperLoader from '../../Common/SuperLoader';
-import CaptionControls from './CaptionControls';
+// import CaptionControls from './CaptionControls';
 
-const videoStyles = `
-  video::-webkit-media-controls-panel,
-  video::-webkit-media-controls-enclosure {
-    display: flex !important;
-    opacity: 1 !important;
-  }
-  
-  video::-webkit-media-controls-overflow-menu-list {
-    display: flex !important;
-  }
-`;
-
-const LessonContent = () => {
+const LessonContent = ({ lessonData, onNavigate }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const videoUrl = 'https://d2vg68qr0mu2pv.cloudfront.net/1734603232822_videoplayback.mp4';
-  
-  // Test VTT content for different languages
-  const englishCaptionsVtt = `WEBVTT
+  const [content, setContent] = useState(null);
 
-00:00:00.000 --> 00:00:03.000
-Welcome to the UX course!
+  // Sample content for different lesson types
+  const lessonContents = {
+    // Video lessons
+    "What's \"Discovery\"?": {
+      type: 'video',
+      url: 'https://d2vg68qr0mu2pv.cloudfront.net/1734603232822_videoplayback.mp4',
+      transcript: 'User Experience, or UX, is an exciting field...'
+    },
+    'Discovery Overview': {
+      type: 'video',
+      url: 'https://res.cloudinary.com/defsu5bfc/video/upload/v1733042798/prompting_7_rmcwjy.mp4',
+      transcript: 'In this overview, well explore the key aspects...'
+    },
+    // PDF documents
+    'Stakeholder Interviews (optional)': {
+      type: 'document',
+      content: `
+        <div class="p-6 bg-white rounded-lg">
+          <h2 class="text-2xl font-bold mb-4">Stakeholder Interview Guide</h2>
+          <div class="space-y-4">
+            <p>This document provides a comprehensive guide for conducting stakeholder interviews...</p>
+            <h3 class="text-xl font-semibold">Key Questions to Ask:</h3>
+            <ul class="list-disc pl-5">
+              <li>What are your main goals for this project?</li>
+              <li>Who are the target users?</li>
+              <li>What are the biggest challenges you're facing?</li>
+            </ul>
+          </div>
+        </div>
+      `
+    },
+    'Secondary Research': {
+      type: 'document',
+      content: `
+        <div class="p-6 bg-white rounded-lg">
+          <h2 class="text-2xl font-bold mb-4">Secondary Research Methods</h2>
+          <div class="space-y-4">
+            <p>Secondary research involves analyzing existing data and research...</p>
+            <h3 class="text-xl font-semibold">Sources to Consider:</h3>
+            <ul class="list-disc pl-5">
+              <li>Academic journals and publications</li>
+              <li>Industry reports and white papers</li>
+              <li>Market research data</li>
+              <li>Competitor analysis</li>
+            </ul>
+          </div>
+        </div>
+      `
+    },
+    // Interactive content
+    'Analytics Research': {
+      type: 'interactive',
+      content: `
+        <div class="p-6 bg-white rounded-lg">
+          <h2 class="text-2xl font-bold mb-4">Analytics Dashboard Exercise</h2>
+          <div class="space-y-6">
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <h3 class="font-semibold mb-2">Exercise 1: Data Analysis</h3>
+              <p>Review the following analytics dashboard and identify key metrics...</p>
+              <img src="/sample-analytics.png" alt="Analytics Dashboard" class="my-4 rounded-lg shadow" />
+              <div class="space-y-2">
+                <label class="block font-medium">What insights can you draw?</label>
+                <textarea class="w-full p-2 border rounded" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    }
+  };
 
-00:00:03.000 --> 00:00:06.000
-User Experience is all about making things better for users
+  // Get all lessons in a flat array for navigation
+  const allLessons = [
+    { title: "What's \"Discovery\"?", chapter: "Discovery Learning - Understanding Users", type: "play" },
+    { title: "Discovery Overview", chapter: "Discovery Learning - Understanding Users", type: "play" },
+    { title: "Stakeholder Interviews", chapter: "Discovery Learning - Understanding Users", type: "play" },
+    { title: "Stakeholder Interviews (optional)", chapter: "Discovery Learning - Understanding Users", type: "file" },
+    { title: "Secondary Research", chapter: "Discovery Learning - Understanding Users", type: "play" },
+    // ... add all other lessons in sequence
+  ];
 
-00:00:06.000 --> 00:00:09.000
-Let's learn how to create amazing experiences
+  // Find current lesson index
+  const currentIndex = allLessons.findIndex(lesson => lesson.title === lessonData.lesson);
 
-00:00:09.000 --> 00:00:12.000
-We'll cover the fundamentals of UX design
+  const handleNavigation = (direction) => {
+    if (direction === 'next' && currentIndex < allLessons.length - 1) {
+      const nextLesson = allLessons[currentIndex + 1];
+      onNavigate({
+        chapter: nextLesson.chapter,
+        lesson: nextLesson.title,
+        type: nextLesson.type
+      });
+    } else if (direction === 'prev' && currentIndex > 0) {
+      const prevLesson = allLessons[currentIndex - 1];
+      onNavigate({
+        chapter: prevLesson.chapter,
+        lesson: prevLesson.title,
+        type: prevLesson.type
+      });
+    }
+  };
 
-00:00:12.000 --> 00:00:15.000
-Including user research and prototyping
-
-00:00:15.000 --> 00:00:18.000
-Understanding user needs is crucial
-
-00:00:18.000 --> 00:00:21.000
-We'll learn various research methods
-
-00:00:21.000 --> 00:00:24.000
-And how to apply them effectively
-
-00:00:24.000 --> 00:00:27.000
-Then we'll move on to wireframing
-
-00:00:27.000 --> 00:00:30.000
-Creating interactive prototypes
-
-00:00:30.000 --> 00:00:33.000
-And testing with real users
-
-00:00:33.000 --> 00:00:36.000
-By the end, you'll be ready to create
-
-00:00:36.000 --> 00:00:39.000
-User-centered design solutions
-
-00:00:39.000 --> 00:00:42.000
-That solve real problems
-
-00:00:42.000 --> 00:03:22.000
-Let's dive deeper into UX design principles and best practices
-
-00:03:22.000 --> 00:03:25.000
-This concludes our introduction to UX design`;
-
-  const hindiCaptionsVtt = `WEBVTT
-
-00:00:00.000 --> 00:00:03.000
-यूएक्स कोर्स में आपका स्वागत है!
-
-00:00:03.000 --> 00:00:06.000
-यूजर एक्सपीरियंस का मतलब है उपयोगकर्ताओं के लिए चीजों को बेहतर बनाना
-
-00:00:06.000 --> 00:00:09.000
-आइए जानें कि कैसे बनाएं शानदार अनुभव
-
-00:00:09.000 --> 00:00:12.000
-हम यूएक्स डिजाइन की मूल बातें सीखेंगे
-
-00:00:12.000 --> 00:00:15.000
-इसमें यूजर रिसर्च और प्रोटोटाइपिंग शामिल है
-
-00:00:15.000 --> 00:00:18.000
-उपयोगकर्ता की जरूरतों को समझना महत्वपूर्ण है
-
-00:00:18.000 --> 00:00:21.000
-हम विभिन्न शोध विधियों को सीखेंगे
-
-00:00:21.000 --> 00:00:24.000
-और उन्हें प्रभावी ढंग से लागू करना सीखेंगे
-
-00:00:24.000 --> 00:00:27.000
-फिर हम वायरफ्रेमिंग पर जाएंगे
-
-00:00:27.000 --> 00:00:30.000
-इंटरैक्टिव प्रोटोटाइप बनाना
-
-00:00:30.000 --> 00:00:33.000
-और वास्तविक उपयोगकर्ताओं के साथ परीक्षण
-
-00:00:33.000 --> 00:00:36.000
-अंत में, आप तैयार हो जाएंगे
-
-00:00:36.000 --> 00:00:39.000
-यूजर-केंद्रित डिजाइन समाधान बनाने के लिए
-
-00:00:39.000 --> 00:00:42.000
-जो वास्तविक समस्याओं को हल करते हैं
-
-00:00:42.000 --> 00:03:22.000
-आइए यूएक्स डिजाइन सिद्धांतों और सर्वोत्तम प्रथाओं में गहराई से जाएं`;
-
-  const teluguCaptionsVtt = `WEBVTT
-
-00:00:00.000 --> 00:00:03.000
-UX కోర్స్‌కి స్వాగతం!
-
-00:00:03.000 --> 00:00:06.000
-యూజర్ ఎక్స్‌పీరియన్స్ అంటే వినియోగదారులకు విషయాలను మెరుగుపరచడం
-
-00:00:06.000 --> 00:00:09.000
-అద్భుతమైన అనుభవాలను ఎలా సృష్టించాలో నేర్చుకుందాం
-
-00:00:09.000 --> 00:00:12.000
-మేము UX డిజైన్ యొక్క మూలాలను కవర్ చేస్తాము
-
-00:00:12.000 --> 00:00:15.000
-వినియోగదారు పరిశోధన మరియు ప్రోటోటైపింగ్ సహా
-
-00:00:15.000 --> 00:00:18.000
-వినియోగదారు అవసరాలను అర్థం చేసుకోవడం చాలా ముఖ్యం
-
-00:00:18.000 --> 00:00:21.000
-మేము వివిధ పరిశోధనా పద్ధతులను నేర్చుకుంటాము
-
-00:00:21.000 --> 00:00:24.000
-మరియు వాటిని ప్రభావవంతంగా ఎలా అన్వయించాలి
-
-00:00:24.000 --> 00:00:27.000
-తర్వాత మేము వైర్‌ఫ్రేమింగ్‌కి వెళ్తాము
-
-00:00:27.000 --> 00:00:30.000
-ఇంటరాక్టివ్ ప్రోటోటైప్‌లను సృష్టించడం
-
-00:00:30.000 --> 00:00:33.000
-మరియు నిజమైన వినియోగదారులతో పరీక్షించడం
-
-00:00:33.000 --> 00:00:36.000
-చివరికి, మీరు సిద్ధంగా ఉంటారు
-
-00:00:36.000 --> 00:00:39.000
-వినియోగదారు-కేంద్రీకృత డిజైన్ పరిష్కారాలను సృష్టించడానికి
-
-00:00:39.000 --> 00:00:42.000
-నిజమైన సమస్యలను పరిష్కరించే
-
-00:00:42.000 --> 00:03:22.000
-UX డిజైన్ సూత్రాలు మరియు ఉత్తమ పద్ధతులను లోతుగా అన్వేషించండి`;
-
-  // Create Blob URLs for each VTT content
-  const englishCaptionsUrl = URL.createObjectURL(
-    new Blob([englishCaptionsVtt], { type: 'text/vtt' })
-  );
-  const hindiCaptionsUrl = URL.createObjectURL(
-    new Blob([hindiCaptionsVtt], { type: 'text/vtt' })
-  );
-  const teluguCaptionsUrl = URL.createObjectURL(
-    new Blob([teluguCaptionsVtt], { type: 'text/vtt' })
-  );
-
-  // Cleanup Blob URLs on unmount
   useEffect(() => {
-    return () => {
-      URL.revokeObjectURL(englishCaptionsUrl);
-      URL.revokeObjectURL(hindiCaptionsUrl);
-      URL.revokeObjectURL(teluguCaptionsUrl);
-    };
-  }, []);
+    if (lessonData.lesson) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setContent(lessonContents[lessonData.lesson] || {
+          type: 'default',
+          content: `
+            <div class="p-6 bg-white rounded-lg">
+              <h2 class="text-xl font-semibold mb-4">${lessonData.lesson}</h2>
+              <p>Content for this lesson is being developed...</p>
+            </div>
+          `
+        });
+        setIsLoading(false);
+      }, 500);
+    }
+  }, [lessonData]);
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <SuperLoader />;
+    }
+
+    if (!content) {
+      return <div>Please select a lesson</div>;
+    }
+
+    switch (content.type) {
+      case 'video':
+        return (
+          <div className="w-full h-[600px] p-2">
+            <div className="w-full h-full relative">
+              <video
+                className="w-full h-full object-cover"
+                controls
+                playsInline
+                onLoadedData={() => setIsLoading(false)}
+              >
+                <source src={content.url} type="video/mp4" />
+                
+                {/* Multiple language tracks */}
+                {/* <track 
+                  src={englishCaptionsUrl}
+                  label="English" 
+                  kind="captions" 
+                  srcLang="en"
+                  default 
+                />
+                <track 
+                  src={hindiCaptionsUrl}
+                  label="हिंदी" 
+                  kind="captions" 
+                  srcLang="hi"
+                />
+                <track 
+                  src={teluguCaptionsUrl}
+                  label="తెలుగు" 
+                  kind="captions" 
+                  srcLang="te"
+                /> */}
+
+                Your browser does not support the video tag.
+              </video>
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-opacity-50">
+                  <SuperLoader />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'document':
+      case 'interactive':
+        return (
+          <div className="p-4">
+            <div dangerouslySetInnerHTML={{ __html: content.content }} />
+          </div>
+        );
+
+      default:
+        return (
+          <div className="p-4">
+            <div dangerouslySetInnerHTML={{ __html: content.content }} />
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="w-full">
-      <style>{videoStyles}</style>
       {/* Navigation Bar */}
       <div className="flex items-center justify-between px-6 py-3 bg-[#e5e7eb] border-b border-gray-200">
-        <button className="flex items-center gap-2 text-blue-600 border border-blue-700 px-4 py-2 rounded-md hover:text-blue-700 transition-colors duration-200">
+        <button 
+          className={`flex items-center gap-2 px-4 py-2 rounded-md
+            ${currentIndex > 0 
+              ? 'text-blue-600 border border-blue-700 hover:text-blue-700' 
+              : 'text-gray-400 border border-gray-300 cursor-not-allowed'}`}
+          onClick={() => handleNavigation('prev')}
+          disabled={currentIndex <= 0}
+        >
           <IoIosArrowBack className="text-xl" />
           <span className="text-sm font-medium">Previous</span>
         </button>
         
         <div className="flex items-start mr-auto ml-6 space-x-2">
           <h2 className="text-base font-bold text-black">
-            Chapter: What&apos;s &quot;Discovery&quot;?
+            Chapter: {lessonData.chapter}
           </h2>
-          <span className="text-xs text-gray-500 mt-1 bg-[#F2F9FF] px-2 py-1 rounded-md">Playing</span>
+          <span className="text-xs text-gray-500 mt-1 bg-[#F2F9FF] px-2 py-1 rounded-md">
+            {lessonData.type === 'play' ? 'Playing' : 'Reading'}
+          </span>
         </div>
 
-        <button className="flex items-center gap-2 text-blue-600 border border-blue-700 px-4 py-2 rounded-md hover:text-blue-700 transition-colors duration-200">
+        <button 
+          className={`flex items-center gap-2 px-4 py-2 rounded-md
+            ${currentIndex < allLessons.length - 1 
+              ? 'text-blue-600 border border-blue-700 hover:text-blue-700' 
+              : 'text-gray-400 border border-gray-300 cursor-not-allowed'}`}
+          onClick={() => handleNavigation('next')}
+          disabled={currentIndex >= allLessons.length - 1}
+        >
           <span className="text-sm font-medium">Next</span>
           <IoIosArrowForward className="text-xl" />
         </button>
       </div>
 
-      {/* Video Container */}
-      <div className="w-full h-[600px] p-2">
-        <div className="w-full h-full relative">
-          <video
-            className="w-full h-full object-cover"
-            controls
-            playsInline
-            onLoadedData={() => setIsLoading(false)}
-          >
-            <source src={videoUrl} type="video/mp4" />
-            
-            {/* Multiple language tracks */}
-            <track 
-              src={englishCaptionsUrl}
-              label="English" 
-              kind="captions" 
-              srcLang="en"
-              default 
-            />
-            <track 
-              src={hindiCaptionsUrl}
-              label="हिंदी" 
-              kind="captions" 
-              srcLang="hi"
-            />
-            <track 
-              src={teluguCaptionsUrl}
-              label="తెలుగు" 
-              kind="captions" 
-              srcLang="te"
-            />
-
-            Your browser does not support the video tag.
-          </video>
-          {/* <CaptionControls /> */}
-        </div>
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-opacity-50">
-            <SuperLoader />
-          </div>
-        )}
+      {/* Content Area */}
+      <div className="h-auto overflow-y-auto">
+        {renderContent()}
       </div>
-
-      {/* Transcript Section */}
-      
     </div>
   );
 };

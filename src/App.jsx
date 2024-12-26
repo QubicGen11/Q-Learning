@@ -23,6 +23,7 @@ import CoursesPage from './Components/Instructor Module/Courses/CoursesPage';
 import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 import CourseContent from './Components/Instructor Module/Courses/CreateCourse/CourseContent';
 import FAQ from './Components/Instructor Module/Courses/CreateCourse/Steps/FAQ';
+import Viewallskillsec from './Components/New Landingpage/Skill Assessent Module/Viewallskillsec';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -100,11 +101,14 @@ function App() {
               <Route path="/loader" element={<SuperLoader />} />
               <Route path="/course/:id/learn" element={<CourseLearnInterface/>} />
               <Route path="/spline" element={<SplineScene/>} />
+              <Route path="/viewallskillsec" element={<Viewallskillsec/>} />
               <Route path="/instructor" element={<InstructorLayout />}>
                 <Route path="courses" element={<CoursesPage />} />
                 <Route path="courses/create" element={<CreateCourse />} />
                 <Route path="courses/content" element={<CourseContent />} />
                 <Route path="courses/faq" element={<FAQ />} />
+                {/* <Route path="/skillassessment" element={<Skillassessment/>} /> */}
+              
                 {/* Other routes */}
               </Route>
             </Routes>

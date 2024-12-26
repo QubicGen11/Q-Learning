@@ -14,6 +14,7 @@ import EducationAspiration from './Education Aspiraton Componenst/EducationAspir
 import Toptrending from './Top Trending Skills/Toptrending'
 import usePreLoginFeedStore from '../../stores/preLoginFeedStore'
 import SuperLoader from '../Common/SuperLoader'
+import Skillassessment from './Skill Assessent Module/Skillassessment'
 
 const Landingpage = () => {
   const { 
@@ -74,6 +75,7 @@ const Landingpage = () => {
       <EducationAspiration/>
       <Testimonials testimonials={testimonials} />
       <LearnersChoice courses={learnersChoice}/>
+      <Skillassessment/>
       <Toptrending skills={topTrendingSkills} />
       <Exploretopskills topSkillsAndCertifications={topSkillsAndCertifications}/>
       <Footer/>
