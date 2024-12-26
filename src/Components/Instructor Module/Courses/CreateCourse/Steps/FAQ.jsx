@@ -50,7 +50,7 @@ function FAQ() {
           <button className="py-4 px-1 text-gray-500">
             Basic Information
           </button>
-          <button className="py-4 px-1 text-gray-500">
+          <button className="py-4 px-1 text-blue-600 border-b-2 border-blue-600">
             Course Content
           </button>
           <button className="py-4 px-1 text-gray-500">

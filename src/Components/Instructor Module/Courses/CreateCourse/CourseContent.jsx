@@ -20,6 +20,23 @@ function CourseContent() {
     material: { name: 'nameof.exe' }
   });
 
+  const [selectedLesson, setSelectedLesson] = useState({
+    chapterId: 1,
+    lessonId: 1,
+    type: 'Video'
+  });
+
+  const [quizQuestions, setQuizQuestions] = useState([
+    {
+      id: 1,
+      questionType: 'Multiple Choice',
+      question: '',
+      description: '',
+      hasMedia: false,
+      options: ['Yes', 'No']
+    }
+  ]);
+
   const handleAddChapter = () => {
     const newChapter = {
       id: chapters.length + 1,
@@ -69,6 +86,7 @@ function CourseContent() {
       }
       return chapter;
     }));
+    setSelectedLesson({ chapterId, lessonId, type: newType });
   };
 
   const handlePrevious = () => {
@@ -77,6 +95,234 @@ function CourseContent() {
 
   const handleNext = () => {
     navigate('/instructor/courses/faq'); // Goes to FAQ section
+  };
+
+  const addNewQuestion = () => {
+    setQuizQuestions([
+      ...quizQuestions,
+      {
+        id: quizQuestions.length + 1,
+        questionType: 'Multiple Choice',
+        question: '',
+        description: '',
+        hasMedia: false,
+        options: ['Yes', 'No']
+      }
+    ]);
+  };
+
+  const handleQuestionChange = (questionId, field, value) => {
+    setQuizQuestions(quizQuestions.map(q => 
+      q.id === questionId ? { ...q, [field]: value } : q
+    ));
+  };
+
+  const renderLessonContent = (type) => {
+    switch(type) {
+      case 'Video':
+        return (
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">
+                Lessons *
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <div className="flex flex-col items-center">
+                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
+                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
+                  <p className="text-sm text-gray-400">MP4, MKW... up to 1MB</p>
+                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
+                    Browse
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">
+                Materials *
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <div className="flex flex-col items-center">
+                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
+                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
+                  <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
+                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
+                    Browse
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'PDF':
+        return (
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">
+                Content *
+              </label>
+              <textarea
+                className="w-full h-64 p-4 border rounded-lg text-sm resize-none"
+                placeholder="Enter your content here..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">
+                Materials *
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <div className="flex flex-col items-center">
+                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
+                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
+                  <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
+                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
+                    Browse
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'Quiz':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-medium">Quiz</h3>
+              <button 
+                onClick={addNewQuestion}
+                className="text-blue-600 flex items-center gap-1"
+              >
+                <span className="material-icons text-sm">add_circle_outline</span>
+                Add Question
+              </button>
+            </div>
+
+            {quizQuestions.map((question, index) => (
+              <div key={question.id} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Question {question.id}</span>
+                    <select 
+                      className="text-sm border rounded px-2 py-1"
+                      value={question.questionType}
+                      onChange={(e) => handleQuestionChange(question.id, 'questionType', e.target.value)}
+                    >
+                      <option>Multiple Choice</option>
+                      <option>Open Ended</option>
+                      <option>Dropdown</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button className="p-1">
+                      <span className="material-icons text-gray-400">content_copy</span>
+                    </button>
+                    <button 
+                      className="p-1"
+                      onClick={() => setQuizQuestions(quizQuestions.filter(q => q.id !== question.id))}
+                    >
+                      <span className="material-icons text-gray-400">delete</span>
+                    </button>
+                    <button className="p-1">
+                      <span className="material-icons text-gray-400">unfold_less</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Question *"
+                    className="w-full p-2 border rounded text-sm"
+                    value={question.question}
+                    onChange={(e) => handleQuestionChange(question.id, 'question', e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Description"
+                    className="w-full p-2 border rounded text-sm"
+                    rows="3"
+                    value={question.description}
+                    onChange={(e) => handleQuestionChange(question.id, 'description', e.target.value)}
+                  />
+                  
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      id={`addImage-${question.id}`}
+                      checked={question.hasMedia}
+                      onChange={(e) => handleQuestionChange(question.id, 'hasMedia', e.target.checked)}
+                    />
+                    <label htmlFor={`addImage-${question.id}`} className="text-sm">
+                      Add Image or Video
+                    </label>
+                  </div>
+
+                  {question.hasMedia && (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <div className="flex flex-col items-center">
+                        <p className="text-gray-500 mb-1">Drag and Drop Or Browse</p>
+                        <p className="text-sm text-gray-400">MP4, MKW, PNG, JPG(up to 20MB)</p>
+                        <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
+                          Browse
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {question.questionType === 'Multiple Choice' && (
+                    <div className="space-y-2">
+                      {question.options.map((option, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input 
+                            type="radio" 
+                            name={`question-${question.id}`} 
+                            id={`option-${question.id}-${idx}`}
+                          />
+                          <input
+                            type="text"
+                            className="flex-1 p-2 border rounded text-sm"
+                            value={option}
+                            onChange={(e) => {
+                              const newOptions = [...question.options];
+                              newOptions[idx] = e.target.value;
+                              handleQuestionChange(question.id, 'options', newOptions);
+                            }}
+                          />
+                          <button 
+                            onClick={() => {
+                              const newOptions = question.options.filter((_, i) => i !== idx);
+                              handleQuestionChange(question.id, 'options', newOptions);
+                            }}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <span className="material-icons text-sm">close</span>
+                          </button>
+                        </div>
+                      ))}
+                      <button 
+                        onClick={() => {
+                          const newOptions = [...question.options, ''];
+                          handleQuestionChange(question.id, 'options', newOptions);
+                        }}
+                        className="text-blue-600 text-sm flex items-center gap-1"
+                      >
+                        <span className="material-icons text-sm">add_circle_outline</span>
+                        Add Option
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
@@ -188,7 +434,8 @@ function CourseContent() {
                     {chapter.lessons.map((lesson) => (
                       <div key={lesson.id} className="flex items-center gap-2 py-2 pl-6">
                         <span className="material-icons text-gray-400 text-sm">
-                          {lesson.type === 'Video' ? 'play_circle' : 'description'}
+                          {lesson.type === 'Video' ? 'play_circle' : 
+                           lesson.type === 'Quiz' ? 'quiz' : 'description'}
                         </span>
                         <span className="text-sm">{lesson.title}</span>
                         <select 
@@ -198,6 +445,7 @@ function CourseContent() {
                         >
                           <option value="Video">Video</option>
                           <option value="PDF">PDF</option>
+                          <option value="Quiz">Quiz</option>
                         </select>
                       </div>
                     ))}
@@ -217,89 +465,7 @@ function CourseContent() {
 
         {/* Right Content Area */}
         <div className="flex-1 bg-white rounded-lg p-6">
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Lessons *
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <div className="flex flex-col items-center">
-                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                  <p className="text-sm text-gray-400">MP4, MKW... up to 1MB</p>
-                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
-                    Browse
-                  </button>
-                </div>
-              </div>
-              {uploadedFiles.lesson && (
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-blue-600">×</span>
-                  <span className="text-sm">{uploadedFiles.lesson.name}</span>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Materials *
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <div className="flex flex-col items-center">
-                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                  <p className="text-sm text-gray-400">MP4, MKW... up to 1MB</p>
-                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
-                    Browse
-                  </button>
-                </div>
-              </div>
-              {uploadedFiles.material && (
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-blue-600">×</span>
-                  <span className="text-sm">{uploadedFiles.material.name}</span>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-600">
-                  Lesson Quiz
-                </label>
-                <button className="flex items-center gap-1 text-blue-600 text-sm">
-                  <span className="material-icons text-sm">add_circle_outline</span>
-                  Add Question
-                </button>
-              </div>
-              <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <input
-                      type="text"
-                      placeholder="What is the question topic here"
-                      className="text-sm focus:outline-none flex-1"
-                    />
-                    <select className="text-sm border rounded px-2 py-1">
-                      <option>Open-Ended</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <input
-                      type="text"
-                      placeholder="What is the question topic here"
-                      className="text-sm focus:outline-none flex-1"
-                    />
-                    <select className="text-sm border rounded px-2 py-1">
-                      <option>Multiple Choice</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {renderLessonContent(selectedLesson.type)}
         </div>
       </div>
 

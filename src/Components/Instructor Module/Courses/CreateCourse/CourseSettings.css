@@ -1,0 +1,14 @@
+
+/* Toggle Switch Styles */
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #3B82F6;
+  }
+  
+  .toggle-checkbox:checked + .toggle-label {
+    background-color: #3B82F6;
+  }
+  
+  .toggle-label {
+    transition: background-color 0.2s ease-in;
+  }
