@@ -379,7 +379,7 @@ const Newnavbar = () => {
     { label: 'My Learning', link: '/my-learning' },
     { label: 'My Cart', link: '/cart' },
     { label: 'Wishlist', link: '/wishlist' },
-    { label: 'Teach on QubiNest', link: '/teach' },
+    { label: 'Teach on QubiNest', link: '/instructor' },
     { label: 'Notifications', link: '/notifications' },
     { label: 'Account Settings', link: '/settings' },
     { label: 'Edit Profile', link: '/profile/edit' },
@@ -575,7 +575,7 @@ const Newnavbar = () => {
         {/* User Info and Icons */}
         {isLoggedIn ? (
           <div className="hidden md:flex items-center gap-4 lg:gap-8">
-            <a href="#" className="text-gray-600 hover:text-[#0056B3] hover:scale-110 transform transition-transform duration-200 ">
+            <a href="/instructor" className="text-gray-600 hover:text-[#0056B3] hover:scale-110 transform transition-transform duration-200 ">
               Teach Online
             </a>
             <a href="#" className="text-gray-600 hover:text-[#0056B3] hover:scale-110 transform transition-transform duration-200 ">
@@ -665,7 +665,7 @@ const Newnavbar = () => {
           </div>
         ) : (
           <div className="hidden md:flex items-center gap-4 lg:gap-8">
-            <a href="#" className="text-gray-600 hover:text-[#0056B3] transition-colors duration-200">
+            <a href="/instructor" className="text-gray-600 hover:text-[#0056B3] transition-colors duration-200">
               Teach Online
             </a>
             <a href="#" className="text-gray-600 hover:text-[#0056B3] transition-colors duration-200">
@@ -733,7 +733,7 @@ const Newnavbar = () => {
                     Wishlist
                   </a>
                   <div className="border-t border-gray-200 my-2"></div>
-                  <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                  <a href="/instructor" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
                     Teach Online
                   </a>
                   <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
