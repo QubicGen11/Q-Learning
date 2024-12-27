@@ -38,7 +38,9 @@ const Coursepagemain = () => {
     <div>
       <Newnavbar />
       <CourseBanner 
-        title={courseData.courseTitle}
+        title={courseData.courseName}
+        teachingLanguage={courseData.teachingLanguage}
+        courseTagline={courseData.courseTagline}
         description={courseData.description}
         thumbnail={courseData.thumbnail}
         owner={courseData.courseOwner}
@@ -50,10 +52,12 @@ const Coursepagemain = () => {
         subCategory={courseData.subCategory}  
         updatedAt={courseData.updatedAt}
         courseRating={courseData.courseRating}
+        courseOutcome={courseData.courseOutcome}
       />
       <Coursebarsec 
        
         courseId={courseData.id}
+        courseOutcome={courseData.courseOutcome}
       />
     
       

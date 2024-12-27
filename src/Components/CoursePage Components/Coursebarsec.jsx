@@ -4,7 +4,7 @@ import RelatedCoursesmain from './RelatedCourse/RelatedCoursesmain';
 import Community from './Community Section/Community';
 import usePreLoginFeedStore from '../../stores/preLoginFeedStore';
 
-const Coursebarsec = ({ courseId }) => {
+const Coursebarsec = ({ courseId, courseOutcome }) => {
   const [activeLink, setActiveLink] = useState('Course Content');
 
   const navLinks = [
@@ -17,7 +17,7 @@ const Coursebarsec = ({ courseId }) => {
   const renderContent = () => {
     switch (activeLink) {
       case 'Course Content':
-        return <Coursecontentmain courseId={courseId} />;
+        return <Coursecontentmain courseId={courseId} courseOutcome={courseOutcome} />;
       case 'Related Courses & About Instructor':
         return <RelatedCoursesmain courseId={courseId} />;
       case 'Community Support':

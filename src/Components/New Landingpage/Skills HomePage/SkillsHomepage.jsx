@@ -8,28 +8,18 @@ const SkillsHomepage = ({ categories }) => {
     .filter(category => category)
   )];
 
-  // Set default category to first available category or 'Programming' if none exist
-  const defaultCategory = uniqueCategories.length > 0 ? uniqueCategories[0] : 'Programming';
+  // Set default category to first available category or 'Web Development' if none exist
+  const defaultCategory = uniqueCategories.length > 0 ? uniqueCategories[0] : 'Web Development';
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
 
-  // Get unique subcategories for selected category with default images
+  // Get subcategories with their actual images from the API
   const getSubcategoriesWithImages = (category) => {
-    const subcategories = [...new Set(categories
-      .filter(item => item.category === category && item.subCategory)
-      .map(item => item.subCategory)
-    )];
-
-    // Map each subcategory to an object with title and image
-    return subcategories.map((subCategory, index) => ({
-      title: subCategory,
-      image: [
-      
-        
-        
-        "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-        
-      ][index % 6] // Cycle through images if more than 6 subcategories
-    }));
+    return categories
+      .filter(item => item.category === category)
+      .map(item => ({
+        title: item.subCategory,
+        image: item.categoryImage // Using the actual image from API
+      }));
   };
 
   // Get current subcategories based on selected category

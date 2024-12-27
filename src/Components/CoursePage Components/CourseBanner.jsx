@@ -3,6 +3,7 @@ import { FaHeart, FaVolumeMute } from 'react-icons/fa';
 
 const CourseBanner = ({ 
   title, 
+  courseTagline,
   description, 
   thumbnail, 
   owner, 
@@ -13,6 +14,7 @@ const CourseBanner = ({
   category,
   subCategory,
   updatedAt,
+  teachingLanguage,
   courseRating
 }) => {
   const [isCompact, setIsCompact] = useState(false);
@@ -96,7 +98,7 @@ const CourseBanner = ({
                 </h1>
 
                 <p className="text-gray-300 text-lg mb-6">
-                  {description}
+                  {courseTagline}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
@@ -114,7 +116,7 @@ const CourseBanner = ({
                   <div className='text-white bg-[#4B5563] p-2 rounded'>
                     Last updated {formatDate(updatedAt)}
                   </div>
-                  <div className="bg-green-600 px-2 py-1 rounded">English</div>
+                  <div className="bg-green-600 px-2 py-1 rounded">{teachingLanguage}</div>
                   <div className="flex items-center gap-1">
                     
                     {/* <span></span> */}

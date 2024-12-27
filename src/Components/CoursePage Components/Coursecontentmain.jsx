@@ -4,7 +4,7 @@ import CourseContent from './CourseContent';
 import CourseContentsec from './CourseContentsec';
 import CourseDesc from './CourseDesc';
 
-const Coursecontentmain = ({ courseId }) => {
+const Coursecontentmain = ({ courseId, courseOutcome }) => {
   const { getCourseById } = usePreLoginFeedStore();
   const courseData = getCourseById(courseId);
 
@@ -15,6 +15,7 @@ const Coursecontentmain = ({ courseId }) => {
       <CourseContent 
         curriculum={courseData.curriculum}
         learningObjective={courseData.learningObjective}
+        courseOutcome={courseOutcome}
         aboutCourse={courseData.aboutCourse}
       />
       <CourseContentsec 

@@ -71,18 +71,12 @@ const MostSellingCourses = ({ courses }) => {
               <div key={course.id} className="px-3">
                 <div 
                   className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
-                  onClick={(e) => {
-                    // Prevent navigation if clicking on a button or link inside the card
-                    if (e.target.tagName.toLowerCase() !== 'button' && 
-                        !e.target.closest('a')) {
-                      handleCourseClick(course.id);
-                    }
-                  }}
+                  onClick={() => handleCourseClick(course.id)}
                 >
                   <div className="relative overflow-hidden">
                     <img 
-                      src={course.thumbnail || course.technologyImage || 'https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png'} 
-                      alt={course.courseTitle} 
+                      src={course.categoryImage || course.courseBanner} 
+                      alt={course.courseName} 
                       className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
                     />
                     <div className="absolute top-4 left-4 bg-[#0056b3] text-white px-3 py-1 rounded-md text-sm">
@@ -103,16 +97,13 @@ const MostSellingCourses = ({ courses }) => {
                     </div>
                     
                     <h3 className="font-medium text-lg mb-2 group-hover:text-[#0056b3] transition-colors duration-300">
-                      {course.courseTitle}
+                      {course.courseName}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-2">{course.courseOwner}</p>
+                    <p className="text-gray-600 text-sm mb-2">{course.trainerName}</p>
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <span className="text-[#0056b3] font-bold">₹{course.price || 'Free'}</span>
-                        {course.originalPrice && (
-                          <span className="ml-2 text-gray-400 line-through">₹{course.originalPrice}</span>
-                        )}
+                        <span className="text-[#0056b3] font-bold">Free</span>
                       </div>
                       <span className={`bg-emerald-500 text-white text-sm px-2 py-1 rounded transition-transform duration-300 group-hover:scale-105`}>
                         {course.difficultyLevel}
