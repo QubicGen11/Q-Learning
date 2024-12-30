@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import useSidebarStore from '../../stores/sidebarStore';
@@ -7,9 +7,17 @@ import Cookies from 'js-cookie';
 import Swal from 'sweetalert2';
 
 const InstructorLayout = () => {
-  const { isCollapsed } = useSidebarStore();
+  const { isCollapsed, toggleSidebar } = useSidebarStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check for route changes and collapse sidebar if on course routes
+  useEffect(() => {
+    if (location.pathname.includes('/instructor/courses') && !isCollapsed) {
+      toggleSidebar();
+    }
+  }, [location.pathname, isCollapsed, toggleSidebar]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,7 +38,7 @@ const InstructorLayout = () => {
         if (result.isConfirmed) {
           navigate('/login');
         } else {
-          navigate('/'); // or any other fallback route
+          navigate('/');
         }
         return;
       }
@@ -42,17 +50,15 @@ const InstructorLayout = () => {
   }, [navigate]);
 
   if (!isAuthenticated) {
-    return null; // or return a loading spinner
+    return null;
   }
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
       <div className="fixed h-screen">
         <Sidebar />
       </div>
 
-      {/* Main Content */}
       <div className={`flex-1 ${isCollapsed ? 'ml-[60px]' : 'ml-64'}`}>
         <div className="sticky top-0 z-10 bg-white">
           <Navbar />
