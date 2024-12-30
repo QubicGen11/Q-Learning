@@ -15,7 +15,8 @@ const CourseBanner = ({
   subCategory,
   updatedAt,
   teachingLanguage,
-  courseRating
+  courseRating,
+  rating
 }) => {
   const [isCompact, setIsCompact] = useState(false);
   const bannerRef = useRef(null);
@@ -34,9 +35,7 @@ const CourseBanner = ({
     return stars;
   };
 
-  const averageRating = courseRating && courseRating.length > 0 
-    ? courseRating[0].rating 
-    : 0;
+  const averageRating = rating || 0;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -126,15 +125,21 @@ const CourseBanner = ({
 
               <div className="w-full md:w-80 rounded-lg shadow-lg p-6 mx-auto my-auto">
                 
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 ">
               
-                  <span className="text-3xl font-bold text-white">₹{price}</span>
-                  {originalPrice && (
-                    <span className="text-gray-500 line-through text-white font-light">₹{originalPrice}</span>
-                  )}
-                  {discount && (
-                    <span className="text-green-600 font-semibold text-white font-light">{discount}% off</span>
-                  )}
+                <span className="text-3xl font-bold text-white">
+                  ₹{Math.round(price)}
+                </span>
+                {originalPrice && (
+                  <span className="text-gray-400 line-through text-white font-light opacity-80">
+                    ₹{Math.round(originalPrice)}
+                  </span>
+                )}
+                {discount && (
+                  <span className="bg-green-500 text-white px-2 py-0.5 rounded-md font-medium text-sm ml-2">
+                    {Math.round(discount)}% OFF
+                  </span>
+                )}
                     <FaVolumeMute size={30} color='white'/>
                 </div>
                 

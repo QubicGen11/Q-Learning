@@ -1,12 +1,15 @@
 import React from 'react';
 import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
 
-
 const LearnersChoice = () => {
   const learnersChoice = usePreLoginFeedStore((state) => state.learnersChoice || []);
   
   // Take only the first 4 courses
   const limitedCourses = learnersChoice?.slice(0, 4) || [];
+
+  const renderStars = (rating) => {
+    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  };
 
   if (!learnersChoice || learnersChoice.length === 0) {
     return (
@@ -35,8 +38,8 @@ const LearnersChoice = () => {
                 <div className="relative w-40 sm:w-48 flex-shrink-0">
                   <div className="aspect-video rounded-lg overflow-hidden">
                     <img 
-                      src={course.thumbnail || course.courseBanner || 'https://via.placeholder.com/300x200'} 
-                      alt={course.courseTitle}
+                      src={course.courseImage || course.courseBanner || 'https://via.placeholder.com/300x200'} 
+                      alt={course.courseName}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                   </div>
@@ -48,23 +51,37 @@ const LearnersChoice = () => {
                 {/* Right side - Content */}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium mb-1 text-gray-900 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
-                    {course.courseTitle}
+                    {course.courseName}
                   </h3>
                   
                   <p className="text-xs text-gray-600 mb-2">
-                    {course.courseOwner}
+                    {course.trainerName}
                   </p>
-                  
+
+                  {/* Rating */}
                   <div className="flex items-center gap-2 mb-2">
-                    {course.price ? (
+                    <span className="text-yellow-400 text-sm">{renderStars(course.rating)}</span>
+                    <span className="text-xs text-gray-600">({course.rating})</span>
+                  </div>
+                  
+                  {/* Price */}
+                  <div className="flex items-center gap-2 mb-2">
+                    {course.courseSettings?.[0]?.settings && (
                       <>
-                        <span className="text-blue-600 font-bold">₹{course.price}/-</span>
-                        {course.originalPrice && (
-                          <span className="text-gray-400 text-sm line-through">₹{course.originalPrice}/-</span>
+                        <span className="text-blue-600 font-bold">
+                          ₹{course.courseSettings[0].settings.price}
+                        </span>
+                        {course.courseSettings[0].settings.offeredPrice && (
+                          <span className="text-gray-400 text-sm line-through">
+                            ₹{course.courseSettings[0].settings.offeredPrice}
+                          </span>
+                        )}
+                        {course.courseSettings[0].settings.discount && (
+                          <span className="text-green-600 text-xs">
+                            {course.courseSettings[0].settings.discount}% off
+                          </span>
                         )}
                       </>
-                    ) : (
-                      <span className="text-blue-600 font-bold">Free</span>
                     )}
                   </div>
 
@@ -72,16 +89,9 @@ const LearnersChoice = () => {
                     <div className="flex items-center gap-3">
                       <span>{course.viewsCount || 0} Viewing</span>
                       <span>{course.difficultyLevel}</span>
+                      <span>{course.courseDuration}</span>
                     </div>
                   </div>
-
-                  <span className={`inline-block mt-2 px-2 py-1 text-xs text-white rounded ${
-                    course.courseType === 'Premium' ? 'bg-purple-600' :
-                    course.courseType === 'Enterprise' ? 'bg-gray-700' :
-                    'bg-green-500'
-                  }`}>
-                    {course.courseType}
-                  </span>
                 </div>
               </div>
             </div>

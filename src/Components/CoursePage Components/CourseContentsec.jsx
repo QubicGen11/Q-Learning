@@ -2,7 +2,15 @@ import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp, FaPlayCircle, FaFile } from 'react-icons/fa';
 import './CourseContentsec.css';
 
-const CourseContentsec = () => {
+const CourseContentsec = ({ 
+  coursePreRequisites, 
+  aboutCourse, 
+  endObjective, 
+  technologiesUsed,
+  courseAudience
+}) => {
+  console.log('Received prerequisites:', coursePreRequisites);
+
   const [expandedSections, setExpandedSections] = useState(['Discovery Learning']);
   const [allExpanded, setAllExpanded] = useState(false);
   const [currentReview, setCurrentReview] = useState(0);
@@ -200,10 +208,29 @@ const CourseContentsec = () => {
             {/* Requirements Section */}
             <div>
               <h3 className="text-lg font-semibold mb-3">Requirements</h3>
-              <p className="text-gray-600">
-                This course was created for students of all levels, but a basic familiarity with Adobe and Microsoft 
-                products will be helpful if you plan to do the class projects.
-              </p>
+              {Array.isArray(coursePreRequisites) && coursePreRequisites.length > 0 ? (
+                <ul className="space-y-2">
+                  {coursePreRequisites.map((item) => (
+                    <li 
+                      key={item.id} 
+                      className="flex items-start gap-2"
+                    >
+                      <span className="text-gray-600">
+                        • {item.preRequisites?.preRequisiteRequired}
+                        {item.preRequisites?.preRequisiteLevel && (
+                          <span className="ml-2 text-sm text-blue-600">
+                            ({item.preRequisites.preRequisiteLevel})
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600">
+                  No specific prerequisites are required for this course.
+                </p>
+              )}
             </div>
 
             {/* Most Useful Reviews */}
@@ -285,17 +312,24 @@ const CourseContentsec = () => {
             {/* Who can enrol */}
             <div>
               <h3 className="text-lg font-semibold mb-3">Who can enrol for this course</h3>
-              <ul className="space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-gray-600">• People who want to enter the UX field and become practitioners</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-gray-600">• Professionals who want or need to add UX to their skill set</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-gray-600">• Anyone at an agency or company who needs to quickly learn real-world UX fundamentals you can use on the job</span>
-                </li>
-              </ul>
+              {Array.isArray(courseAudience) && courseAudience.length > 0 ? (
+                <ul className="space-y-2">
+                  {courseAudience.map((item) => (
+                    <li 
+                      key={item.id}
+                      className="flex items-start gap-2"
+                    >
+                      <span className="text-gray-600">
+                        • {item.audience}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600">
+                  This course is open to all learners.
+                </p>
+              )}
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaCheck } from 'react-icons/fa';
 
-const CourseContent = ({ curriculum, learningObjective, aboutCourse , courseOutcome }) => {
+const CourseContent = ({ curriculum, learningObjective, aboutCourse, courseOutcome }) => {
   const courseIncludes = [
     '5 hours on-demand video',
     '31 articles',
@@ -16,10 +16,12 @@ const CourseContent = ({ curriculum, learningObjective, aboutCourse , courseOutc
           {/* What You Will Get */}
           <div>
             <h2 className="text-base font-medium mb-2">What You Will Get</h2>
-            <div className="flex items-start gap-2">
-              <FaCheck className="text-[#0056D2] mt-1 flex-shrink-0 text-xs" />
-              <span className="text-gray-600 text-sm">{courseOutcome}</span>
-            </div>
+            {courseOutcome && (
+              <div className="flex items-start gap-2">
+                <FaCheck className="text-[#0056D2] mt-1 flex-shrink-0 text-xs" />
+                <span className="text-gray-600 text-sm">{courseOutcome}</span>
+              </div>
+            )}
           </div>
 
           {/* This course includes */}

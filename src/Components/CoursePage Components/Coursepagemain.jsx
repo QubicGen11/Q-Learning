@@ -34,26 +34,32 @@ const Coursepagemain = () => {
     );
   }
 
+  // Extract pricing information from courseSettings
+  const pricing = courseData.courseSettings?.[0]?.settings || {
+    price: 0,
+    discount: 0,
+    offeredPrice: 0
+  };
+
   return (
     <div>
       <Newnavbar />
       <CourseBanner 
-        title={courseData.courseName}
-        teachingLanguage={courseData.teachingLanguage}
-        courseTagline={courseData.courseTagline}
-        description={courseData.description}
-        thumbnail={courseData.thumbnail}
-        owner={courseData.courseOwner}
-        price={courseData.price}
-        originalPrice={courseData.originalPrice}
-        discount={courseData.discount}
-        courseBanner={courseData.courseBanner}
-        category={courseData.category}
-        subCategory={courseData.subCategory}  
-        updatedAt={courseData.updatedAt}
-        courseRating={courseData.courseRating}
-        courseOutcome={courseData.courseOutcome}
-      />
+  title={courseData.courseName}
+  courseTagline={courseData.courseTagline}
+  description={courseData.courseDescription}
+  thumbnail={courseData.courseImage}
+  courseBanner={courseData.courseBanner}
+  category={courseData.category}
+  subCategory={courseData.subCategory}
+  updatedAt={courseData.updatedAt}
+  teachingLanguage={courseData.teachingLanguage}
+  courseRating={courseData.courseRating}
+  rating={courseData.rating}  // Add this line
+  price={courseData.courseSettings[0]?.settings.price}
+  originalPrice={courseData.courseSettings[0]?.settings.offeredPrice}
+  discount={courseData.courseSettings[0]?.settings.discount}
+/>
       <Coursebarsec 
        
         courseId={courseData.id}
