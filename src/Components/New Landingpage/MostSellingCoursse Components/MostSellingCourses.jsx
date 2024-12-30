@@ -34,6 +34,25 @@ const MostSellingCourses = ({ courses }) => {
     );
   };
 
+  // Add renderStars function
+  const renderRating = (rating, reviewCount) => {
+    return (
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span 
+            key={star} 
+            className={`text-lg ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
+          >
+            ★
+          </span>
+        ))}
+        <span className="ml-2 text-sm text-gray-600">
+          ({rating} | {reviewCount || '121'})
+        </span>
+      </div>
+    );
+  };
+
   const settings = {
     dots: false,
     infinite: false,
@@ -77,37 +96,45 @@ const MostSellingCourses = ({ courses }) => {
                     <img 
                       src={course.categoryImage || course.courseBanner} 
                       alt={course.courseName} 
-                      className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
+                      className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                     />
-                    <div className="absolute top-4 left-4 bg-[#0056b3] text-white px-3 py-1 rounded-md text-sm">
-                      {course.category}
+                    <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-md text-sm">
+                    {course.category}
                     </div>
-                    <div className="absolute top-4 right-4 bg-white rounded-md px-2 py-1 flex items-center text-sm">
-                      <span className="mr-1">👥</span>
-                      <span>{course.viewsCount || '1,000+'} Views</span>
+                    <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                      </svg>
+                      32 Enrolled
                     </div>
                   </div>
                   
                   <div className="p-4">
-                    <div className="flex items-center mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-yellow-400">★</span>
-                      ))}
-                      <span className="ml-2 text-sm">(4.5 | {course.salesCount || '100+'})</span>
+                    {/* Rating Stars */}
+                    <div className="mb-2">
+                      {renderRating(course.rating || 4.7)}
                     </div>
                     
-                    <h3 className="font-medium text-lg mb-2 group-hover:text-[#0056b3] transition-colors duration-300">
+                    <h3 className="font-medium text-lg mb-2 group-hover:text-blue-600 transition-colors duration-300">
                       {course.courseName}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-2">{course.trainerName}</p>
+                    <p className="text-gray-600 text-sm mb-4">{course.trainerName}</p>
                     
+                    {/* Price Section */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <span className="text-[#0056b3] font-bold">Free</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl font-bold text-blue-600">
+                          ₹{course.courseSettings[0]?.settings.offeredPrice}/-
+                        </span>
+                        <span className="text-gray-400 line-through text-sm">
+                          ₹{course.courseSettings[0]?.settings.price}/-
+                        </span>
                       </div>
-                      <span className={`bg-emerald-500 text-white text-sm px-2 py-1 rounded transition-transform duration-300 group-hover:scale-105`}>
-                        {course.difficultyLevel}
-                      </span>
+                      {course.courseSettings[0]?.settings.discount && (
+                        <span className="bg-black text-white text-xs px-2 py-1 rounded">
+                          {course.courseSettings[0]?.settings.discount}% Off | Black Friday Sale
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

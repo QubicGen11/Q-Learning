@@ -5,27 +5,37 @@ const Exploretopskills = ({topSkillsAndCertifications}) => {
   // Create sections using first 3 categories
   const sections = categories.slice(0, 3).map(category => ({
     title: category.toUpperCase(),
-    items: topSkillsAndCertifications[category].map(item => item.courseTitle)
+    courses: topSkillsAndCertifications[category].map(course => ({
+      courseName: course.courseName,
+      price: course.courseSettings[0]?.settings.price,
+      offeredPrice: course.courseSettings[0]?.settings.offeredPrice,
+      discount: course.courseSettings[0]?.settings.discount
+    }))
   }));
 
   // Create bottom sections using next 3 categories
   const bottomSections = categories.slice(3, 6).map(category => ({
     title: category.toUpperCase(),
-    items: topSkillsAndCertifications[category].map(item => item.courseTitle)
+    courses: topSkillsAndCertifications[category].map(course => ({
+      courseName: course.courseName,
+      price: course.courseSettings[0]?.settings.price,
+      offeredPrice: course.courseSettings[0]?.settings.offeredPrice,
+      discount: course.courseSettings[0]?.settings.discount
+    }))
   }));
 
   // If there aren't enough categories, fill with defaults
   while (sections.length < 3) {
     sections.push({
       title: "ADDITIONAL SKILLS",
-      items: ["No courses available"]
+      courses: []
     });
   }
 
   while (bottomSections.length < 3) {
     bottomSections.push({
       title: "ADDITIONAL SKILLS",
-      items: ["No courses available"]
+      courses: []
     });
   }
 
@@ -44,27 +54,34 @@ const Exploretopskills = ({topSkillsAndCertifications}) => {
                 {section.title}
               </h3>
               <ul className="space-y-3 sm:space-y-4">
-                {section.items.map((item, itemIndex) => (
-                  <li 
-                    key={itemIndex} 
-                    className="flex items-center justify-between text-gray-300 hover:text-white transition-colors duration-200 cursor-pointer group"
-                  >
-                    <span className="text-xs sm:text-sm pr-2">{item}</span>
-                    <svg 
-                      className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 opacity-100 transition-opacity duration-200 flex-shrink-0" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
+                {section.courses.length > 0 ? (
+                  section.courses.map((course, itemIndex) => (
+                    <li 
+                      key={itemIndex} 
+                      className="flex items-center justify-between text-gray-300 hover:text-white transition-colors duration-200 cursor-pointer group"
                     >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth="2" 
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </li>
-                ))}
+                      <div className="flex flex-col">
+                        <span className="text-xs sm:text-sm pr-2">{course.courseName}</span>
+                   
+                      </div>
+                      <svg 
+                        className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth="2" 
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-400 text-xs sm:text-sm">No courses available</li>
+                )}
               </ul>
             </div>
           ))}
@@ -78,27 +95,34 @@ const Exploretopskills = ({topSkillsAndCertifications}) => {
                 {section.title}
               </h3>
               <ul className="space-y-3 sm:space-y-4">
-                {section.items.map((item, itemIndex) => (
-                  <li 
-                    key={itemIndex} 
-                    className="flex items-center justify-between text-gray-300 hover:text-white transition-colors duration-200 cursor-pointer group"
-                  >
-                    <span className="text-xs sm:text-sm pr-2">{item}</span>
-                    <svg 
-                      className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 opacity-100 transition-opacity duration-200 flex-shrink-0" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
+                {section.courses.length > 0 ? (
+                  section.courses.map((course, itemIndex) => (
+                    <li 
+                      key={itemIndex} 
+                      className="flex items-center justify-between text-gray-300 hover:text-white transition-colors duration-200 cursor-pointer group"
                     >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth="2" 
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </li>
-                ))}
+                      <div className="flex flex-col">
+                        <span className="text-xs sm:text-sm pr-2">{course.courseName}</span>
+                  
+                      </div>
+                      <svg 
+                        className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth="2" 
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-400 text-xs sm:text-sm">No courses available</li>
+                )}
               </ul>
             </div>
           ))}
