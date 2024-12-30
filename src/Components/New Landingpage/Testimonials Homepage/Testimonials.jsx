@@ -2,6 +2,22 @@ import React from 'react'
 import { PiCertificate } from "react-icons/pi";
 
 const Testimonials = ({testimonials}) => {
+  if (!testimonials || testimonials.length === 0) {
+    return (
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-semibold text-center mb-12">
+            Testimonials
+          </h2>
+          <div className="text-center text-gray-600 py-10">
+            <p className="text-lg">No testimonials available at the moment.</p>
+            <p className="mt-2">Be the first one to share your learning experience!</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-50 py-16">
       <div className="max-w-7xl mx-auto px-4">
