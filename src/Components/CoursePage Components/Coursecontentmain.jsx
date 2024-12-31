@@ -27,6 +27,7 @@ const Coursecontentmain = ({ courseId }) => {
         technologiesUsed={courseData.technologiesUsed}
         coursePreRequisites={courseData.coursePreRequisites}
         courseAudience={courseData.courseAudience}
+        courseChapters={courseData.courseChapters}
       />
       <CourseDesc 
       

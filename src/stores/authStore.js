@@ -5,6 +5,68 @@ import Swal from 'sweetalert2';
 
 const tokenExpirationEvent = new Event('tokenExpired');
 
+// Add WebSocket connection
+let ws = null;
+
+const connectWebSocket = (token) => {
+  // Close existing connection if any
+  if (ws) {
+    ws.close();
+  }
+
+  // Create new WebSocket connection
+  ws = new WebSocket('ws://localhost:8089/ws');
+
+  ws.onopen = () => {
+    console.log('WebSocket Connected');
+    // Send authentication token
+    ws.send(JSON.stringify({
+      type: 'AUTH',
+      token: token
+    }));
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case 'SESSION_EXPIRED':
+          useAuthStore.getState().showSessionExpiredPopup();
+          break;
+        case 'NOTIFICATION':
+          Swal.fire({
+            title: 'New Notification',
+            text: data.message,
+            icon: 'info',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+          });
+          break;
+        default:
+          console.log('Received WebSocket message:', data);
+      }
+    } catch (error) {
+      console.error('Error processing WebSocket message:', error);
+    }
+  };
+
+  ws.onclose = () => {
+    console.log('WebSocket Disconnected');
+    // Attempt to reconnect after 5 seconds
+    setTimeout(() => {
+      if (Cookies.get('accessToken')) {
+        connectWebSocket(Cookies.get('accessToken'));
+      }
+    }, 5000);
+  };
+
+  ws.onerror = (error) => {
+    console.error('WebSocket Error:', error);
+  };
+};
+
 const useAuthStore = create((set) => ({
   isLoggedIn: false,
   userName: '',
@@ -26,6 +88,9 @@ const useAuthStore = create((set) => ({
         Cookies.set('accessToken', response.data.accessToken);
         Cookies.set('refreshToken', response.data.refreshToken);
         
+        // Initialize WebSocket connection after successful login
+        connectWebSocket(response.data.accessToken);
+
         const tokenPayload = JSON.parse(atob(response.data.accessToken.split('.')[1]));
         console.log('Decoded Token:', tokenPayload);
 
@@ -156,6 +221,12 @@ const useAuthStore = create((set) => ({
   },
 
   logout: () => {
+    // Close WebSocket connection
+    if (ws) {
+      ws.close();
+      ws = null;
+    }
+
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
     set({
@@ -215,7 +286,7 @@ const useAuthStore = create((set) => ({
             closeButton.style.fontSize = '22px';
             closeButton.style.color = '#666';
             closeButton.style.transition = 'color 0.2s';
-            closeButton.addEventListener('mouseover', () => {
+            closeButton.addEventListener('mouseover', () => { 
               closeButton.style.color = '#333';
             });
             closeButton.addEventListener('mouseout', () => {
@@ -244,8 +315,17 @@ const useAuthStore = create((set) => ({
       isChecking = true;
       
       const state = useAuthStore.getState();
-      if (state.isLoggedIn && !Cookies.get('accessToken') && !state.loading) {
+      const token = Cookies.get('accessToken');
+
+      if (state.isLoggedIn && !token && !state.loading) {
+        if (ws) {
+          ws.close();
+          ws = null;
+        }
         useAuthStore.getState().showSessionExpiredPopup();
+      } else if (state.isLoggedIn && token && !ws) {
+        // Reconnect WebSocket if needed
+        connectWebSocket(token);
       }
       
       isChecking = false;
@@ -253,8 +333,18 @@ const useAuthStore = create((set) => ({
 
     const intervalCheck = setInterval(checkToken, 5000);
 
+    // Initialize WebSocket if user is already logged in
+    const token = Cookies.get('accessToken');
+    if (token) {
+      connectWebSocket(token);
+    }
+
     return () => {
       clearInterval(intervalCheck);
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
     };
   }
 }));

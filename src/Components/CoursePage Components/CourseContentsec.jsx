@@ -7,7 +7,9 @@ const CourseContentsec = ({
   aboutCourse, 
   endObjective, 
   technologiesUsed,
-  courseAudience
+  courseAudience,
+  courseChapters
+  
 }) => {
   console.log('Received prerequisites:', coursePreRequisites);
 
@@ -27,7 +29,7 @@ const CourseContentsec = ({
     if (allExpanded) {
       setExpandedSections([]); // Collapse all
     } else {
-      setExpandedSections(sections.map(section => section.title)); // Expand all
+      setExpandedSections(courseChapters?.map(item => item.chapter.chapterName) || []);
     }
     setAllExpanded(!allExpanded);
   };
@@ -40,63 +42,21 @@ const CourseContentsec = ({
     setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
   };
 
-  const sections = [
-    {
-      title: 'Overview',
-      duration: '101 lectures • 13min',
-      isExpanded: false
-    },
-    {
-      title: 'Introduction to Class Projects',
-      duration: '3 Lectures • 5min',
-      isExpanded: false
-    },
-    {
-      title: 'Discovery Learning - Understand Your Business Space and Users',
-      duration: '13 Lectures • 1hour 1min',
-      isExpanded: true,
-      subsections: [
-        { title: "What's 'Discovery'?", duration: '04:52', type: 'video' },
-        { title: 'Discovery Overview', duration: '02:09', type: 'video' },
-        { title: 'Stakeholder Interviews', duration: '08:53', type: 'video' },
-        { title: 'Strategic UX Project - Stakeholder Interviews (optional)', duration: '00:21', type: 'file' },
-        { title: 'Secondary Research', duration: '03:23', type: 'video' },
-        { title: 'Strategic UX Project - Secondary Research', duration: '01:08', type: 'file' },
-        { title: 'Analytics', duration: '09:03', type: 'video' },
-        { title: 'Strategic UX Project - Analytics Research', duration: '01:23', type: 'file' },
-        { title: 'Competitive Analysis', duration: '14:02', type: 'video' },
-        { title: 'Heuristic Evaluation', duration: '05:05', type: 'video' },
-        { title: 'Strategic UX Project - Competitive Analysis', duration: '01:40', type: 'file' },
-        { title: 'Exploratory User Research', duration: '04:44', type: 'video' },
-        { title: "How's it going?", duration: '00:19', type: 'file' }
-      ]
-    },
-    {
-      title: 'Discovery Learning (Continued) - How to Conduct User Research',
-      duration: '14 Lectures • 1hour 6min',
-      isExpanded: false
-    },
-    {
-      title: 'Strategic UX - Define Users and Big Goals',
-      duration: '15 Lectures • 1hour 10min',
-      isExpanded: false
-    },
-    {
-      title: 'Presenting - Get Alignment and Move Things Forward',
-      duration: '5 Lectures • 14min',
-      isExpanded: false
-    },
-    {
-      title: 'Interaction Design - Defining the Experience and Interface',
-      duration: '17 Lectures • 1 hour',
-      isExpanded: false
-    },
-    {
-      title: 'Next Steps - Moving Towards a Career in UX',
-      duration: '5 Lectures • 22min',
-      isExpanded: false
+  const sections = React.useMemo(() => {
+    if (!courseChapters || !Array.isArray(courseChapters)) {
+      return [];
     }
-  ];
+
+    return courseChapters.map(item => ({
+      title: item.chapter.chapterName,
+      duration: `${item.chapter.chapterLessons.length} lectures`,
+      subsections: item.chapter.chapterLessons.map(lessonItem => ({
+        title: lessonItem.lesson.lessonTitle,
+        type: lessonItem.lesson.lessonType.toLowerCase(),
+        duration: '00:00'
+      }))
+    })).reverse();
+  }, [courseChapters]);
 
   const reviews = [
     {
@@ -148,7 +108,9 @@ const CourseContentsec = ({
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-semibold">Course content</h2>
-                <p className="text-sm text-gray-600">8 sections • 82 lectures • 5h 31m total length</p>
+                <p className="text-sm text-gray-600">
+                  {sections.length} sections • {sections.reduce((total, section) => total + section.subsections.length, 0)} lectures
+                </p>
               </div>
               <button 
                 className="text-[#0056B3] font-medium"
