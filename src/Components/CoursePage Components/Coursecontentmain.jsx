@@ -22,6 +22,7 @@ const Coursecontentmain = ({ courseId }) => {
         aboutCourse={courseData.aboutCourse}  
       />
       <CourseContentsec 
+        courseId={courseId}
         aboutCourse={courseData.aboutCourse}
         endObjective={courseData.endObjective}
         technologiesUsed={courseData.technologiesUsed}

@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp, FaPlayCircle, FaFile } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import './CourseContentsec.css';
 
 const CourseContentsec = ({ 
+  courseId,
   coursePreRequisites, 
   aboutCourse, 
   endObjective, 
   technologiesUsed,
   courseAudience,
   courseChapters
-  
 }) => {
+  const navigate = useNavigate();
   console.log('Received prerequisites:', coursePreRequisites);
 
   const [expandedSections, setExpandedSections] = useState(['Discovery Learning']);
@@ -34,13 +36,6 @@ const CourseContentsec = ({
     setAllExpanded(!allExpanded);
   };
 
-  const nextReview = () => {
-    setCurrentReview((prev) => (prev + 1) % reviews.length);
-  };
-
-  const previousReview = () => {
-    setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
-  };
 
   const sections = React.useMemo(() => {
     if (!courseChapters || !Array.isArray(courseChapters)) {
@@ -97,6 +92,10 @@ const CourseContentsec = ({
     // Add more reviews as needed
   ];
 
+  const handleLessonClick = (courseId) => {
+    navigate(`/course/${courseId}/learn`);
+  };
+
   return (
     <div className="w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -146,7 +145,8 @@ const CourseContentsec = ({
                     {section.subsections?.map((subsection, subIndex) => (
                       <div
                         key={subIndex}
-                        className="px-12 py-3 flex justify-between items-center border-t hover:bg-gray-100 bg-gray-50"
+                        onClick={() => handleLessonClick(courseId)}
+                        className="px-12 py-3 flex justify-between items-center border-t hover:bg-gray-100 bg-gray-50 cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
                           {subsection.type === 'video' ? (
