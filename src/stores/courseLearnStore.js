@@ -68,15 +68,13 @@ const useCourseLearnStore = create((set, get) => ({
   },
 
   // Set current chapter and lesson
-  setCurrentChapter: (chapterId) => {
-    const { currentCourse } = get();
-    const chapter = currentCourse?.chapters.find(c => c.id === chapterId);
+  setCurrentChapter: (chapter) => {
+    console.log('Setting current chapter:', chapter);
     set({ currentChapter: chapter });
   },
 
-  setCurrentLesson: (lessonId) => {
-    const { currentChapter } = get();
-    const lesson = currentChapter?.lessons.find(l => l.id === lessonId);
+  setCurrentLesson: (lesson) => {
+    console.log('Setting current lesson:', lesson);
     set({ currentLesson: lesson });
   }
 }));

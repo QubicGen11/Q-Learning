@@ -5,6 +5,8 @@ import CourseTracker from './CourseTracker';
 import ChaptersSidebar from './ChaptersSidebar';
 // import LessonContent from './LessonConten';
 import LessonMaterials from './LessonMaterials';
+import SuperLoader from '../../Common/SuperLoader';
+import LessonContent from './LessonConten';
 
 
 const CourseLearnInterface = () => {
@@ -49,12 +51,15 @@ const CourseLearnInterface = () => {
   }, [currentCourse]);
 
   const handleLessonSelect = ({ chapter, lesson }) => {
+    console.log('Selected chapter:', chapter);
+    console.log('Selected lesson:', lesson);
+    
     setCurrentChapter(chapter);
     setCurrentLesson(lesson);
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div><SuperLoader/></div>;
   }
 
   if (error) {
@@ -68,8 +73,8 @@ const CourseLearnInterface = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <CourseTracker 
-        courseName={currentCourse.courseName}
-        progress={currentCourse.progress || 0}
+        courseName={currentCourse?.courseName}
+        progress={currentCourse?.progress || 0}
       />
       
       <div className="flex flex-1">
@@ -81,18 +86,20 @@ const CourseLearnInterface = () => {
             onLessonSelect={handleLessonSelect}
           />
         </div>
-
-        <div className="flex-1 flex flex-col">
-          {/* <div className="flex-1">
-            <LessonContent
+        <div className="flex-1">
+          {currentLesson ? (
+            <LessonContent 
+              chapter={currentChapter}
               lesson={currentLesson}
+              allChapters={currentCourse?.courseChapters || []}
               onNavigate={handleLessonSelect}
             />
-          </div>
-           */}
-          <div className="h-48 border-t border-gray-200">
-            <LessonMaterials materials={currentLesson?.materials} />
-          </div>
+          ) : (
+            <div className="p-8">
+              <h2 className="text-xl font-semibold">Welcome to {currentCourse?.courseName}</h2>
+              <p className="mt-4">Select a lesson to begin learning.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
