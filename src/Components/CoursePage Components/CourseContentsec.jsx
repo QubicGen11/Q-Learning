@@ -93,7 +93,7 @@ const CourseContentsec = ({
   ];
 
   const handleLessonClick = (courseId) => {
-    navigate(`/course/${courseId}/learn`);
+    navigate(`/learn-course/${courseId}`);
   };
 
   return (

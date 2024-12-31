@@ -100,7 +100,7 @@ function App() {
               <Route path="/course/:id" element={<Coursepagemain/>} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/loader" element={<SuperLoader />} />
-              <Route path="/course/:id/learn" element={<CourseLearnInterface/>} />
+              {/* <Route path="/course/:id/learn" element={<CourseLearnInterface/>} /> */}
               <Route path="/spline" element={<SplineScene/>} />
               <Route path="/viewallskillsec" element={<Viewallskillsec/>} />
               <Route path="/instructor" element={<InstructorLayout />}>
@@ -113,6 +113,7 @@ function App() {
               
                 {/* Other routes */}
               </Route>
+              <Route path="/learn-course/:courseId" element={<CourseLearnInterface />} />
             </Routes>
             <ScrollToTopButton />
           </div>

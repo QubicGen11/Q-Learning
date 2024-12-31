@@ -1,0 +1,84 @@
+import { create } from 'zustand';
+import axios from 'axios';
+import config from '../config/apiConfig';
+
+const useCourseLearnStore = create((set, get) => ({
+  currentCourse: null,
+  isLoading: false,
+  error: null,
+  currentChapter: null,
+  currentLesson: null,
+
+  // Fetch course data by ID
+  fetchCourseById: async (courseId) => {
+    try {
+      set({ isLoading: true });
+      console.log('Fetching course with ID:', courseId);
+      
+      const response = await axios.get(`http://localhost:8089/qlms/getCourseById/${courseId}`);
+      console.log('Raw API response:', response.data);
+      
+      if (!response.data) {
+        throw new Error('No data received from API');
+      }
+
+      // Transform the API response
+      const courseData = {
+        id: response.data.id,
+        courseName: response.data.courseName || 'Untitled Course',
+        progress: response.data.progress || 0,
+        ...response.data,
+        chapters: response.data.courseChapters?.map(({ chapter }) => ({
+          id: chapter.id,
+          title: chapter.chapterName,
+          lessons: chapter.chapterLessons?.map(({ lesson }) => ({
+            id: lesson.id,
+            title: lesson.lessonTitle,
+            content: lesson.lessonContent,
+            type: lesson.lessonType,
+            video: lesson.lessonVideo,
+            materials: lesson.lessonMaterials,
+            questions: lesson.lessonQuestions?.map(q => ({
+              question: q.question.question,
+              options: q.question.options
+            })) || []
+          })) || [],
+          questions: chapter.chaperQuestions?.map(q => ({
+            question: q.question.question,
+            options: q.question.options
+          })) || []
+        })) || []
+      };
+
+      console.log('Transformed course data:', courseData);
+
+      set({ 
+        currentCourse: courseData,
+        isLoading: false,
+        error: null
+      });
+    } catch (error) {
+      console.error('Error fetching course:', error);
+      set({ 
+        error: error.message || 'Failed to fetch course data',
+        isLoading: false,
+        currentCourse: null
+      });
+    }
+  },
+
+  // Set current chapter and lesson
+  setCurrentChapter: (chapterId) => {
+    const { currentCourse } = get();
+    const chapter = currentCourse?.chapters.find(c => c.id === chapterId);
+    set({ currentChapter: chapter });
+  },
+
+  setCurrentLesson: (lessonId) => {
+    const { currentChapter } = get();
+    const lesson = currentChapter?.lessons.find(l => l.id === lessonId);
+    set({ currentLesson: lesson });
+  }
+}));
+
+export default useCourseLearnStore; 

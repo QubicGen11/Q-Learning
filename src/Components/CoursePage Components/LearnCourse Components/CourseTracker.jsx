@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import useAuthStore from '../../../stores/authStore';
 import useNavbarStore from '../../../stores/navbarStore';
 
-const CourseTracker = () => {
+const CourseTracker = ({ courseName, progress }) => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
@@ -29,12 +29,7 @@ const CourseTracker = () => {
   console.log('Auth Store Values:', { userName, userEmail, userImage });
 
   // Static course data
-  const staticCourseData = {
-    courseTitle: "Complete Web Development Course Real World UX | Learn User Experience & Start Your Career",
-    duration: "52",
-    lectureCount: "346",
-    level: "All Levels"
-  };
+
 
   // Click outside handler
   useEffect(() => {
@@ -66,6 +61,10 @@ const CourseTracker = () => {
     });
   };
 
+  // console.log('Current Course:', currentCourse);
+
+  console.log('CourseTracker props:', { courseName, progress });
+
   return (
     <div className="h-14 bg-gradient-to-r from-[#0056B3] to-[#00254D] text-white">
       <div className="h-full flex items-center justify-between px-4">
@@ -82,7 +81,7 @@ const CourseTracker = () => {
         <div className="flex-1 ">
           <div className="flex items-center mb-1 space-x-14">
             <div className="">
-              <span className="text-base font-medium">Real World UX | Learn User Experience & Start Your Career</span>
+              <span className="text-base font-medium">{courseName}</span>
             <div className="flex items-center space-x-2">
               <div className="flex items-center text-xs text-white/80 space-x-2">
                 <span>52 Hours of Learning</span>
