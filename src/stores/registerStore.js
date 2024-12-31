@@ -16,6 +16,29 @@ const useRegisterStore = create((set, get) => ({
   timer: 30,
   canResend: false,
 
+  decrementTimer: () => {
+    const { timer } = get();
+    if (timer > 0) {
+      set((state) => ({ 
+        timer: state.timer - 1,
+        canResend: state.timer <= 1
+      }));
+    }
+  },
+
+  startTimer: () => {
+    set({ timer: 30, canResend: false });
+    const interval = setInterval(() => {
+      const { timer } = get();
+      if (timer <= 0) {
+        clearInterval(interval);
+        set({ canResend: true });
+      } else {
+        get().decrementTimer();
+      }
+    }, 1000);
+  },
+
   updateForm: (name, value) => {
     set((state) => ({
       formData: {
@@ -52,10 +75,10 @@ const useRegisterStore = create((set, get) => ({
       if (response.status === 200) {
         set({ 
           showOtpModal: true,
-          timer: 30,
-          canResend: false,
           loading: false 
         });
+        
+        get().startTimer();
         
         Swal.fire({
           icon: 'success',
@@ -145,8 +168,39 @@ const useRegisterStore = create((set, get) => ({
     });
   },
 
-  startTimer: () => {
-    set({ timer: 30, canResend: false });
+  handleResendOtp: async () => {
+    const state = get();
+    if (!state.canResend) return;
+
+    try {
+      const response = await axios.post('http://localhost:8089/qlms/register', {
+        firstName: state.formData.firstName,
+        lastName: state.formData.lastName,
+        email: state.formData.email,
+        password: state.formData.password,
+      });
+
+      if (response.status === 200) {
+        get().startTimer();
+        set({ otp: new Array(6).fill('') });
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'OTP resent successfully!',
+          position: 'center',
+          confirmButtonColor: '#0056B3',
+          iconColor: '#0056B3',
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong resending OTP',
+        position: 'center',
+      });
+    }
   }
 }));
 

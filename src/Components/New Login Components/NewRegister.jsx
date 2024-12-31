@@ -20,8 +20,7 @@ const NewRegister = () => {
     updateForm,
     updateOtp,
     register,
-    startTimer,
-    resetForm,
+    handleResendOtp,
     verifyRegistration
   } = useRegisterStore();
 
@@ -37,23 +36,6 @@ const NewRegister = () => {
   });
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let interval;
-    if (showOtpModal && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            setCanResend(true);
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [showOtpModal, timer]);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -160,48 +142,6 @@ const NewRegister = () => {
       console.error('Verification error:', error);
     } finally {
       setIsVerifying(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (!canResend) return;
-
-    try {
-      const registrationData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-      };
-
-      const response = await fetch("http://localhost:8089/qlms/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registrationData),
-      });
-
-      if (response.ok) {
-        setTimer(30);
-        setCanResend(false);
-        updateOtp(new Array(6).fill(""));
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "OTP resent successfully!",
-          position: "center",
-          confirmButtonColor: "#0056B3",
-          iconColor: "#0056B3",
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Something went wrong resending OTP",
-        position: "center",
-      });
     }
   };
 

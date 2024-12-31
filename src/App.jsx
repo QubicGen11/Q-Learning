@@ -25,6 +25,7 @@ import CourseContent from './Components/Instructor Module/Courses/CreateCourse/C
 import FAQ from './Components/Instructor Module/Courses/CreateCourse/Steps/FAQ';
 import Viewallskillsec from './Components/New Landingpage/Skill Assessent Module/Viewallskillsec';
 import CourseSettings from './Components/Instructor Module/Courses/CreateCourse/CourseSettings';
+import AssignmentView from './Components/CoursePage Components/LearnCourse Components/AssignmentView';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -114,6 +115,7 @@ function App() {
                 {/* Other routes */}
               </Route>
               <Route path="/learn-course/:courseId" element={<CourseLearnInterface />} />
+              <Route path="/course/assignment/:chapterName" element={<AssignmentView />} />
             </Routes>
             <ScrollToTopButton />
           </div>

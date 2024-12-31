@@ -5,11 +5,13 @@ import SuperLoader from '../../Common/SuperLoader';
 import Skeleton from 'react-loading-skeleton';
 import { FaFolder } from 'react-icons/fa6';
 import LessonMaterials from './LessonMaterials';
+import AssignmentView from './AssignmentView';
 
 
 const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [currentAssignment, setCurrentAssignment] = useState(null);
 
   // Reset loading state when lesson changes
   useEffect(() => {
@@ -51,6 +53,14 @@ const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
       });
     }
   };
+
+  const handleAssignmentSelect = (assignment) => {
+    setCurrentAssignment(assignment);
+  };
+
+  if (currentAssignment) {
+    return <AssignmentView assignment={currentAssignment} />;
+  }
 
   const renderContent = () => {
     if (isLoading) {

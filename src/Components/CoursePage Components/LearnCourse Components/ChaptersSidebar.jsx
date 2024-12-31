@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlay, FaFile, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import '../../../App.css'
+import { useNavigate } from 'react-router-dom';
 
 const ChaptersSidebar = ({ chapters = [], onLessonSelect, currentLesson, currentChapter }) => {
+  const navigate = useNavigate();
   const [isChaptersOpen, setIsChaptersOpen] = useState(true);
   
   // Set expanded chapter based on currentChapter
@@ -25,6 +27,17 @@ const ChaptersSidebar = ({ chapters = [], onLessonSelect, currentLesson, current
     onLessonSelect({
       chapter: chapter,
       lesson: lesson
+    });
+  };
+
+  const handleAssignmentClick = (chapter, index) => {
+    // Navigate to assignment view with chapter info
+    navigate(`/course/assignment/${chapter.chapterName}`, {
+      state: {
+        chapterName: chapter.chapterName,
+        assignmentNumber: index + 1,
+        questions: chapter.chaperQuestions
+      }
     });
   };
 
@@ -58,7 +71,7 @@ const ChaptersSidebar = ({ chapters = [], onLessonSelect, currentLesson, current
                     onClick={() => handleChapterClick(chapter.chapterName)}
                   >
                     <span className="text-sm">{chapter.chapterName}</span>
-                    {chapter.chapterLessons?.length > 0 && (
+                    {(chapter.chapterLessons?.length > 0 || chapter.chaperQuestions?.length > 0) && (
                       expandedChapterTitle === chapter.chapterName ? (
                         <FaChevronDown className="text-gray-500" />
                       ) : (
@@ -67,15 +80,16 @@ const ChaptersSidebar = ({ chapters = [], onLessonSelect, currentLesson, current
                     )}
                   </div>
                   
-                  {expandedChapterTitle === chapter.chapterName && chapter.chapterLessons?.length > 0 && (
+                  {expandedChapterTitle === chapter.chapterName && (
                     <div className="bg-gray-50 rounded-b-lg">
-                      {[...chapter.chapterLessons].map((lessonData, lessonIndex) => {
+                      {/* Lessons */}
+                      {chapter.chapterLessons?.map((lessonData, lessonIndex) => {
                         const lesson = lessonData.lesson;
                         const isActive = currentLesson?.lessonTitle === lesson.lessonTitle;
                         
                         return (
                           <div 
-                            key={lessonIndex}
+                            key={`lesson-${lessonIndex}`}
                             className={`p-3 pl-8 hover:bg-gray-100 flex items-center gap-2 cursor-pointer
                               ${isActive ? 'bg-[#f2f9ff] text-[#0056B3]' : ''}
                             `}
@@ -90,6 +104,29 @@ const ChaptersSidebar = ({ chapters = [], onLessonSelect, currentLesson, current
                           </div>
                         );
                       })}
+
+                      {/* Chapter Assignments */}
+                      {chapter.chaperQuestions && chapter.chaperQuestions.length > 0 && (
+                        <div 
+                          className="p-3 pl-8 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                          onClick={() => handleAssignmentClick(chapter, index)}
+                        >
+                          <svg 
+                            className="w-4 h-4 text-gray-500" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" 
+                            />
+                          </svg>
+                          <span className="text-sm">Assignment {index + 1}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
