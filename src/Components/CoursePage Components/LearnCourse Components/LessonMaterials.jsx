@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 
-const LessonMaterials = ({ lessonMaterials }) => {
+const LessonMaterials = ({ lessonMaterials, lessonQuestions }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+
+  const handleOptionSelect = (questionIndex, option) => {
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [questionIndex]: option
+    });
+  };
 
   return (
     <div className="p-4">
@@ -53,6 +61,45 @@ const LessonMaterials = ({ lessonMaterials }) => {
       <div className="mt-4 text-gray-600 leading-relaxed text-[15px]">
         User Experience, or UX, is an exciting field. It's essentially about empowering people to do the things they want to do, which is both fun and gratifying. And, having a great user experience drives business success...
       </div>
+
+      {/* Quiz Section */}
+      {lessonQuestions && lessonQuestions.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">QUIZ</h2>
+          <div className="space-y-6">
+            {lessonQuestions.map((questionObj, index) => (
+              <div key={index} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 className="text-lg font-medium mb-4">{questionObj.question.question}</h3>
+                <div className="space-y-3">
+                  {questionObj.question.options.map((option, optionIndex) => (
+                    <div 
+                      key={optionIndex}
+                      onClick={() => handleOptionSelect(index, option.option)}
+                      className={`p-3 rounded-md cursor-pointer border ${
+                        selectedAnswers[index] === option.option 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                          selectedAnswers[index] === option.option 
+                            ? 'border-blue-500 bg-blue-500' 
+                            : 'border-gray-300'
+                        }`} />
+                        <span>{option.option}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <button className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+            Submit
+          </button>
+        </div>
+      )}
 
       {/* Materials Drawer */}
       <div 

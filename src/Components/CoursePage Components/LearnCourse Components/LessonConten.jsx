@@ -101,7 +101,10 @@ const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
               )}
             </div>
             <div>
-            <LessonMaterials lessonMaterials={lesson.lessonMaterials} />
+            <LessonMaterials 
+              lessonMaterials={lesson.lessonMaterials} 
+              lessonQuestions={lesson.lessonQuestions}
+            />
             </div>
           </div>
         );
