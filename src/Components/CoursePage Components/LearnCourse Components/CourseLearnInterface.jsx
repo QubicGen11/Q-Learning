@@ -48,9 +48,9 @@ const CourseLearnInterface = () => {
     }
   }, [currentCourse]);
 
-  const handleLessonSelect = (lessonData) => {
-    setCurrentChapter(lessonData.chapterId);
-    setCurrentLesson(lessonData.lessonId);
+  const handleLessonSelect = ({ chapter, lesson }) => {
+    setCurrentChapter(chapter);
+    setCurrentLesson(lesson);
   };
 
   if (isLoading) {
@@ -75,7 +75,7 @@ const CourseLearnInterface = () => {
       <div className="flex flex-1">
         <div className="w-80 border-r border-gray-200 h-[calc(100vh-64px)] overflow-y-auto">
           <ChaptersSidebar 
-            chapters={currentCourse?.chapters || []}
+            chapters={currentCourse?.courseChapters || []}
             currentChapter={currentChapter}
             currentLesson={currentLesson}
             onLessonSelect={handleLessonSelect}
