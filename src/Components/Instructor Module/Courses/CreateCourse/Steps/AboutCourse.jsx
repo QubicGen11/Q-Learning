@@ -10,13 +10,25 @@ function AboutCourse() {
   const [audienceText, setAudienceText] = useState('');
 
   const handleAddPoint = (field, text, setText) => {
-    if (text.trim()) {
-      updateCourseData('about', {
-        ...about,
-        [field]: [...(about[field] || []), text.trim()]
-      });
-      setText('');
+    if (!text.trim()) return;
+
+    let newText = text;
+    
+    // Handle bold text
+    if (text.startsWith('B ') || text.startsWith('b ')) {
+      newText = `**${text.substring(2)}**`;
     }
+    
+    // Handle list items
+    if (text.startsWith('* ')) {
+      newText = `• ${text.substring(2)}`;
+    }
+
+    updateCourseData('about', {
+      ...about,
+      [field]: [...(about[field] || []), newText]
+    });
+    setText('');
   };
 
   const handleRemovePoint = (field, index) => {
@@ -51,6 +63,9 @@ function AboutCourse() {
                   <input
                     type="text"
                     value={point}
+                    className={`flex-1 border-none focus:outline-none p-0 text-sm h-7 ${
+                      point.startsWith('**') ? 'font-bold' : ''
+                    }`}
                     onChange={(e) => {
                       const updatedOutcomes = [...about.courseOutcome];
                       updatedOutcomes[index] = e.target.value;
@@ -59,7 +74,6 @@ function AboutCourse() {
                         courseOutcome: updatedOutcomes
                       });
                     }}
-                    className="flex-1 border-none focus:outline-none p-0 text-sm h-7"
                   />
                   <button
                     onClick={() => handleRemovePoint('courseOutcome', index)}
@@ -80,18 +94,21 @@ function AboutCourse() {
               value={whatYouGetText}
               onChange={(e) => setWhatYouGetText(e.target.value)}
               onKeyPress={(e) => handleKeyPress(e, 'courseOutcome', whatYouGetText, setWhatYouGetText)}
-              placeholder="Type and press Enter to add new point"
+              placeholder="Type 'B' for bold or '*' for list item"
               className="flex-1 border-none focus:outline-none p-0 text-sm h-7"
             />
           </div>
 
           {/* Formatting Buttons */}
           <div className="absolute right-2 top-2 flex flex-col gap-0.5">
-            <button className="p-1 hover:bg-gray-100 rounded">
+            <button 
+              onClick={() => handleAddPoint('courseOutcome', 'B ' + whatYouGetText, setWhatYouGetText)}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
               <span className="material-icons text-gray-400 text-lg">format_bold</span>
             </button>
             <button 
-              onClick={() => handleAddPoint('courseOutcome', whatYouGetText, setWhatYouGetText)}
+              onClick={() => handleAddPoint('courseOutcome', '* ' + whatYouGetText, setWhatYouGetText)}
               className="p-1 hover:bg-gray-100 rounded"
             >
               <span className="material-icons text-gray-400 text-lg">format_list_bulleted</span>
@@ -114,6 +131,9 @@ function AboutCourse() {
                   <input
                     type="text"
                     value={prereq}
+                    className={`flex-1 border-none focus:outline-none p-0 text-sm h-7 ${
+                      prereq.startsWith('**') ? 'font-bold' : ''
+                    }`}
                     onChange={(e) => {
                       const updatedPrereqs = [...about.prerequisites];
                       updatedPrereqs[index] = e.target.value;
@@ -122,7 +142,6 @@ function AboutCourse() {
                         prerequisites: updatedPrereqs
                       });
                     }}
-                    className="flex-1 border-none focus:outline-none p-0 text-sm h-7"
                   />
                   <button
                     onClick={() => handleRemovePoint('prerequisites', index)}
@@ -142,7 +161,7 @@ function AboutCourse() {
               value={prerequisiteText}
               onChange={(e) => setPrerequisiteText(e.target.value)}
               onKeyPress={(e) => handleKeyPress(e, 'prerequisites', prerequisiteText, setPrerequisiteText)}
-              placeholder="Type and press Enter to add prerequisite"
+              placeholder="Type 'B' for bold or '*' for list item"
               className="flex-1 border-none focus:outline-none p-0 text-sm h-7"
             />
           </div>
@@ -163,6 +182,9 @@ function AboutCourse() {
                   <input
                     type="text"
                     value={audience}
+                    className={`flex-1 border-none focus:outline-none p-0 text-sm h-7 ${
+                      audience.startsWith('**') ? 'font-bold' : ''
+                    }`}
                     onChange={(e) => {
                       const updatedAudience = [...about.targetAudience];
                       updatedAudience[index] = e.target.value;
@@ -171,7 +193,6 @@ function AboutCourse() {
                         targetAudience: updatedAudience
                       });
                     }}
-                    className="flex-1 border-none focus:outline-none p-0 text-sm h-7"
                   />
                   <button
                     onClick={() => handleRemovePoint('targetAudience', index)}
@@ -191,7 +212,7 @@ function AboutCourse() {
               value={audienceText}
               onChange={(e) => setAudienceText(e.target.value)}
               onKeyPress={(e) => handleKeyPress(e, 'targetAudience', audienceText, setAudienceText)}
-              placeholder="Type and press Enter to add target audience"
+              placeholder="Type 'B' for bold or '*' for list item"
               className="flex-1 border-none focus:outline-none p-0 text-sm h-7"
             />
           </div>
@@ -225,4 +246,4 @@ function AboutCourse() {
   );
 }
 
-export default AboutCourse; 
+export default AboutCourse;
