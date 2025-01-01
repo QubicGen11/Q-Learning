@@ -9,21 +9,21 @@ function CourseContent() {
       title: 'Starting Chapter 1',
       isExpanded: true,
       lessons: [
-        { id: 1, title: 'Lesson 1', type: 'Video' },
-        { id: 2, title: 'Lesson 2', type: 'PDF' }
+      
       ]
     }
   ]);
 
   const [uploadedFiles, setUploadedFiles] = useState({
-    lesson: { name: 'video_name.mp4' },
-    material: { name: 'nameof.exe' }
+
   });
 
   const [selectedLesson, setSelectedLesson] = useState({
     chapterId: 1,
     lessonId: 1,
-    type: 'Video'
+    type: 'Video',
+    content: '',
+    materials: null
   });
 
   const [quizQuestions, setQuizQuestions] = useState([
@@ -89,13 +89,6 @@ function CourseContent() {
     setSelectedLesson({ chapterId, lessonId, type: newType });
   };
 
-  const handlePrevious = () => {
-    navigate('/instructor/courses/create'); // Goes back to Basic Information
-  };
-
-  const handleNext = () => {
-    navigate('/instructor/courses/faq'); // Goes to FAQ section
-  };
 
   const addNewQuestion = () => {
     setQuizQuestions([
@@ -117,6 +110,115 @@ function CourseContent() {
     ));
   };
 
+  const handleDeleteLesson = (chapterId, lessonId) => {
+    setChapters(chapters.map(chapter => {
+      if (chapter.id === chapterId) {
+        return {
+          ...chapter,
+          lessons: chapter.lessons.filter(lesson => lesson.id !== lessonId)
+        };
+      }
+      return chapter;
+    }));
+  };
+
+  const handleFileUpload = (type, file) => {
+    setUploadedFiles(prev => ({
+      ...prev,
+      [type]: file
+    }));
+
+    setSelectedLesson(prev => ({
+      ...prev,
+      materials: file
+    }));
+
+    setChapters(chapters.map(chapter => {
+      if (chapter.id === selectedLesson.chapterId) {
+        return {
+          ...chapter,
+          lessons: chapter.lessons.map(lesson => {
+            if (lesson.id === selectedLesson.lessonId) {
+              return {
+                ...lesson,
+                materials: file
+              };
+            }
+            return lesson;
+          })
+        };
+      }
+      return chapter;
+    }));
+  };
+
+  const handleContentChange = (content) => {
+    setSelectedLesson(prev => ({
+      ...prev,
+      content: content
+    }));
+
+    setChapters(chapters.map(chapter => {
+      if (chapter.id === selectedLesson.chapterId) {
+        return {
+          ...chapter,
+          lessons: chapter.lessons.map(lesson => {
+            if (lesson.id === selectedLesson.lessonId) {
+              return {
+                ...lesson,
+                content: content
+              };
+            }
+            return lesson;
+          })
+        };
+      }
+      return chapter;
+    }));
+  };
+
+  const handleLessonSelect = (chapterId, lesson) => {
+    setChapters(prevChapters => prevChapters.map(chapter => {
+      if (chapter.id === selectedLesson.chapterId) {
+        return {
+          ...chapter,
+          lessons: chapter.lessons.map(l => {
+            if (l.id === selectedLesson.lessonId) {
+              return {
+                ...l,
+                content: selectedLesson.content,
+                materials: selectedLesson.materials
+              };
+            }
+            return l;
+          })
+        };
+      }
+      return chapter;
+    }));
+
+    const targetLesson = chapters
+      .find(ch => ch.id === chapterId)
+      ?.lessons.find(l => l.id === lesson.id);
+
+    setSelectedLesson({
+      chapterId,
+      lessonId: lesson.id,
+      type: lesson.type,
+      content: targetLesson?.content || '',
+      materials: targetLesson?.materials || null
+    });
+    
+    if (targetLesson?.materials) {
+      setUploadedFiles({
+        ...uploadedFiles,
+        material: targetLesson.materials
+      });
+    } else {
+      setUploadedFiles({});
+    }
+  };
+
   const renderLessonContent = (type) => {
     switch(type) {
       case 'Video':
@@ -129,11 +231,35 @@ function CourseContent() {
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <div className="flex flex-col items-center">
                   <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                  <p className="text-sm text-gray-400">MP4, MKW... up to 1MB</p>
-                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
-                    Browse
-                  </button>
+                  {uploadedFiles.lesson ? (
+                    <div className="flex items-center gap-2">
+                      <span>{uploadedFiles.lesson.name}</span>
+                      <button 
+                        onClick={() => handleFileUpload('lesson', null)}
+                        className="text-red-500"
+                      >
+                        <span className="material-icons text-sm">close</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-500 mb-1">Or Drag and Drop</p>
+                      <p className="text-sm text-gray-400">MP4, MKW... up to 1MB</p>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        className="hidden"
+                        id="lesson-upload"
+                        onChange={(e) => handleFileUpload('lesson', e.target.files[0])}
+                      />
+                      <label 
+                        htmlFor="lesson-upload" 
+                        className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded cursor-pointer"
+                      >
+                        Browse
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -145,11 +271,35 @@ function CourseContent() {
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <div className="flex flex-col items-center">
                   <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                  <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
-                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
-                    Browse
-                  </button>
+                  {uploadedFiles.material ? (
+                    <div className="flex items-center gap-2">
+                      <span>{uploadedFiles.material.name}</span>
+                      <button 
+                        onClick={() => handleFileUpload('material', null)}
+                        className="text-red-500"
+                      >
+                        <span className="material-icons text-sm">close</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-500 mb-1">Or Drag and Drop</p>
+                      <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        id="material-upload"
+                        onChange={(e) => handleFileUpload('material', e.target.files[0])}
+                      />
+                      <label 
+                        htmlFor="material-upload" 
+                        className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded cursor-pointer"
+                      >
+                        Browse
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -166,6 +316,8 @@ function CourseContent() {
               <textarea
                 className="w-full h-64 p-4 border rounded-lg text-sm resize-none"
                 placeholder="Enter your content here..."
+                value={selectedLesson.content}
+                onChange={(e) => handleContentChange(e.target.value)}
               />
             </div>
 
@@ -176,11 +328,35 @@ function CourseContent() {
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <div className="flex flex-col items-center">
                   <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                  <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
-                  <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
-                    Browse
-                  </button>
+                  {uploadedFiles.material ? (
+                    <div className="flex items-center gap-2">
+                      <span>{uploadedFiles.material.name}</span>
+                      <button 
+                        onClick={() => handleFileUpload('material', null)}
+                        className="text-red-500"
+                      >
+                        <span className="material-icons text-sm">close</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-500 mb-1">Or Drag and Drop</p>
+                      <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        id="pdf-material-upload"
+                        onChange={(e) => handleFileUpload('material', e.target.files[0])}
+                      />
+                      <label 
+                        htmlFor="pdf-material-upload" 
+                        className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded cursor-pointer"
+                      >
+                        Browse
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -365,7 +541,13 @@ function CourseContent() {
                 {chapter.isExpanded && (
                   <div className="px-3 pb-3">
                     {chapter.lessons.map((lesson) => (
-                      <div key={lesson.id} className="flex items-center gap-2 py-2 pl-6">
+                      <div 
+                        key={lesson.id} 
+                        className={`flex items-center gap-2 py-2 pl-6 cursor-pointer ${
+                          selectedLesson.lessonId === lesson.id ? 'bg-blue-50' : ''
+                        }`}
+                        onClick={() => handleLessonSelect(chapter.id, lesson)}
+                      >
                         <span className="material-icons text-gray-400 text-sm">
                           {lesson.type === 'Video' ? 'play_circle' : 
                            lesson.type === 'Quiz' ? 'quiz' : 'description'}
@@ -375,11 +557,21 @@ function CourseContent() {
                           className="ml-auto text-xs border rounded px-2 py-0.5"
                           value={lesson.type}
                           onChange={(e) => handleLessonTypeChange(chapter.id, lesson.id, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <option value="Video">Video</option>
                           <option value="PDF">PDF</option>
                           <option value="Quiz">Quiz</option>
                         </select>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteLesson(chapter.id, lesson.id);
+                          }}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <span className="material-icons text-sm">delete</span>
+                        </button>
                       </div>
                     ))}
                     <button 
