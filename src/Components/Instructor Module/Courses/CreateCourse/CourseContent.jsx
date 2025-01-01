@@ -1,517 +1,309 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import Cookies from 'js-cookie';
 
 function CourseContent() {
   const navigate = useNavigate();
-  const [chapters, setChapters] = useState([
-    {
-      id: 1,
-      title: 'Starting Chapter 1',
-      isExpanded: true,
-      lessons: [
-      
-      ]
-    }
-  ]);
+  const [chapters, setChapters] = useState([]);
+  const [selectedChapter, setSelectedChapter] = useState(null);
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
-  const [uploadedFiles, setUploadedFiles] = useState({
-
-  });
-
-  const [selectedLesson, setSelectedLesson] = useState({
-    chapterId: 1,
-    lessonId: 1,
-    type: 'Video',
-    content: '',
-    materials: null
-  });
-
-  const [quizQuestions, setQuizQuestions] = useState([
-    {
-      id: 1,
-      questionType: 'Multiple Choice',
-      question: '',
-      description: '',
-      hasMedia: false,
-      options: ['Yes', 'No']
-    }
-  ]);
-
+  // Add new chapter
   const handleAddChapter = () => {
     const newChapter = {
-      name: '',
+      chapterName: `Chapter ${chapters.length + 1}`,
       lessons: [],
       questions: []
     };
-    
-    console.log('Adding new chapter:', newChapter);
-    console.log('Current chapters:', content.chapters);
-    
-    updateCourseData('content', {
-      ...content,
-      chapters: [...content.chapters, newChapter]
-    });
+    setChapters([...chapters, newChapter]);
   };
 
-  const handleUpdateChapter = (index, updatedChapter) => {
-    console.log('Updating chapter at index:', index);
-    console.log('Updated chapter data:', updatedChapter);
-    
-    const updatedChapters = [...content.chapters];
-    updatedChapters[index] = updatedChapter;
-    
-    updateCourseData('content', {
-      ...content,
-      chapters: updatedChapters
-    });
+  // Select chapter
+  const handleSelectChapter = (chapterIndex) => {
+    setSelectedChapter(chapterIndex);
+    setSelectedLesson(null); // Reset selected lesson when changing chapter
   };
 
-  const handleAddLesson = (chapterId) => {
-    setChapters(chapters.map(chapter => {
-      if (chapter.id === chapterId) {
-        const newLesson = {
-          id: chapter.lessons.length + 1,
-          title: `Lesson ${chapter.lessons.length + 1}`,
-          type: 'Video'
-        };
-        return {
-          ...chapter,
-          lessons: [...chapter.lessons, newLesson]
-        };
-      }
-      return chapter;
-    }));
-  };
-
-  const toggleChapter = (chapterId) => {
-    setChapters(chapters.map(chapter => 
-      chapter.id === chapterId 
-        ? { ...chapter, isExpanded: !chapter.isExpanded }
-        : chapter
-    ));
-  };
-
-  const handleLessonTypeChange = (chapterId, lessonId, newType) => {
-    setChapters(chapters.map(chapter => {
-      if (chapter.id === chapterId) {
-        return {
-          ...chapter,
-          lessons: chapter.lessons.map(lesson => 
-            lesson.id === lessonId 
-              ? { ...lesson, type: newType }
-              : lesson
-          )
-        };
-      }
-      return chapter;
-    }));
-    setSelectedLesson({ chapterId, lessonId, type: newType });
-  };
-
-
-  const addNewQuestion = () => {
-    setQuizQuestions([
-      ...quizQuestions,
-      {
-        id: quizQuestions.length + 1,
-        questionType: 'Multiple Choice',
-        question: '',
-        description: '',
-        hasMedia: false,
-        options: ['Yes', 'No']
-      }
-    ]);
-  };
-
-  const handleQuestionChange = (questionId, field, value) => {
-    setQuizQuestions(quizQuestions.map(q => 
-      q.id === questionId ? { ...q, [field]: value } : q
-    ));
-  };
-
-  const handleDeleteLesson = (chapterId, lessonId) => {
-    setChapters(chapters.map(chapter => {
-      if (chapter.id === chapterId) {
-        return {
-          ...chapter,
-          lessons: chapter.lessons.filter(lesson => lesson.id !== lessonId)
-        };
-      }
-      return chapter;
-    }));
-  };
-
-  const handleFileUpload = (type, file) => {
-    setUploadedFiles(prev => ({
-      ...prev,
-      [type]: file
-    }));
-
-    setSelectedLesson(prev => ({
-      ...prev,
-      materials: file
-    }));
-
-    setChapters(chapters.map(chapter => {
-      if (chapter.id === selectedLesson.chapterId) {
-        return {
-          ...chapter,
-          lessons: chapter.lessons.map(lesson => {
-            if (lesson.id === selectedLesson.lessonId) {
-              return {
-                ...lesson,
-                materials: file
-              };
-            }
-            return lesson;
-          })
-        };
-      }
-      return chapter;
-    }));
-  };
-
-  const handleContentChange = (content) => {
-    setSelectedLesson(prev => ({
-      ...prev,
-      content: content
-    }));
-
-    setChapters(chapters.map(chapter => {
-      if (chapter.id === selectedLesson.chapterId) {
-        return {
-          ...chapter,
-          lessons: chapter.lessons.map(lesson => {
-            if (lesson.id === selectedLesson.lessonId) {
-              return {
-                ...lesson,
-                content: content
-              };
-            }
-            return lesson;
-          })
-        };
-      }
-      return chapter;
-    }));
-  };
-
-  const handleLessonSelect = (chapterId, lesson) => {
-    setChapters(prevChapters => prevChapters.map(chapter => {
-      if (chapter.id === selectedLesson.chapterId) {
-        return {
-          ...chapter,
-          lessons: chapter.lessons.map(l => {
-            if (l.id === selectedLesson.lessonId) {
-              return {
-                ...l,
-                content: selectedLesson.content,
-                materials: selectedLesson.materials
-              };
-            }
-            return l;
-          })
-        };
-      }
-      return chapter;
-    }));
-
-    const targetLesson = chapters
-      .find(ch => ch.id === chapterId)
-      ?.lessons.find(l => l.id === lesson.id);
-
+  // Select lesson and show right content
+  const handleSelectLesson = (chapterIndex, lessonIndex) => {
+    const lesson = chapters[chapterIndex].lessons[lessonIndex];
+    setSelectedChapter(chapterIndex);
     setSelectedLesson({
-      chapterId,
-      lessonId: lesson.id,
-      type: lesson.type,
-      content: targetLesson?.content || '',
-      materials: targetLesson?.materials || null
+      ...lesson,
+      chapterIndex,
+      lessonIndex
+    });
+  };
+
+  // Add new lesson to chapter
+  const handleAddLesson = (chapterIndex) => {
+    const newLesson = {
+      lessonTitle: `Lesson ${chapters[chapterIndex].lessons.length + 1}`,
+      lessonType: 'Video',
+      lessonContent: '',
+      lessonVideo: '',
+      lessonMaterials: ''
+    };
+    
+    const updatedChapters = [...chapters];
+    updatedChapters[chapterIndex].lessons.push(newLesson);
+    setChapters(updatedChapters);
+  };
+
+  // Add question to quiz
+  const handleAddQuestion = (chapterIndex, lessonIndex) => {
+    const updatedChapters = [...chapters];
+    const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+    
+    if (!lesson.questions) {
+      lesson.questions = [];
+    }
+    
+    lesson.questions.push({
+      question: '',
+      isOpenSource: true,
+      options: [
+        { option: '', isCorrect: false },
+        { option: '', isCorrect: false }
+      ]
     });
     
-    if (targetLesson?.materials) {
-      setUploadedFiles({
-        ...uploadedFiles,
-        material: targetLesson.materials
+    setChapters(updatedChapters);
+  };
+
+  // Handle lesson type change
+  const handleLessonTypeChange = (chapterIndex, lessonIndex, newType) => {
+    const updatedChapters = [...chapters];
+    const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+    lesson.lessonType = newType;
+    
+    // Initialize questions array when switching to Quiz type
+    if (newType === 'Quiz') {
+      lesson.questions = [{
+        question: '',
+        isOpenSource: true,
+        options: [
+          { option: '', isCorrect: false },
+          { option: '', isCorrect: false }
+        ]
+      }];
+    }
+    
+    setChapters(updatedChapters);
+  };
+
+  // Save course content
+  const handleSave = async () => {
+    try {
+      const response = await fetch('http://localhost:8089/qlms/createCourse', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('accessToken')}`
+        },
+        body: JSON.stringify({
+          courseChapters: chapters
+        })
       });
-    } else {
-      setUploadedFiles({});
+
+      if (response.ok) {
+        toast.success('Course content saved successfully');
+        navigate('/instructor/courses');
+      } else {
+        throw new Error('Failed to save course');
+      }
+    } catch (error) {
+      toast.error('Failed to save course content');
+      console.error(error);
     }
   };
 
-  const renderLessonContent = (type) => {
-    switch(type) {
-      case 'Video':
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Lessons *
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <div className="flex flex-col items-center">
-                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  {uploadedFiles.lesson ? (
-                    <div className="flex items-center gap-2">
-                      <span>{uploadedFiles.lesson.name}</span>
-                      <button 
-                        onClick={() => handleFileUpload('lesson', null)}
-                        className="text-red-500"
-                      >
-                        <span className="material-icons text-sm">close</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                      <p className="text-sm text-gray-400">MP4, MKW... up to 1MB</p>
-                      <input
-                        type="file"
-                        accept="video/*"
-                        className="hidden"
-                        id="lesson-upload"
-                        onChange={(e) => handleFileUpload('lesson', e.target.files[0])}
-                      />
-                      <label 
-                        htmlFor="lesson-upload" 
-                        className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded cursor-pointer"
-                      >
-                        Browse
-                      </label>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+  // Render right content based on selection
+  const renderRightContent = () => {
+    if (!selectedLesson) {
+      return (
+        <div className="flex items-center justify-center h-full text-gray-500">
+          Select a lesson to view content
+        </div>
+      );
+    }
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Materials *
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <div className="flex flex-col items-center">
-                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  {uploadedFiles.material ? (
-                    <div className="flex items-center gap-2">
-                      <span>{uploadedFiles.material.name}</span>
-                      <button 
-                        onClick={() => handleFileUpload('material', null)}
-                        className="text-red-500"
-                      >
-                        <span className="material-icons text-sm">close</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                      <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
-                      <input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        className="hidden"
-                        id="material-upload"
-                        onChange={(e) => handleFileUpload('material', e.target.files[0])}
-                      />
-                      <label 
-                        htmlFor="material-upload" 
-                        className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded cursor-pointer"
-                      >
-                        Browse
-                      </label>
-                    </>
-                  )}
-                </div>
+    switch (selectedLesson.lessonType.toLowerCase()) {
+      case 'video':
+        return (
+          <div className="p-6">
+            <h3 className="text-xl font-medium mb-6">Video Lesson</h3>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Video Upload</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => handleFileUpload(e, 'lessonVideo')}
+                  className="w-full p-2 border rounded"
+                />
+                {selectedLesson.lessonVideo && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Current video: {selectedLesson.lessonVideo}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Additional Materials (PDF)</label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => handleFileUpload(e, 'lessonMaterials')}
+                  className="w-full p-2 border rounded"
+                />
+                {selectedLesson.lessonMaterials && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Current material: {selectedLesson.lessonMaterials}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  value={selectedLesson.lessonContent}
+                  onChange={(e) => handleContentChange(e.target.value)}
+                  className="w-full p-2 border rounded h-32"
+                  placeholder="Enter lesson description"
+                />
               </div>
             </div>
           </div>
         );
 
-      case 'PDF':
+      case 'pdf':
         return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Content *
-              </label>
-              <textarea
-                className="w-full h-64 p-4 border rounded-lg text-sm resize-none"
-                placeholder="Enter your content here..."
-                value={selectedLesson.content}
-                onChange={(e) => handleContentChange(e.target.value)}
-              />
-            </div>
+          <div className="p-6">
+            <h3 className="text-xl font-medium mb-6">PDF Lesson</h3>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">PDF Upload</label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => handleFileUpload(e, 'lessonMaterials')}
+                  className="w-full p-2 border rounded"
+                />
+                {selectedLesson.lessonMaterials && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Current PDF: {selectedLesson.lessonMaterials}
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Materials *
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <div className="flex flex-col items-center">
-                  <img src="/path-to-upload-icon.svg" alt="" className="mb-2" />
-                  {uploadedFiles.material ? (
-                    <div className="flex items-center gap-2">
-                      <span>{uploadedFiles.material.name}</span>
-                      <button 
-                        onClick={() => handleFileUpload('material', null)}
-                        className="text-red-500"
-                      >
-                        <span className="material-icons text-sm">close</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-gray-500 mb-1">Or Drag and Drop</p>
-                      <p className="text-sm text-gray-400">PDF, DOC... up to 1MB</p>
-                      <input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        className="hidden"
-                        id="pdf-material-upload"
-                        onChange={(e) => handleFileUpload('material', e.target.files[0])}
-                      />
-                      <label 
-                        htmlFor="pdf-material-upload" 
-                        className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded cursor-pointer"
-                      >
-                        Browse
-                      </label>
-                    </>
-                  )}
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  value={selectedLesson.lessonContent}
+                  onChange={(e) => handleContentChange(e.target.value)}
+                  className="w-full p-2 border rounded h-32"
+                  placeholder="Enter lesson description"
+                />
               </div>
             </div>
           </div>
         );
 
-      case 'Quiz':
+      case 'quiz':
         return (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium">Quiz</h3>
-              <button 
-                onClick={addNewQuestion}
-                className="text-blue-600 flex items-center gap-1"
-              >
-                <span className="material-icons text-sm">add_circle_outline</span>
-                Add Question
-              </button>
-            </div>
-
-            {quizQuestions.map((question, index) => (
-              <div key={question.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Question {question.id}</span>
-                    <select 
-                      className="text-sm border rounded px-2 py-1"
-                      value={question.questionType}
-                      onChange={(e) => handleQuestionChange(question.id, 'questionType', e.target.value)}
-                    >
-                      <option>Multiple Choice</option>
-                      <option>Open Ended</option>
-                      <option>Dropdown</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="p-1">
-                      <span className="material-icons text-gray-400">content_copy</span>
-                    </button>
-                    <button 
-                      className="p-1"
-                      onClick={() => setQuizQuestions(quizQuestions.filter(q => q.id !== question.id))}
-                    >
-                      <span className="material-icons text-gray-400">delete</span>
-                    </button>
-                    <button className="p-1">
-                      <span className="material-icons text-gray-400">unfold_less</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Question *"
-                    className="w-full p-2 border rounded text-sm"
-                    value={question.question}
-                    onChange={(e) => handleQuestionChange(question.id, 'question', e.target.value)}
-                  />
-                  <textarea
-                    placeholder="Description"
-                    className="w-full p-2 border rounded text-sm"
-                    rows="3"
-                    value={question.description}
-                    onChange={(e) => handleQuestionChange(question.id, 'description', e.target.value)}
-                  />
-                  
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="checkbox" 
-                      id={`addImage-${question.id}`}
-                      checked={question.hasMedia}
-                      onChange={(e) => handleQuestionChange(question.id, 'hasMedia', e.target.checked)}
+          <div className="p-4">
+            <h3>Quiz Questions</h3>
+            {selectedLesson.questions?.map((question, qIndex) => (
+              <div key={qIndex} className="border p-4 rounded mb-4">
+                <input
+                  type="text"
+                  placeholder="Enter your question"
+                  value={question.question}
+                  onChange={(e) => {
+                    const updatedChapters = [...chapters];
+                    updatedChapters[selectedLesson.chapterIndex]
+                      .lessons[selectedLesson.lessonIndex]
+                      .questions[qIndex].question = e.target.value;
+                    setChapters(updatedChapters);
+                  }}
+                  className="w-full p-2 border rounded mb-2"
+                />
+                
+                {question.options.map((option, oIndex) => (
+                  <div key={oIndex} className="flex items-center gap-2 mb-2">
+                    <input
+                      type="radio"
+                      name={`question-${qIndex}`}
+                      checked={option.isCorrect}
+                      onChange={() => {
+                        const updatedChapters = [...chapters];
+                        const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                          .lessons[selectedLesson.lessonIndex]
+                          .questions[qIndex];
+                        
+                        currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                          ...opt,
+                          isCorrect: idx === oIndex
+                        }));
+                        setChapters(updatedChapters);
+                      }}
                     />
-                    <label htmlFor={`addImage-${question.id}`} className="text-sm">
-                      Add Image or Video
-                    </label>
+                    <input
+                      type="text"
+                      value={option.option}
+                      onChange={(e) => {
+                        const updatedChapters = [...chapters];
+                        updatedChapters[selectedLesson.chapterIndex]
+                          .lessons[selectedLesson.lessonIndex]
+                          .questions[qIndex].options[oIndex].option = e.target.value;
+                        setChapters(updatedChapters);
+                      }}
+                      placeholder={`Option ${oIndex + 1}`}
+                      className="flex-1 p-2 border rounded"
+                    />
                   </div>
-
-                  {question.hasMedia && (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                      <div className="flex flex-col items-center">
-                        <p className="text-gray-500 mb-1">Drag and Drop Or Browse</p>
-                        <p className="text-sm text-gray-400">MP4, MKW, PNG, JPG(up to 20MB)</p>
-                        <button className="mt-4 px-4 py-1.5 bg-gray-100 text-sm rounded">
-                          Browse
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {question.questionType === 'Multiple Choice' && (
-                    <div className="space-y-2">
-                      {question.options.map((option, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <input 
-                            type="radio" 
-                            name={`question-${question.id}`} 
-                            id={`option-${question.id}-${idx}`}
-                          />
-                          <input
-                            type="text"
-                            className="flex-1 p-2 border rounded text-sm"
-                            value={option}
-                            onChange={(e) => {
-                              const newOptions = [...question.options];
-                              newOptions[idx] = e.target.value;
-                              handleQuestionChange(question.id, 'options', newOptions);
-                            }}
-                          />
-                          <button 
-                            onClick={() => {
-                              const newOptions = question.options.filter((_, i) => i !== idx);
-                              handleQuestionChange(question.id, 'options', newOptions);
-                            }}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <span className="material-icons text-sm">close</span>
-                          </button>
-                        </div>
-                      ))}
-                      <button 
-                        onClick={() => {
-                          const newOptions = [...question.options, ''];
-                          handleQuestionChange(question.id, 'options', newOptions);
-                        }}
-                        className="text-blue-600 text-sm flex items-center gap-1"
-                      >
-                        <span className="material-icons text-sm">add_circle_outline</span>
-                        Add Option
-                      </button>
-                    </div>
-                  )}
-                </div>
+                ))}
+                
+                <button
+                  onClick={() => {
+                    const updatedChapters = [...chapters];
+                    updatedChapters[selectedLesson.chapterIndex]
+                      .lessons[selectedLesson.lessonIndex]
+                      .questions[qIndex].options.push({ option: '', isCorrect: false });
+                    setChapters(updatedChapters);
+                  }}
+                  className="text-blue-600 text-sm"
+                >
+                  + Add Option
+                </button>
               </div>
             ))}
+            
+            <button
+              onClick={() => {
+                const updatedChapters = [...chapters];
+                if (!updatedChapters[selectedLesson.chapterIndex]
+                    .lessons[selectedLesson.lessonIndex].questions) {
+                  updatedChapters[selectedLesson.chapterIndex]
+                    .lessons[selectedLesson.lessonIndex].questions = [];
+                }
+                updatedChapters[selectedLesson.chapterIndex]
+                  .lessons[selectedLesson.lessonIndex].questions.push({
+                    question: '',
+                    isOpenSource: true,
+                    options: [
+                      { option: '', isCorrect: false },
+                      { option: '', isCorrect: false }
+                    ]
+                  });
+                setChapters(updatedChapters);
+              }}
+              className="text-blue-600"
+            >
+              + Add Question
+            </button>
           </div>
         );
 
@@ -520,101 +312,137 @@ function CourseContent() {
     }
   };
 
+  // Handle content changes
+  const handleContentChange = (content) => {
+    const updatedChapters = [...chapters];
+    updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = content;
+    setChapters(updatedChapters);
+  };
+
+  // Handle file uploads
+  const handleFileUpload = (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const updatedChapters = [...chapters];
+    updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex][field] = file.name;
+    setChapters(updatedChapters);
+  };
+
+  // Handle quiz changes
+  const handleQuestionChange = (questionIndex, value) => {
+    const updatedChapters = [...chapters];
+    const lesson = updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex];
+    lesson.questions[questionIndex].question = value;
+    setChapters(updatedChapters);
+  };
+
+  const handleOptionChange = (questionIndex, optionIndex, value) => {
+    const updatedChapters = [...chapters];
+    const lesson = updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex];
+    lesson.questions[questionIndex].options[optionIndex].option = value;
+    setChapters(updatedChapters);
+  };
+
+  const handleCorrectOptionChange = (questionIndex, optionIndex) => {
+    const updatedChapters = [...chapters];
+    const lesson = updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex];
+    lesson.questions[questionIndex].options = lesson.questions[questionIndex].options.map((opt, idx) => ({
+      ...opt,
+      isCorrect: idx === optionIndex
+    }));
+    setChapters(updatedChapters);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header with breadcrumb and buttons */}
-     
-
-   
-
-      {/* Steps Progress */}
-     
-
-      {/* Content Area */}
       <div className="flex gap-6">
-        {/* Left Sidebar - Curriculum */}
+        {/* Left Sidebar - Chapters and Lessons */}
         <div className="w-1/3 bg-white rounded-lg p-4">
-          <h2 className="font-medium mb-4">Curriculum</h2>
+          <h2 className="font-medium mb-4">Course Content</h2>
           <button 
             onClick={handleAddChapter}
-            className="flex items-center gap-2 text-blue-600 mb-4 text-sm"
+            className="flex items-center gap-2 text-blue-600 mb-4"
           >
             <span className="material-icons text-sm">add_circle_outline</span>
             Add Chapter
           </button>
 
-          <div className="space-y-2">
-            {chapters.map((chapter) => (
-              <div key={chapter.id} className="border rounded-lg">
-                <div 
-                  className="flex items-center justify-between p-3 cursor-pointer"
-                  onClick={() => toggleChapter(chapter.id)}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="material-icons text-gray-400 text-sm">
-                      {chapter.isExpanded ? 'expand_more' : 'chevron_right'}
-                    </span>
-                    <span className="text-sm">{chapter.title}</span>
-                  </div>
-                </div>
-                {chapter.isExpanded && (
-                  <div className="px-3 pb-3">
-                    {chapter.lessons.map((lesson) => (
-                      <div 
-                        key={lesson.id} 
-                        className={`flex items-center gap-2 py-2 pl-6 cursor-pointer ${
-                          selectedLesson.lessonId === lesson.id ? 'bg-blue-50' : ''
-                        }`}
-                        onClick={() => handleLessonSelect(chapter.id, lesson)}
+          {chapters.map((chapter, chapterIndex) => (
+            <div 
+              key={chapterIndex} 
+              className={`mb-4 border rounded-lg p-4 ${selectedChapter === chapterIndex ? 'border-blue-500' : ''}`}
+            >
+              <input
+                type="text"
+                value={chapter.chapterName}
+                onChange={(e) => {
+                  const updatedChapters = [...chapters];
+                  updatedChapters[chapterIndex].chapterName = e.target.value;
+                  setChapters(updatedChapters);
+                }}
+                className="w-full mb-2 p-2 border rounded"
+              />
+
+              {/* Lessons List */}
+              <div className="space-y-2">
+                {chapter.lessons.map((lesson, lessonIndex) => (
+                  <div 
+                    key={lessonIndex} 
+                    className={`ml-4 p-2 border rounded cursor-pointer hover:bg-gray-50
+                      ${selectedLesson?.chapterIndex === chapterIndex && 
+                        selectedLesson?.lessonIndex === lessonIndex ? 'bg-blue-50' : ''}`}
+                    onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{lesson.lessonTitle}</span>
+                      <select
+                        value={lesson.lessonType}
+                        onChange={(e) => handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="ml-2 p-1 border rounded"
                       >
-                        <span className="material-icons text-gray-400 text-sm">
-                          {lesson.type === 'Video' ? 'play_circle' : 
-                           lesson.type === 'Quiz' ? 'quiz' : 'description'}
-                        </span>
-                        <span className="text-sm">{lesson.title}</span>
-                        <select 
-                          className="ml-auto text-xs border rounded px-2 py-0.5"
-                          value={lesson.type}
-                          onChange={(e) => handleLessonTypeChange(chapter.id, lesson.id, e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <option value="Video">Video</option>
-                          <option value="PDF">PDF</option>
-                          <option value="Quiz">Quiz</option>
-                        </select>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteLesson(chapter.id, lesson.id);
-                          }}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <span className="material-icons text-sm">delete</span>
-                        </button>
-                      </div>
-                    ))}
-                    <button 
-                      onClick={() => handleAddLesson(chapter.id)}
-                      className="flex items-center gap-2 text-blue-600 text-sm pl-6 mt-2"
-                    >
-                      <span className="material-icons text-sm">add_circle_outline</span>
-                      Add Lesson
-                    </button>
+                        <option value="Video">Video</option>
+                        <option value="PDF">PDF</option>
+                        <option value="Quiz">Quiz</option>
+                      </select>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+
+              {/* Add Lesson Button */}
+              <button
+                onClick={() => handleAddLesson(chapterIndex)}
+                className="mt-2 ml-4 text-blue-600 text-sm flex items-center gap-1"
+              >
+                <span className="material-icons text-sm">add_circle_outline</span>
+                Add Lesson
+              </button>
+            </div>
+          ))}
         </div>
 
         {/* Right Content Area */}
-        <div className="flex-1 bg-white rounded-lg p-6">
-          {renderLessonContent(selectedLesson.type)}
+        <div className="flex-1 bg-white rounded-lg">
+          {!selectedLesson ? (
+            <div className="h-full flex items-center justify-center text-gray-500">
+              Select a lesson to view or edit its content
+            </div>
+          ) : (
+            renderRightContent()
+          )}
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-     
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={handleSave}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Save Course
+        </button>
+      </div>
     </div>
   );
 }

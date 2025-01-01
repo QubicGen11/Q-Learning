@@ -146,7 +146,8 @@ const useCourseCreationStore = create((set, get) => ({
         _debug_outcome: courseData.about?.courseOutCome || '',
 
         isDraft: currentStep < 6,
-        courseStatus: 'pending'
+        courseStatus: 'pending',
+        courseChapters: courseData.content?.chapters || []
       };
 
       console.log('Outcome values being sent:', {
