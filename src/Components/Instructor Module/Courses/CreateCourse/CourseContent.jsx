@@ -39,12 +39,31 @@ function CourseContent() {
 
   const handleAddChapter = () => {
     const newChapter = {
-      id: chapters.length + 1,
-      title: `Chapter ${chapters.length + 1}`,
-      isExpanded: false,
-      lessons: []
+      name: '',
+      lessons: [],
+      questions: []
     };
-    setChapters([...chapters, newChapter]);
+    
+    console.log('Adding new chapter:', newChapter);
+    console.log('Current chapters:', content.chapters);
+    
+    updateCourseData('content', {
+      ...content,
+      chapters: [...content.chapters, newChapter]
+    });
+  };
+
+  const handleUpdateChapter = (index, updatedChapter) => {
+    console.log('Updating chapter at index:', index);
+    console.log('Updated chapter data:', updatedChapter);
+    
+    const updatedChapters = [...content.chapters];
+    updatedChapters[index] = updatedChapter;
+    
+    updateCourseData('content', {
+      ...content,
+      chapters: updatedChapters
+    });
   };
 
   const handleAddLesson = (chapterId) => {

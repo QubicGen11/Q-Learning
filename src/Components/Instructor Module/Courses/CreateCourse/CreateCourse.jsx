@@ -6,7 +6,7 @@ import StepIndicator from './Components/StepIndicator';
 function CreateCourse() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentStep, steps, setStep, resetStore } = useCourseCreationStore();
+  const { currentStep, steps, setStep, resetStore, submitCourse } = useCourseCreationStore();
 
   // Set initial step based on URL
   useEffect(() => {
@@ -89,21 +89,21 @@ function CreateCourse() {
               Previous
             </button>
           )}
-          {currentStep < steps.length ? (
+          {currentStep === steps.length ? (
+            <button
+              onClick={() => submitCourse(navigate)}
+              className="flex items-center gap-2 text-white bg-green-600 px-6 py-2 rounded-lg hover:bg-green-700 ml-auto"
+            >
+              Submit Course
+              <span className="material-icons">check</span>
+            </button>
+          ) : (
             <button
               onClick={handleNext}
               className="flex items-center gap-2 text-white bg-blue-600 px-6 py-2 rounded-lg hover:bg-blue-700 ml-auto"
             >
               Next
               <span className="material-icons">arrow_forward</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => {/* Submit course logic */}}
-              className="flex items-center gap-2 text-white bg-green-600 px-6 py-2 rounded-lg hover:bg-green-700 ml-auto"
-            >
-              Submit Course
-              <span className="material-icons">check</span>
             </button>
           )}
         </div>
