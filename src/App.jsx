@@ -26,6 +26,9 @@ import FAQ from './Components/Instructor Module/Courses/CreateCourse/Steps/FAQ';
 import Viewallskillsec from './Components/New Landingpage/Skill Assessent Module/Viewallskillsec';
 import CourseSettings from './Components/Instructor Module/Courses/CreateCourse/CourseSettings';
 import AssignmentView from './Components/CoursePage Components/LearnCourse Components/AssignmentView';
+import BasicInformation from './Components/Instructor Module/Courses/CreateCourse/Steps/BasicInformation';
+import AddMedia from './Components/Instructor Module/Courses/CreateCourse/Steps/AddMedia';
+import AboutCourse from './Components/Instructor Module/Courses/CreateCourse/Steps/AboutCourse';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -104,18 +107,22 @@ function App() {
               {/* <Route path="/course/:id/learn" element={<CourseLearnInterface/>} /> */}
               <Route path="/spline" element={<SplineScene/>} />
               <Route path="/viewallskillsec" element={<Viewallskillsec/>} />
-              <Route path="/instructor" element={<InstructorLayout />}>
-                <Route path="courses" element={<CoursesPage />} />
-                <Route path="courses/create" element={<CreateCourse />} />
-                <Route path="courses/content" element={<CourseContent />} />
-                <Route path="courses/faq" element={<FAQ />} />
-                <Route path="courses/settings" element={<CourseSettings />} />
-                {/* <Route path="/skillassessment" element={<Skillassessment/>} /> */}
-              
-                {/* Other routes */}
-              </Route>
+     
               <Route path="/learn-course/:courseId" element={<CourseLearnInterface />} />
               <Route path="/course/assignment/:chapterName" element={<AssignmentView />} />
+              <Route path="/instructor" element={<InstructorLayout />}>
+                <Route path="courses">
+                  <Route index element={<CoursesPage />} />
+                  <Route path="create" element={<CreateCourse />}>
+                    <Route path="basic-info" element={<BasicInformation />} />
+                    <Route path="media" element={<AddMedia />} />
+                    <Route path="about" element={<AboutCourse />} />
+                    <Route path="content" element={<CourseContent />} />
+                    <Route path="faq" element={<FAQ />} />
+                    <Route path="settings" element={<CourseSettings />} />
+                  </Route>
+                </Route>
+              </Route>
             </Routes>
             <ScrollToTopButton />
           </div>
