@@ -20,6 +20,20 @@ const BasicInformation = () => {
     });
   };
 
+  // Get subcategories based on selected category
+  const getSubCategories = (category) => {
+    switch(category) {
+      case 'Development':
+        return ['Web Development', 'Mobile Development', 'Game Development', 'Software Testing', 'Database Design'];
+      case 'Design':
+        return ['UI/UX Design', 'Graphic Design', '3D Design', 'Animation', 'Web Design'];
+      case 'Business':
+        return ['Entrepreneurship', 'Marketing', 'Finance', 'Sales', 'Management'];
+      default:
+        return [];
+    }
+  };
+
   return (
     <div className="max-w-[700px] mx-auto space-y-4">
       <div>
@@ -95,6 +109,26 @@ const BasicInformation = () => {
           <option value="Development">Development</option>
           <option value="Design">Design</option>
           <option value="Business">Business</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Sub Category *
+        </label>
+        <select
+          name="subCategory"
+          value={basicInfo?.subCategory || ''}
+          onChange={handleChange}
+          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+          disabled={!basicInfo?.category} // Disable if no category is selected
+        >
+          <option value="">Select Sub Category</option>
+          {getSubCategories(basicInfo?.category).map((subCat) => (
+            <option key={subCat} value={subCat}>
+              {subCat}
+            </option>
+          ))}
         </select>
       </div>
 

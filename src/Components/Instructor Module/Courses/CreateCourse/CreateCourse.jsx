@@ -6,7 +6,13 @@ import StepIndicator from './Components/StepIndicator';
 function CreateCourse() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentStep, steps, setStep, resetStore, submitCourse } = useCourseCreationStore();
+  const { 
+    currentStep, 
+    steps, 
+    setStep, 
+    resetStore, 
+    handleNext 
+  } = useCourseCreationStore();
 
   // Set initial step based on URL
   useEffect(() => {
@@ -18,20 +24,12 @@ function CreateCourse() {
       // Redirect to first step if no valid path
       navigate(`/instructor/courses/create/${steps[0].path}`);
     }
-  }, [location.pathname]);
+  }, [location.pathname, steps, navigate, setStep]);
 
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel? All progress will be lost.')) {
       resetStore();
       navigate('/instructor/courses');
-    }
-  };
-
-  const handleNext = () => {
-    if (currentStep < steps.length) {
-      const nextStep = steps[currentStep];
-      setStep(currentStep + 1);
-      navigate(`/instructor/courses/create/${nextStep.path}`);
     }
   };
 
@@ -99,7 +97,7 @@ function CreateCourse() {
             </button>
           ) : (
             <button
-              onClick={handleNext}
+              onClick={() => handleNext(navigate)}
               className="flex items-center gap-2 text-white bg-blue-600 px-6 py-2 rounded-lg hover:bg-blue-700 ml-auto"
             >
               Next
