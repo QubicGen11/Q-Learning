@@ -18,7 +18,7 @@ const useCourseCreationStore = create((set, get) => ({
   },
 
   updateCourseData: (section, data) => {
-    set(state => ({
+    set((state) => ({
       courseData: {
         ...state.courseData,
         [section]: {
@@ -27,8 +27,7 @@ const useCourseCreationStore = create((set, get) => ({
         }
       }
     }));
-    // Log the updated state
-    console.log('Updated course data:', get().courseData);
+    console.log('Updated course data:', get().courseData); // Debug log
   },
 
   resetStore: () => {
@@ -51,10 +50,11 @@ const useCourseCreationStore = create((set, get) => ({
           categoryImage: ''
         },
         about: {
-          courseOutcome: '',
-          description: '',
-          prerequisites: [],
-          targetAudience: []
+          courseOutCome: '',
+          courseDescription: '',
+          coursePreRequisites: [],
+          coursePrerequisites: [],
+          courseAudience: []
         },
         content: { 
           chapters: []
@@ -91,10 +91,11 @@ const useCourseCreationStore = create((set, get) => ({
       categoryImage: null
     },
     about: {
-      courseOutcome: '',
-      description: '',
-      prerequisites: [],
-      targetAudience: []
+      courseOutCome: '',
+      courseDescription: '',
+      coursePreRequisites: [],
+      coursePrerequisites: [],
+      courseAudience: []
     },
     content: { 
       chapters: []
@@ -118,11 +119,8 @@ const useCourseCreationStore = create((set, get) => ({
     const token = Cookies.get('accessToken');
 
     try {
-      console.log('Course data before API call:', courseData);
-      console.log('Media data before API call:', courseData.media);
-
-      // Create request body
       const requestBody = {
+        // Basic Info
         courseName: courseData.basicInfo.courseName,
         courseTagline: courseData.basicInfo.courseTagline,
         courseDuration: courseData.basicInfo.courseDuration,
@@ -130,51 +128,130 @@ const useCourseCreationStore = create((set, get) => ({
         category: courseData.basicInfo.category,
         subCategory: courseData.basicInfo.subCategory,
         teachingLanguage: courseData.basicInfo.teachingLanguage,
-        isDraft: currentStep < 6,
-        courseStatus: 'pending',
-        // Use the full data URLs
+        
+        // Media
         courseBanner: courseData.media?.courseBanner || null,
         courseImage: courseData.media?.courseImage || null,
-        categoryImage: courseData.media?.categoryImage || null
+        categoryImage: courseData.media?.categoryImage || null,
+        
+        // About Course - Fixed field names and structure
+        courseOutcome: courseData.about?.courseOutCome || '',
+        courseOutCome: courseData.about?.courseOutCome || '',
+        
+        courseDescription: courseData.about?.courseDescription || '',
+        coursePreRequisites: courseData.about?.coursePreRequisites || [],
+        courseAudience: courseData.about?.courseAudience || [],
+        
+        // Add debug field
+        _debug_outcome: courseData.about?.courseOutCome || '',
+
+        isDraft: currentStep < 6,
+        courseStatus: 'pending'
       };
 
-      console.log('Final request body media:', {
-        courseBanner: requestBody.courseBanner ? 'present' : 'null',
-        courseImage: requestBody.courseImage ? 'present' : 'null',
-        categoryImage: requestBody.categoryImage ? 'present' : 'null'
+      console.log('Outcome values being sent:', {
+        courseOutcome: requestBody.courseOutcome,
+        courseOutCome: requestBody.courseOutCome,
+        _debug: requestBody._debug_outcome
       });
 
       const response = await fetch('http://localhost:8089/qlms/createCourse', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(requestBody)
       });
 
-      const responseData = await response.json();
-      console.log('API Response:', responseData);
+      const data = await response.json();
+      console.log('API Response:', data);
 
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to save progress');
+      // Add verification request
+      if (response.ok) {
+        const verifyResponse = await fetch(`http://localhost:8089/qlms/getCourse/${data.course.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        const verifyData = await verifyResponse.json();
+        console.log('Verification GET response:', verifyData);
+        
+        // Log any differences in outcome field
+        if (requestBody._debug_outcome !== verifyData.course.courseOutcome && 
+            requestBody._debug_outcome !== verifyData.course.courseOutCome) {
+          console.warn('Outcome field mismatch:', {
+            sent: requestBody._debug_outcome,
+            received_lowercase: verifyData.course.courseOutcome,
+            received_uppercase: verifyData.course.courseOutCome
+          });
+        }
       }
 
-      // Success handling
-      if (currentStep < 6) {
-        set({ currentStep: currentStep + 1 });
-        navigate(`/instructor/courses/create/${get().steps[currentStep].path}`);
-        toast.success('Progress saved successfully!');
+      if (response.ok) {
+        if (!data.course.courseOutCome && requestBody.courseOutCome) {
+          console.warn('Warning: courseOutCome not in response despite being sent');
+        }
+        if (!data.course.coursePreRequisites && requestBody.coursePreRequisites?.length > 0) {
+          console.warn('Warning: coursePreRequisites not in response despite being sent');
+        }
+
+        toast.success('Course updated successfully!');
+        if (currentStep < 6) {
+          set({ currentStep: currentStep + 1 });
+        } else {
+          navigate('/instructor/courses');
+        }
+
+        const courseId = data.course.id;
+        // Verify the data was saved
+        const verificationData = await verifyCourseData(courseId, token);
+        console.log('Verification data:', verificationData);
+
+        // Add verification request
+        const verifyResponse = await fetch(`http://localhost:8089/qlms/getCourse/${data.course.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        const verifyData = await verifyResponse.json();
+        console.log('Verification GET response:', verifyData);
+        
+        // Log any differences
+        if (JSON.stringify(requestBody.coursePreRequisites) !== 
+            JSON.stringify(verifyData.course.coursePreRequisites)) {
+          console.warn('Prerequisites mismatch:', {
+            sent: requestBody.coursePreRequisites,
+            received: verifyData.course.coursePreRequisites
+          });
+        }
       } else {
-        toast.success('Course created successfully!');
-        navigate('/instructor/courses');
+        toast.error(data.message || 'Failed to update course');
       }
-      return true;
-
     } catch (error) {
-      console.error('Error in handleNext:', error);
-      toast.error(error.message || 'Failed to save progress');
-      return false;
+      console.error('Error:', error);
+      toast.error('Failed to update course');
+    }
+  },
+
+  // Add this function to your store
+  verifyCourseData: async (courseId, token) => {
+    try {
+      const response = await fetch(`http://localhost:8089/qlms/getCourse/${courseId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+      const data = await response.json();
+      console.log('Verification GET response:', data);
+      return data;
+    } catch (error) {
+      console.error('Verification failed:', error);
+      return null;
     }
   }
 }));
@@ -214,6 +291,17 @@ function validateStepData(step, data) {
       }
       if (!data.media.categoryImage) {
         toast.error('Please upload a category image');
+        return false;
+      }
+      return true;
+
+    case 3:
+      if (!data.about.courseOutCome) {
+        toast.error('Course outcome is required');
+        return false;
+      }
+      if (!data.about.courseDescription) {
+        toast.error('Course description is required');
         return false;
       }
       return true;
