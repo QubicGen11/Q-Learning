@@ -22,7 +22,7 @@ function CreateCourse() {
       setStep(step.id);
     } else {
       // Redirect to first step if no valid path
-      navigate(`/instructor/courses/create/${steps[0].path}`);
+      navigate(`/instructor/courses/create/${steps[0].path}`);  
     }
   }, [location.pathname, steps, navigate, setStep]);
 
