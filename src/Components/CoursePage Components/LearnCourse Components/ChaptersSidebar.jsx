@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlay, FaFile, FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { FaPlay, FaFile, FaChevronDown, FaChevronRight, FaQuestionCircle } from 'react-icons/fa';
 import '../../../App.css'
 import { useNavigate } from 'react-router-dom';
 
@@ -39,6 +39,17 @@ const ChaptersSidebar = ({ chapters = [], onLessonSelect, currentLesson, current
         questions: chapter.chaperQuestions
       }
     });
+  };
+
+  const getLessonIcon = (lessonType, isActive) => {
+    switch(lessonType) {
+      case 'Video':
+        return <FaPlay className={`text-xs ${isActive ? 'text-[#0056B3]' : 'text-gray-500'}`} />;
+      case 'Quiz':
+        return <FaQuestionCircle className={`text-xs ${isActive ? 'text-[#0056B3]' : 'text-gray-500'}`} />;
+      default:
+        return <FaFile className={`text-xs ${isActive ? 'text-[#0056B3]' : 'text-gray-500'}`} />;
+    }
   };
 
   return (
@@ -95,11 +106,7 @@ const ChaptersSidebar = ({ chapters = [], onLessonSelect, currentLesson, current
                             `}
                             onClick={() => handleLessonClick(chapter, lesson)}
                           >
-                            {lesson.lessonType === 'Video' ? (
-                              <FaPlay className={`text-xs ${isActive ? 'text-[#0056B3]' : 'text-gray-500'}`} />
-                            ) : (
-                              <FaFile className={`text-xs ${isActive ? 'text-[#0056B3]' : 'text-gray-500'}`} />
-                            )}
+                            {getLessonIcon(lesson.lessonType, isActive)}
                             <span className="text-sm">{lesson.lessonTitle}</span>
                           </div>
                         );
