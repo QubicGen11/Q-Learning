@@ -10,7 +10,7 @@ function CourseContent() {
   const [chapters, setChapters] = useState([]);
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState();
-  const [lessonFiles, setLessonFiles] = useState({});
+  const [selectedMaterials, setSelectedMaterials] = useState(null);
 
   // Add new chapter
   const handleAddChapter = () => {
@@ -104,6 +104,47 @@ function CourseContent() {
     }
   };
 
+  // Handle file upload
+  const handleFileUpload = (e, type, chapterIndex, lessonIndex) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedMaterials({
+        chapterIndex,
+        lessonIndex,
+        type,
+        name: file.name
+      });
+      
+      const updatedChapters = [...chapters];
+      const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+      
+      if (type === 'video') {
+        lesson.lessonVideo = file.name;
+      } else if (type === 'materials') {
+        lesson.lessonMaterials = file.name;
+      }
+      
+      setChapters(updatedChapters);
+      updateCourseData('content', { chapters: updatedChapters });
+      
+      // Force re-render by updating selectedLesson
+      setSelectedLesson({
+        ...lesson,
+        chapterIndex,
+        lessonIndex
+      });
+    }
+  };
+
+  // Get stored file info
+  const getStoredFileInfo = (chapterIndex, lessonIndex, type) => {
+    const lesson = chapters[chapterIndex]?.lessons[lessonIndex];
+    if (!lesson) return null;
+
+    const fileName = type === 'video' ? lesson.lessonVideo : lesson.lessonMaterials;
+    return fileName ? { name: fileName } : null;
+  };
+
   // Render right content based on selection
   const renderRightContent = () => {
     if (!selectedLesson) {
@@ -169,6 +210,97 @@ function CourseContent() {
                   </p>
                 )}
               </div>
+
+              {/* Add Quiz Button */}
+              <div className="mt-6">
+                <button
+                  onClick={() => handleAddQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                >
+                  <span className="material-icons text-sm">add_circle_outline</span>
+                  Add Quiz Question
+                </button>
+              </div>
+
+              {/* Show Questions if they exist */}
+              {selectedLesson.questions && selectedLesson.questions.length > 0 && (
+                <div className="mt-4 space-y-4">
+                  <h4 className="font-medium">Quiz Questions</h4>
+                  {selectedLesson.questions.map((q, qIndex) => (
+                    <div key={qIndex} className="border p-4 rounded mb-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <input
+                          type="text"
+                          placeholder="Enter your question"
+                          value={q.question}
+                          onChange={(e) => {
+                            const updatedChapters = [...chapters];
+                            updatedChapters[selectedLesson.chapterIndex]
+                              .lessons[selectedLesson.lessonIndex]
+                              .questions[qIndex].question = e.target.value;
+                            setChapters(updatedChapters);
+                          }}
+                          className="w-full p-2 border rounded mb-2"
+                        />
+                        <button
+                          onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          <span className="material-icons">remove_circle_outline</span>
+                        </button>
+                      </div>
+                      
+                      {q.options.map((option, oIndex) => (
+                        <div key={oIndex} className="flex items-center gap-2 mb-2">
+                          <input
+                            type="radio"
+                            name={`question-${qIndex}`}
+                            checked={option.isCorrect}
+                            onChange={() => {
+                              const updatedChapters = [...chapters];
+                              const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex]
+                                .questions[qIndex];
+                              
+                              currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                ...opt,
+                                isCorrect: idx === oIndex
+                              }));
+                              setChapters(updatedChapters);
+                            }}
+                          />
+                          <input
+                            type="text"
+                            value={option.option}
+                            onChange={(e) => {
+                              const updatedChapters = [...chapters];
+                              updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex]
+                                .questions[qIndex].options[oIndex].option = e.target.value;
+                              setChapters(updatedChapters);
+                            }}
+                            placeholder={`Option ${oIndex + 1}`}
+                            className="flex-1 p-2 border rounded"
+                          />
+                        </div>
+                      ))}
+                      
+                      <button
+                        onClick={() => {
+                          const updatedChapters = [...chapters];
+                          updatedChapters[selectedLesson.chapterIndex]
+                            .lessons[selectedLesson.lessonIndex]
+                            .questions[qIndex].options.push({ option: '', isCorrect: false });
+                          setChapters(updatedChapters);
+                        }}
+                        className="text-blue-600 text-sm"
+                      >
+                        + Add Option
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -219,6 +351,97 @@ function CourseContent() {
                   </p>
                 )}
               </div>
+
+              {/* Add Quiz Button */}
+              <div className="mt-6">
+                <button
+                  onClick={() => handleAddQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                >
+                  <span className="material-icons text-sm">add_circle_outline</span>
+                  Add Quiz Question
+                </button>
+              </div>
+
+              {/* Show Questions if they exist */}
+              {selectedLesson.questions && selectedLesson.questions.length > 0 && (
+                <div className="mt-4 space-y-4">
+                  <h4 className="font-medium">Quiz Questions</h4>
+                  {selectedLesson.questions.map((q, qIndex) => (
+                    <div key={qIndex} className="border p-4 rounded mb-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <input
+                          type="text"
+                          placeholder="Enter your question"
+                          value={q.question}
+                          onChange={(e) => {
+                            const updatedChapters = [...chapters];
+                            updatedChapters[selectedLesson.chapterIndex]
+                              .lessons[selectedLesson.lessonIndex]
+                              .questions[qIndex].question = e.target.value;
+                            setChapters(updatedChapters);
+                          }}
+                          className="w-full p-2 border rounded mb-2"
+                        />
+                        <button
+                          onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          <span className="material-icons">remove_circle_outline</span>
+                        </button>
+                      </div>
+                      
+                      {q.options.map((option, oIndex) => (
+                        <div key={oIndex} className="flex items-center gap-2 mb-2">
+                          <input
+                            type="radio"
+                            name={`question-${qIndex}`}
+                            checked={option.isCorrect}
+                            onChange={() => {
+                              const updatedChapters = [...chapters];
+                              const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex]
+                                .questions[qIndex];
+                              
+                              currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                ...opt,
+                                isCorrect: idx === oIndex
+                              }));
+                              setChapters(updatedChapters);
+                            }}
+                          />
+                          <input
+                            type="text"
+                            value={option.option}
+                            onChange={(e) => {
+                              const updatedChapters = [...chapters];
+                              updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex]
+                                .questions[qIndex].options[oIndex].option = e.target.value;
+                              setChapters(updatedChapters);
+                            }}
+                            placeholder={`Option ${oIndex + 1}`}
+                            className="flex-1 p-2 border rounded"
+                          />
+                        </div>
+                      ))}
+                      
+                      <button
+                        onClick={() => {
+                          const updatedChapters = [...chapters];
+                          updatedChapters[selectedLesson.chapterIndex]
+                            .lessons[selectedLesson.lessonIndex]
+                            .questions[qIndex].options.push({ option: '', isCorrect: false });
+                          setChapters(updatedChapters);
+                        }}
+                        className="text-blue-600 text-sm"
+                      >
+                        + Add Option
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -330,45 +553,64 @@ function CourseContent() {
   // Add these helper functions at the top of your component
 
 
-  // Update the file handler
-  const handleFileUpload = (e, type, chapterIndex, lessonIndex) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const storageKey = `file_${chapterIndex}_${lessonIndex}_${type}`;
-    const fileInfo = {
-      name: file.name,
-      timestamp: new Date().getTime()
-    };
-    
-    localStorage.setItem(storageKey, JSON.stringify(fileInfo));
-
+  // Add new question to lesson
+  const handleAddQuestion = (chapterIndex, lessonIndex) => {
     const updatedChapters = [...chapters];
     const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
     
-    if (type === 'video') {
-      lesson.lessonVideo = file.name;
-    } else if (type === 'materials') {
-      lesson.lessonMaterials = file.name;
+    if (!lesson.questions) {
+      lesson.questions = [];
     }
+
+    lesson.questions.push({
+      question: '',
+      isOpenSource: true,
+      options: [
+        { option: '', isCorrect: false },
+        { option: '', isCorrect: false }
+      ]
+    });
+
+    setChapters(updatedChapters);
+    updateCourseData('content', { chapters: updatedChapters });
+    // Force re-render
+    setSelectedLesson({
+      ...lesson,
+      chapterIndex,
+      lessonIndex
+    });
+  };
+
+  // Remove question
+  const handleRemoveQuestion = (chapterIndex, lessonIndex, questionIndex) => {
+    const updatedChapters = [...chapters];
+    const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+    
+    lesson.questions.splice(questionIndex, 1);
     
     setChapters(updatedChapters);
-
-    // Reset the file input
-    e.target.value = '';
+    updateCourseData('content', { chapters: updatedChapters });
+    // Force re-render
+    setSelectedLesson({
+      ...lesson,
+      chapterIndex,
+      lessonIndex
+    });
   };
 
-  // Function to get the stored file info
-  const getStoredFileInfo = (chapterIndex, lessonIndex, type) => {
-    const storageKey = `file_${chapterIndex}_${lessonIndex}_${type}`;
-    const stored = localStorage.getItem(storageKey);
-    return stored ? JSON.parse(stored) : null;
+  // Add function to remove lesson
+  const handleRemoveLesson = (chapterIndex, lessonIndex) => {
+    const updatedChapters = [...chapters];
+    updatedChapters[chapterIndex].lessons.splice(lessonIndex, 1);
+    setChapters(updatedChapters);
+    updateCourseData('content', { chapters: updatedChapters });
+    
+    // Clear selected lesson if it was deleted
+    if (selectedLesson?.chapterIndex === chapterIndex && 
+        selectedLesson?.lessonIndex === lessonIndex) {
+      setSelectedLesson(null);
+    }
   };
-
-  // Add this helper to get file name
-
-
-  // Add this CSS class to hide the "No file chosen" text
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -384,7 +626,8 @@ function CourseContent() {
             Add Chapter
           </button>
 
-          {chapters.map((chapter, chapterIndex) => (
+          {/* Only render chapters if they exist */}
+          {chapters.length > 0 && chapters.map((chapter, chapterIndex) => (
             <div 
               key={chapterIndex} 
               className={`mb-4 border rounded-lg p-4 ${selectedChapter === chapterIndex ? 'border-blue-500' : ''}`}
@@ -405,23 +648,39 @@ function CourseContent() {
                 {chapter.lessons.map((lesson, lessonIndex) => (
                   <div 
                     key={lessonIndex} 
-                    className={`ml-4 p-2 border rounded cursor-pointer hover:bg-gray-50
+                    className={`ml-4 p-2 border rounded hover:bg-gray-50
                       ${selectedLesson?.chapterIndex === chapterIndex && 
                         selectedLesson?.lessonIndex === lessonIndex ? 'bg-blue-50' : ''}`}
-                    onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{lesson.lessonTitle}</span>
-                      <select
-                        value={lesson.lessonType}
-                        onChange={(e) => handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="ml-2 p-1 border rounded"
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
                       >
-                        <option value="Video">Video</option>
-                        <option value="PDF">PDF</option>
-                        <option value="Quiz">Quiz</option>
-                      </select>
+                        <span>{lesson.lessonTitle}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={lesson.lessonType}
+                          onChange={(e) => handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1 border rounded text-sm"
+                        >
+                          <option value="Video">Video</option>
+                          <option value="PDF">PDF</option>
+                          <option value="Quiz">Quiz</option>
+                        </select>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveLesson(chapterIndex, lessonIndex);
+                          }}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Delete lesson"
+                        >
+                          <span className="material-icons text-sm">delete_outline</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -441,13 +700,7 @@ function CourseContent() {
 
         {/* Right Content Area */}
         <div className="flex-1 bg-white rounded-lg">
-          {!selectedLesson ? (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              Select a lesson to view or edit its content
-            </div>
-          ) : (
-            renderRightContent()
-          )}
+          {renderRightContent()}
         </div>
       </div>
 
