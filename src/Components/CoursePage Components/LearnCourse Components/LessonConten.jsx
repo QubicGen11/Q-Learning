@@ -336,13 +336,13 @@ const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
                 <div className="p-4">
                   {lesson.lessonMaterials && (
                     <a
-                      href={`/api/materials/${lesson.lessonMaterials}`}
+                      href={`${lesson.lessonMaterials}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
                     >
                       <FaFilePdf className="text-red-500 text-2xl" />
-                      <span className="text-blue-600 font-medium">{lesson.lessonMaterials}</span>
+                      <span className="text-blue-600 font-medium">PDf</span>
                     </a>
                   )}
                 </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import useCourseCreationStore from '../../../../stores/courseCreationStore';
+import axios from 'axios';
 
 function CourseContent() {
   const navigate = useNavigate();
@@ -104,44 +105,66 @@ function CourseContent() {
     }
   };
 
-  // Handle file upload
-  const handleFileUpload = (e, type, chapterIndex, lessonIndex) => {
+  // Handle file upload to S3
+  const handleFileUpload = async (e, type, chapterIndex, lessonIndex) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedMaterials({
-        chapterIndex,
-        lessonIndex,
-        type,
-        name: file.name
-      });
-      
-      const updatedChapters = [...chapters];
-      const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
-      
-      if (type === 'video') {
-        lesson.lessonVideo = file.name;
-      } else if (type === 'materials') {
-        lesson.lessonMaterials = file.name;
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await axios.post('https://image.qubinest.com/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (response.data && response.data.url) {
+          setSelectedMaterials({
+            chapterIndex,
+            lessonIndex,
+            type,
+            name: file.name
+          });
+          
+          const updatedChapters = [...chapters];
+          const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+          
+          if (type === 'video') {
+            lesson.lessonVideo = response.data.url;
+          } else if (type === 'materials') {
+            lesson.lessonMaterials = response.data.url;
+          }
+          
+          setChapters(updatedChapters);
+          updateCourseData('content', { chapters: updatedChapters });
+          
+          // Force re-render
+          setSelectedLesson({
+            ...lesson,
+            chapterIndex,
+            lessonIndex
+          });
+
+          toast.success(`${type === 'video' ? 'Video' : 'Material'} uploaded successfully`);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast.error(`Failed to upload ${type === 'video' ? 'video' : 'material'}`);
       }
-      
-      setChapters(updatedChapters);
-      updateCourseData('content', { chapters: updatedChapters });
-      
-      // Force re-render by updating selectedLesson
-      setSelectedLesson({
-        ...lesson,
-        chapterIndex,
-        lessonIndex
-      });
     }
   };
 
-  // Get stored file info
+  // Get stored file info - Updated to handle URLs
   const getStoredFileInfo = (chapterIndex, lessonIndex, type) => {
     const lesson = chapters[chapterIndex]?.lessons[lessonIndex];
     if (!lesson) return null;
 
-    const fileName = type === 'video' ? lesson.lessonVideo : lesson.lessonMaterials;
+    const fileUrl = type === 'video' ? lesson.lessonVideo : lesson.lessonMaterials;
+    if (!fileUrl) return null;
+
+    // Extract filename from URL
+    const fileName = fileUrl.split('/').pop();
     return fileName ? { name: fileName } : null;
   };
 
