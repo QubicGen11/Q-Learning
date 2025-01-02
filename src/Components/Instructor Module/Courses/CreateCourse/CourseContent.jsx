@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
+import useCourseCreationStore from '../../../../stores/courseCreationStore';
 
 function CourseContent() {
   const navigate = useNavigate();
+  const { updateCourseData } = useCourseCreationStore();
   const [chapters, setChapters] = useState([]);
   const [selectedChapter, setSelectedChapter] = useState(null);
-  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [selectedLesson, setSelectedLesson] = useState();
+  const [lessonFiles, setLessonFiles] = useState({});
 
   // Add new chapter
   const handleAddChapter = () => {
@@ -16,14 +19,13 @@ function CourseContent() {
       lessons: [],
       questions: []
     };
-    setChapters([...chapters, newChapter]);
+    const updatedChapters = [...chapters, newChapter];
+    setChapters(updatedChapters);
+    updateCourseData('content', { chapters: updatedChapters });
   };
 
   // Select chapter
-  const handleSelectChapter = (chapterIndex) => {
-    setSelectedChapter(chapterIndex);
-    setSelectedLesson(null); // Reset selected lesson when changing chapter
-  };
+
 
   // Select lesson and show right content
   const handleSelectLesson = (chapterIndex, lessonIndex) => {
@@ -49,28 +51,11 @@ function CourseContent() {
     const updatedChapters = [...chapters];
     updatedChapters[chapterIndex].lessons.push(newLesson);
     setChapters(updatedChapters);
+    updateCourseData('content', { chapters: updatedChapters });
   };
 
   // Add question to quiz
-  const handleAddQuestion = (chapterIndex, lessonIndex) => {
-    const updatedChapters = [...chapters];
-    const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
-    
-    if (!lesson.questions) {
-      lesson.questions = [];
-    }
-    
-    lesson.questions.push({
-      question: '',
-      isOpenSource: true,
-      options: [
-        { option: '', isCorrect: false },
-        { option: '', isCorrect: false }
-      ]
-    });
-    
-    setChapters(updatedChapters);
-  };
+
 
   // Handle lesson type change
   const handleLessonTypeChange = (chapterIndex, lessonIndex, newType) => {
@@ -132,47 +117,57 @@ function CourseContent() {
     switch (selectedLesson.lessonType.toLowerCase()) {
       case 'video':
         return (
-          <div className="p-6">
-            <h3 className="text-xl font-medium mb-6">Video Lesson</h3>
-            <div className="space-y-6">
+          <div className="p-4">
+            <h3>Video Content</h3>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Video Upload</label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) => handleFileUpload(e, 'lessonVideo')}
-                  className="w-full p-2 border rounded"
-                />
-                {selectedLesson.lessonVideo && (
+                <label className="block mb-2">Video Upload</label>
+                <div className="relative">
+                  <button 
+                    onClick={() => document.getElementById(`video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`).click()}
+                    className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+                  >
+                    Choose file
+                  </button>
+                  <input
+                    id={`video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => handleFileUpload(e, 'video', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+                    className="hidden"
+                    key={`video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                  />
+                </div>
+                {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') && (
                   <p className="mt-2 text-sm text-gray-600">
-                    Current video: {selectedLesson.lessonVideo}
+                    Selected video: {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video').name}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Additional Materials (PDF)</label>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={(e) => handleFileUpload(e, 'lessonMaterials')}
-                  className="w-full p-2 border rounded"
-                />
-                {selectedLesson.lessonMaterials && (
+                <label className="block mb-2">Additional Materials</label>
+                <div className="relative">
+                  <button 
+                    onClick={() => document.getElementById(`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`).click()}
+                    className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+                  >
+                    Choose file
+                  </button>
+                  <input
+                    id={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => handleFileUpload(e, 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+                    className="hidden"
+                    key={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                  />
+                </div>
+                {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
                   <p className="mt-2 text-sm text-gray-600">
-                    Current material: {selectedLesson.lessonMaterials}
+                    Selected material: {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
                   </p>
                 )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
-                <textarea
-                  value={selectedLesson.lessonContent}
-                  onChange={(e) => handleContentChange(e.target.value)}
-                  className="w-full p-2 border rounded h-32"
-                  placeholder="Enter lesson description"
-                />
               </div>
             </div>
           </div>
@@ -180,32 +175,49 @@ function CourseContent() {
 
       case 'pdf':
         return (
-          <div className="p-6">
-            <h3 className="text-xl font-medium mb-6">PDF Lesson</h3>
-            <div className="space-y-6">
+          <div className="p-4">
+            <h3>PDF Content</h3>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">PDF Upload</label>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={(e) => handleFileUpload(e, 'lessonMaterials')}
-                  className="w-full p-2 border rounded"
+                <label className="block mb-2">PDF Content</label>
+                <textarea
+                  value={chapters[selectedLesson.chapterIndex]?.lessons[selectedLesson.lessonIndex]?.lessonContent || ''}
+                  onChange={(e) => {
+                    const updatedChapters = [...chapters];
+                    if (!updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent) {
+                      updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = '';
+                    }
+                    updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = e.target.value;
+                    setChapters(updatedChapters);
+                  }}
+                  placeholder="Enter your PDF content here..."
+                  className="w-full p-2 border rounded h-40 resize-y"
                 />
-                {selectedLesson.lessonMaterials && (
-                  <p className="mt-2 text-sm text-gray-600">
-                    Current PDF: {selectedLesson.lessonMaterials}
-                  </p>
-                )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
-                <textarea
-                  value={selectedLesson.lessonContent}
-                  onChange={(e) => handleContentChange(e.target.value)}
-                  className="w-full p-2 border rounded h-32"
-                  placeholder="Enter lesson description"
-                />
+                <label className="block mb-2">Additional Materials</label>
+                <div className="relative">
+                  <button 
+                    onClick={() => document.getElementById(`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`).click()}
+                    className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+                  >
+                    Choose file
+                  </button>
+                  <input
+                    id={`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => handleFileUpload(e, 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+                    className="hidden"
+                    key={`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                  />
+                </div>
+                {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Selected material: {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -313,46 +325,50 @@ function CourseContent() {
   };
 
   // Handle content changes
-  const handleContentChange = (content) => {
-    const updatedChapters = [...chapters];
-    updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = content;
-    setChapters(updatedChapters);
-  };
 
-  // Handle file uploads
-  const handleFileUpload = (e, field) => {
+
+  // Add these helper functions at the top of your component
+
+
+  // Update the file handler
+  const handleFileUpload = (e, type, chapterIndex, lessonIndex) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const storageKey = `file_${chapterIndex}_${lessonIndex}_${type}`;
+    const fileInfo = {
+      name: file.name,
+      timestamp: new Date().getTime()
+    };
+    
+    localStorage.setItem(storageKey, JSON.stringify(fileInfo));
+
     const updatedChapters = [...chapters];
-    updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex][field] = file.name;
+    const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+    
+    if (type === 'video') {
+      lesson.lessonVideo = file.name;
+    } else if (type === 'materials') {
+      lesson.lessonMaterials = file.name;
+    }
+    
     setChapters(updatedChapters);
+
+    // Reset the file input
+    e.target.value = '';
   };
 
-  // Handle quiz changes
-  const handleQuestionChange = (questionIndex, value) => {
-    const updatedChapters = [...chapters];
-    const lesson = updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex];
-    lesson.questions[questionIndex].question = value;
-    setChapters(updatedChapters);
+  // Function to get the stored file info
+  const getStoredFileInfo = (chapterIndex, lessonIndex, type) => {
+    const storageKey = `file_${chapterIndex}_${lessonIndex}_${type}`;
+    const stored = localStorage.getItem(storageKey);
+    return stored ? JSON.parse(stored) : null;
   };
 
-  const handleOptionChange = (questionIndex, optionIndex, value) => {
-    const updatedChapters = [...chapters];
-    const lesson = updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex];
-    lesson.questions[questionIndex].options[optionIndex].option = value;
-    setChapters(updatedChapters);
-  };
+  // Add this helper to get file name
 
-  const handleCorrectOptionChange = (questionIndex, optionIndex) => {
-    const updatedChapters = [...chapters];
-    const lesson = updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex];
-    lesson.questions[questionIndex].options = lesson.questions[questionIndex].options.map((opt, idx) => ({
-      ...opt,
-      isCorrect: idx === optionIndex
-    }));
-    setChapters(updatedChapters);
-  };
+
+  // Add this CSS class to hide the "No file chosen" text
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
