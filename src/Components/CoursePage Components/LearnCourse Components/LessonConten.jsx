@@ -97,7 +97,8 @@ const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
     switch (lesson.lessonType) {
       case 'Video':
         return (
-          <div className="w-full h-[600px] p-2">
+        <div className=" w-full h-[83vh] overflow-y-auto">
+           <div className="w-full h-[600px] p-2">
             <div className="w-full h-full relative">
               <video
                 key={lesson.lessonVideo} // Add key to force video reload
@@ -115,13 +116,18 @@ const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
                 </div>
               )}
             </div>
-            <div>
+           
+          </div>
+          <div>
             <LessonMaterials 
               lessonMaterials={lesson.lessonMaterials} 
               lessonQuestions={lesson.lessonQuestions}
             />
             </div>
-          </div>
+
+
+        </div>
+         
         );
 
       case 'Quiz':

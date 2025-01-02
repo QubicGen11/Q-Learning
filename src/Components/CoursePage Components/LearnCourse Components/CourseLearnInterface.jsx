@@ -71,7 +71,7 @@ const CourseLearnInterface = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col ">
       <CourseTracker 
         courseName={currentCourse?.courseName}
         progress={currentCourse?.progress || 0}
@@ -86,7 +86,7 @@ const CourseLearnInterface = () => {
             onLessonSelect={handleLessonSelect}
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 h-[calc(100vh-64px)] ">
           {currentLesson ? (
             <LessonContent 
               chapter={currentChapter}
