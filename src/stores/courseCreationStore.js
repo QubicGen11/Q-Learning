@@ -48,7 +48,8 @@ const useCourseCreationStore = create((set, get) => ({
         certificateEligibility: false,
         notifications: { notifyUpdates: false, notifyAssignments: false }
       }
-    }
+    },
+    courseSettings: []
   },
 
   setStep: (step) => {
@@ -59,8 +60,12 @@ const useCourseCreationStore = create((set, get) => ({
     set((state) => ({
       courseData: {
         ...state.courseData,
-        [section]: section === 'courseFaqs' ? 
-          // Handle FAQs as a direct array
+        [section]: section === 'courseSettings' ? 
+          // Handle settings as array
+          (Array.isArray(data) ? data : [data])
+          :
+          section === 'courseFaqs' ?
+          // Handle FAQs as array
           (Array.isArray(data) ? data : Object.values(data))
           :
           // Handle other sections as before
@@ -73,13 +78,29 @@ const useCourseCreationStore = create((set, get) => ({
   },
 
   // Function to handle next button click and API calls
-  handleNext: async (navigate) => {
-    const { currentStep, courseData } = get();
+  handleNext: (navigate) => {
+    const { currentStep } = get();
+    // Just handle navigation, no API call
+    if (currentStep < 6) {
+      set({ currentStep: currentStep + 1 });
+      const nextStep = get().steps[currentStep];
+      navigate(`/instructor/courses/create/${nextStep.path}`);
+    }
+  },
+
+  submitCourse: async (navigate) => {
+    const { courseData } = get();
     const token = Cookies.get('accessToken');
 
     try {
+      // Format the dates in courseSettings
+      const formattedSettings = courseData.courseSettings.map(setting => ({
+        ...setting,
+        startDate: setting.startDate ? new Date(setting.startDate).toISOString() : null,
+        endDate: setting.endDate ? new Date(setting.endDate).toISOString() : null
+      }));
+
       const requestBody = {
-        // Basic Info
         courseName: courseData.basicInfo.courseName,
         courseTagline: courseData.basicInfo.courseTagline,
         courseDuration: courseData.basicInfo.courseDuration,
@@ -87,56 +108,42 @@ const useCourseCreationStore = create((set, get) => ({
         category: courseData.basicInfo.category,
         subCategory: courseData.basicInfo.subCategory,
         teachingLanguage: courseData.basicInfo.teachingLanguage,
-        
-        // Media
-        courseBanner: courseData.media?.courseBanner || null,
-        courseImage: courseData.media?.courseImage || null,
-        categoryImage: courseData.media?.categoryImage || null,
-        
-        // About Course
-        courseOutcome: courseData.about?.courseOutCome || '',
-        courseOutCome: courseData.about?.courseOutCome || '',
-        courseDescription: courseData.about?.courseDescription || '',
-        coursePreRequisites: courseData.about?.coursePreRequisites || [],
-        courseAudience: courseData.about?.courseAudience || [],
-        
-        // Course Content
-        courseChapters: courseData.content?.chapters || [],
-
-        // Course FAQs - ensure it's an array
+        courseBanner: courseData.media.courseBanner,
+        courseImage: courseData.media.courseImage,
+        categoryImage: courseData.media.categoryImage,
+        courseOutCome: courseData.about.courseOutCome,
+        courseDescription: courseData.about.courseDescription,
+        coursePreRequisites: courseData.about.coursePreRequisites,
+        courseAudience: courseData.about.courseAudience,
+        courseChapters: courseData.content.chapters,
         courseFaqs: Array.isArray(courseData.courseFaqs) ? 
           courseData.courseFaqs : 
           Object.values(courseData.courseFaqs || {}),
-
-        isDraft: currentStep < 6,
+        courseSettings: formattedSettings,
+        isDraft: false,
         courseStatus: 'pending'
       };
 
       const response = await fetch('http://localhost:8089/qlms/createCourse', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Course updated successfully!');
-        if (currentStep < 6) {
-          set({ currentStep: currentStep + 1 });
-        } else {
-          navigate('/instructor/courses');
-        }
+        toast.success('Course submitted successfully!');
+        navigate('/instructor/courses');
       } else {
-        toast.error(data.message || 'Failed to update course');
+        toast.error(data.message || 'Failed to submit course');
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Failed to update course');
+      toast.error('Failed to submit course');
     }
   },
 
@@ -178,7 +185,8 @@ const useCourseCreationStore = create((set, get) => ({
             certificateEligibility: false,
             notifications: { notifyUpdates: false, notifyAssignments: false }
           }
-        }
+        },
+        courseSettings: []
       }
     });
   }

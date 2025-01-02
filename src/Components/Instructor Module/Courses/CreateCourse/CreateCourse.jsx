@@ -11,7 +11,8 @@ function CreateCourse() {
     steps, 
     setStep, 
     resetStore, 
-    handleNext 
+    handleNext,
+    submitCourse 
   } = useCourseCreationStore();
 
   // Set initial step based on URL

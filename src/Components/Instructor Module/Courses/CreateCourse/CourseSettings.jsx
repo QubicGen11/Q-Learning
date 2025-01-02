@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import useCourseCreationStore from '../../../../stores/courseCreationStore';
+import { toast } from 'react-hot-toast';
 
 function CourseSettings() {
   const { courseData, updateCourseData } = useCourseCreationStore();
-  const { settings } = courseData;
   const [activeSection, setActiveSection] = useState('courseSettings');
 
-  const handleSettingChange = (section, field, value) => {
-    updateCourseData('settings', {
-      ...settings,
-      [section]: {
-        ...settings[section],
-        [field]: value
-      }
-    });
+  const handleSettingChange = (field, value) => {
+    const updatedSettings = [{
+      ...courseData.courseSettings?.[0] || {},
+      [field]: value
+    }];
+    updateCourseData('courseSettings', updatedSettings);
   };
+
+  const settings = courseData.courseSettings?.[0] || {};
 
   const renderCourseSettings = () => (
     <div className="space-y-6">
@@ -22,16 +22,26 @@ function CourseSettings() {
       <div>
         <h3 className="text-sm font-medium mb-3">Course Visibility</h3>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600">Public</span>
+          <span className="text-sm text-gray-600">Public Access</span>
           <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" className="sr-only peer" />
+            <input 
+              type="checkbox" 
+              className="sr-only peer"
+              checked={settings.publicAccess || false}
+              onChange={(e) => handleSettingChange('publicAccess', e.target.checked)}
+            />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
           </label>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Enable Preview</span>
           <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" className="sr-only peer" />
+            <input 
+              type="checkbox" 
+              className="sr-only peer"
+              checked={settings.enablePreview || false}
+              onChange={(e) => handleSettingChange('enablePreview', e.target.checked)}
+            />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
           </label>
         </div>
@@ -42,38 +52,165 @@ function CourseSettings() {
         <h3 className="text-sm font-medium mb-3">Course Access</h3>
         <div className="mb-3">
           <label className="block text-sm mb-1 text-gray-600">Access Duration *</label>
-          <select className="w-full px-3 py-1.5 border rounded text-sm h-9">
-            <option value="">Select Months</option>
-          </select>
+          <input
+            type="text"
+            className="w-full px-3 py-1.5 border rounded text-sm h-9"
+            value={settings.accessDuration || ''}
+            onChange={(e) => handleSettingChange('accessDuration', e.target.value)}
+            placeholder="e.g., 12 weeks"
+          />
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Lifetime Access</span>
           <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" className="sr-only peer" />
+            <input 
+              type="checkbox" 
+              className="sr-only peer"
+              checked={settings.lifeTimeAccess || false}
+              onChange={(e) => handleSettingChange('lifeTimeAccess', e.target.checked)}
+            />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
           </label>
+        </div>
+      </div>
+
+      {/* Pricing */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Pricing</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm mb-1 text-gray-600">Price *</label>
+            <input
+              type="number"
+              className="w-full px-3 py-1.5 border rounded text-sm h-9"
+              value={settings.price || ''}
+              onChange={(e) => handleSettingChange('price', parseFloat(e.target.value))}
+              placeholder="Enter price"
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1 text-gray-600">Discount (%)</label>
+            <input
+              type="number"
+              className="w-full px-3 py-1.5 border rounded text-sm h-9"
+              value={settings.discount || ''}
+              onChange={(e) => handleSettingChange('discount', parseFloat(e.target.value))}
+              placeholder="Enter discount"
+            />
+          </div>
+        </div>
+        <div className="mt-4">
+          <label className="block text-sm mb-1 text-gray-600">Offered Price</label>
+          <input
+            type="number"
+            className="w-full px-3 py-1.5 border rounded text-sm h-9"
+            value={settings.offeredPrice || ''}
+            onChange={(e) => handleSettingChange('offeredPrice', parseFloat(e.target.value))}
+            placeholder="Enter offered price"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="block text-sm mb-1 text-gray-600">Start Date</label>
+            <input
+              type="date"
+              className="w-full px-3 py-1.5 border rounded text-sm h-9"
+              value={settings.startDate?.split('T')[0] || ''}
+              onChange={(e) => handleSettingChange('startDate', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1 text-gray-600">End Date</label>
+            <input
+              type="date"
+              className="w-full px-3 py-1.5 border rounded text-sm h-9"
+              value={settings.endDate?.split('T')[0] || ''}
+              onChange={(e) => handleSettingChange('endDate', e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Enrollment Settings */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Enrollment Settings</h3>
+        <div className="mb-3">
+          <label className="block text-sm mb-1 text-gray-600">Maximum Students</label>
+          <input
+            type="number"
+            className="w-full px-3 py-1.5 border rounded text-sm h-9"
+            value={settings.maxStudents || ''}
+            onChange={(e) => handleSettingChange('maxStudents', parseInt(e.target.value))}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Certificate Eligibility</span>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="sr-only peer"
+              checked={settings.certificateEligibility || false}
+              onChange={(e) => handleSettingChange('certificateEligibility', e.target.checked)}
+            />
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+          </label>
+        </div>
+      </div>
+
+      {/* Notifications */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Notifications</h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Notify Students on Updates</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={settings.notifyStudentsOnUpdate || false}
+                onChange={(e) => handleSettingChange('notifyStudentsOnUpdate', e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+            </label>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Notify Students on Assignments</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={settings.notifyStudentsOnAssignment || false}
+                onChange={(e) => handleSettingChange('notifyStudentsOnAssignment', e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+            </label>
+          </div>
         </div>
       </div>
 
       {/* Refund Policy */}
       <div>
         <h3 className="text-sm font-medium mb-3">Refund Policy</h3>
-        <div>
-          <label className="block text-sm mb-1 text-gray-600">Return Period *</label>
-          <div className="flex items-center gap-4">
+        <div className="mb-3">
+          <label className="block text-sm mb-1 text-gray-600">Return Period (days)</label>
+          <input
+            type="text"
+            className="w-full px-3 py-1.5 border rounded text-sm h-9"
+            value={settings.returnPeriod || ''}
+            onChange={(e) => handleSettingChange('returnPeriod', e.target.value)}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Refunds Allowed</span>
+          <label className="relative inline-flex items-center cursor-pointer">
             <input 
-              type="text" 
-              placeholder="No. of days" 
-              className="flex-1 px-3 py-1.5 border rounded text-sm h-9"
+              type="checkbox" 
+              className="sr-only peer"
+              checked={settings.refundsAllowed || false}
+              onChange={(e) => handleSettingChange('refundsAllowed', e.target.checked)}
             />
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Refunds Allowed</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-              </label>
-            </div>
-          </div>
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+          </label>
         </div>
       </div>
 
@@ -84,36 +221,90 @@ function CourseSettings() {
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Allow Content Downloads</span>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={settings.allowContentDownloads || false}
+                onChange={(e) => handleSettingChange('allowContentDownloads', e.target.checked)}
+              />
               <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
             </label>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Allow Discussion Participation</span>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={settings.allowDiscussionParticipation || false}
+                onChange={(e) => handleSettingChange('allowDiscussionParticipation', e.target.checked)}
+              />
               <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
             </label>
           </div>
         </div>
       </div>
 
-      {/* Live Classes Integration */}
+      {/* Live Classes */}
       <div>
-        <h3 className="text-sm font-medium mb-3">Live Classes Integration</h3>
+        <h3 className="text-sm font-medium mb-3">Live Classes</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Schedule Live Classes</span>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={settings.scheduleLiveClasses || false}
+                onChange={(e) => handleSettingChange('scheduleLiveClasses', e.target.checked)}
+              />
               <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
             </label>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Enable Subtitles</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={settings.enableSubtitles || false}
+                onChange={(e) => handleSettingChange('enableSubtitles', e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* SEO Settings */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">SEO Settings</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm mb-1 text-gray-600">SEO Title</label>
             <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-blue-600"
+              type="text"
+              className="w-full px-3 py-1.5 border rounded text-sm h-9"
+              value={settings.seoTitle || ''}
+              onChange={(e) => handleSettingChange('seoTitle', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1 text-gray-600">SEO Description</label>
+            <textarea
+              className="w-full px-3 py-1.5 border rounded text-sm"
+              value={settings.seoDescription || ''}
+              onChange={(e) => handleSettingChange('seoDescription', e.target.value)}
+              rows={3}
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1 text-gray-600">SEO Keywords</label>
+            <input
+              type="text"
+              className="w-full px-3 py-1.5 border rounded text-sm h-9"
+              value={settings.seoKeywords || ''}
+              onChange={(e) => handleSettingChange('seoKeywords', e.target.value)}
             />
           </div>
         </div>
@@ -121,195 +312,17 @@ function CourseSettings() {
     </div>
   );
 
-  const renderEnrollmentSettings = () => (
-    <div className="space-y-6">
-      <h3 className="text-sm font-medium mb-3">Enrollment Settings</h3>
-      
-      {/* Max Students */}
-      <div>
-        <label className="block text-sm mb-1 text-gray-600">Max Students *</label>
-        <input
-          type="number"
-          className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          placeholder="—"
-        />
-        <div className="flex items-center gap-2 mt-2">
-          <input
-            type="checkbox"
-            id="certificateEligibility"
-            className="rounded border-gray-300"
-          />
-          <label htmlFor="certificateEligibility" className="text-sm text-gray-600">
-            Certificate Eligibility
-          </label>
-        </div>
-      </div>
-
-      {/* Notifications */}
-      <div>
-        <h4 className="text-sm font-medium mb-3">Notifications</h4>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Notify Students on Updates</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-            </label>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Notify Students on Assignments</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderPricingSettings = () => (
-    <div className="space-y-6">
-      <h3 className="text-sm font-medium mb-3">Pricing</h3>
-      
-      <div>
-        <label className="block text-sm mb-1 text-gray-600">Original Price *</label>
-        <input
-          type="number"
-          className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          placeholder="Enter original price"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm mb-1 text-gray-600">Offered Price</label>
-        <input
-          type="number"
-          className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          placeholder="Enter offered price"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm mb-1 text-gray-600">Discounted Price</label>
-        <input
-          type="number"
-          className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          placeholder="Enter discounted price"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm mb-1 text-gray-600">Start Date</label>
-          <input
-            type="date"
-            className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          />
-        </div>
-        <div>
-          <label className="block text-sm mb-1 text-gray-600">End Date</label>
-          <input
-            type="date"
-            className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          />
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAdvancedSettings = () => (
-    <div className="space-y-6">
-      <h3 className="text-sm font-medium mb-3">Advanced Settings</h3>
-      
-      <div className="grid grid-cols-2 gap-4">
-        {/* SEO Title */}
-        <div>
-          <label className="block text-sm mb-1 text-gray-600">
-            SEO Title *
-          </label>
-          <input
-            type="text"
-            placeholder="Placeholder Text"
-            className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          />
-        </div>
-
-        {/* SEO Description */}
-        <div>
-          <label className="block text-sm mb-1 text-gray-600">    
-            SEO Description *
-          </label>
-          <input
-            type="text"
-            placeholder="Placeholder Text"
-            className="w-full px-3 py-1.5 border rounded text-sm h-9"
-          />
-        </div>
-      </div>
-
-      {/* SEO Keywords */}
-      <div>
-        <label className="block text-sm mb-1 text-gray-600">
-          SEO Keywords *
-        </label>
-        <input
-          type="text"
-          placeholder="Placeholder Text"
-          className="w-full px-3 py-1.5 border rounded text-sm h-9"
-        />
-      </div>
-    </div>
-  );
-
   return (
     <div className="max-w-[800px] mx-auto">
-      <div className="flex gap-6">
-        {/* Left Sidebar Navigation */}
-        <div className="w-48">
-          <div className="space-y-1">
-            <div 
-              onClick={() => setActiveSection('courseSettings')}
-              className={`w-full text-left px-4 py-2 text-sm cursor-pointer ${
-                activeSection === 'courseSettings' ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              Course Settings
-            </div>
-            <div 
-              onClick={() => setActiveSection('enrollment')}
-              className={`w-full text-left px-4 py-2 text-sm cursor-pointer ${
-                activeSection === 'enrollment' ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              Enrollment Settings
-            </div>
-            <div 
-              onClick={() => setActiveSection('pricing')}
-              className={`w-full text-left px-4 py-2 text-sm cursor-pointer ${
-                activeSection === 'pricing' ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              Pricing
-            </div>
-            <div 
-              onClick={() => setActiveSection('advanced')}
-              className={`w-full text-left px-4 py-2 text-sm cursor-pointer ${
-                activeSection === 'advanced' ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              Advanced Settings
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1">
-          {activeSection === 'courseSettings' && renderCourseSettings()}
-          {activeSection === 'enrollment' && renderEnrollmentSettings()}
-          {activeSection === 'pricing' && renderPricingSettings()}
-          {activeSection === 'advanced' && renderAdvancedSettings()}
-          {/* Other sections will be added when needed */}
+      <div className="bg-white rounded-lg p-6">
+        {renderCourseSettings()}
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={() => updateCourseData('courseSettings', [settings])}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Save Settings
+          </button>
         </div>
       </div>
     </div>
