@@ -6,7 +6,7 @@ import Skeleton from 'react-loading-skeleton';
 import { FaFolder, FaFilePdf } from 'react-icons/fa6';
 import LessonMaterials from './LessonMaterials';
 import AssignmentView from './AssignmentView';
-
+import { LuFolderDown } from "react-icons/lu";
 
 const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -315,18 +315,36 @@ const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
           <div className="relative h-full">
             {/* Materials Button */}
             {lesson.lessonMaterials && (
-              <button
-                onClick={toggleDrawer}
-                className="fixed right-4 top-20 z-10 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-                title="View Materials"
-              >
-                <FaFolder className="text-xl" />
-              </button>
+             <div className='fixed top-[67px] right-4 z-10'>
+                    <div 
+          onClick={() => setIsDrawerOpen(true)}
+          className="flex items-center space-x-1 text-[#0056B3] p-2 bg-[#F3F4F6] rounded-lg cursor-pointer hover:bg-[#0056B3] hover:text-white "
+        >
+          {/* <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 16 16" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="mr-1"
+          >
+            <path
+              d="M2 4C2 3.44772 2.44772 3 3 3H6.5C6.81476 3 7.11115 3.14819 7.30208 3.4L8.19792 4.6C8.38885 4.85181 8.68524 5 9 5H13C13.5523 5 14 5.44772 14 6V12C14 12.5523 13.5523 13 13 13H3C2.44772 13 2 12.5523 2 12V4Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg> */}
+          <LuFolderDown />
+          <span>Materials</span>
+        </div>
+             </div>
             )}
 
-            {/* Materials Drawer */}
+            {/* Materials Drawer - Updated positioning */}
             <div
-              className={`fixed right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-20
+              className={`fixed top-[64px] right-0 h-[calc(100vh-64px)] w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-20
                 ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
               <div className="h-full flex flex-col bg-white">
@@ -348,19 +366,23 @@ const LessonContent = ({ chapter, lesson, allChapters = [], onNavigate }) => {
                       className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
                     >
                       <FaFilePdf className="text-red-500 text-2xl" />
-                      <span className="text-blue-600 font-medium">PDf</span>
+                      <span className="text-blue-600 font-medium">PDF</span>
                     </a>
                   )}
                 </div>
               </div>
             </div>
 
+            {/* Overlay - Updated positioning */}
+            {isDrawerOpen && (
+              <div 
+                className="fixed inset-0 top-[64px] bg-black bg-opacity-50 z-10"
+                onClick={() => setIsDrawerOpen(false)}
+              />
+            )}
+
             {/* PDF Content */}
             <div className="p-6">
-              {/* PDF Materials */}
-           
-
-              {/* Lesson Content */}
               <div className="prose max-w-none">
                 {lesson.lessonContent}
               </div>
