@@ -22,7 +22,9 @@ const useCourseCreationStore = create((set, get) => ({
       category: '',
       subCategory: '',
       teachingLanguage: '',
-      hashtags: []
+      hashtags: [],
+      courseType: '',
+      percentageRequired: '',
     },
     media: {
       courseBanner: null,
@@ -54,6 +56,8 @@ const useCourseCreationStore = create((set, get) => ({
 
   categories: [],
   subCategories: [],
+
+  courseTypes: [],
 
   setStep: (step) => {
     set({ currentStep: step });
@@ -96,12 +100,19 @@ const useCourseCreationStore = create((set, get) => ({
     const token = Cookies.get('accessToken');
 
     try {
-      // Format the dates in courseSettings
       const formattedSettings = courseData.courseSettings.map(setting => ({
         ...setting,
         startDate: setting.startDate ? new Date(setting.startDate).toISOString() : null,
         endDate: setting.endDate ? new Date(setting.endDate).toISOString() : null
       }));
+
+      // Correctly format hashtags as array of objects with tagName
+      const hashTags = Array.isArray(courseData.basicInfo.hashtags) 
+        ? courseData.basicInfo.hashtags
+        : courseData.basicInfo.hashtags.split(',')
+            .map(tag => tag.trim())
+            .filter(Boolean)
+            .map(tag => ({ tagName: tag }));
 
       const requestBody = {
         courseName: courseData.basicInfo.courseName,
@@ -111,6 +122,9 @@ const useCourseCreationStore = create((set, get) => ({
         category: courseData.basicInfo.category,
         subCategory: courseData.basicInfo.subCategory,
         teachingLanguage: courseData.basicInfo.teachingLanguage,
+        courseType: courseData.basicInfo.courseType,
+        percentageRequired: parseFloat(courseData.basicInfo.percentageRequired) || 0,
+        hashTags, // Use the correctly formatted hashtags
         courseBanner: courseData.media.courseBanner,
         courseImage: courseData.media.courseImage,
         categoryImage: courseData.media.categoryImage,
@@ -164,7 +178,9 @@ const useCourseCreationStore = create((set, get) => ({
           category: '',
           subCategory: '',
           teachingLanguage: '',
-          hashtags: []
+          hashtags: [],
+          courseType: '',
+          percentageRequired: '',
         },
         media: {
           courseBanner: null,
@@ -219,6 +235,17 @@ const useCourseCreationStore = create((set, get) => ({
     } catch (error) {
       console.error('Error fetching subcategories:', error);
       toast.error('Failed to load subcategories');
+    }
+  },
+
+  fetchCourseTypes: async () => {
+    try {
+      const response = await fetch('http://localhost:8089/qlms/allCourseTypes');
+      const data = await response.json();
+      set({ courseTypes: data });
+    } catch (error) {
+      console.error('Error fetching course types:', error);
+      toast.error('Failed to load course types');
     }
   }
 }));

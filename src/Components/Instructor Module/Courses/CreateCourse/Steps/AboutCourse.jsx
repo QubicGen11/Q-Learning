@@ -6,18 +6,53 @@ function AboutCourse() {
   const { courseData, updateCourseData, setStep, currentStep } = useCourseCreationStore();
   const { about } = courseData;
 
-  // State for prerequisites
   const [prerequisite, setPrerequisite] = useState({
     preRequisiteRequired: '',
     preRequisiteLevel: 'Beginner'
   });
 
   const handleChange = (field, value) => {
-    console.log(`Updating ${field}:`, value); // Debug log
-    updateCourseData('about', {
-      ...about,
-      [field]: value
-    });
+    console.log(`Updating ${field}:`, value);
+    
+    if (field === 'coursePreRequisites') {
+      // Handle prerequisites as objects with level
+      const prerequisites = value.split(',')
+        .map(item => item.trim())
+        .filter(Boolean)
+        .map(item => ({
+          preRequisiteRequired: item,
+          preRequisiteLevel: 'Beginner'
+        }));
+
+      updateCourseData('about', {
+        ...about,
+        coursePreRequisites: prerequisites
+      });
+    } 
+    else if (field === 'courseAudience') {
+      // Handle audience as simple array
+      const audiences = value.split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+
+      updateCourseData('about', {
+        ...about,
+        courseAudience: audiences
+      });
+    }
+    else if (field === 'courseOutcome') {
+      // Handle outcome as simple string
+      updateCourseData('about', {
+        ...about,
+        courseOutcome: value
+      });
+    }
+    else {
+      updateCourseData('about', {
+        ...about,
+        [field]: value
+      });
+    }
   };
 
   const handlePrerequisiteAdd = () => {
@@ -69,91 +104,89 @@ function AboutCourse() {
     setStep(currentStep + 1);
   };
 
+  const handleKeyDown = (e, field) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const value = e.target.value.trim();
+      if (!value) return;
+
+      if (field === 'coursePreRequisites') {
+        const currentPreReqs = about.coursePreRequisites || [];
+        updateCourseData('about', {
+          ...about,
+          coursePreRequisites: [
+            ...currentPreReqs,
+            { preRequisiteRequired: value, preRequisiteLevel: 'Beginner' }
+          ]
+        });
+      } 
+      else if (field === 'courseAudience') {
+        const currentAudience = about.courseAudience || [];
+        updateCourseData('about', {
+          ...about,
+          courseAudience: [...currentAudience, value]
+        });
+      }
+      e.target.value = ''; // Clear the input
+    }
+  };
+
+  const handleRemoveItem = (field, index) => {
+    if (field === 'coursePreRequisites') {
+      const newPreReqs = [...(about.coursePreRequisites || [])];
+      newPreReqs.splice(index, 1);
+      updateCourseData('about', {
+        ...about,
+        coursePreRequisites: newPreReqs
+      });
+    } 
+    else if (field === 'courseAudience') {
+      const newAudience = [...(about.courseAudience || [])];
+      newAudience.splice(index, 1);
+      updateCourseData('about', {
+        ...about,
+        courseAudience: newAudience
+      });
+    }
+  };
+
   return (
-    <div className="max-w-[700px] mx-auto space-y-8">
-      {/* Course Outcome */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Course Outcome *
+    <div className="max-w-[800px] mx-auto">
+      {/* What will you get */}
+      <div className="mb-6">
+        <label className="block text-sm text-gray-600 mb-2">
+          What will you get *
         </label>
         <textarea
           value={about.courseOutcome || ''}
-          onChange={(e) => {
-            console.log('Setting courseOutcome:', e.target.value);
-            handleChange('courseOutcome', e.target.value);
-          }}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          onChange={(e) => handleChange('courseOutcome', e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           rows={4}
-          placeholder="What will students learn from this course?"
-        />
-      </div>
-
-      {/* Course Description */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Course Description *
-        </label>
-        <textarea
-          value={about.courseDescription || ''}
-          onChange={(e) => handleChange('courseDescription', e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          rows={6}
-          placeholder="Provide a detailed description of your course"
+          placeholder="Enter what students will learn"
         />
       </div>
 
       {/* Prerequisites */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Course Prerequisites
+      <div className="mb-6">
+        <label className="block text-sm text-gray-600 mb-2">
+          Prerequisites * (Press Enter or comma to add)
         </label>
-        <div className="space-y-4">
-          <div className="flex gap-4">
-            <input
-              type="text"
-              value={prerequisite.preRequisiteRequired}
-              onChange={(e) => setPrerequisite({
-                ...prerequisite,
-                preRequisiteRequired: e.target.value
-              })}
-              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Enter prerequisite"
-            />
-            <select
-              value={prerequisite.preRequisiteLevel}
-              onChange={(e) => setPrerequisite({
-                ...prerequisite,
-                preRequisiteLevel: e.target.value
-              })}
-              className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-            </select>
-            <button
-              onClick={handlePrerequisiteAdd}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Add
-            </button>
-          </div>
-          
-          {/* Display prerequisites */}
-          <div className="space-y-2">
+        <div>
+          <input
+            type="text"
+            onKeyDown={(e) => handleKeyDown(e, 'coursePreRequisites')}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            placeholder="Type and press Enter or comma to add prerequisite"
+          />
+          <div className="mt-2 flex flex-wrap gap-2">
             {about.coursePreRequisites?.map((prereq, index) => (
-              <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                <span>
-                  {prereq.preRequisiteRequired} - {prereq.preRequisiteLevel}
-                </span>
+              <div key={index} className="bg-blue-100 px-3 py-1 rounded-full flex items-center">
+                <span>{prereq.preRequisiteRequired}</span>
                 <button
-                  onClick={() => {
-                    const updated = about.coursePreRequisites.filter((_, i) => i !== index);
-                    handleChange('coursePreRequisites', updated);
-                  }}
-                  className="text-red-600 hover:text-red-800"
+                  onClick={() => handleRemoveItem('coursePreRequisites', index)}
+                  className="ml-2 text-red-500 hover:text-red-700"
                 >
-                  Remove
+                  ×
                 </button>
               </div>
             ))}
@@ -161,43 +194,76 @@ function AboutCourse() {
         </div>
       </div>
 
-      {/* Course Audience */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Course Audience
+      {/* Who can enroll for this course */}
+      <div className="mb-6">
+        <label className="block text-sm text-gray-600 mb-2">
+          Who can enrol for this course * (Press Enter or comma to add)
+        </label>
+        <div>
+          <input
+            type="text"
+            onKeyDown={(e) => handleKeyDown(e, 'courseAudience')}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            placeholder="Type and press Enter or comma to add audience"
+          />
+          <div className="mt-2 flex flex-wrap gap-2">
+            {about.courseAudience?.map((audience, index) => (
+              <div key={index} className="bg-blue-100 px-3 py-1 rounded-full flex items-center">
+                <span>{audience}</span>
+                <button
+                  onClick={() => handleRemoveItem('courseAudience', index)}
+                  className="ml-2 text-red-500 hover:text-red-700"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Most useful reviews if any */}
+      <div className="mb-6">
+        <label className="block text-sm text-gray-600 mb-2">
+          Most useful reviews if any *
+        </label>
+        <select
+          value={about.reviews || ''}
+          onChange={(e) => handleChange('reviews', e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white"
+        >
+          <option value="">Multi Select</option>
+          {/* ... keep existing options ... */}
+        </select>
+      </div>
+
+      {/* Description */}
+      <div className="mb-6">
+        <label className="block text-sm text-gray-600 mb-2">
+          Description *
         </label>
         <textarea
-          value={about.courseAudience?.join('\n') || ''}
-          onChange={(e) => handleAudienceAdd(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          value={about.courseDescription || ''}
+          onChange={(e) => handleChange('courseDescription', e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           rows={4}
-          placeholder="Enter each target audience on a new line"
+          placeholder="Enter course description"
         />
       </div>
 
-      {/* Debug display */}
-      <div className="mt-4 p-4 bg-gray-50 rounded">
-        <pre className="text-xs">
-          {JSON.stringify({
-            courseOutCome: about.courseOutCome,
-            coursePreRequisites: about.coursePreRequisites
-          }, null, 2)}
-        </pre>
-      </div>
-
       {/* Navigation Buttons */}
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between mt-8">
         <button
           onClick={() => setStep(currentStep - 1)}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          className="text-blue-600 hover:text-blue-700 flex items-center"
         >
-          Previous
+          <span className="mr-2">←</span> Previous
         </button>
         <button
-          onClick={handleNext}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => setStep(currentStep + 1)}
+          className="text-blue-600 hover:text-blue-700 flex items-center"
         >
-          Next
+          Next Course Content <span className="ml-2">→</span>
         </button>
       </div>
     </div>

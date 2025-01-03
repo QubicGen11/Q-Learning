@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
+import axios from 'axios';
 
 function BasicInfo() {
+  const [courseTypes, setCourseTypes] = useState([]);
   const { 
     courseData, 
     updateCourseData, 
@@ -27,13 +29,36 @@ function BasicInfo() {
     }
   }, [basicInfo.category, categories, fetchSubCategories]);
 
+  // Fetch course types on component mount
+  useEffect(() => {
+    const fetchCourseTypes = async () => {
+      try {
+        const response = await axios.get('http://localhost:8089/qlms/allCourseTypes');
+        setCourseTypes(response.data);
+      } catch (error) {
+        console.error('Error fetching course types:', error);
+      }
+    };
+    fetchCourseTypes();
+  }, []);
+
   const handleChange = (field, value) => {
-    // If changing category, reset subcategory
     if (field === 'category') {
       updateCourseData('basicInfo', {
         ...basicInfo,
         category: value,
         subCategory: '' // Reset subcategory when category changes
+      });
+    } else if (field === 'hashtags') {
+      // Convert comma-separated string to array of objects
+      const hashtagArray = value.split(',')
+        .map(tag => tag.trim())
+        .filter(Boolean)
+        .map(tag => ({ tagName: tag }));
+
+      updateCourseData('basicInfo', {
+        ...basicInfo,
+        hashtags: hashtagArray
       });
     } else {
       updateCourseData('basicInfo', {
@@ -58,7 +83,41 @@ function BasicInfo() {
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         />
       </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Course Type *
+        </label>
+        <select
+          name="courseType"
+          value={basicInfo?.courseType || ''}
+          onChange={(e) => handleChange('courseType', e.target.value)}
+          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+        >
+          <option value="">Select Course Type</option>
+          {courseTypes.map((type) => (
+            <option key={type.id} value={type.courseType}>
+              {type.courseType}
+            </option>
+          ))}
+        </select>
+      </div>
 
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Percentage Required *
+        </label>
+        <input
+          type="number"
+          name="percentageRequired"
+          value={basicInfo?.percentageRequired || ''}
+          onChange={(e) => handleChange('percentageRequired', parseFloat(e.target.value))}
+          placeholder="e.g., 99.9"
+          min="0"
+          max="100"
+          step="0.1"
+          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+        />
+      </div>
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Tagline *
@@ -179,14 +238,18 @@ function BasicInfo() {
         <input
           type="text"
           name="hashtags"
-          value={(basicInfo?.hashtags || []).join(', ')}
+          value={Array.isArray(basicInfo?.hashtags) 
+            ? basicInfo.hashtags.map(tag => tag.tagName).join(', ') 
+            : ''}
           onChange={(e) => handleChange('hashtags', e.target.value)}
-          placeholder="e.g., ux, design, career (comma separated)"
+          placeholder="e.g., WebDev, JavaScript, Frontend (comma separated)"
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         />
       </div>
+
+    
     </div>
   );
 }
 
-export default BasicInfo; 
+export default BasicInfo;
