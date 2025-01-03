@@ -54,7 +54,7 @@ function AboutCourse() {
 
   const handleNext = () => {
     // Validate required fields
-    if (!about.courseOutCome?.trim()) {
+    if (!about.courseOutcome?.trim()) {
       toast.error('Course outcome is required');
       return;
     }
@@ -77,10 +77,10 @@ function AboutCourse() {
           Course Outcome *
         </label>
         <textarea
-          value={about.courseOutCome || ''}
+          value={about.courseOutcome || ''}
           onChange={(e) => {
-            console.log('Setting courseOutCome:', e.target.value); // Debug log
-            handleChange('courseOutCome', e.target.value);
+            console.log('Setting courseOutcome:', e.target.value);
+            handleChange('courseOutcome', e.target.value);
           }}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           rows={4}

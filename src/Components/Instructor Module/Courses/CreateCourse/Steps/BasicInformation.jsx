@@ -1,41 +1,50 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 
-const BasicInformation = () => {
-  const { courseData, updateCourseData } = useCourseCreationStore();
+function BasicInfo() {
+  const { 
+    courseData, 
+    updateCourseData, 
+    categories, 
+    subCategories, 
+    fetchCategories, 
+    fetchSubCategories 
+  } = useCourseCreationStore();
   const { basicInfo } = courseData;
 
-  const handleChange = (e) => {
-    updateCourseData('basicInfo', {
-      ...basicInfo,
-      [e.target.name]: e.target.value
-    });
-  };
+  // Fetch categories on component mount
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
-  const handleHashtagChange = (e) => {
-    const tags = e.target.value.split(',').map(tag => tag.trim());
-    updateCourseData('basicInfo', {
-      ...basicInfo,
-      hashtags: tags
-    });
-  };
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    if (basicInfo.category) {
+      const selectedCategory = categories.find(cat => cat.category === basicInfo.category);
+      if (selectedCategory) {
+        fetchSubCategories(selectedCategory.id);
+      }
+    }
+  }, [basicInfo.category, categories, fetchSubCategories]);
 
-  // Get subcategories based on selected category
-  const getSubCategories = (category) => {
-    switch(category) {
-      case 'Development':
-        return ['Web Development', 'Mobile Development', 'Game Development', 'Software Testing', 'Database Design'];
-      case 'Design':
-        return ['UI/UX Design', 'Graphic Design', '3D Design', 'Animation', 'Web Design'];
-      case 'Business':
-        return ['Entrepreneurship', 'Marketing', 'Finance', 'Sales', 'Management'];
-      default:
-        return [];
+  const handleChange = (field, value) => {
+    // If changing category, reset subcategory
+    if (field === 'category') {
+      updateCourseData('basicInfo', {
+        ...basicInfo,
+        category: value,
+        subCategory: '' // Reset subcategory when category changes
+      });
+    } else {
+      updateCourseData('basicInfo', {
+        ...basicInfo,
+        [field]: value
+      });
     }
   };
 
   return (
-    <div className="max-w-[700px] mx-auto space-y-4">
+    <div className="max-w-[700px] mx-auto space-y-6">
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Name *
@@ -44,7 +53,7 @@ const BasicInformation = () => {
           type="text"
           name="courseName"
           value={basicInfo?.courseName || ''}
-          onChange={handleChange}
+          onChange={(e) => handleChange('courseName', e.target.value)}
           placeholder="Real World UX Learn User Experience & Start Your Career"
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         />
@@ -57,7 +66,7 @@ const BasicInformation = () => {
         <textarea
           name="courseTagline"
           value={basicInfo?.courseTagline || ''}
-          onChange={handleChange}
+          onChange={(e) => handleChange('courseTagline', e.target.value)}
           placeholder="UX based on real world examples. Gain powerful UX skills you can use to start a UX career or improve your projects."
           rows={3}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -72,7 +81,7 @@ const BasicInformation = () => {
           type="text"
           name="courseDuration"
           value={basicInfo?.courseDuration || ''}
-          onChange={handleChange}
+          onChange={(e) => handleChange('courseDuration', e.target.value)}
           placeholder="e.g., 10 hours"
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         />
@@ -85,7 +94,7 @@ const BasicInformation = () => {
         <select
           name="difficultyLevel"
           value={basicInfo?.difficultyLevel || ''}
-          onChange={handleChange}
+          onChange={(e) => handleChange('difficultyLevel', e.target.value)}
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         >
           <option value="">Select Difficulty Level</option>
@@ -95,41 +104,55 @@ const BasicInformation = () => {
         </select>
       </div>
 
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
+      <div className="mb-4">
+        <label htmlFor="category" className="block mb-1 text-sm text-gray-600 font-semibold">
           Category *
         </label>
-        <select
-          name="category"
-          value={basicInfo?.category || ''}
-          onChange={handleChange}
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        >
-          <option value="">Select Category</option>
-          <option value="Development">Development</option>
-          <option value="Design">Design</option>
-          <option value="Business">Business</option>
-        </select>
+        <div className="relative">
+          <select
+            id="category"
+            value={basicInfo.category || ''}
+            onChange={(e) => handleChange('category', e.target.value)}
+            className="w-full text-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.category} className='text-sm'>
+                {cat.category}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+           
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Sub Category *
+      <div className="mb-4">
+        <label htmlFor="subcategory" className="block mb-1 text-sm text-gray-600 font-semibold">
+          Subcategory *
         </label>
-        <select
-          name="subCategory"
-          value={basicInfo?.subCategory || ''}
-          onChange={handleChange}
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-          disabled={!basicInfo?.category} // Disable if no category is selected
-        >
-          <option value="">Select Sub Category</option>
-          {getSubCategories(basicInfo?.category).map((subCat) => (
-            <option key={subCat} value={subCat}>
-              {subCat}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            id="subcategory"
+            value={basicInfo.subCategory || ''}
+            onChange={(e) => handleChange('subCategory', e.target.value)}
+            className="w-full text-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            required
+            disabled={!basicInfo.category}
+          >
+            <option value="">Select a subcategory</option>
+            {subCategories.map((subCat, index) => (
+              <option key={index} value={subCat.subCategory} className='text-sm'>
+                {subCat.subCategory}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+          
+          </div>
+        </div>
       </div>
 
       <div>
@@ -139,7 +162,7 @@ const BasicInformation = () => {
         <select
           name="teachingLanguage"
           value={basicInfo?.teachingLanguage || ''}
-          onChange={handleChange}
+          onChange={(e) => handleChange('teachingLanguage', e.target.value)}
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         >
           <option value="">Select Language</option>
@@ -157,13 +180,13 @@ const BasicInformation = () => {
           type="text"
           name="hashtags"
           value={(basicInfo?.hashtags || []).join(', ')}
-          onChange={handleHashtagChange}
+          onChange={(e) => handleChange('hashtags', e.target.value)}
           placeholder="e.g., ux, design, career (comma separated)"
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         />
       </div>
     </div>
   );
-};
+}
 
-export default BasicInformation; 
+export default BasicInfo; 

@@ -30,7 +30,7 @@ const useCourseCreationStore = create((set, get) => ({
       categoryImage: null
     },
     about: {
-      courseOutCome: '',
+      courseOutcome: '',
       courseDescription: '',
       coursePreRequisites: [],
       courseAudience: []
@@ -51,6 +51,9 @@ const useCourseCreationStore = create((set, get) => ({
     },
     courseSettings: []
   },
+
+  categories: [],
+  subCategories: [],
 
   setStep: (step) => {
     set({ currentStep: step });
@@ -111,7 +114,7 @@ const useCourseCreationStore = create((set, get) => ({
         courseBanner: courseData.media.courseBanner,
         courseImage: courseData.media.courseImage,
         categoryImage: courseData.media.categoryImage,
-        courseOutCome: courseData.about.courseOutCome,
+        courseOutcome: courseData.about.courseOutcome,
         courseDescription: courseData.about.courseDescription,
         coursePreRequisites: courseData.about.coursePreRequisites,
         courseAudience: courseData.about.courseAudience,
@@ -123,6 +126,8 @@ const useCourseCreationStore = create((set, get) => ({
         isDraft: false,
         courseStatus: 'pending'
       };
+
+      console.log('Submitting course data:', requestBody); // Debug log
 
       const response = await fetch('http://localhost:8089/qlms/createCourse', {
         method: 'POST',
@@ -167,7 +172,7 @@ const useCourseCreationStore = create((set, get) => ({
           categoryImage: null
         },
         about: {
-          courseOutCome: '',
+          courseOutcome: '',
           courseDescription: '',
           coursePreRequisites: [],
           courseAudience: []
@@ -189,6 +194,32 @@ const useCourseCreationStore = create((set, get) => ({
         courseSettings: []
       }
     });
+  },
+
+  fetchCategories: async () => {
+    try {
+      const response = await fetch('http://localhost:8089/qlms/allCategories');
+      const data = await response.json();
+      set({ categories: data });
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('Failed to load categories');
+    }
+  },
+
+  fetchSubCategories: async (categoryId) => {
+    if (!categoryId) {
+      set({ subCategories: [] });
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:8089/qlms/allSubCategories/${categoryId}`);
+      const data = await response.json();
+      set({ subCategories: data });
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      toast.error('Failed to load subcategories');
+    }
   }
 }));
 
