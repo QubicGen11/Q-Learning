@@ -77,17 +77,20 @@ function CreateCourse() {
               <p className="text-sm text-gray-500">Step {currentStep} of {steps.length}</p>
             </div>
             <div className="flex items-center gap-4">
+              <div className="relative">
+                <button
+                  onClick={() => {/* Save as draft logic */}}
+                  className="px-4 py-2 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
+                >
+                  Save as Draft
+                  <span className="material-icons text-sm">expand_more</span>
+                </button>
+              </div>
               <button
-                onClick={() => {/* Save as draft logic */}}
-                className="px-4 py-2 text-sm text-[#FFFFFF]  bg-[#0056B3] hover:bg-[#004494] rounded-md "
+                onClick={() => {/* Submit for review logic */}}
+                className="px-4 py-2 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
               >
-                Save as Draft
-              </button>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 text-sm text-[#FFFFFF]  bg-[#0056B3] hover:bg-[#004494] rounded-md "
-              >
-                Cancel
+                Submit for review
               </button>
             </div>
           </div>

@@ -66,7 +66,7 @@ function BasicInfo() {
         [field]: value
       });
     }
-  };
+  };  
 
   return (
     <div className="max-w-[700px] mx-auto space-y-6">
@@ -99,24 +99,7 @@ function BasicInfo() {
       </div>
       
       <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Course Type *
-          </label>
-          <select
-            name="courseType"
-            value={basicInfo?.courseType || ''}
-            onChange={(e) => handleChange('courseType', e.target.value)}
-            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-          >
-            <option value="">Select Course Type</option>
-            {courseTypes.map((type) => (
-              <option key={type.id} value={type.courseType}>
-                {type.courseType}
-              </option>
-            ))}
-          </select>
-        </div>
+       
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">

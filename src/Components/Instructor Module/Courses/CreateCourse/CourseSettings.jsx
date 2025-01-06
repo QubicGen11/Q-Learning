@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import useCourseCreationStore from '../../../../stores/courseCreationStore';
 
 function CourseSettings() {
   const { courseData, updateCourseData } = useCourseCreationStore();
   const [activeSection, setActiveSection] = useState('courseSettings');
+  const [courseTypes, setCourseTypes] = useState([]);
   const settings = courseData.courseSettings?.[0] || {};
+
+  useEffect(() => {
+    const fetchCourseTypes = async () => {
+      try {
+        const response = await axios.get('http://localhost:8089/qlms/allCourseTypes');
+        setCourseTypes(response.data);
+      } catch (error) {
+        console.error('Error fetching course types:', error);
+      }
+    };
+    fetchCourseTypes();
+  }, []);
 
   const handleSettingChange = (field, value) => {
     const updatedSettings = [{
@@ -229,10 +243,12 @@ function CourseSettings() {
                         value={settings.courseType || ''}
                         onChange={(e) => handleSettingChange('courseType', e.target.value)}
                       >
-                        <option value="">Select</option>
-                        <option value="free">Free</option>
-                        <option value="paid">Paid</option>
-                        <option value="subscription">Subscription</option>
+                        <option value="">Select Course Type</option>
+                        {courseTypes.map((type) => (
+                          <option key={type.id} value={type.courseType}>
+                            {type.courseType}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
