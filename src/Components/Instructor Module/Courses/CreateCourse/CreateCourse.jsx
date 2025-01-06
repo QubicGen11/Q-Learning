@@ -8,24 +8,48 @@ function CreateCourse() {
   const location = useLocation();
   const { 
     currentStep, 
-    steps, 
     setStep, 
     resetStore, 
     handleNext,
     submitCourse 
   } = useCourseCreationStore();
 
-  // Set initial step based on URL
+  // Updated steps definition
+  const steps = [
+    { id: 1, path: 'basic-info' },
+    { id: 2, path: 'media' },
+    { id: 3, path: 'about' },
+    { id: 4, path: 'content' },
+    { id: 5, path: 'more-info' },
+    { id: 6, path: 'faq' },
+    { id: 7, path: 'settings' }
+  ];
+
+  // Modified useEffect to handle course content section properly
   useEffect(() => {
     const path = location.pathname.split('/').pop();
-    const step = steps.find(s => s.path === path);
-    if (step) {
-      setStep(step.id);
+    
+    // Check if we're in the course content section
+    if (['content', 'more-info', 'faq'].includes(path)) {
+      const stepMap = {
+        'content': 4,
+        'more-info': 5,
+        'faq': 6
+      };
+      setStep(stepMap[path]);
     } else {
-      // Redirect to first step if no valid path
-      navigate(`/instructor/courses/create/${steps[0].path}`);  
+      // Handle other sections
+      const step = steps.find(s => s.path === path);
+      if (step) {
+        setStep(step.id);
+      } else {
+        // Only redirect if we're at the root create path
+        if (location.pathname === '/instructor/courses/create') {
+          navigate(`/instructor/courses/create/basic-info`);
+        }
+      }
     }
-  }, [location.pathname, steps, navigate, setStep]);
+  }, [location.pathname, navigate, setStep]);
 
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel? All progress will be lost.')) {

@@ -55,6 +55,12 @@ const StepIndicator = () => {
     },
     {
       number: 2,
+      title: 'More Info',
+      subtitle: 'Glossary and References',
+      path: 'more-info'
+    },
+    {
+      number: 3,
       title: "FAQ's",
       subtitle: 'Add frequently asked questions',
       path: 'faq'
@@ -68,11 +74,13 @@ const StepIndicator = () => {
         currentTab: 'info',
         steps: courseInformationSteps
       };
-    } else if (path.includes('/content') || path.includes('/faq')) {
+    } else if (path.includes('/content') || path.includes('/more-info') || path.includes('/faq')) {
       return {
         currentTab: 'content',
         steps: courseContentSteps,
-        currentStepNumber: path.includes('/content') ? 1 : 2
+        currentStepNumber: path.includes('/content') ? 1 
+          : path.includes('/more-info') ? 2 
+          : path.includes('/faq') ? 3 : 1
       };
     } else if (path.includes('/settings')) {
       return {
@@ -86,7 +94,7 @@ const StepIndicator = () => {
   const { currentTab, steps } = getCurrentTabAndSteps();
 
   const handleNext = () => {
-    const { currentTab, steps } = getCurrentTabAndSteps();
+    const { currentTab } = getCurrentTabAndSteps();
     
     if (currentTab === 'info' && currentStep === courseInformationSteps.length) {
       // Move to Course Content after completing Course Information
@@ -94,11 +102,15 @@ const StepIndicator = () => {
       navigate('/instructor/courses/create/content');
     } else if (currentTab === 'content') {
       if (location.pathname.includes('/content')) {
-        // Move from Course Content to FAQ
+        // Move from Content to More Info
         setStep(2);
+        navigate('/instructor/courses/create/more-info');
+      } else if (location.pathname.includes('/more-info')) {
+        // Move from More Info to FAQ
+        setStep(3);
         navigate('/instructor/courses/create/faq');
       } else if (location.pathname.includes('/faq')) {
-        // Move from FAQ to Settings
+        // Move to Settings
         navigate('/instructor/courses/create/settings');
       }
     } else if (currentStep < steps.length) {
@@ -114,12 +126,16 @@ const StepIndicator = () => {
     
     if (currentTab === 'content') {
       if (location.pathname.includes('/faq')) {
-        // Move back from FAQ to Course Content
+        // Move back from FAQ to More Info
+        setStep(2);
+        navigate('/instructor/courses/create/more-info');
+      } else if (location.pathname.includes('/more-info')) {
+        // Move back from More Info to Content
         setStep(1);
         navigate('/instructor/courses/create/content');
       } else if (location.pathname.includes('/content')) {
-        // Move back from Course Content to last step of Course Information
-        setStep(3);
+        // Move back to Course Information
+        setStep(courseInformationSteps.length);
         navigate('/instructor/courses/create/about');
       }
     } else if (currentTab === 'settings') {
@@ -138,10 +154,10 @@ const StepIndicator = () => {
     const { currentTab } = getCurrentTabAndSteps();
     const path = location.pathname;
 
-    if (currentTab === 'info' && currentStep === courseInformationSteps.length) {
-      return 'Next: Course Content';
-    } else if (currentTab === 'content') {
+    if (currentTab === 'content') {
       if (path.includes('/content')) {
+        return 'Next: More Info';
+      } else if (path.includes('/more-info')) {
         return "Next: FAQ's";
       } else if (path.includes('/faq')) {
         return 'Next: Settings';

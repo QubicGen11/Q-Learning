@@ -8,6 +8,7 @@ import ReactQuill from 'react-quill';
 // import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './Coursecontent.css'
+import { BsQuestionOctagon } from "react-icons/bs";
 
 function CourseContent() {
   const navigate = useNavigate();
@@ -290,114 +291,150 @@ function CourseContent() {
 
               {/* Show Questions if they exist */}
               {selectedLesson.questions && selectedLesson.questions.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-medium mb-4">Quiz Questions</h4>
-                  <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4">
-                    {selectedLesson.questions.map((q, qIndex) => (
-                      <div key={qIndex} className="border rounded mb-4 bg-white shadow-sm">
-                        <div className="flex justify-between items-center p-4 border-b">
-                          <div className="flex items-center gap-2 flex-1">
-                            <span className="text-gray-600">Question {qIndex + 1}</span>
-                            <input
-                              type="text"
-                              placeholder="Enter your question"
-                              value={q.question}
-                              onChange={(e) => {
-                                const updatedChapters = [...chapters];
-                                updatedChapters[selectedLesson.chapterIndex]
-                                  .lessons[selectedLesson.lessonIndex]
-                                  .questions[qIndex].question = e.target.value;
-                                setChapters(updatedChapters);
-                              }}
-                              className="flex-1 p-2 border rounded"
-                            />
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <span className="material-icons">delete_outline</span>
-                            </button>
-                            <button 
-                              onClick={() => toggleQuestion(qIndex)}
-                              className="text-gray-500 hover:text-gray-700"
-                            >
-                              <span className="material-icons">
-                                {collapsedQuestions.has(qIndex) ? 'expand_more' : 'expand_less'}
-                              </span>
-                            </button>
-                          </div>
-                        </div>
-                        
-                        {!collapsedQuestions.has(qIndex) && (
-                          <div className="p-4 space-y-3">
-                            {q.options.map((option, oIndex) => (
-                              <div key={oIndex} className="flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name={`question-${qIndex}`}
-                                  checked={option.isCorrect}
-                                  onChange={() => {
-                                    const updatedChapters = [...chapters];
-                                    const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
-                                      .lessons[selectedLesson.lessonIndex]
-                                      .questions[qIndex];
-                                    
-                                    currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
-                                      ...opt,
-                                      isCorrect: idx === oIndex
-                                    }));
-                                    setChapters(updatedChapters);
-                                  }}
-                                />
-                                <input
-                                  type="text"
-                                  value={option.option}
-                                  onChange={(e) => {
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[selectedLesson.chapterIndex]
-                                      .lessons[selectedLesson.lessonIndex]
-                                      .questions[qIndex].options[oIndex].option = e.target.value;
-                                    setChapters(updatedChapters);
-                                  }}
-                                  placeholder={`Option ${oIndex + 1}`}
-                                  className="flex-1 p-2 border rounded"
-                                />
-                                <button
-                                  onClick={() => {
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[selectedLesson.chapterIndex]
-                                      .lessons[selectedLesson.lessonIndex]
-                                      .questions[qIndex].options.splice(oIndex, 1);
-                                    setChapters(updatedChapters);
-                                  }}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  <span className="material-icons text-sm">remove_circle_outline</span>
-                                </button>
-                              </div>
-                            ))}
-                            
-                            <button
-                              onClick={() => {
-                                const updatedChapters = [...chapters];
-                                updatedChapters[selectedLesson.chapterIndex]
-                                  .lessons[selectedLesson.lessonIndex]
-                                  .questions[qIndex].options.push({ option: '', isCorrect: false });
-                                setChapters(updatedChapters);
-                              }}
-                              className="mt-3 text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                            >
-                              <span className="material-icons text-sm">add_circle_outline</span>
-                              Add Option
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+               <div className="flex-1 pl-6 h-full overflow-hidden">
+               <div className="h-full flex flex-col">
+                 <div className="flex justify-between items-center mb-4 flex-shrink-0">
+                   <h2 className="font-medium">Quiz</h2>
+                   <button
+                     onClick={() => {
+                       const updatedChapters = [...chapters];
+                       if (!updatedChapters[selectedLesson.chapterIndex]
+                           .lessons[selectedLesson.lessonIndex].questions) {
+                         updatedChapters[selectedLesson.chapterIndex]
+                           .lessons[selectedLesson.lessonIndex].questions = [];
+                       }
+                       updatedChapters[selectedLesson.chapterIndex]
+                         .lessons[selectedLesson.lessonIndex].questions.push({
+                           question: '',
+                           options: [
+                             { option: '', isCorrect: false },
+                             { option: '', isCorrect: false }
+                           ]
+                         });
+                       setChapters(updatedChapters);
+                     }}
+                     className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                   >
+                     <span className="material-icons text-sm">add_circle_outline</span>
+                     Add Another
+                   </button>
+                 </div>
+
+                 <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
+                   {selectedLesson.questions?.map((q, qIndex) => (
+                     <div key={qIndex} className="border rounded-lg bg-white shadow-sm">
+                       <div className="flex justify-between items-center p-4 border-b bg-[#f3f4f6]">
+                         <div className="flex items-center gap-2">
+                           {/* <span className="material-icons text-[#0056B3]">quiz</span> */}
+                           <BsQuestionOctagon className="text-[#0056B3] font-extrabold" />
+                           <span>Question {qIndex + 1}</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <button
+                             onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
+                             className="text-red-500 hover:text-red-700"
+                           >
+                             <span className="material-icons">delete_outline</span>
+                           </button>
+                           <button 
+                             onClick={() => toggleQuestion(qIndex)}
+                             className="text-gray-500"
+                           >
+                             <span className="material-icons">
+                               {collapsedQuestions.has(qIndex) ? 'expand_more' : 'expand_less'}
+                             </span>
+                           </button>
+                         </div>
+                       </div>
+
+                       {!collapsedQuestions.has(qIndex) && (
+                         <div className="p-4 space-y-4">
+                           <div>
+                             <input
+                               type="text"
+                               placeholder="Enter your question"
+                               value={q.question}
+                               onChange={(e) => {
+                                 const updatedChapters = [...chapters];
+                                 updatedChapters[selectedLesson.chapterIndex]
+                                   .lessons[selectedLesson.lessonIndex]
+                                   .questions[qIndex].question = e.target.value;
+                                 setChapters(updatedChapters);
+                               }}
+                               className="w-full p-2 border rounded"
+                             />
+                           </div>
+
+                           <div className="space-y-3">
+                             {q.options.map((option, oIndex) => (
+                               <div key={oIndex} className="flex items-center gap-2">
+                                 <input
+                                   type="radio"
+                                   name={`question-${qIndex}`}
+                                   checked={option.isCorrect}
+                                   onChange={() => {
+                                     const updatedChapters = [...chapters];
+                                     const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                       .lessons[selectedLesson.lessonIndex]
+                                       .questions[qIndex];
+                                     
+                                     currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                       ...opt,
+                                       isCorrect: idx === oIndex
+                                     }));
+                                     setChapters(updatedChapters);
+                                   }}
+                                   className="form-radio text-[#0056B3]"
+                                 />
+                                 <input
+                                   type="text"
+                                   value={option.option}
+                                   onChange={(e) => {
+                                     const updatedChapters = [...chapters];
+                                     updatedChapters[selectedLesson.chapterIndex]
+                                       .lessons[selectedLesson.lessonIndex]
+                                       .questions[qIndex].options[oIndex].option = e.target.value;
+                                     setChapters(updatedChapters);
+                                   }}
+                                   placeholder={`Option ${oIndex + 1}`}
+                                   className="flex-1 p-2 border rounded"
+                                 />
+                                 <button
+                                   onClick={() => {
+                                     const updatedChapters = [...chapters];
+                                     updatedChapters[selectedLesson.chapterIndex]
+                                       .lessons[selectedLesson.lessonIndex]
+                                       .questions[qIndex].options.splice(oIndex, 1);
+                                     setChapters(updatedChapters);
+                                   }}
+                                   className="text-red-500 hover:text-red-700"
+                                 >
+                                   <span className="material-icons text-sm">remove_circle_outline</span>
+                                 </button>
+                               </div>
+                             ))}
+
+                             <button
+                               onClick={() => {
+                                 const updatedChapters = [...chapters];
+                                 updatedChapters[selectedLesson.chapterIndex]
+                                   .lessons[selectedLesson.lessonIndex]
+                                   .questions[qIndex].options.push({ option: '', isCorrect: false });
+                                 setChapters(updatedChapters);
+                               }}
+                               className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                             >
+                               <span className="material-icons text-sm">add_circle_outline</span>
+                               Add Option
+                             </button>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             </div>
               )}
             </div>
           </div>
@@ -520,25 +557,168 @@ function CourseContent() {
               {selectedLesson.questions && selectedLesson.questions.length > 0 && (
                 <div className="mt-4">
                   <h4 className="font-medium mb-4">Quiz Questions</h4>
-                  <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4">
-                    {selectedLesson.questions.map((q, qIndex) => (
-                      <div key={qIndex} className="border rounded mb-4 bg-white shadow-sm">
-                        <div className="flex justify-between items-center p-4 border-b">
-                          <div className="flex items-center gap-2 flex-1">
-                            <span className="text-gray-600">Question {qIndex + 1}</span>
-                            <input
-                              type="text"
-                              placeholder="Enter your question"
-                              value={q.question}
-                              onChange={(e) => {
-                                const updatedChapters = [...chapters];
-                                updatedChapters[selectedLesson.chapterIndex]
-                                  .lessons[selectedLesson.lessonIndex]
-                                  .questions[qIndex].question = e.target.value;
-                                setChapters(updatedChapters);
-                              }}
-                              className="flex-1 p-2 border rounded"
-                            />
+                  {selectedLesson.questions?.map((q, qIndex) => (
+                     <div key={qIndex} className="border rounded-lg bg-white shadow-sm">
+                       <div className="flex justify-between items-center p-4 border-b bg-[#f3f4f6]">
+                         <div className="flex items-center gap-2">
+                           {/* <span className="material-icons text-[#0056B3]">quiz</span> */}
+                           <BsQuestionOctagon className="text-[#0056B3] font-extrabold" />
+                           <span>Question {qIndex + 1}</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <button
+                             onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
+                             className="text-red-500 hover:text-red-700"
+                           >
+                             <span className="material-icons">delete_outline</span>
+                           </button>
+                           <button 
+                             onClick={() => toggleQuestion(qIndex)}
+                             className="text-gray-500"
+                           >
+                             <span className="material-icons">
+                               {collapsedQuestions.has(qIndex) ? 'expand_more' : 'expand_less'}
+                             </span>
+                           </button>
+                         </div>
+                       </div>
+
+                       {!collapsedQuestions.has(qIndex) && (
+                         <div className="p-4 space-y-4">
+                           <div>
+                             <input
+                               type="text"
+                               placeholder="Enter your question"
+                               value={q.question}
+                               onChange={(e) => {
+                                 const updatedChapters = [...chapters];
+                                 updatedChapters[selectedLesson.chapterIndex]
+                                   .lessons[selectedLesson.lessonIndex]
+                                   .questions[qIndex].question = e.target.value;
+                                 setChapters(updatedChapters);
+                               }}
+                               className="w-full p-2 border rounded"
+                             />
+                           </div>
+
+                           <div className="space-y-3">
+                             {q.options.map((option, oIndex) => (
+                               <div key={oIndex} className="flex items-center gap-2">
+                                 <input
+                                   type="radio"
+                                   name={`question-${qIndex}`}
+                                   checked={option.isCorrect}
+                                   onChange={() => {
+                                     const updatedChapters = [...chapters];
+                                     const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                       .lessons[selectedLesson.lessonIndex]
+                                       .questions[qIndex];
+                                     
+                                     currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                       ...opt,
+                                       isCorrect: idx === oIndex
+                                     }));
+                                     setChapters(updatedChapters);
+                                   }}
+                                   className="form-radio text-[#0056B3]"
+                                 />
+                                 <input
+                                   type="text"
+                                   value={option.option}
+                                   onChange={(e) => {
+                                     const updatedChapters = [...chapters];
+                                     updatedChapters[selectedLesson.chapterIndex]
+                                       .lessons[selectedLesson.lessonIndex]
+                                       .questions[qIndex].options[oIndex].option = e.target.value;
+                                     setChapters(updatedChapters);
+                                   }}
+                                   placeholder={`Option ${oIndex + 1}`}
+                                   className="flex-1 p-2 border rounded"
+                                 />
+                                 <button
+                                   onClick={() => {
+                                     const updatedChapters = [...chapters];
+                                     updatedChapters[selectedLesson.chapterIndex]
+                                       .lessons[selectedLesson.lessonIndex]
+                                       .questions[qIndex].options.splice(oIndex, 1);
+                                     setChapters(updatedChapters);
+                                   }}
+                                   className="text-red-500 hover:text-red-700"
+                                 >
+                                   <span className="material-icons text-sm">remove_circle_outline</span>
+                                 </button>
+                               </div>
+                             ))}
+
+                             <button
+                               onClick={() => {
+                                 const updatedChapters = [...chapters];
+                                 updatedChapters[selectedLesson.chapterIndex]
+                                   .lessons[selectedLesson.lessonIndex]
+                                   .questions[qIndex].options.push({ option: '', isCorrect: false });
+                                 setChapters(updatedChapters);
+                               }}
+                               className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                             >
+                               <span className="material-icons text-sm">add_circle_outline</span>
+                               Add Option
+                             </button>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'quiz':
+        return (
+          <div className="bg-white rounded-lg p-6 h-[calc(100vh-280px)]">
+            <div className="flex h-full">
+              {/* Left Sidebar */}
+            
+
+              {/* Content Area */}
+              <div className="flex-1 pl-6 h-full overflow-hidden">
+                <div className="h-full flex flex-col">
+                  <div className="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h2 className="font-medium">Quiz</h2>
+                    <button
+                      onClick={() => {
+                        const updatedChapters = [...chapters];
+                        if (!updatedChapters[selectedLesson.chapterIndex]
+                            .lessons[selectedLesson.lessonIndex].questions) {
+                          updatedChapters[selectedLesson.chapterIndex]
+                            .lessons[selectedLesson.lessonIndex].questions = [];
+                        }
+                        updatedChapters[selectedLesson.chapterIndex]
+                          .lessons[selectedLesson.lessonIndex].questions.push({
+                            question: '',
+                            options: [
+                              { option: '', isCorrect: false },
+                              { option: '', isCorrect: false }
+                            ]
+                          });
+                        setChapters(updatedChapters);
+                      }}
+                      className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                    >
+                      <span className="material-icons text-sm">add_circle_outline</span>
+                      Add Another
+                    </button>
+                  </div>
+
+                  <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
+                    {selectedLesson.questions?.map((q, qIndex) => (
+                      <div key={qIndex} className="border rounded-lg bg-white shadow-sm">
+                        <div className="flex justify-between items-center p-4 border-b bg-[#f3f4f6]">
+                          <div className="flex items-center gap-2">
+                            {/* <span className="material-icons text-[#0056B3]">quiz</span> */}
+                            <BsQuestionOctagon className="text-[#0056B3] font-extrabold" />
+                            <span>Question {qIndex + 1}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <button
@@ -549,7 +729,7 @@ function CourseContent() {
                             </button>
                             <button 
                               onClick={() => toggleQuestion(qIndex)}
-                              className="text-gray-500 hover:text-gray-700"
+                              className="text-gray-500"
                             >
                               <span className="material-icons">
                                 {collapsedQuestions.has(qIndex) ? 'expand_more' : 'expand_less'}
@@ -557,214 +737,96 @@ function CourseContent() {
                             </button>
                           </div>
                         </div>
-                        
+
                         {!collapsedQuestions.has(qIndex) && (
-                          <div className="p-4 space-y-3">
-                            {q.options.map((option, oIndex) => (
-                              <div key={oIndex} className="flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name={`question-${qIndex}`}
-                                  checked={option.isCorrect}
-                                  onChange={() => {
-                                    const updatedChapters = [...chapters];
-                                    const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
-                                      .lessons[selectedLesson.lessonIndex]
-                                      .questions[qIndex];
-                                    
-                                    currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
-                                      ...opt,
-                                      isCorrect: idx === oIndex
-                                    }));
-                                    setChapters(updatedChapters);
-                                  }}
-                                />
-                                <input
-                                  type="text"
-                                  value={option.option}
-                                  onChange={(e) => {
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[selectedLesson.chapterIndex]
-                                      .lessons[selectedLesson.lessonIndex]
-                                      .questions[qIndex].options[oIndex].option = e.target.value;
-                                    setChapters(updatedChapters);
-                                  }}
-                                  placeholder={`Option ${oIndex + 1}`}
-                                  className="flex-1 p-2 border rounded"
-                                />
-                                <button
-                                  onClick={() => {
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[selectedLesson.chapterIndex]
-                                      .lessons[selectedLesson.lessonIndex]
-                                      .questions[qIndex].options.splice(oIndex, 1);
-                                    setChapters(updatedChapters);
-                                  }}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  <span className="material-icons text-sm">remove_circle_outline</span>
-                                </button>
-                              </div>
-                            ))}
-                            
-                            <button
-                              onClick={() => {
-                                const updatedChapters = [...chapters];
-                                updatedChapters[selectedLesson.chapterIndex]
-                                  .lessons[selectedLesson.lessonIndex]
-                                  .questions[qIndex].options.push({ option: '', isCorrect: false });
-                                setChapters(updatedChapters);
-                              }}
-                              className="mt-3 text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                            >
-                              <span className="material-icons text-sm">add_circle_outline</span>
-                              Add Option
-                            </button>
+                          <div className="p-4 space-y-4">
+                            <div>
+                              <input
+                                type="text"
+                                placeholder="Enter your question"
+                                value={q.question}
+                                onChange={(e) => {
+                                  const updatedChapters = [...chapters];
+                                  updatedChapters[selectedLesson.chapterIndex]
+                                    .lessons[selectedLesson.lessonIndex]
+                                    .questions[qIndex].question = e.target.value;
+                                  setChapters(updatedChapters);
+                                }}
+                                className="w-full p-2 border rounded"
+                              />
+                            </div>
+
+                            <div className="space-y-3">
+                              {q.options.map((option, oIndex) => (
+                                <div key={oIndex} className="flex items-center gap-2">
+                                  <input
+                                    type="radio"
+                                    name={`question-${qIndex}`}
+                                    checked={option.isCorrect}
+                                    onChange={() => {
+                                      const updatedChapters = [...chapters];
+                                      const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                        .lessons[selectedLesson.lessonIndex]
+                                        .questions[qIndex];
+                                      
+                                      currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                        ...opt,
+                                        isCorrect: idx === oIndex
+                                      }));
+                                      setChapters(updatedChapters);
+                                    }}
+                                    className="form-radio text-[#0056B3]"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={option.option}
+                                    onChange={(e) => {
+                                      const updatedChapters = [...chapters];
+                                      updatedChapters[selectedLesson.chapterIndex]
+                                        .lessons[selectedLesson.lessonIndex]
+                                        .questions[qIndex].options[oIndex].option = e.target.value;
+                                      setChapters(updatedChapters);
+                                    }}
+                                    placeholder={`Option ${oIndex + 1}`}
+                                    className="flex-1 p-2 border rounded"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const updatedChapters = [...chapters];
+                                      updatedChapters[selectedLesson.chapterIndex]
+                                        .lessons[selectedLesson.lessonIndex]
+                                        .questions[qIndex].options.splice(oIndex, 1);
+                                      setChapters(updatedChapters);
+                                    }}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <span className="material-icons text-sm">remove_circle_outline</span>
+                                  </button>
+                                </div>
+                              ))}
+
+                              <button
+                                onClick={() => {
+                                  const updatedChapters = [...chapters];
+                                  updatedChapters[selectedLesson.chapterIndex]
+                                    .lessons[selectedLesson.lessonIndex]
+                                    .questions[qIndex].options.push({ option: '', isCorrect: false });
+                                  setChapters(updatedChapters);
+                                }}
+                                className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                              >
+                                <span className="material-icons text-sm">add_circle_outline</span>
+                                Add Option
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        );
-
-      case 'quiz':
-        return (
-          <div className="p-4">
-            <h3>Quiz Questions</h3>
-            <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4">
-              {selectedLesson.questions?.map((q, qIndex) => (
-                <div key={qIndex} className="border rounded mb-4 bg-white shadow-sm">
-                  <div className="flex justify-between items-center p-4 border-b">
-                    <div className="flex items-center gap-2 flex-1">
-                      <span className="text-gray-600">Question {qIndex + 1}</span>
-                      <input
-                        type="text"
-                        placeholder="Enter your question"
-                        value={q.question}
-                        onChange={(e) => {
-                          const updatedChapters = [...chapters];
-                          updatedChapters[selectedLesson.chapterIndex]
-                            .lessons[selectedLesson.lessonIndex]
-                            .questions[qIndex].question = e.target.value;
-                          setChapters(updatedChapters);
-                        }}
-                        className="flex-1 p-2 border rounded"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <span className="material-icons">delete_outline</span>
-                      </button>
-                      <button 
-                        onClick={() => toggleQuestion(qIndex)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        <span className="material-icons">
-                          {collapsedQuestions.has(qIndex) ? 'expand_more' : 'expand_less'}
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {!collapsedQuestions.has(qIndex) && (
-                    <div className="p-4 space-y-3">
-                      {q.options.map((option, oIndex) => (
-                        <div key={oIndex} className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name={`question-${qIndex}`}
-                            checked={option.isCorrect}
-                            onChange={() => {
-                              const updatedChapters = [...chapters];
-                              const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
-                                .lessons[selectedLesson.lessonIndex]
-                                .questions[qIndex];
-                              
-                              currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
-                                ...opt,
-                                isCorrect: idx === oIndex
-                              }));
-                              setChapters(updatedChapters);
-                            }}
-                          />
-                          <input
-                            type="text"
-                            value={option.option}
-                            onChange={(e) => {
-                              const updatedChapters = [...chapters];
-                              updatedChapters[selectedLesson.chapterIndex]
-                                .lessons[selectedLesson.lessonIndex]
-                                .questions[qIndex].options[oIndex].option = e.target.value;
-                              setChapters(updatedChapters);
-                            }}
-                            placeholder={`Option ${oIndex + 1}`}
-                            className="flex-1 p-2 border rounded"
-                          />
-                          <button
-                            onClick={() => {
-                              const updatedChapters = [...chapters];
-                              updatedChapters[selectedLesson.chapterIndex]
-                                .lessons[selectedLesson.lessonIndex]
-                                .questions[qIndex].options.splice(oIndex, 1);
-                              setChapters(updatedChapters);
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <span className="material-icons text-sm">remove_circle_outline</span>
-                          </button>
-                        </div>
-                      ))}
-                      
-                      <button
-                        onClick={() => {
-                          const updatedChapters = [...chapters];
-                          updatedChapters[selectedLesson.chapterIndex]
-                            .lessons[selectedLesson.lessonIndex]
-                            .questions[qIndex].options.push({ option: '', isCorrect: false });
-                          setChapters(updatedChapters);
-                        }}
-                        className="mt-3 text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                      >
-                        <span className="material-icons text-sm">add_circle_outline</span>
-                        Add Option
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <button
-              onClick={() => {
-                const updatedChapters = [...chapters];
-                if (!updatedChapters[selectedLesson.chapterIndex]
-                    .lessons[selectedLesson.lessonIndex].questions) {
-                  updatedChapters[selectedLesson.chapterIndex]
-                    .lessons[selectedLesson.lessonIndex].questions = [];
-                }
-                updatedChapters[selectedLesson.chapterIndex]
-                  .lessons[selectedLesson.lessonIndex].questions.push({
-                    question: '',
-                    isOpenSource: true,
-                    options: [
-                      { option: '', isCorrect: false },
-                      { option: '', isCorrect: false }
-                    ]
-                  });
-                setChapters(updatedChapters);
-              }}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mt-4"
-            >
-              <span className="material-icons text-sm">add_circle_outline</span>
-              Add Question
-            </button>
           </div>
         );
 

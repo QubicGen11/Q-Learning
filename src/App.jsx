@@ -29,6 +29,7 @@ import AssignmentView from './Components/CoursePage Components/LearnCourse Compo
 import BasicInformation from './Components/Instructor Module/Courses/CreateCourse/Steps/BasicInformation';
 import AddMedia from './Components/Instructor Module/Courses/CreateCourse/Steps/AddMedia';
 import AboutCourse from './Components/Instructor Module/Courses/CreateCourse/Steps/AboutCourse';
+import MoreInfo from './Components/Instructor Module/Courses/CreateCourse/Steps/MoreInfo';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -118,6 +119,7 @@ function App() {
                     <Route path="media" element={<AddMedia />} />
                     <Route path="about" element={<AboutCourse />} />
                     <Route path="content" element={<CourseContent />} />
+                    <Route path="more-info" element={<MoreInfo />} />
                     <Route path="faq" element={<FAQ />} />
                     <Route path="settings" element={<CourseSettings />} />
                   </Route>
