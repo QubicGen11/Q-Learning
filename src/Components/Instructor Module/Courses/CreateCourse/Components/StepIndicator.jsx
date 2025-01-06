@@ -165,17 +165,17 @@ const StepIndicator = () => {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Main Navigation Tabs */}
       <div className="border-b">
-        <div className="flex gap-8 ml-5 px-2">
+        <div className="flex gap-8 ml-5 px-2 py-2">
           {mainTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => navigate(tab.path)}
-              className={`py-4 text-sm font-medium border-b-2 -mb-[2px]  ${
+              className={` text-md font-medium border-b-2 -mb-[2px]  ${
                 tab.id === currentTab
-                  ? ' text-[#0056B3] bg-[#F2F9FF] px-4 py-2 rounded-md'
+                  ? ' text-[#0056B3] bg-[#f2f9ff] px-4 py-1 rounded-md'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -192,7 +192,7 @@ const StepIndicator = () => {
             <React.Fragment key={step.number}>
               <div className="flex items-center">
                 <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-sm
+                  w-8 h-8 rounded-full flex items-center justify-center text-md border
                   ${currentStep === step.number 
                     ? 'bg-[#0056B3] text-white' 
                     : currentStep > step.number
@@ -251,6 +251,7 @@ const StepIndicator = () => {
             </button>
           )}
         </div>
+        
       </div>
     </div>
   );

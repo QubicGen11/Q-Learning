@@ -83,41 +83,7 @@ function BasicInfo() {
           className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
         />
       </div>
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Course Type *
-        </label>
-        <select
-          name="courseType"
-          value={basicInfo?.courseType || ''}
-          onChange={(e) => handleChange('courseType', e.target.value)}
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        >
-          <option value="">Select Course Type</option>
-          {courseTypes.map((type) => (
-            <option key={type.id} value={type.courseType}>
-              {type.courseType}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Percentage Required *
-        </label>
-        <input
-          type="number"
-          name="percentageRequired"
-          value={basicInfo?.percentageRequired || ''}
-          onChange={(e) => handleChange('percentageRequired', parseFloat(e.target.value))}
-          placeholder="e.g., 99.9"
-          min="0"
-          max="100"
-          step="0.1"
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        />
-      </div>
+   
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Tagline *
@@ -131,120 +97,186 @@ function BasicInfo() {
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Course Duration *
-        </label>
-        <input
-          type="text"
-          name="courseDuration"
-          value={basicInfo?.courseDuration || ''}
-          onChange={(e) => handleChange('courseDuration', e.target.value)}
-          placeholder="e.g., 10 hours"
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        />
-      </div>
-
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Difficulty Level *
-        </label>
-        <select
-          name="difficultyLevel"
-          value={basicInfo?.difficultyLevel || ''}
-          onChange={(e) => handleChange('difficultyLevel', e.target.value)}
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        >
-          <option value="">Select Difficulty Level</option>
-          <option value="Beginner">Beginner</option>
-          <option value="Intermediate">Intermediate</option>
-          <option value="Advanced">Advanced</option>
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="category" className="block mb-1 text-sm text-gray-600 font-semibold">
-          Category *
-        </label>
-        <div className="relative">
+      
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Course Type *
+          </label>
           <select
-            id="category"
-            value={basicInfo.category || ''}
-            onChange={(e) => handleChange('category', e.target.value)}
-            className="w-full text-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            required
+            name="courseType"
+            value={basicInfo?.courseType || ''}
+            onChange={(e) => handleChange('courseType', e.target.value)}
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.category} className='text-sm'>
-                {cat.category}
+            <option value="">Select Course Type</option>
+            {courseTypes.map((type) => (
+              <option key={type.id} value={type.courseType}>
+                {type.courseType}
               </option>
             ))}
           </select>
-          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-           
-          </div>
         </div>
-      </div>
 
-      <div className="mb-4">
-        <label htmlFor="subcategory" className="block mb-1 text-sm text-gray-600 font-semibold">
-          Subcategory *
-        </label>
-        <div className="relative">
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Percentage Required *
+          </label>
+          <input
+            type="number"
+            name="percentageRequired"
+            value={basicInfo?.percentageRequired || ''}
+            onChange={(e) => handleChange('percentageRequired', parseFloat(e.target.value))}
+            placeholder="e.g., 99.9"
+            min="0"
+            max="100"
+            step="0.1"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Course Duration *
+          </label>
+          <input
+            type="text"
+            name="courseDuration"
+            value={basicInfo?.courseDuration || ''}
+            onChange={(e) => handleChange('courseDuration', e.target.value)}
+            placeholder="e.g., 10 hours"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Difficulty Level *
+          </label>
           <select
-            id="subcategory"
-            value={basicInfo.subCategory || ''}
-            onChange={(e) => handleChange('subCategory', e.target.value)}
-            className="w-full text-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            required
-            disabled={!basicInfo.category}
+            name="difficultyLevel"
+            value={basicInfo?.difficultyLevel || ''}
+            onChange={(e) => handleChange('difficultyLevel', e.target.value)}
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           >
-            <option value="">Select a subcategory</option>
-            {subCategories.map((subCat, index) => (
-              <option key={index} value={subCat.subCategory} className='text-sm'>
-                {subCat.subCategory}
-              </option>
-            ))}
+            <option value="">Select Difficulty Level</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
           </select>
-          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-          
+        </div>
+
+        <div>
+          <label htmlFor="category" className="block mb-1 text-sm text-gray-600 font-semibold">
+            Category *
+          </label>
+          <div className="relative">
+            <select
+              id="category"
+              value={basicInfo.category || ''}
+              onChange={(e) => handleChange('category', e.target.value)}
+              className="w-full text-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              required
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.category} className='text-sm'>
+                  {cat.category}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+            </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Teaching Language *
-        </label>
-        <select
-          name="teachingLanguage"
-          value={basicInfo?.teachingLanguage || ''}
-          onChange={(e) => handleChange('teachingLanguage', e.target.value)}
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        >
-          <option value="">Select Language</option>
-          <option value="English">English</option>
-          <option value="Hindi">Hindi</option>
-          <option value="Urdu">Urdu</option>
-        </select>
-      </div>
+        <div>
+          <label htmlFor="subcategory" className="block mb-1 text-sm text-gray-600 font-semibold">
+            Subcategory *
+          </label>
+          <div className="relative">
+            <select
+              id="subcategory"
+              value={basicInfo.subCategory || ''}
+              onChange={(e) => handleChange('subCategory', e.target.value)}
+              className="w-full text-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              required
+              disabled={!basicInfo.category}
+            >
+              <option value="">Select a subcategory</option>
+              {subCategories.map((subCat, index) => (
+                <option key={index} value={subCat.subCategory} className='text-sm'>
+                  {subCat.subCategory}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+            </div>
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Hashtags
-        </label>
-        <input
-          type="text"
-          name="hashtags"
-          value={Array.isArray(basicInfo?.hashtags) 
-            ? basicInfo.hashtags.map(tag => tag.tagName).join(', ') 
-            : ''}
-          onChange={(e) => handleChange('hashtags', e.target.value)}
-          placeholder="e.g., WebDev, JavaScript, Frontend (comma separated)"
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        />
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Teaching Language *
+          </label>
+          <select
+            name="teachingLanguage"
+            value={basicInfo?.teachingLanguage || ''}
+            onChange={(e) => handleChange('teachingLanguage', e.target.value)}
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+          >
+            <option value="">Select Language</option>
+            <option value="English">English</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Urdu">Urdu</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Hashtags
+          </label>
+          <input
+            type="text"
+            name="hashtags"
+            value={Array.isArray(basicInfo?.hashtags) 
+              ? basicInfo.hashtags.map(tag => tag.tagName).join(', ') 
+              : ''}
+            onChange={(e) => handleChange('hashtags', e.target.value)}
+            placeholder="e.g., WebDev, JavaScript, Frontend (comma separated)"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Upload Transcript
+          </label>
+          <div className="flex items-center">
+            <input
+              type="file"
+              name="transcript"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={(e) => handleChange('transcript', e.target.files[0])}
+              className="hidden"
+              id="transcript-upload"
+            />
+            <input 
+              type="text"
+              value={basicInfo?.transcript?.name || ''}
+              className="w-full px-3 py-1.5 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+              placeholder="No file chosen"
+              readOnly
+            />
+            <label
+              htmlFor="transcript-upload"
+              className="px-4 py-1.5 text-sm bg-gray-100 text-gray-700 border border-l-0 rounded-r-lg cursor-pointer hover:bg-gray-200 h-9 flex items-center"
+            >
+              Browse
+            </label>
+          </div>
+        </div>
+
       </div>
 
     
