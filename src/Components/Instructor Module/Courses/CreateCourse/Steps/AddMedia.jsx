@@ -112,16 +112,14 @@ function Media() {
                 onChange={(e) => handleFileSelect(e, 'banner')}
                 accept="video/*"
               />
-              <label htmlFor="banner-upload" className="cursor-pointer">
+              <label htmlFor="banner-upload" className="cursor-pointer w-full">
                 <div className="flex flex-col items-center justify-center">
                   {uploading.banner ? (
-                    // Loading Spinner
                     <div className="flex flex-col items-center gap-2">
                       <Spinner className="h-12 w-12" />
                       <p className="text-sm text-gray-500">Uploading video...</p>
                     </div>
                   ) : (
-                    // Upload Icon and Text
                     <>
                       <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -130,9 +128,9 @@ function Media() {
                         Drag and Drop Or Browse<br />
                         MP4, MKW up to 20MB
                       </p>
-                      <button className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded">
+                      <div className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
                         Browse
-                      </button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -144,7 +142,7 @@ function Media() {
           <div className="mt-2 flex flex-wrap gap-2">
             {selectedFiles.banner && (
               <div 
-                className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer"
+                className="flex items-center gap-1 text-sm text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer"
                 onClick={() => handlePreviewClick(selectedFiles.banner, 'banner')}
               >
                 <span>{selectedFiles.banner.name}</span>
@@ -190,9 +188,9 @@ function Media() {
                         Drag and Drop Or Browse<br />
                         PNG, JPG up to 20MB
                       </p>
-                      <button className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded">
+                      <div className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded">
                         Browse
-                      </button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -204,7 +202,7 @@ function Media() {
           <div className="mt-2 flex flex-wrap gap-2">
             {selectedFiles.course && (
               <div 
-                className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer"
+                className="flex items-center gap-1 text-sm text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer"
                 onClick={() => handlePreviewClick(selectedFiles.course, 'course')}
               >
                 <span>{selectedFiles.course.name}</span>
@@ -250,9 +248,9 @@ function Media() {
                         Drag and Drop Or Browse<br />
                         PNG, JPG up to 20MB
                       </p>
-                      <button className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded">
+                      <div className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded">
                         Browse
-                      </button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -264,7 +262,7 @@ function Media() {
           <div className="mt-2 flex flex-wrap gap-2">
             {selectedFiles.category && (
               <div 
-                className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer"
+                className="flex items-center gap-1 text-sm text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer"
                 onClick={() => handlePreviewClick(selectedFiles.category, 'category')}
               >
                 <span>{selectedFiles.category.name}</span>

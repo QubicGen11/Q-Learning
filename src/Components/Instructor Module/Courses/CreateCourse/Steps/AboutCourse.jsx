@@ -169,56 +169,86 @@ function AboutCourse() {
       {/* Prerequisites */}
       <div className="mb-6">
         <label className="block text-sm text-gray-600 mb-2">
-          Prerequisites * (Press Enter or comma to add)
+          Prerequisites * (Press Enter for new line)
         </label>
         <div>
-          <input
-            type="text"
-            onKeyDown={(e) => handleKeyDown(e, 'coursePreRequisites')}
+          <textarea
+            value={about.coursePreRequisites?.map(prereq => `• ${prereq.preRequisiteRequired}`).join('\n') || ''}
+            onChange={(e) => {
+              const prerequisites = e.target.value
+                .split('\n')
+                .map(item => item.replace('• ', ''))
+                .filter(Boolean)
+                .map(item => ({
+                  preRequisiteRequired: item,
+                  preRequisiteLevel: 'Beginner'
+                }));
+              updateCourseData('about', {
+                ...about,
+                coursePreRequisites: prerequisites
+              });
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const target = e.target;
+                const value = target.value;
+                const cursorPos = target.selectionStart;
+                
+                const newValue = value.slice(0, cursorPos) + '\n• ' + value.slice(cursorPos);
+                target.value = newValue;
+                
+                const event = new Event('input', { bubbles: true });
+                target.dispatchEvent(event);
+                
+                target.selectionStart = target.selectionEnd = cursorPos + 3;
+              }
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            placeholder="Type and press Enter or comma to add prerequisite"
+            rows={4}
+            placeholder="Press Enter for new line"
           />
-          <div className="mt-2 flex flex-wrap gap-2">
-            {about.coursePreRequisites?.map((prereq, index) => (
-              <div key={index} className="bg-blue-100 px-3 py-1 rounded-full flex items-center">
-                <span>{prereq.preRequisiteRequired}</span>
-                <button
-                  onClick={() => handleRemoveItem('coursePreRequisites', index)}
-                  className="ml-2 text-red-500 hover:text-red-700"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
       {/* Who can enroll for this course */}
       <div className="mb-6">
         <label className="block text-sm text-gray-600 mb-2">
-          Who can enrol for this course * (Press Enter or comma to add)
+          Who can enrol for this course * (Press Enter for new line)
         </label>
         <div>
-          <input
-            type="text"
-            onKeyDown={(e) => handleKeyDown(e, 'courseAudience')}
+          <textarea
+            value={about.courseAudience?.map(item => `• ${item}`).join('\n') || ''}
+            onChange={(e) => {
+              const audiences = e.target.value
+                .split('\n')
+                .map(item => item.replace('• ', ''))
+                .filter(Boolean);
+              updateCourseData('about', {
+                ...about,
+                courseAudience: audiences
+              });
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const target = e.target;
+                const value = target.value;
+                const cursorPos = target.selectionStart;
+                
+                const newValue = value.slice(0, cursorPos) + '\n• ' + value.slice(cursorPos);
+                target.value = newValue;
+                
+                const event = new Event('input', { bubbles: true });
+                target.dispatchEvent(event);
+                
+                target.selectionStart = target.selectionEnd = cursorPos + 3;
+              }
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            placeholder="Type and press Enter or comma to add audience"
+            rows={4}
+            placeholder="Press Enter for new line"
           />
-          <div className="mt-2 flex flex-wrap gap-2">
-            {about.courseAudience?.map((audience, index) => (
-              <div key={index} className="bg-blue-100 px-3 py-1 rounded-full flex items-center">
-                <span>{audience}</span>
-                <button
-                  onClick={() => handleRemoveItem('courseAudience', index)}
-                  className="ml-2 text-red-500 hover:text-red-700"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -252,20 +282,7 @@ function AboutCourse() {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between mt-8">
-        <button
-          onClick={() => setStep(currentStep - 1)}
-          className="text-blue-600 hover:text-blue-700 flex items-center"
-        >
-          <span className="mr-2">←</span> Previous
-        </button>
-        <button
-          onClick={() => setStep(currentStep + 1)}
-          className="text-blue-600 hover:text-blue-700 flex items-center"
-        >
-          Next Course Content <span className="ml-2">→</span>
-        </button>
-      </div>
+   
     </div>
   );
 }
