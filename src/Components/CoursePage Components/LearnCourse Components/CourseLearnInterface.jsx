@@ -4,7 +4,7 @@ import useCourseLearnStore from '../../../stores/courseLearnStore';
 import CourseTracker from './CourseTracker';
 import ChaptersSidebar from './ChaptersSidebar';
 // import LessonContent from './LessonConten';
-import LessonMaterials from './LessonMaterials';
+// import LessonMaterials from './LessonMaterials';
 import SuperLoader from '../../Common/SuperLoader';
 import LessonContent from './LessonConten';
 
