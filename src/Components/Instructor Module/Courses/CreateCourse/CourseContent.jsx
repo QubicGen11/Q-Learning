@@ -980,86 +980,123 @@ function CourseContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      
       <div className="flex gap-6">
         {/* Left Sidebar - Chapters and Lessons */}
-        <div className="w-1/3 bg-white rounded-lg p-4">
-          <h2 className="font-medium mb-4">Course Content</h2>
+        <div className="w-1/3 bg-white rounded-lg p-4  h-[80vh] overflow-y-auto">
+          <h2 className="font-medium mb-4">Curriculum</h2>
           <button 
             onClick={handleAddChapter}
-            className="flex items-center gap-2 text-blue-600 mb-4"
+            className="flex items-center gap-2 text-[#0056B3] bg-[#f2f9ff] mb-4 w-full justify-center p-2"
           >
-            <span className="material-icons text-sm">add_circle_outline</span>
+            <span className="material-icons text-sm">add</span>
             Add Chapter
           </button>
 
-          {/* Only render chapters if they exist */}
+          {/* Chapters List */}
           {chapters.length > 0 && chapters.map((chapter, chapterIndex) => (
             <div 
               key={chapterIndex} 
-              className={`mb-4 border rounded-lg p-4 ${selectedChapter === chapterIndex ? 'border-blue-500' : ''}`}
+              className="mb-3 shadow-sm"
             >
-              <input
-                type="text"
-                value={chapter.chapterName}
-                onChange={(e) => {
-                  const updatedChapters = [...chapters];
-                  updatedChapters[chapterIndex].chapterName = e.target.value;
-                  setChapters(updatedChapters);
-                }}
-                className="w-full mb-2 p-2 border rounded"
-              />
-
-              {/* Lessons List */}
-              <div className="space-y-2">
-                {chapter.lessons.map((lesson, lessonIndex) => (
-                  <div 
-                    key={lessonIndex} 
-                    className={`ml-4 p-2 border rounded hover:bg-gray-50
-                      ${selectedLesson?.chapterIndex === chapterIndex && 
-                        selectedLesson?.lessonIndex === lessonIndex ? 'bg-blue-50' : ''}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div 
-                        className="flex-1 cursor-pointer"
-                        onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
-                      >
-                        <span>{lesson.lessonTitle}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={lesson.lessonType}
-                          onChange={(e) => handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-1 border rounded text-sm"
-                        >
-                          <option value="Video">Video</option>
-                          <option value="PDF">PDF</option>
-                          <option value="Quiz">Quiz</option>
-                        </select>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveLesson(chapterIndex, lessonIndex);
-                          }}
-                          className="text-red-500 hover:text-red-700 p-1"
-                          title="Delete lesson"
-                        >
-                          <span className="material-icons text-sm">delete_outline</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              {/* Chapter Header */}
+              <div 
+                className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
+                  selectedChapter === chapterIndex ? 'bg-gray-50' : ''
+                }`}
+              >
+                <span className="material-icons text-gray-400 text-sm">drag_indicator</span>
+                <span 
+                  className="text-sm text-gray-700 flex-1"
+                  onClick={() => {
+                    setSelectedChapter(selectedChapter === chapterIndex ? null : chapterIndex);
+                  }}
+                >
+                  {chapter.chapterName || `Chapter ${chapterIndex + 1}`}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const updatedChapters = [...chapters];
+                    updatedChapters.splice(chapterIndex, 1);
+                    setChapters(updatedChapters);
+                    if(selectedChapter === chapterIndex) {
+                      setSelectedChapter(null);
+                    }
+                  }}
+                  className="text-red-500 hover:text-red-700 p-1"
+                  title="Delete chapter"
+                >
+                  <span className="material-icons text-sm">delete_outline</span>
+                </button>
+                <span 
+                  className="material-icons text-gray-400 text-sm"
+                  onClick={() => {
+                    setSelectedChapter(selectedChapter === chapterIndex ? null : chapterIndex);
+                  }}
+                >
+                  {selectedChapter === chapterIndex ? 'expand_less' : 'expand_more'}
+                </span>
               </div>
 
-              {/* Add Lesson Button */}
-              <button
-                onClick={() => handleAddLesson(chapterIndex)}
-                className="mt-2 ml-4 text-blue-600 text-sm flex items-center gap-1"
-              >
-                <span className="material-icons text-sm">add_circle_outline</span>
-                Add Lesson
-              </button>
+              {/* Lessons List - Only show if chapter is selected */}
+              {selectedChapter === chapterIndex && (
+                <div className=" mt-2 space-y-2 p-2 bg-[#f3f4f6]">
+                  {chapter.lessons.map((lesson, lessonIndex) => (
+                    <div 
+                      key={lessonIndex}
+                      onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
+                      className={`flex items-center gap-2 p-2 rounded cursor-pointer bg-white ${
+                        selectedLesson?.chapterIndex === chapterIndex && 
+                        selectedLesson?.lessonIndex === lessonIndex ? 'bg-blue-50' : ''
+                      }`}
+                    >
+                      {/* Lesson Icon based on type */}
+                      <span className="material-icons text-gray-400 text-sm">
+                        {lesson.lessonType === 'Video' ? 'play_circle' : 
+                         lesson.lessonType === 'Quiz' ? 'quiz' : 'article'}
+                      </span>
+                      
+                      <span className="text-sm flex-1">{lesson.lessonTitle || `Lesson ${lessonIndex + 1}`}</span>
+                      
+                      <select
+                        value={lesson.lessonType}
+                        onChange={(e) => {
+                          e.stopPropagation(); // Prevent lesson selection when changing type
+                          handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value);
+                        }}
+                        onClick={(e) => e.stopPropagation()} // Prevent lesson selection when clicking dropdown
+                        className="text-sm border rounded px-2 py-1 bg-transparent"
+                      >
+                        <option value="Video">Video</option>
+                        <option value="PDF">PDF</option>
+                        <option value="Quiz">Quiz</option>
+                      </select>
+
+                      {/* Add delete button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveLesson(chapterIndex, lessonIndex);
+                        }}
+                        className="text-red-500 hover:text-red-700 p-1"
+                        title="Delete lesson"
+                      >
+                        <span className="material-icons text-sm">delete_outline</span>
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* Add Lesson Button */}
+                  <button
+                    onClick={() => handleAddLesson(chapterIndex)}
+                    className="flex items-center gap-1 text-blue-600 text-sm w-full justify-center mt-2"
+                  >
+                    <span className="material-icons text-sm">add</span>
+                    Add Lesson
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
