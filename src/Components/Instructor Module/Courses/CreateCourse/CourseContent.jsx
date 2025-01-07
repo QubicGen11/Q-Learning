@@ -16,11 +16,11 @@ function CourseContent() {
   const [chapters, setChapters] = useState([]);
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState();
-  const [selectedMaterials, setSelectedMaterials] = useState(null);
+  // const [selectedMaterials, setSelectedMaterials] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewContent, setPreviewContent] = useState({ type: '', url: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const [questionsCollapsed, setQuestionsCollapsed] = useState(false);
+  // const [questionsCollapsed, setQuestionsCollapsed] = useState(false);
   const [collapsedQuestions, setCollapsedQuestions] = useState(new Set());
 
   // Add new chapter
@@ -933,6 +933,52 @@ function CourseContent() {
     setCollapsedQuestions(newCollapsed);
   };
 
+  const handleRemoveContent = (content) => {
+    if (!selectedLesson) {
+      console.error('No lesson selected');
+      return;
+    }
+
+    console.log('Removing content:', content);
+    console.log('Selected Lesson:', selectedLesson);
+
+    try {
+      const updatedChapters = courseData.chapters.map((chapter, chapterIndex) => {
+        if (chapterIndex === selectedLesson.chapterIndex) {
+          const updatedLessons = chapter.lessons.map((lesson, lessonIndex) => {
+            if (lessonIndex === selectedLesson.lessonIndex) {
+              // Remove either video or material based on content type
+              return {
+                ...lesson,
+                [content.type === 'video' ? 'video' : 'material']: null
+              };
+            }
+            return lesson;
+          });
+          return { ...chapter, lessons: updatedLessons };
+        }
+        return chapter;
+      });
+
+      console.log('Updated chapters:', updatedChapters);
+      updateCourseData('chapters', updatedChapters);
+
+      // Clear file input if exists
+      const inputId = `${content.type}-upload-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`;
+      const fileInput = document.getElementById(inputId);
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
+      // Close preview
+      setPreviewOpen(false);
+      setPreviewContent(null);
+
+    } catch (error) {
+      console.error('Error removing content:', error);
+    }
+  };
+
   useEffect(() => {
     // Add data-title attributes to toolbar buttons after component mounts
     const toolbar = document.querySelector('.ql-toolbar');
@@ -1118,35 +1164,56 @@ function CourseContent() {
 
       {previewOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 max-w-4xl w-full max-h-[90vh] overflow-auto relative">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto relative">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">
                 {previewContent.type === 'video' ? 'Video Preview' : 'Material Preview'}
               </h3>
               <button 
                 onClick={() => setPreviewOpen(false)}
-                className="absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-md text-gray-600 hover:text-gray-800"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
               >
-                ×
+                <span className="material-icons">close</span>
               </button>
             </div>
             
-            {previewContent.type === 'video' ? (
-              <div className="relative">
-                <video 
-                  src={previewContent.url} 
-                  controls 
-                  className="w-full"
-                  autoPlay
+            <div className="mb-6">
+              {previewContent.type === 'video' ? (
+                <div className="relative">
+                  <video 
+                    src={previewContent.url} 
+                    controls 
+                    className="w-full rounded-lg"
+                    autoPlay
+                  />
+                </div>
+              ) : (
+                <iframe
+                  src={previewContent.url}
+                  className="w-full h-[70vh] rounded-lg"
+                  title="Material Preview"
                 />
-              </div>
-            ) : (
-              <iframe
-                src={previewContent.url}
-                className="w-full h-[80vh]"
-                title="Material Preview"
-              />
-            )}
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between gap-3 mt-4 border-t pt-4">
+              <button
+                onClick={() => {
+                  handleRemoveFile(previewContent.type === 'video' ? 'video' : 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex);
+                  setPreviewOpen(false);
+                }}
+                className="px-4 py-2 text-[#0056B3] hover:bg-gray-50 rounded border border-[#0056B3]"
+              >
+                Remove
+              </button>
+              <button
+                onClick={() => setPreviewOpen(false)}
+                className="px-4 py-2 bg-[#0056B3] text-white hover:bg-blue-700 rounded"
+              >
+                Keep
+              </button>
+            </div>
           </div>
         </div>
       )}
