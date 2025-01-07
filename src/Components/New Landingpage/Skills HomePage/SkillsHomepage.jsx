@@ -27,7 +27,7 @@ const SkillsHomepage = ({ categories }) => {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-20 py-8">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+      <h2 className="text-xl font-semibold text-[#4B5563] mb-6">
         SKILLS FOR YOUR PRESENT (AND YOUR FUTURE)
       </h2>
       
@@ -39,8 +39,8 @@ const SkillsHomepage = ({ categories }) => {
             onClick={() => setSelectedCategory(category)}
             className={`whitespace-nowrap px-4 py-2 text-sm font-medium transition-all duration-300 ${
               category === selectedCategory 
-                ? "text-blue-600 border-b-2 border-blue-600" 
-                : "text-gray-600 hover:text-blue-600 hover:border-b-2 hover:border-blue-600"
+                ? "text-[#4B5563] border-b-2 border-[#0056B3] bg-[#f2f9ff]" 
+                : "text-[#0056B3] hover:text-[#0056B3] hover:border-b-2 hover:border-[#0056B3]"
             }`}
           >
             {category}
@@ -53,9 +53,14 @@ const SkillsHomepage = ({ categories }) => {
         <h3 className="text-xl text-gray-700 font-medium">
           {selectedCategory} Courses
         </h3>
-        <button className="text-blue-600 hover:text-blue-700 bg-white px-4 py-2 rounded-md border border-blue-600 transition-all duration-300 hover:bg-blue-50">
-          View all {selectedCategory} Courses
-        </button>
+        <div className="flex gap-4">
+          <button className="text-[#0056B3] hover:text-[#0056B3] font-medium bg-white px-4 py-2 rounded-md border border-[#0056B3] transition-all duration-300 hover:bg-[#F3F4F6]">
+            {selectedCategory} Skill Assessments
+          </button>
+          <button className="text-[#0056B3] hover:text-[#0056B3] font-medium bg-white px-4 py-2 rounded-md border border-[#0056B3] transition-all duration-300 hover:bg-[#F3F4F6]">
+            View all {selectedCategory} Courses
+          </button>
+        </div>
       </div>
 
       {/* Subcategory Cards Grid */}

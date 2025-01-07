@@ -71,7 +71,7 @@ function CreateCourse() {
       {/* Header */}
       <div className="border-b border-gray-200">
         <div className="px-6 ">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between"> 
      
           
           </div>

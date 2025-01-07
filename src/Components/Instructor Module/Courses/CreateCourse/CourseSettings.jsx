@@ -21,10 +21,26 @@ function CourseSettings() {
   }, []);
 
   const handleSettingChange = (field, value) => {
+    let processedValue = value;
+    
+    // Handle fields that need to be strings
+    if (field === 'accessDuration' || field === 'returnPeriod') {
+      processedValue = String(value);
+    }
+    // Handle float fields
+    else if (field === 'offeredPrice') {
+      processedValue = parseFloat(value) || 0;
+    }
+    // Handle other numeric fields
+    else if (['maxStudents', 'price', 'discount'].includes(field)) {
+      processedValue = parseInt(value, 10) || 0;
+    }
+    
     const updatedSettings = [{
-      ...courseData.courseSettings?.[0] || {},
-      [field]: value
+      ...courseData.courseSettings?.[0],
+      [field]: processedValue
     }];
+
     updateCourseData('courseSettings', updatedSettings);
   };
 
@@ -265,13 +281,20 @@ function CourseSettings() {
                   <h3 className="text-sm font-medium mb-3">Enrollment Settings</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm mb-1 text-gray-600">Max Students *</label>
+                      <label className="block text-sm mb-1 text-gray-600">Maximum Students</label>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
                         className="w-full px-3 py-1.5 border rounded text-sm h-9"
                         value={settings.maxStudents || ''}
                         onChange={(e) => handleSettingChange('maxStudents', e.target.value)}
-                        placeholder="--"
+                        onBlur={(e) => {
+                          // Ensure integer on blur
+                          const value = parseInt(e.target.value, 10) || 0;
+                          handleSettingChange('maxStudents', value);
+                        }}
+                        placeholder="Enter maximum number of students"
                       />
                     </div>
                     <div>
@@ -311,8 +334,8 @@ function CourseSettings() {
                         <input 
                           type="checkbox" 
                           className="sr-only peer"
-                          checked={settings.notifyUpdates || false}
-                          onChange={(e) => handleSettingChange('notifyUpdates', e.target.checked)}
+                          checked={settings.notifyStudentsOnUpdate || false}
+                          onChange={(e) => handleSettingChange('notifyStudentsOnUpdate', e.target.checked)}
                         />
                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                       </label>
@@ -323,8 +346,8 @@ function CourseSettings() {
                         <input 
                           type="checkbox" 
                           className="sr-only peer"
-                          checked={settings.notifyAssignments || false}
-                          onChange={(e) => handleSettingChange('notifyAssignments', e.target.checked)}
+                          checked={settings.notifyStudentsOnAssignment || false}
+                          onChange={(e) => handleSettingChange('notifyStudentsOnAssignment', e.target.checked)}
                         />
                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                       </label>
@@ -378,9 +401,10 @@ function CourseSettings() {
                         onChange={(e) => handleSettingChange('promotionType', e.target.value)}
                       >
                         <option value="">Select</option>
-                        <option value="early_bird">Early Bird</option>
-                        <option value="seasonal">Seasonal</option>
-                        <option value="special">Special</option>
+                        <option value="nopromotion">No Promotion</option>
+                        <option value="featured">Featured</option>
+                        <option value="learnerchoice">Learner Choice</option>
+                        <option value="qubinestsuggestionsforyou">Qubinest Suggestions for you</option>
                       </select>
                     </div>
 
@@ -400,17 +424,30 @@ function CourseSettings() {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm mb-2 text-gray-600">Discount *</label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            className="w-full pr-7 pl-3 py-1.5 border rounded text-sm h-9"
-                            value={settings.discount || ''}
-                            onChange={(e) => handleSettingChange('discount', e.target.value)}
-                            placeholder="Enter discount"
-                          />
-                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
-                        </div>
+                        <label className="block text-sm mb-1 text-gray-600">Offered Price ($)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="w-full px-3 py-1.5 border rounded text-sm h-9"
+                          value={settings.offeredPrice || ''}
+                          onChange={(e) => handleSettingChange('offeredPrice', e.target.value)}
+                          placeholder="Enter offered price"
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="block text-sm mb-1 text-gray-600">Discount (%)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          className="w-full px-3 py-1.5 border rounded text-sm h-9"
+                          value={settings.discount || ''}
+                          onChange={(e) => handleSettingChange('discount', e.target.value)}
+                          placeholder="Enter discount percentage"
+                        />
                       </div>
                     </div>
 

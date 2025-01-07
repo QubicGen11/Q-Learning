@@ -16,8 +16,7 @@ const CourseBanner = ({
   updatedAt,
   teachingLanguage,
   courseRating,
-  courseImage,
-
+  categoryImage,
   rating
 }) => {
   const [isCompact, setIsCompact] = useState(false);
@@ -65,7 +64,7 @@ const CourseBanner = ({
         `}
         style={{
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          backgroundImage: isCompact ? ` url(${courseImage})` : 'none',
+          backgroundImage: isCompact ? `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${categoryImage})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -169,7 +168,7 @@ const CourseBanner = ({
               ${isCompact ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[20px] pointer-events-none absolute'}
             `}
             style={{
-              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${courseImage})`,
+              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${categoryImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
