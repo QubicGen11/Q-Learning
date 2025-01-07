@@ -70,29 +70,10 @@ function CreateCourse() {
     <div className="bg-white rounded-lg shadow">
       {/* Header */}
       <div className="border-b border-gray-200">
-        <div className="px-6 py-4">
+        <div className="px-6 ">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold">Create New Course</h1>
-              <p className="text-sm text-gray-500">Step {currentStep} of {steps.length}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <button
-                  onClick={() => {/* Save as draft logic */}}
-                  className="px-4 py-2 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
-                >
-                 Preview
-                  <span className="material-icons text-sm">expand_more</span>
-                </button>
-              </div>
-              <button
-                onClick={() => {/* Submit for review logic */}}
-                className="px-4 py-2 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
-              >
-                Submit for review
-              </button>
-            </div>
+     
+          
           </div>
         </div>
         <StepIndicator />

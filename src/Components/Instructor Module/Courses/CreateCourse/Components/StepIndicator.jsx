@@ -183,7 +183,7 @@ const StepIndicator = () => {
   return (
     <div className="space-y-2">
       {/* Main Navigation Tabs */}
-      <div className="border-b">
+      <div className="border-b flex justify-between">
         <div className="flex gap-8 ml-5 px-2 py-2">
           {mainTabs.map((tab) => (
             <button
@@ -199,6 +199,23 @@ const StepIndicator = () => {
             </button>
           ))}
         </div>
+        <div className="flex items-center gap-4">
+              <div className="relative">
+                <button
+                  onClick={() => {/* Save as draft logic */}}
+                  className="px-4 py-2 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
+                >
+                 Preview
+                  <span className="material-icons text-sm">expand_more</span>
+                </button>
+              </div>
+              <button
+                onClick={() => {/* Submit for review logic */}}
+                className="px-4 py-2 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
+              >
+                Submit for review
+              </button>
+            </div>
       </div>
 
       {/* Step Indicator with Navigation */}
