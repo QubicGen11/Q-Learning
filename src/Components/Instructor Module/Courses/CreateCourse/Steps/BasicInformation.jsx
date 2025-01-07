@@ -101,7 +101,7 @@ function BasicInfo() {
       <div className="grid grid-cols-2 gap-6">
        
 
-        <div>
+        {/* <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
             Percentage Required *
           </label>
@@ -116,7 +116,7 @@ function BasicInfo() {
             step="0.1"
             className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           />
-        </div>
+        </div> */}
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -215,7 +215,7 @@ function BasicInfo() {
           </select>
         </div>
 
-        <div>
+        {/* <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
             Hashtags
           </label>
@@ -229,13 +229,13 @@ function BasicInfo() {
             placeholder="e.g., WebDev, JavaScript, Frontend (comma separated)"
             className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           />
-        </div>
+        </div> */}
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
             Upload Transcript
           </label>
-          <div className="flex items-center">
+          <div className="relative w-full">
             <input
               type="file"
               name="transcript"
@@ -244,19 +244,21 @@ function BasicInfo() {
               className="hidden"
               id="transcript-upload"
             />
-            <input 
-              type="text"
-              value={basicInfo?.transcript?.name || ''}
-              className="w-full px-3 py-1.5 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-              placeholder="No file chosen"
-              readOnly
-            />
-            <label
-              htmlFor="transcript-upload"
-              className="px-4 py-1.5 text-sm bg-gray-100 text-gray-700 border border-l-0 rounded-r-lg cursor-pointer hover:bg-gray-200 h-9 flex items-center"
-            >
-              Browse
-            </label>
+            <div className="relative">
+              <input 
+                type="text"
+                value={basicInfo?.transcript?.name || ''}
+                className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9 pr-20"
+                placeholder="No file chosen"
+                readOnly
+              />
+              <label
+                htmlFor="transcript-upload"
+                className="absolute right-1 top-1/2 -translate-y-1/2 px-4 py-1 text-sm bg-[#6b7280] text-white rounded cursor-pointer hover:bg-gray-600"
+              >
+                Browse
+              </label>
+            </div>
           </div>
         </div>
 

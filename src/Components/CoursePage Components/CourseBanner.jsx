@@ -16,6 +16,8 @@ const CourseBanner = ({
   updatedAt,
   teachingLanguage,
   courseRating,
+  courseImage,
+
   rating
 }) => {
   const [isCompact, setIsCompact] = useState(false);
@@ -58,24 +60,31 @@ const CourseBanner = ({
       
       <div 
         ref={bannerRef}
-        className={`w-full bg-black transition-all duration-300 ease-in-out transform
+        className={`w-full transition-all duration-300 ease-in-out transform
           ${isCompact ? 'fixed top-0 left-0 right-0 z-50 h-20' : 'relative h-[400px]'}
         `}
         style={{
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          backgroundImage: isCompact ? ` url(${courseImage})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
       >
-        <video 
-          className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-        >
-          <source src={courseBanner} type="video/mp4" />
-        </video>
-        
-        <div className="absolute inset-0 bg-black/75 z-10" />
+        {!isCompact && (
+          <>
+            <video 
+              className="absolute inset-0 w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+            >
+              <source src={courseBanner} type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-black/75 z-10" />
+          </>
+        )}
 
         <div className="relative z-20 max-w-7xl mx-auto px-4 h-full">
           <div 
@@ -156,9 +165,15 @@ const CourseBanner = ({
           </div>
 
           <div 
-            className={`h-full transition-all duration-300 ease-in-out transform
+            className={`h-full transition-all duration-300 ease-in-out transform relative
               ${isCompact ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[20px] pointer-events-none absolute'}
             `}
+            style={{
+              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${courseImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
           >
             <div className="h-full flex items-center justify-between">
               <div className="flex-1">

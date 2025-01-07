@@ -82,7 +82,7 @@ function CreateCourse() {
                   onClick={() => {/* Save as draft logic */}}
                   className="px-4 py-2 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
                 >
-                  Save as Draft
+                 Preview
                   <span className="material-icons text-sm">expand_more</span>
                 </button>
               </div>

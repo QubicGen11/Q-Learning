@@ -50,6 +50,8 @@ const Coursepagemain = () => {
   description={courseData.courseDescription}
   thumbnail={courseData.courseImage}
   courseBanner={courseData.courseBanner}
+  categoryImage={courseData.categoryImage}
+  courseImage={courseData.courseImage}
   category={courseData.category}
   subCategory={courseData.subCategory}
   updatedAt={courseData.updatedAt}
