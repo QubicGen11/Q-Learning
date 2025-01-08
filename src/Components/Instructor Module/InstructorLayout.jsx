@@ -63,7 +63,7 @@ const InstructorLayout = () => {
         <div className="sticky top-0 z-10 ">
           <Navbar />
         </div>
-        <main className="p-6 bg-[#f2f9ff]">
+        <main className="p-[2px] bg-[#f2f9ff] ">
           <Outlet />
         </main>
       </div>
