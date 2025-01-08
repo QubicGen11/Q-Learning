@@ -82,12 +82,13 @@ const StepIndicator = () => {
         steps: courseInformationSteps
       };
     } else if (path.includes('/content') || path.includes('/more-info') || path.includes('/faq')) {
+      const currentStepNumber = path.includes('/content') ? 1 
+        : path.includes('/more-info') ? 2 
+        : path.includes('/faq') ? 3 : 1;
       return {
         currentTab: 'content',
         steps: courseContentSteps,
-        currentStepNumber: path.includes('/content') ? 1 
-          : path.includes('/more-info') ? 2 
-          : path.includes('/faq') ? 3 : 1
+        currentStepNumber
       };
     } else if (path.includes('/settings')) {
       return {
@@ -285,15 +286,20 @@ const StepIndicator = () => {
                 <div className="flex items-center w-4/5">
                   <div className={`
                     relative group z-[999]
-                    ${currentStep === step.number ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' : ''}
+                    ${(currentTab === 'info' && currentStep === step.number) || 
+                      (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
+                      ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' 
+                      : ''}
                   `}>
                     <div className={`
                       w-8 h-8 rounded-full flex items-center justify-center text-md border
-                      ${currentStep === step.number 
+                      ${(currentTab === 'info' && currentStep === step.number) || 
+                        (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
                         ? 'bg-[#0056B3] text-white' 
-                        : currentStep > step.number
-                          ? 'bg-[#0056B3] text-white'
-                          : 'border-2 border-gray-300 text-gray-400'
+                        : ((currentTab === 'info' && currentStep > step.number) || 
+                           (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber > step.number))
+                            ? 'bg-[#0056B3] text-white'
+                            : 'border-2 border-gray-300 text-gray-400'
                       }
                     `}>
                       {(currentStep > step.number && currentTab !== 'content') || 
@@ -328,7 +334,10 @@ const StepIndicator = () => {
                 </div>
                 <div className={`
                   h-1 w-full relative top-5 right-4
-                  ${currentStep === step.number ? 'bg-[#0056B3]' : 'bg-transparent'}
+                  ${(currentTab === 'info' && currentStep === step.number) || 
+                    (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
+                    ? 'bg-[#0056B3]' 
+                    : 'bg-transparent'}
                 `} />
               </div>
               {index < steps.length - 1 && (
