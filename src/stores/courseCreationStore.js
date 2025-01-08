@@ -51,7 +51,12 @@ const useCourseCreationStore = create((set, get) => ({
         notifications: { notifyUpdates: false, notifyAssignments: false }
       }
     },
-    courseSettings: []
+    courseSettings: [{
+      pricingType: '',
+      promotionType: '',
+      publicAccess: false,
+      enablePreview: false,
+    }]
   },
 
   categories: [],
@@ -207,7 +212,12 @@ const useCourseCreationStore = create((set, get) => ({
             notifications: { notifyUpdates: false, notifyAssignments: false }
           }
         },
-        courseSettings: []
+        courseSettings: [{
+          pricingType: '',
+          promotionType: '',
+          publicAccess: false,
+          enablePreview: false,
+        }]
       }
     });
   },

@@ -9,6 +9,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './Coursecontent.css'
 import { BsQuestionOctagon } from "react-icons/bs";
+import { LiaUploadSolid } from "react-icons/lia";
 
 function CourseContent() {
   const navigate = useNavigate();
@@ -90,30 +91,7 @@ function CourseContent() {
   };
 
   // Save course content
-  const handleSave = async () => {
-    try {
-      const response = await fetch('http://localhost:8089/qlms/createCourse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Cookies.get('accessToken')}`
-        },
-        body: JSON.stringify({
-          courseChapters: chapters
-        })
-      });
 
-      if (response.ok) {
-        toast.success('Course content saved successfully');
-        navigate('/instructor/courses');
-      } else {
-        throw new Error('Failed to save course');
-      }
-    } catch (error) {
-      toast.error('Failed to save course content');
-      console.error(error);
-    }
-  };
 
   // Handle file upload to S3
   const handleFileUpload = async (e, type, chapterIndex, lessonIndex) => {
@@ -180,12 +158,22 @@ function CourseContent() {
       case 'video':
         return (
           <div className="p-4">
-            <h3>Video Content</h3>
+            <h3>Lessons</h3>
             <div className="space-y-4">
               <div>
                 <label className="block mb-2">Lesson *</label>
                 <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
-                  <div className="text-center">
+                  <div className="text-center relative">
+                    <div className="absolute top-0 right-0 flex items-center px-4 py-2 rounded-md bg-[#6B7280] hover:bg-[#4B5563] gap-2">
+                      <label 
+                        htmlFor={`video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                        className=" text-white rounded  cursor-pointer"
+                      >
+                        Browse
+                      </label>
+                      <LiaUploadSolid color='white' size={22} fontWeight={900} />
+                    </div>
+
                     <input
                       type="file"
                       id={`video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
@@ -205,16 +193,14 @@ function CourseContent() {
                           Drag and Drop Or Browse<br />
                           MP4, MKW... up to _MB
                         </p>
-                        <div className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
-                          Browse
-                        </div>
+                       
                       </div>
                     </label>
                   </div>
                   {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') && (
                     <div className="mt-2 text-sm text-gray-600 text-center flex items-center justify-center gap-2">
                       <p 
-                        className="cursor-pointer hover:text-blue-600"
+                        className="cursor-pointer hover:text-[#0056B3]"
                         onClick={() => handlePreviewClick('video', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonVideo)}
                       >
                         {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video').name}
@@ -231,58 +217,66 @@ function CourseContent() {
               </div>
 
               <div>
-                <label className="block mb-2">Materials *</label>
-                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
-                  <div className="text-center">
-                    <input
-                      type="file"
-                      id={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                      className="hidden"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => handleFileUpload(e, 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                    />
-                    <label 
-                      htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                      className="cursor-pointer"
-                    >
-                      <div className="flex flex-col items-center justify-center">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                          <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <p className="mt-1 text-sm text-gray-500">
-                          Drag and Drop Or Browse<br />
-                          MP4, MKW... up to _MB
-                        </p>
-                        <div className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
-                          Browse
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                  {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
-                    <div className="mt-2 text-sm text-gray-600 text-center flex items-center justify-center gap-2">
-                      <p 
-                        className="cursor-pointer hover:text-blue-600"
-                        onClick={() => handlePreviewClick('materials', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonMaterials)}
-                      >
-                        {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
-                      </p>
-                      <button
-                        onClick={() => handleRemoveFile('materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+  <label className="block mb-2">Materials *</label>
+  <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+    <div className="text-center relative">
+      {/* Add Browse button to top right */}
+      <div className="absolute top-0 right-0 flex items-center px-4 py-2 rounded-md bg-[#6B7280] hover:bg-[#4B5563] gap-2">
+        <label 
+          htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+          className=" text-white rounded  cursor-pointer"
+        >
+          Browse
+        </label>
+        <LiaUploadSolid color='white' size={22} fontWeight={900} />
+      </div>
+
+      <input
+        type="file"
+        id={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+        className="hidden"
+        accept=".pdf,.doc,.docx"
+        onChange={(e) => handleFileUpload(e, 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+      />
+      <label 
+        htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+        className="cursor-pointer"
+      >
+        <div className="flex flex-col items-center justify-center">
+          <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <p className="mt-1 text-sm text-gray-500">
+            Drag and Drop Or Browse<br />
+            PDF, DOC, DOCX... up to 20 MB
+          </p>
+        </div>
+      </label>
+    </div>
+    {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
+      <div className="mt-2 text-sm text-gray-600 text-center flex items-center justify-center gap-2">
+        <p 
+          className="cursor-pointer hover:text-[#0056B3]"
+          onClick={() => handlePreviewClick('materials', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonMaterials)}
+        >
+          {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
+        </p>
+        <button
+          onClick={() => handleRemoveFile('materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+          className="text-red-500 hover:text-red-700"
+        >
+          ×
+        </button>
+      </div>
+    )}
+  </div>
+</div>
 
               {/* Add Quiz Button */}
               <div className="mt-6">
                 <button
                   onClick={() => handleAddQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  className="flex items-center gap-2 text-[#0056B3] hover:text-blue-700"
                 >
                   <span className="material-icons text-sm">add_circle_outline</span>
                   Add Quiz Question
@@ -495,9 +489,19 @@ function CourseContent() {
               </div>
 
               <div className=''>
-                <label className="block mt-12">Additional Materials *</label>
+                <label className="block mt-12 relative">Additional Materials *</label>
                 <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
-                  <div className="text-center">
+                  <div className="text-center relative">
+                    <div className="absolute top-0 right-0 flex items-center px-4 py-2 rounded-md bg-[#6B7280] hover:bg-[#4B5563] gap-2">
+                      <label 
+                        htmlFor={`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                        className="text-white rounded cursor-pointer"
+                      >
+                        Browse
+                      </label>
+                      <LiaUploadSolid color='white' size={22} fontWeight={900} />
+                    </div>
+
                     <input
                       type="file"
                       id={`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
@@ -517,16 +521,13 @@ function CourseContent() {
                           Drag and Drop Or Browse<br />
                           PDF, DOC, DOCX... up to _MB
                         </p>
-                        <div className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
-                          Browse
-                        </div>
                       </div>
                     </label>
                   </div>
                   {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
                     <div className="mt-2 text-sm text-gray-600 text-center flex items-center justify-center gap-2">
                       <p 
-                        className="cursor-pointer hover:text-blue-600"
+                        className="cursor-pointer hover:text-[#0056B3]"
                         onClick={() => handlePreviewClick('materials', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonMaterials)}
                       >
                         {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
@@ -546,7 +547,7 @@ function CourseContent() {
               <div className="">
                 <button
                   onClick={() => handleAddQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  className="flex items-center gap-2 text-[#0056B3] hover:text-blue-700"
                 >
                   <span className="material-icons text-sm">add_circle_outline</span>
                   Add Quiz Question
@@ -933,52 +934,7 @@ function CourseContent() {
     setCollapsedQuestions(newCollapsed);
   };
 
-  const handleRemoveContent = (content) => {
-    if (!selectedLesson) {
-      console.error('No lesson selected');
-      return;
-    }
-
-    console.log('Removing content:', content);
-    console.log('Selected Lesson:', selectedLesson);
-
-    try {
-      const updatedChapters = courseData.chapters.map((chapter, chapterIndex) => {
-        if (chapterIndex === selectedLesson.chapterIndex) {
-          const updatedLessons = chapter.lessons.map((lesson, lessonIndex) => {
-            if (lessonIndex === selectedLesson.lessonIndex) {
-              // Remove either video or material based on content type
-              return {
-                ...lesson,
-                [content.type === 'video' ? 'video' : 'material']: null
-              };
-            }
-            return lesson;
-          });
-          return { ...chapter, lessons: updatedLessons };
-        }
-        return chapter;
-      });
-
-      console.log('Updated chapters:', updatedChapters);
-      updateCourseData('chapters', updatedChapters);
-
-      // Clear file input if exists
-      const inputId = `${content.type}-upload-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`;
-      const fileInput = document.getElementById(inputId);
-      if (fileInput) {
-        fileInput.value = '';
-      }
-
-      // Close preview
-      setPreviewOpen(false);
-      setPreviewContent(null);
-
-    } catch (error) {
-      console.error('Error removing content:', error);
-    }
-  };
-
+ 
   useEffect(() => {
     // Add data-title attributes to toolbar buttons after component mounts
     const toolbar = document.querySelector('.ql-toolbar');
@@ -1033,7 +989,7 @@ function CourseContent() {
           <h2 className="font-medium mb-4">Curriculum</h2>
           <button 
             onClick={handleAddChapter}
-            className="flex items-center gap-2 text-[#0056B3] bg-[#f2f9ff] mb-4 w-full justify-center p-2"
+            className="flex font-normal items-center gap-2 text-[#0056B3] bg-[#f2f9ff] mb-4 w-full justify-center p-2"
           >
             <span className="material-icons text-sm">add</span>
             Add Chapter
@@ -1048,7 +1004,7 @@ function CourseContent() {
               {/* Chapter Header */}
               <div 
                 className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
-                  selectedChapter === chapterIndex ? 'bg-gray-50' : ''
+                  selectedChapter === chapterIndex ? 'bg-white' : ''
                 }`}
               >
                 <span className="material-icons text-gray-400 text-sm">drag_indicator</span>
@@ -1070,13 +1026,13 @@ function CourseContent() {
                       setSelectedChapter(null);
                     }
                   }}
-                  className="text-red-500 hover:text-red-700 p-1"
+                  className="text-red-500 hover:text-red-700 p-1 text-lg"
                   title="Delete chapter"
                 >
-                  <span className="material-icons text-sm">delete_outline</span>
+                  <span className="material-icons text-lg">delete_outline</span>
                 </button>
                 <span 
-                  className="material-icons text-gray-400 text-sm"
+                  className="material-icons text-gray-700 text-2xl"
                   onClick={() => {
                     setSelectedChapter(selectedChapter === chapterIndex ? null : chapterIndex);
                   }}
@@ -1092,13 +1048,15 @@ function CourseContent() {
                     <div 
                       key={lessonIndex}
                       onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
-                      className={`flex items-center gap-2 p-2 rounded cursor-pointer bg-white ${
+                      className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
                         selectedLesson?.chapterIndex === chapterIndex && 
-                        selectedLesson?.lessonIndex === lessonIndex ? 'bg-blue-50' : ''
+                        selectedLesson?.lessonIndex === lessonIndex 
+                          ? 'bg-[#f2f9ff]' 
+                          : 'bg-white'
                       }`}
                     >
                       {/* Lesson Icon based on type */}
-                      <span className="material-icons text-gray-400 text-sm">
+                      <span className="material-icons text-gray-400 text-xl">
                         {lesson.lessonType === 'Video' ? 'play_circle' : 
                          lesson.lessonType === 'Quiz' ? 'quiz' : 'article'}
                       </span>
@@ -1128,24 +1086,37 @@ function CourseContent() {
                         className="text-red-500 hover:text-red-700 p-1"
                         title="Delete lesson"
                       >
-                        <span className="material-icons text-sm">delete_outline</span>
+                        <span className="material-icons text-lg">delete_outline</span>
                       </button>
                     </div>
                   ))}
 
                   {/* Add Lesson Button */}
+                  <div className='flex justify-center'>
+
                   <button
                     onClick={() => handleAddLesson(chapterIndex)}
-                    className="flex items-center gap-1 text-blue-600 text-sm w-full justify-center mt-2"
+                    className="flex items-center px-2 py-2 rounded-md w-1/5 gap-1 bg-white text-[#0056B3] text-sm w-full justify-center mt-2"
                   >
-                    <span className="material-icons text-sm">add</span>
+                  
                     Add Lesson
                   </button>
+                  </div>
                 </div>
               )}
             </div>
           ))}
         </div>
+
+
+
+
+
+
+
+
+
+
 
         {/* Right Content Area */}
         <div className="flex-1 bg-white rounded-lg">

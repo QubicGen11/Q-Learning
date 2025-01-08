@@ -184,7 +184,7 @@ const StepIndicator = () => {
     <div className="space-y-2">
       {/* Main Navigation Tabs */}
       <div className="border-b flex justify-between">
-        <div className="flex gap-8 ml-5 px-2 py-2">
+        <div className="flex gap-8 ml-5  py-2 p-4">
           {mainTabs.map((tab) => (
             <button
               key={tab.id}
@@ -199,7 +199,7 @@ const StepIndicator = () => {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 p-2">
               <div className="relative">
                 <button
                   onClick={() => {/* Save as draft logic */}}

@@ -60,10 +60,10 @@ const InstructorLayout = () => {
       </div>
 
       <div className={`flex-1 ${isCollapsed ? 'ml-[60px]' : 'ml-64'}`}>
-        <div className="sticky top-0 z-10 bg-white">
+        <div className="sticky top-0 z-10 ">
           <Navbar />
         </div>
-        <main className="p-6">
+        <main className="p-6 bg-[#f2f9ff]">
           <Outlet />
         </main>
       </div>
