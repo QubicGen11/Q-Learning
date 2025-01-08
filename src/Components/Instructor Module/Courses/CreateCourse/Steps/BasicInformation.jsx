@@ -72,7 +72,8 @@ function BasicInfo() {
     fetchCategories, 
     fetchSubCategories,
     validationErrors,
-    setValidationErrors
+    setValidationErrors,
+    setBreadcrumbTitle
   } = useCourseCreationStore();
   const { basicInfo } = courseData;
 
@@ -160,6 +161,10 @@ function BasicInfo() {
   const handleChange = (field, value) => {
     let newBasicInfo;
     
+    if (field === 'courseName') {
+      setBreadcrumbTitle(value);
+    }
+    
     // Update the course data
     if (field === 'category') {
       newBasicInfo = {
@@ -200,6 +205,19 @@ function BasicInfo() {
     const error = validateField(field, value);
     setErrors(prev => ({ ...prev, [field]: error }));
   };
+
+  const testCategories = [
+    { id: 1, category: "Development" },
+    { id: 2, category: "Business" },
+    { id: 3, category: "Design" },
+    { id: 4, category: "Marketing" },
+    { id: 5, category: "IT & Software" },
+    { id: 6, category: "Personal Development" },
+    { id: 7, category: "Photography & Video" },
+    { id: 8, category: "Music" },
+    { id: 9, category: "Health & Fitness" },
+    { id: 10, category: "Teaching & Academics" }
+  ];
 
   return (
     <div className="max-w-[700px] mx-auto space-y-6">
@@ -327,7 +345,7 @@ function BasicInfo() {
             } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
           >
             <option value="">Select a category</option>
-            {categories.map((cat) => (
+            {(categories.length > 0 ? categories : testCategories).map((cat) => (
               <option key={cat.id} value={cat.category}>{cat.category}</option>
             ))}
           </select>

@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import useSidebarStore from '../../stores/sidebarStore';
 import Cookies from 'js-cookie';
 import Swal from 'sweetalert2';
+import { PiCaretRightBold, PiPresentationBold } from 'react-icons/pi';
+import useCourseCreationStore from '../../stores/courseCreationStore';
+// import useCourseCreationStore from '../../../stores/courseCreationStore';
 
 const InstructorLayout = () => {
   const { isCollapsed, toggleSidebar } = useSidebarStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { breadcrumbTitle, currentStep } = useCourseCreationStore();
+  
+  const isCreateCoursePath = location.pathname.includes('/instructor/courses/create');
 
   // Check for route changes and collapse sidebar if on course routes
   useEffect(() => {
@@ -49,6 +55,20 @@ const InstructorLayout = () => {
     checkAuth();
   }, [navigate]);
 
+  // Function to get current step label
+  const getCurrentStepLabel = () => {
+    const path = location.pathname.split('/').pop();
+    
+    if (path.includes('basic-info') || path.includes('media') || path.includes('about')) {
+      return 'Course Information';
+    } else if (path.includes('content') || path.includes('more-info') || path.includes('faq')) {
+      return 'Course Content';
+    } else if (path.includes('settings')) {
+      return 'Settings';
+    }
+    return '';
+  };
+
   if (!isAuthenticated) {
     return null;
   }
@@ -63,7 +83,70 @@ const InstructorLayout = () => {
         <div className="sticky top-0 z-30">
           <Navbar />
         </div>
-        <main className="p-[2px] bg-[#f2f9ff] relative z-20">
+        <main className="p-6 bg-[#f2f9ff] relative z-20">
+          <div className='text-md text-[#0077FF] flex items-center gap-1 relative bottom-3'>
+            <PiPresentationBold className='text-lg font-bold' />
+            <a href="/instructor/courses"><p className='text-md'>Courses</p></a>
+            
+            {location.pathname.match(/^\/instructor\/courses\/create(\/.*)?$/) && (
+              location.pathname !== '/instructor/courses/create' && (
+                <>
+                  <span>
+                    <PiCaretRightBold className='text-xs' />
+                  </span>
+               <Link to="/instructor/courses/create">
+               <p className='text-md text-[#4B5563] inline-flex items-center'>
+                    {breadcrumbTitle || 'Untitled Course'}
+                  </p>
+                </Link>  
+                  
+                  {/* Show step and substep */}
+                  {location.pathname.includes('/settings') ? (
+                    // For Settings
+                    <>
+                      <span>
+                        <PiCaretRightBold className='text-xs' />
+                      </span>
+                      <p className='text-md text-[#4B5563]'>Settings</p>
+                    </>
+                  ) : (
+                    <>
+                      <span>
+                        <PiCaretRightBold className='text-xs' />
+                      </span>
+                      <p className='text-md text-[#4B5563] inline-flex items-center whitespace-nowrap'>
+                        {/* Course Information sub-steps */}
+                        {location.pathname.includes('basic-info') && 'Course Details'}
+                        {location.pathname.includes('media') && 'Add Media'}
+                        {location.pathname.includes('about') && 'About Course'}
+                        
+                        {/* Course Content with sub-steps */}
+                        {(location.pathname.includes('/content') || 
+                          location.pathname.includes('more-info') || 
+                          location.pathname.includes('faq')) && (
+                          <>
+                            Course Content
+                            <span>
+                              <PiCaretRightBold className='text-xs mx-1' />
+                            </span>
+                            <span>
+                              {location.pathname.includes('/content') && 'Add sections and lectures'}
+                              {location.pathname.includes('more-info') && 'Glossary and References'}
+                              {location.pathname.includes('faq') && "FAQ's"}
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    </>
+                  )}
+                </>
+              )
+            )}
+
+            <div className='bg-[#6B7280] text-white  rounded-md ml-3 w-[70px] text-center' style={{padding:"1px 8px 1px 8px"}}>
+              Drafts
+            </div>
+          </div>
           <Outlet />
         </main>
       </div>

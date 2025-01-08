@@ -67,7 +67,7 @@ function CreateCourse() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white">
       {/* Header */}
       <div className="border-b border-gray-200">
         <div className="px-6 ">
@@ -81,6 +81,7 @@ function CreateCourse() {
 
       {/* Content Area */}
       <div className="p-6 h-[70vh] overflow-y-auto">
+        
         <Outlet />
       </div>
 

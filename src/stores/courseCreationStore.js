@@ -260,7 +260,10 @@ const useCourseCreationStore = create((set, get) => ({
       console.error('Error fetching course types:', error);
       toast.error('Failed to load course types');
     }
-  }
+  },
+
+  breadcrumbTitle: '',
+  setBreadcrumbTitle: (title) => set({ breadcrumbTitle: title }),
 }));
 
 export default useCourseCreationStore;
