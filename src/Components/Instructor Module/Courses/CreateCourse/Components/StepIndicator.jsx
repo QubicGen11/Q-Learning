@@ -2,10 +2,17 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 
+
 const StepIndicator = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentStep, setStep } = useCourseCreationStore();
+  const { 
+    currentStep, 
+    setStep, 
+    courseData, 
+    validationErrors,
+    setValidationErrors
+  } = useCourseCreationStore();
 
   const mainTabs = [
     { 
@@ -93,31 +100,78 @@ const StepIndicator = () => {
 
   const { currentTab, steps } = getCurrentTabAndSteps();
 
+  const validateBasicInfo = () => {
+    const { basicInfo } = courseData || {};
+    const errors = {};
+
+    // Required fields validation
+    if (!basicInfo?.courseName || basicInfo.courseName.length < 10) {
+      errors.courseName = 'Course name is required and must be at least 10 characters';
+    }
+    if (!basicInfo?.courseTagline || basicInfo.courseTagline.length < 20) {
+      errors.courseTagline = 'Course tagline is required and must be at least 20 characters';
+    }
+    if (!basicInfo?.courseDuration) {
+      errors.courseDuration = 'Course duration is required';
+    } else if (isNaN(basicInfo.courseDuration) || Number(basicInfo.courseDuration) <= 0) {
+      errors.courseDuration = 'Course duration must be a valid number greater than 0';
+    }
+    if (!basicInfo?.difficultyLevel) {
+      errors.difficultyLevel = 'Difficulty level is required';
+    }
+    if (!basicInfo?.category) {
+      errors.category = 'Category is required';
+    }
+    if (basicInfo?.category && !basicInfo?.subCategory) {
+      errors.subCategory = 'Subcategory is required';
+    }
+    if (!basicInfo?.teachingLanguage) {
+      errors.teachingLanguage = 'Teaching language is required';
+    }
+
+    // Return validation result
+    const isValid = Object.keys(errors).length === 0;
+    return { isValid, errors };
+  };
+
   const handleNext = () => {
     const { currentTab } = getCurrentTabAndSteps();
     
+    if (currentTab === 'info' && location.pathname.includes('/basic-info')) {
+      const { isValid, errors } = validateBasicInfo();
+      
+      // Always set validation errors when Next is clicked
+      setValidationErrors(errors);
+      
+      // Only proceed if valid
+      if (isValid) {
+        setStep(currentStep + 1);
+        navigate('/instructor/courses/create/media');
+      }
+      return;
+    }
+
+    // Existing navigation logic for other steps
     if (currentTab === 'info' && currentStep === courseInformationSteps.length) {
-      // Move to Course Content after completing Course Information
       setStep(1);
       navigate('/instructor/courses/create/content');
     } else if (currentTab === 'content') {
       if (location.pathname.includes('/content')) {
-        // Move from Content to More Info
         setStep(2);
         navigate('/instructor/courses/create/more-info');
       } else if (location.pathname.includes('/more-info')) {
-        // Move from More Info to FAQ
         setStep(3);
         navigate('/instructor/courses/create/faq');
       } else if (location.pathname.includes('/faq')) {
-        // Move to Settings
         navigate('/instructor/courses/create/settings');
       }
-    } else if (currentStep < steps.length) {
-      // Normal step progression within Course Information
-      const nextStep = steps[currentStep];
-      setStep(currentStep + 1);
-      navigate(`/instructor/courses/create/${nextStep.path}`);
+    } else if (currentTab === 'info') {
+      // Handle navigation within info tab
+      const nextStep = courseInformationSteps[currentStep];
+      if (nextStep) {
+        setStep(currentStep + 1);
+        navigate(`/instructor/courses/create/${nextStep.path}`);
+      }
     }
   };
 

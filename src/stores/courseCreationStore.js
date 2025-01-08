@@ -64,6 +64,9 @@ const useCourseCreationStore = create((set, get) => ({
 
   courseTypes: [],
 
+  validationErrors: {},
+  setValidationErrors: (errors) => set({ validationErrors: errors }),
+
   setStep: (step) => {
     set({ currentStep: step });
   },

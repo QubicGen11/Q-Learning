@@ -70,9 +70,36 @@ function BasicInfo() {
     categories, 
     subCategories, 
     fetchCategories, 
-    fetchSubCategories 
+    fetchSubCategories,
+    validationErrors,
+    setValidationErrors
   } = useCourseCreationStore();
   const { basicInfo } = courseData;
+
+  // Add state for validation errors
+  const [errors, setErrors] = useState({});
+
+  // Validation function
+  const validateField = (field, value) => {
+    switch (field) {
+      case 'courseName':
+        return (!value || value.length < 10) ? 'Course name is required and must be at least 10 characters' : '';
+      case 'courseTagline':
+        return (!value || value.length < 20) ? 'Course tagline is required and must be at least 20 characters' : '';
+      case 'courseDuration':
+        return (!value || isNaN(value) || Number(value) <= 0) ? 'Course duration must be a valid number greater than 0' : '';
+      case 'difficultyLevel':
+        return !value ? 'Difficulty level is required' : '';
+      case 'category':
+        return !value ? 'Category is required' : '';
+      case 'subCategory':
+        return !value ? 'Subcategory is required' : '';
+      case 'teachingLanguage':
+        return !value ? 'Teaching language is required' : '';
+      default:
+        return '';
+    }
+  };
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -102,31 +129,77 @@ function BasicInfo() {
     fetchCourseTypes();
   }, []);
 
+  const validateAllFields = (currentData) => {
+    const errors = {};
+    
+    if (!currentData?.courseName || currentData.courseName.length < 10) {
+      errors.courseName = 'Course name is required and must be at least 10 characters';
+    }
+    if (!currentData?.courseTagline || currentData.courseTagline.length < 20) {
+      errors.courseTagline = 'Course tagline is required and must be at least 20 characters';
+    }
+    if (!currentData?.courseDuration || isNaN(currentData.courseDuration) || Number(currentData.courseDuration) <= 0) {
+      errors.courseDuration = 'Course duration must be a valid number greater than 0';
+    }
+    if (!currentData?.difficultyLevel) {
+      errors.difficultyLevel = 'Difficulty level is required';
+    }
+    if (!currentData?.category) {
+      errors.category = 'Category is required';
+    }
+    if (!currentData?.subCategory) {
+      errors.subCategory = 'Subcategory is required';
+    }
+    if (!currentData?.teachingLanguage) {
+      errors.teachingLanguage = 'Teaching language is required';
+    }
+    
+    return errors;
+  };
+
   const handleChange = (field, value) => {
+    let newBasicInfo;
+    
+    // Update the course data
     if (field === 'category') {
-      updateCourseData('basicInfo', {
+      newBasicInfo = {
         ...basicInfo,
         category: value,
-        subCategory: '' // Reset subcategory when category changes
-      });
+        subCategory: ''
+      };
     } else if (field === 'hashtags') {
-      // Convert comma-separated string to array of objects
       const hashtagArray = value.split(',')
         .map(tag => tag.trim())
         .filter(Boolean)
         .map(tag => ({ tagName: tag }));
 
-      updateCourseData('basicInfo', {
+      newBasicInfo = {
         ...basicInfo,
         hashtags: hashtagArray
-      });
+      };
     } else {
-      updateCourseData('basicInfo', {
+      newBasicInfo = {
         ...basicInfo,
         [field]: value
-      });
+      };
     }
-  };  
+
+    // Update course data
+    updateCourseData('basicInfo', newBasicInfo);
+
+    // Only validate if there are existing validation errors
+    if (Object.keys(validationErrors).length > 0) {
+      const newErrors = validateAllFields(newBasicInfo);
+      setValidationErrors(newErrors);
+    }
+  };
+
+  // Add blur handler for validation
+  const handleBlur = (field) => {
+    const value = basicInfo[field];
+    const error = validateField(field, value);
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   return (
     <div className="max-w-[700px] mx-auto space-y-6">
@@ -140,12 +213,18 @@ function BasicInfo() {
             name="courseName"
             value={basicInfo?.courseName || ''}
             onChange={(e) => handleChange('courseName', e.target.value)}
+            onBlur={() => handleBlur('courseName')}
             maxLength={80}
             placeholder="Real World UX Learn User Experience & Start Your Career"
-            className="w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9"
+            className={`w-full px-3 py-1.5 text-sm border ${
+              validationErrors.courseName ? 'border-red-500' : 'border-[#D1D5DB]'
+            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
           />
+          {validationErrors.courseName && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.courseName}</p>
+          )}
           <span className="absolute right-2 bottom-1.5 text-xs text-gray-500">
-            {(basicInfo?.courseName?.length || 0)}/80 
+            {(basicInfo?.courseName?.length || 0)}/80
           </span>
         </div>
       </div>
@@ -159,11 +238,16 @@ function BasicInfo() {
             name="courseTagline"
             value={basicInfo?.courseTagline || ''}
             onChange={(e) => handleChange('courseTagline', e.target.value)}
-            placeholder="UX based on real world examples. Gain powerful UX skills you can use to start a UX career or improve your projects."
+            placeholder="UX based on real world examples..."
             maxLength={300}
             rows={3}
-            className="w-full px-4 py-2 border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] "
+            className={`w-full px-4 py-2 border ${
+              validationErrors.courseTagline ? 'border-red-500' : 'border-[#D1D5DB]'
+            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4]`}
           />
+          {validationErrors.courseTagline && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.courseTagline}</p>
+          )}
           <span className="absolute right-2 bottom-2 text-xs text-gray-500">
             {(basicInfo?.courseTagline?.length || 0)}/300
           </span>
@@ -199,11 +283,13 @@ function BasicInfo() {
             name="courseDuration"
             value={basicInfo?.courseDuration || ''}
             onChange={(e) => handleChange('courseDuration', e.target.value.toString())}
-            placeholder="e.g., 10"
-            min="0"
-            step="0.5"
-            className="w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9"
+            className={`w-full px-3 py-1.5 text-sm border ${
+              validationErrors.courseDuration ? 'border-red-500' : 'border-[#D1D5DB]'
+            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
           />
+          {validationErrors.courseDuration && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.courseDuration}</p>
+          )}
         </div>
 
         <div>
@@ -214,63 +300,63 @@ function BasicInfo() {
             name="difficultyLevel"
             value={basicInfo?.difficultyLevel || ''}
             onChange={(e) => handleChange('difficultyLevel', e.target.value)}
-            className="w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9"
+            className={`w-full px-3 py-1.5 text-sm border ${
+              validationErrors.difficultyLevel ? 'border-red-500' : 'border-[#D1D5DB]'
+            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
           >
             <option value="">Select Difficulty Level</option>
-          
             <option value="Beginner">Beginner</option>
             <option value="Intermediate">Intermediate</option>
             <option value="Advanced">Advanced</option>
           </select>
+          {validationErrors.difficultyLevel && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.difficultyLevel}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="category" className="block text-xs font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Category *
           </label>
-          <div className="relative">
-            <select
-              id="category"
-              value={basicInfo.category || ''}
-              onChange={(e) => handleChange('category', e.target.value)}
-              className="w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9"
-              required
-            >
-              <option value="">Select a category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.category} className='text-sm'>
-                  {cat.category}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-            </div>
-          </div>
+          <select
+            name="category"
+            value={basicInfo?.category || ''}
+            onChange={(e) => handleChange('category', e.target.value)}
+            className={`w-full px-3 py-1.5 text-sm border ${
+              validationErrors.category ? 'border-red-500' : 'border-[#D1D5DB]'
+            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.category}>{cat.category}</option>
+            ))}
+          </select>
+          {validationErrors.category && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.category}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="subcategory" className="block text-xs font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Subcategory *
           </label>
-          <div className="relative">
-            <select
-              id="subcategory"
-              value={basicInfo.subCategory || ''}
-              onChange={(e) => handleChange('subCategory', e.target.value)}
-              className="w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              required
-              disabled={!basicInfo.category}
-            >
-              <option value="">Select a subcategory</option>
-              {subCategories.map((subCat, index) => (
-                <option key={index} value={subCat.subCategory} className='text-sm'>
-                  {subCat.subCategory}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-            </div>
-          </div>
+          <select
+            name="subCategory"
+            value={basicInfo?.subCategory || ''}
+            onChange={(e) => handleChange('subCategory', e.target.value)}
+            disabled={!basicInfo.category}
+            className={`w-full px-3 py-1.5 text-sm border ${
+              validationErrors.subCategory ? 'border-red-500' : 'border-[#D1D5DB]'
+            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
+          >
+            <option value="">Select a subcategory</option>
+            {subCategories.map((subCat) => (
+              <option key={subCat.id} value={subCat.subCategory}>{subCat.subCategory}</option>
+            ))}
+          </select>
+          {validationErrors.subCategory && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.subCategory}</p>
+          )}
         </div>
 
         <div>
@@ -281,16 +367,18 @@ function BasicInfo() {
             name="teachingLanguage"
             value={basicInfo?.teachingLanguage || ''}
             onChange={(e) => handleChange('teachingLanguage', e.target.value)}
-            className=" w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9"
+            className={`w-full px-3 py-1.5 text-sm border ${
+              validationErrors.teachingLanguage ? 'border-red-500' : 'border-[#D1D5DB]'
+            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
           >
             <option value="">Select a language</option>
-            {languages
-              .sort((a, b) => a.localeCompare(b))
-              .map((language, index) => (
-                <option key={index} value={language}>{language}</option>
-              ))
-            }
+            {languages.map((language, index) => (
+              <option key={index} value={language}>{language}</option>
+            ))}
           </select>
+          {validationErrors.teachingLanguage && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.teachingLanguage}</p>
+          )}
         </div>
 
 
