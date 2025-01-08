@@ -3,6 +3,66 @@ import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import axios from 'axios';
 
 function BasicInfo() {
+  const languages = [
+    // Global Languages
+    "English",
+    "Spanish",
+    "Mandarin Chinese",
+    "French",
+    "Hindi",
+    "Arabic",
+    "Bengali",
+    "Portuguese",
+    "Russian",
+    "German",
+  
+    // India's Famous Languages
+    "Hindi",
+    "Bengali",
+    "Marathi",
+    "Telugu",
+    "Tamil",
+    "Gujarati",
+    "Kannada",
+    "Malayalam",
+    "Odia",
+    "Punjabi",
+    "Assamese",
+    "Urdu",
+    "Sanskrit",
+  
+    // Regional Languages - Asia
+    "Japanese",
+    "Korean",
+    "Thai",
+    "Vietnamese",
+  
+    // Regional Languages - Europe
+    "Italian",
+    "Dutch",
+    "Polish",
+    "Greek",
+  
+    // Regional Languages - Africa
+    "Swahili",
+    "Amharic",
+    "Zulu",
+    "Hausa",
+  
+    // Regional Languages - Americas
+    "Quechua",
+    "Navajo",
+    "Haitian Creole",
+  
+    // Regional Languages - Oceania
+    "Maori",
+    "Samoan",
+    "Hawaiian",
+  
+    // Option for Custom Input
+    "Other"
+  ];
+  
   const [courseTypes, setCourseTypes] = useState([]);
   const { 
     courseData, 
@@ -74,28 +134,40 @@ function BasicInfo() {
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Name *
         </label>
-        <input
-          type="text"
-          name="courseName"
-          value={basicInfo?.courseName || ''}
-          onChange={(e) => handleChange('courseName', e.target.value)}
-          placeholder="Real World UX Learn User Experience & Start Your Career"
-          className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            name="courseName"
+            value={basicInfo?.courseName || ''}
+            onChange={(e) => handleChange('courseName', e.target.value)}
+            maxLength={100}
+            placeholder="Real World UX Learn User Experience & Start Your Career"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+          />
+          <span className="absolute right-2 top-1.5 text-xs text-gray-500">
+            {(basicInfo?.courseName?.length || 0)}/100
+          </span>
+        </div>
       </div>
    
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Tagline *
         </label>
-        <textarea
-          name="courseTagline"
-          value={basicInfo?.courseTagline || ''}
-          onChange={(e) => handleChange('courseTagline', e.target.value)}
-          placeholder="UX based on real world examples. Gain powerful UX skills you can use to start a UX career or improve your projects."
-          rows={3}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative">
+          <textarea
+            name="courseTagline"
+            value={basicInfo?.courseTagline || ''}
+            onChange={(e) => handleChange('courseTagline', e.target.value)}
+            placeholder="UX based on real world examples. Gain powerful UX skills you can use to start a UX career or improve your projects."
+            maxLength={300}
+            rows={3}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span className="absolute right-2 top-2 text-xs text-gray-500">
+            {(basicInfo?.courseTagline?.length || 0)}/300
+          </span>
+        </div>
       </div>
       
       <div className="grid grid-cols-2 gap-6">
@@ -120,14 +192,16 @@ function BasicInfo() {
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
-            Course Duration *
+            Course Duration (Hours) *
           </label>
           <input
-            type="text"
+            type="number"
             name="courseDuration"
             value={basicInfo?.courseDuration || ''}
-            onChange={(e) => handleChange('courseDuration', e.target.value)}
-            placeholder="e.g., 10 hours"
+            onChange={(e) => handleChange('courseDuration', e.target.value.toString())}
+            placeholder="e.g., 10"
+            min="0"
+            step="0.5"
             className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           />
         </div>
@@ -143,6 +217,7 @@ function BasicInfo() {
             className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           >
             <option value="">Select Difficulty Level</option>
+          
             <option value="Beginner">Beginner</option>
             <option value="Intermediate">Intermediate</option>
             <option value="Advanced">Advanced</option>
@@ -208,28 +283,17 @@ function BasicInfo() {
             onChange={(e) => handleChange('teachingLanguage', e.target.value)}
             className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
           >
-            <option value="">Select Language</option>
-            <option value="English">English</option>
-            <option value="Hindi">Hindi</option>
-            <option value="Urdu">Urdu</option>
+            <option value="">Select a language</option>
+            {languages
+              .sort((a, b) => a.localeCompare(b))
+              .map((language, index) => (
+                <option key={index} value={language}>{language}</option>
+              ))
+            }
           </select>
         </div>
 
-        {/* <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Hashtags
-          </label>
-          <input
-            type="text"
-            name="hashtags"
-            value={Array.isArray(basicInfo?.hashtags) 
-              ? basicInfo.hashtags.map(tag => tag.tagName).join(', ') 
-              : ''}
-            onChange={(e) => handleChange('hashtags', e.target.value)}
-            placeholder="e.g., WebDev, JavaScript, Frontend (comma separated)"
-            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
-          />
-        </div> */}
+
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">

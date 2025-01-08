@@ -58,24 +58,8 @@ const Newnavbar = () => {
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
 
   useEffect(() => {
-    checkAuth(); // Check authentication status when component mounts
+    checkAuth(); // This is sufficient to handle authentication
   }, [checkAuth]);
-
-  useEffect(() => {
-    const accessToken = Cookies.get('accessToken');
-    const refreshToken = Cookies.get('refreshToken');
-    
-    if (accessToken && refreshToken) {
-      try {
-        const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
-        setIsLoggedIn(true);
-        setUserName(tokenPayload.userName);
-        setUserEmail('firstname@gmail.com'); // Replace with actual email if available
-      } catch (error) {
-        console.error('Error decoding token:', error);
-      }
-    }
-  }, []);
 
   useClickOutside(dropdownRef, () => {
     if (isProfileDropdownOpen) {

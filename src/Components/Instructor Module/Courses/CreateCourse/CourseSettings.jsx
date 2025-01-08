@@ -258,6 +258,18 @@ function CourseSettings() {
                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-[#0056B3] peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                       </label>
                     </div>
+                    <div className="flex items-center space-x-3 w-[450px]">
+                      <span className="text-sm text-gray-600">Enable Subtitles</span>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer"
+                          checked={settings.enableSubtitles || false}
+                          onChange={(e) => handleSettingChange('enableSubtitles', e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-[#0056B3] peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                      </label>
+                    </div>
                   </div>
                 </div>
 

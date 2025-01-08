@@ -9,36 +9,14 @@ function FAQ() {
 
   // Initialize and sync with courseData
   useEffect(() => {
-    let initialFaqs = [];
-    if (courseData.courseFaqs) {
-      if (Array.isArray(courseData.courseFaqs)) {
-        initialFaqs = courseData.courseFaqs;
-      } else if (typeof courseData.courseFaqs === 'object') {
-        initialFaqs = Object.values(courseData.courseFaqs);
-      }
-    }
+    let initialFaqs = courseData.courseFaqs || [];
     setLocalFaqs(initialFaqs);
-  }, []);
-
-  const toggleFaq = (index) => {
-    const newCollapsed = new Set(collapsedFaqs);
-    if (newCollapsed.has(index)) {
-      newCollapsed.delete(index);
-    } else {
-      newCollapsed.add(index);
-    }
-    setCollapsedFaqs(newCollapsed);
-  };
+  }, [courseData.courseFaqs]);
 
   const handleAddQuestion = () => {
-    const newFaq = {
-      question: '',
-      answer: ''
-    };
-    
+    const newFaq = { question: '', answer: '' };
     const updatedFaqs = [...localFaqs, newFaq];
     setLocalFaqs(updatedFaqs);
-    // Ensure we're sending an array
     updateCourseData('courseFaqs', updatedFaqs);
   };
 
@@ -65,39 +43,47 @@ function FAQ() {
     toast.success('FAQs saved successfully');
   };
 
+  const toggleFaq = (index) => {
+    const newCollapsed = new Set(collapsedFaqs);
+    if (newCollapsed.has(index)) {
+      newCollapsed.delete(index);
+    } else {
+      newCollapsed.add(index);
+    }
+    setCollapsedFaqs(newCollapsed);
+  };
+
   return (
     <div className="bg-white rounded-lg p-6 ">
-      <div className="flex items-center justify-between mb-6 max-w-[800px]">
-        <h2 className="font-medium">Frequently Asked Questions</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-medium">FAQs</h2>
         <button 
-          onClick={() => handleAddQuestion()}
-          className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+          onClick={handleAddQuestion}
+          className="flex items-center gap-2 text-[#0056B3] hover:text-blue-700"
         >
-          <span className="material-icons text-sm">add_circle_outline</span>
+          <span className="material-icons text-lg">add</span>
           Add Question
         </button>
       </div>
 
-      <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4">
-        {Array.isArray(localFaqs) && localFaqs.map((item, index) => (
-          <div key={index} className="border rounded-lg bg-white shadow-sm">
-            <div className="flex justify-between items-center p-4 border-b">
-              <div className="flex items-center gap-2 flex-1">
-                <span className="text-gray-600">Question {index + 1}</span>
-                <input
-                  type="text"
-                  placeholder="What is question here..."
-                  className="flex-1 p-2 border rounded"
-                  value={item.question || ''}
-                  onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
-                />
+      <div className="space-y-4 max-w-[700px] mx-auto ">
+        {localFaqs.map((faq, index) => (
+          <div key={index} className="border rounded-lg shadow-sm">
+            <div className="flex items-center p-4 border-b bg-[#f3f4f6]">
+              <div className="flex items-center gap-3 flex-1">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0056B3] text-white text-sm">
+                  {index + 1}
+                </span>
+                <span className="text-gray-700">
+                  {faq.question || `Question ${index + 1}`}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => handleRemoveQuestion(index)}
                   className="text-red-500 hover:text-red-700"
                 >
-                  <span className="material-icons">delete_outline</span>
+                  <span className="material-icons">delete</span>
                 </button>
                 <button 
                   onClick={() => toggleFaq(index)}
@@ -109,39 +95,47 @@ function FAQ() {
                 </button>
               </div>
             </div>
-            
+
             {!collapsedFaqs.has(index) && (
               <div className="p-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Answer *
-                  </label>
-                  <textarea
-                    className="w-full px-4 py-2 border rounded-lg text-sm min-h-[120px]"
-                    value={item.answer || ''}
-                    onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
-                    placeholder="Type your answer here..."
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Question
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter question here..."
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-[#0056B3] focus:border-[#0056B3]"
+                      value={faq.question}
+                      onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Answer
+                    </label>
+                    <textarea
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-[#0056B3] focus:border-[#0056B3] min-h-[100px]"
+                      placeholder="Type your answer here..."
+                      value={faq.answer}
+                      onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
+                    />
+                  </div>
+
+              
                 </div>
               </div>
             )}
           </div>
         ))}
 
-        {(!localFaqs || localFaqs.length === 0) && (
+        {localFaqs.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             No FAQs added yet. Click "Add Question" to get started.
           </div>
         )}
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={handleSaveFaqs}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Save FAQs
-        </button>
       </div>
     </div>
   );

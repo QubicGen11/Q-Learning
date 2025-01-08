@@ -3,17 +3,13 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const tokenExpirationEvent = new Event('tokenExpired');
+
 
 // Add WebSocket connection
 let ws = null;
 
 const connectWebSocket = (token) => {
-  // Close existing connection if any
-  if (ws) {
-    ws.close();
-  }
-
+  
   // Create new WebSocket connection
   ws = new WebSocket('ws://localhost:8089/ws');
 
@@ -45,25 +41,25 @@ const connectWebSocket = (token) => {
           });
           break;
         default:
-          console.log('Received WebSocket message:', data);
+          // console.log('Received WebSocket message:', data);
       }
     } catch (error) {
-      console.error('Error processing WebSocket message:', error);
+      // console.error('Error processing WebSocket message:', error);
     }
   };
 
   ws.onclose = () => {
-    console.log('WebSocket Disconnected');
+    // console.log('WebSocket Disconnected');
     // Attempt to reconnect after 5 seconds
     setTimeout(() => {
       if (Cookies.get('accessToken')) {
-        connectWebSocket(Cookies.get('accessToken'));
+        // connectWebSocket(Cookies.get('accessToken'));
       }
     }, 5000);
   };
 
   ws.onerror = (error) => {
-    console.error('WebSocket Error:', error);
+    // console.error('WebSocket Error:', error);
   };
 };
 
