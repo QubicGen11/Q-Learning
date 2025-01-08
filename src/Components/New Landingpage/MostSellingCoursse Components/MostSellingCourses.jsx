@@ -46,8 +46,8 @@ const MostSellingCourses = ({ courses }) => {
             ★
           </span>
         ))}
-        <span className="ml-2 text-sm text-gray-600">
-          ({rating} | {reviewCount || '121'})
+        <span className="ml-2 text-sm text-white">
+          ({rating} | {reviewCount || ''})
         </span>
       </div>
     );
@@ -89,19 +89,23 @@ const MostSellingCourses = ({ courses }) => {
             {courses.map((course) => (
               <div key={course.id} className="px-3">
                 <div 
-                  className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                  className="group bg-none rounded-lg overflow-hidden  hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
                   onClick={() => handleCourseClick(course.id)}
                 >
                   <div className="relative overflow-hidden">
                     <img 
                       src={course.categoryImage || course.courseBanner} 
                       alt={course.courseName} 
-                      className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+                      className="w-full h-48 p- object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                     />
-                    <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-md text-sm">
+                    <div   style={{
+                    
+                    borderRadius: '4px 20px 4px 20px',
+                    padding: '6px 8px 6px 8px',
+                  }} className="absolute top-4 left-4  bg-[#0056B3] text-white px-3 py-2 rounded-md text-sm">
                     {course.category}
                     </div>
-                    <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <div className="absolute top-4 right-4 bg-[#f3f4f6] text-[#0056B3] px-3 py-1 rounded-md text-sm flex items-center">
                       <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                       </svg>
@@ -109,32 +113,40 @@ const MostSellingCourses = ({ courses }) => {
                     </div>
                   </div>
                   
-                  <div className="p-4">
+                  <div className="">
                     {/* Rating Stars */}
-                    <div className="mb-2">
+                    <div className='flex justify-between items-center  p-2 text-white bg-[#0056B3]'>
+                    <div className=" ">
                       {renderRating(course.rating || 4.7)}
                     </div>
+               
+                    <div className="flex items-center gap-2">
+                        <span className="text-md font-bold text-white">
+                          ₹{course.courseSettings[0]?.settings.offeredPrice}/-
+                        </span>
+                        <span className="text-white line-through text-sm">
+                          ₹{course.courseSettings[0]?.settings.price}/-
+                        </span>
+                      </div>
+
+                    </div>
                     
+                    <div className='p-2'>
+
                     <h3 className="font-medium text-lg mb-2 group-hover:text-blue-600 transition-colors duration-300">
                       {course.courseName}
                     </h3>
                     <p className="text-gray-600 text-sm mb-4">{course.trainerName}</p>
-                    
-                    {/* Price Section */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-blue-600">
-                          ₹{course.courseSettings[0]?.settings.offeredPrice}/-
-                        </span>
-                        <span className="text-gray-400 line-through text-sm">
-                          ₹{course.courseSettings[0]?.settings.price}/-
-                        </span>
-                      </div>
-                      {course.courseSettings[0]?.settings.discount && (
+                    {course.courseSettings[0]?.settings.discount && (
                         <span className="bg-black text-white text-xs px-2 py-1 rounded">
                           {course.courseSettings[0]?.settings.discount}% Off | Black Friday Sale
                         </span>
                       )}
+                    </div>
+                    {/* Price Section */}
+                    <div className="flex items-center justify-between">
+                    
+                  
                     </div>
                   </div>
                 </div>

@@ -80,12 +80,12 @@ function CreateCourse() {
       </div>
 
       {/* Content Area */}
-      <div className="p-6">
+      <div className="p-6 h-[70vh] overflow-y-auto">
         <Outlet />
       </div>
 
       {/* Bottom Navigation */}
-      <div className="border-t border-gray-200 px-6 py-4">
+      {/* <div className="border-t border-gray-200 px-6 py-4">
         <div className="flex justify-between">
           {currentStep > 1 && (
             <button
@@ -114,7 +114,7 @@ function CreateCourse() {
             </button>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

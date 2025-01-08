@@ -203,7 +203,7 @@ const StepIndicator = () => {
               <div className="relative">
                 <button
                   onClick={() => {/* Save as draft logic */}}
-                  className="px-4 py-2 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
+                  className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
                 >
                  Preview
                   <span className="material-icons text-sm">expand_more</span>
@@ -211,7 +211,7 @@ const StepIndicator = () => {
               </div>
               <button
                 onClick={() => {/* Submit for review logic */}}
-                className="px-4 py-2 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
+                className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
               >
                 Submit for review
               </button>
@@ -219,40 +219,51 @@ const StepIndicator = () => {
       </div>
 
       {/* Step Indicator with Navigation */}
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between p-4 ">
         <div className="flex items-center gap-4">
           {steps.length > 0 && steps.map((step, index) => (
             <React.Fragment key={step.number}>
-              <div className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div className="flex items-center w-4/5">
+                  <div className={`
+                    relative
+                    ${currentStep === step.number ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' : ''}
+                  `}>
+                    <div className={`
+                      w-8 h-8 rounded-full flex items-center justify-center text-md border
+                      ${currentStep === step.number 
+                        ? 'bg-[#0056B3] text-white' 
+                        : currentStep > step.number
+                          ? 'bg-[#0056B3] text-white'
+                          : 'border-2 border-gray-300 text-gray-400'
+                      }
+                    `}>
+                      {(currentStep > step.number && currentTab !== 'content') || 
+                       (currentTab === 'content' && location.pathname.includes(step.path)) || 
+                       (location.pathname.includes('faq') && step.path === 'content') ? (
+                        <CheckIcon />
+                      ) : (
+                        step.number
+                      )}
+                    </div>
+                  </div>
+                  <div className="ml-3 ">
+                    <p className={`text-sm font-medium ${
+                      currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'
+                    }`}>
+                      {step.title}
+                    </p>
+                    <p className={`text-xs ${
+                      currentStep >= step.number ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
+                      {step.subtitle}
+                    </p>
+                  </div>
+                </div>
                 <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-md border
-                  ${currentStep === step.number 
-                    ? 'bg-[#0056B3] text-white' 
-                    : currentStep > step.number
-                      ? 'bg-[#0056B3] text-white'
-                      : 'border-2 border-gray-300 text-gray-400'
-                  }
-                `}>
-                  {(currentStep > step.number && currentTab !== 'content') || 
-                   (currentTab === 'content' && location.pathname.includes(step.path)) || 
-                   (location.pathname.includes('faq') && step.path === 'content') ? (
-                    <CheckIcon />
-                  ) : (
-                    step.number
-                  )}
-                </div>
-                <div className="ml-3">
-                  <p className={`text-sm font-medium ${
-                    currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'
-                  }`}>
-                    {step.title}
-                  </p>
-                  <p className={`text-xs ${
-                    currentStep >= step.number ? 'text-gray-500' : 'text-gray-400'
-                  }`}>
-                    {step.subtitle}
-                  </p>
-                </div>
+                  h-1 w-full relative top-5 right-4
+                  ${currentStep === step.number ? 'bg-[#0056B3]' : 'bg-transparent'}
+                `} />
               </div>
               {index < steps.length - 1 && (
                 <div className={`w-24 h-[1px] ${
@@ -265,19 +276,22 @@ const StepIndicator = () => {
 
         {/* Navigation Buttons */}
         <div className="flex items-center gap-4">
-          {(currentStep > 1 || currentTab !== 'info' || location.pathname.includes('/settings')) && (
-            <button 
-              onClick={handlePrevious}
-              className="flex items-center gap-2 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-4 py-2 rounded-md"
-            >
-              <span className="material-icons text-sm">arrow_back</span>
-              Previous
-            </button>
-          )}
+          <button 
+            onClick={handlePrevious}
+            disabled={currentStep === 1 && currentTab === 'info'}
+            className={`flex items-center gap-2 px-4 py-2 h-8 rounded-md ${
+              currentStep === 1 && currentTab === 'info'
+                ? 'text-gray-400 bg-gray-100 cursor-not-allowed' 
+                : 'text-[#0056B3] hover:text-blue bg-[#F5F5F5]'
+            }`}
+          >
+            <span className="material-icons text-sm">arrow_back</span>
+            Previous
+          </button>
           {(currentStep < steps.length || currentTab !== 'settings') && (
             <button 
               onClick={handleNext}
-              className="flex items-center gap-2 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-4 py-2 rounded-md"
+              className="flex items-center gap-2 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-4 h-8 py-2 rounded-md"
             >
               {getNextButtonText()}
               <span className="material-icons text-sm">arrow_forward</span>
