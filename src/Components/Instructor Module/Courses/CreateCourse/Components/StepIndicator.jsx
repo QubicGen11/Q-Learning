@@ -208,6 +208,10 @@ const StepIndicator = () => {
     const { currentTab } = getCurrentTabAndSteps();
     const path = location.pathname;
 
+    if (currentTab === 'info' && path.includes('/about')) {
+      return 'Next: Course Content';
+    }
+    
     if (currentTab === 'content') {
       if (path.includes('/content')) {
         return 'Next: More Info';

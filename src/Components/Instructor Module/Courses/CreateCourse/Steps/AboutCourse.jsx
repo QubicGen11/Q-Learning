@@ -1,15 +1,63 @@
 import React, { useState } from 'react';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import { toast } from 'react-hot-toast';
+import './Aboucourse.css'
 
 function AboutCourse() {
   const { courseData, updateCourseData, setStep, currentStep } = useCourseCreationStore();
   const { about } = courseData;
 
-  const [prerequisite, setPrerequisite] = useState({
-    preRequisiteRequired: '',
-    preRequisiteLevel: 'Beginner'
-  });
+  // const [prerequisite, setPrerequisite] = useState({
+  //   preRequisiteRequired: '',
+  //   preRequisiteLevel: 'Beginner'
+  // });
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedReviews, setSelectedReviews] = useState([]);
+
+  const reviews = [
+    {
+      id: 1,
+      review: "Great course! The practical examples really helped me understand UX concepts better.",
+      author: "John Doe",
+      rating: 5
+    },
+    {
+      id: 2,
+      review: "Very comprehensive coverage of UX principles. Highly recommended!",
+      author: "Sarah Smith",
+      rating: 5
+    },
+    {
+      id: 3,
+      review: "The instructor's explanation style made complex topics easy to understand.",
+      author: "Mike Johnson",
+      rating: 4
+    },
+    {
+      id: 4,
+      review: "Perfect balance of theory and practical exercises. Worth every penny!",
+      author: "Emily Brown",
+      rating: 5
+    },
+    {
+      id: 5,
+      review: "Excellent course structure and content delivery. Very engaging!",
+      author: "David Wilson",
+      rating: 4
+    }
+  ];
+
+  const handleReviewSelect = (reviewId) => {
+    setSelectedReviews(prev => {
+      const isSelected = prev.includes(reviewId);
+      const newSelection = isSelected 
+        ? prev.filter(id => id !== reviewId)
+        : [...prev, reviewId];
+      handleChange('reviews', newSelection);
+      return newSelection;
+    });
+  };
 
   const handleChange = (field, value) => {
     console.log(`Updating ${field}:`, value);
@@ -55,121 +103,60 @@ function AboutCourse() {
     }
   };
 
-  const handlePrerequisiteAdd = () => {
-    if (prerequisite.preRequisiteRequired) {
-      // Make sure we have an array to spread
-      const currentPreReqs = about.coursePreRequisites || [];
-      const updatedPrerequisites = [...currentPreReqs, {
-        preRequisiteRequired: prerequisite.preRequisiteRequired,
-        preRequisiteLevel: prerequisite.preRequisiteLevel
-      }];
 
-      console.log('Updated prerequisites:', updatedPrerequisites); // Debug log
 
-      // Update the store
-      updateCourseData('about', {
-        ...about,
-        coursePreRequisites: updatedPrerequisites
-      });
 
-      // Reset form
-      setPrerequisite({
-        preRequisiteRequired: '',
-        preRequisiteLevel: 'Beginner'
-      });
-    }
-  };
 
-  const handleAudienceAdd = (value) => {
-    if (value) {
-      const audiences = value.split('\n').map(item => item.trim()).filter(item => item);
-      handleChange('courseAudience', audiences);
-    }
-  };
+ 
 
-  const handleNext = () => {
-    // Validate required fields
-    if (!about.courseOutcome?.trim()) {
-      toast.error('Course outcome is required');
-      return;
-    }
-    if (!about.courseDescription?.trim()) {
-      toast.error('Course description is required');
-      return;
-    }
-
-    // Log the data being saved
-    console.log('About data being saved:', about);
-
-    setStep(currentStep + 1);
-  };
-
-  const handleKeyDown = (e, field) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const value = e.target.value.trim();
-      if (!value) return;
-
-      if (field === 'coursePreRequisites') {
-        const currentPreReqs = about.coursePreRequisites || [];
-        updateCourseData('about', {
-          ...about,
-          coursePreRequisites: [
-            ...currentPreReqs,
-            { preRequisiteRequired: value, preRequisiteLevel: 'Beginner' }
-          ]
-        });
-      } 
-      else if (field === 'courseAudience') {
-        const currentAudience = about.courseAudience || [];
-        updateCourseData('about', {
-          ...about,
-          courseAudience: [...currentAudience, value]
-        });
-      }
-      e.target.value = ''; // Clear the input
-    }
-  };
-
-  const handleRemoveItem = (field, index) => {
-    if (field === 'coursePreRequisites') {
-      const newPreReqs = [...(about.coursePreRequisites || [])];
-      newPreReqs.splice(index, 1);
-      updateCourseData('about', {
-        ...about,
-        coursePreRequisites: newPreReqs
-      });
-    } 
-    else if (field === 'courseAudience') {
-      const newAudience = [...(about.courseAudience || [])];
-      newAudience.splice(index, 1);
-      updateCourseData('about', {
-        ...about,
-        courseAudience: newAudience
-      });
-    }
-  };
+ 
 
   return (
     <div className="max-w-[800px] mx-auto">
       {/* What will you get */}
       <div className="mb-6">
         <label className="block text-sm text-gray-600 mb-2">
-          What will you get *
+          What Audience will get ?* 
         </label>
         <textarea
-          value={about.courseOutcome || ''}
-          onChange={(e) => handleChange('courseOutcome', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          value={about.courseOutcome ? about.courseOutcome.split('\n').map(line => `• ${line.replace('• ', '')}`).join('\n') : ''}
+          onChange={(e) => {
+            const outcomes = e.target.value
+              .split('\n')
+              .map(line => line.replace('• ', ''))
+              .filter(Boolean)
+              .join('\n');
+            handleChange('courseOutcome', outcomes);
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const target = e.target;
+              const value = target.value;
+              const cursorPos = target.selectionStart;
+              
+              const newValue = value.slice(0, cursorPos) + '\n• ' + value.slice(cursorPos);
+              target.value = newValue;
+              
+              const event = new Event('input', { bubbles: true });
+              target.dispatchEvent(event);
+              
+              target.selectionStart = target.selectionEnd = cursorPos + 3;
+            }
+          }}
+          className="w-full p-[16px] h-[110px] border border-[#D1D5DB] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
           rows={4}
-          placeholder="Enter what students will learn"
+          placeholder={`• Example :
+• Gain UX skills you can immediately apply to improve your projects and career
+• Learn how to conduct effective and useful research
+`}
         />
       </div>
 
       {/* Prerequisites */}
       <div className="mb-6">
         <label className="block text-sm text-gray-600 mb-2">
-          Prerequisites * (Press Enter for new line)
+          Prerequisites * 
         </label>
         <div>
           <textarea
@@ -204,9 +191,12 @@ function AboutCourse() {
                 target.selectionStart = target.selectionEnd = cursorPos + 3;
               }
             }}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            className="w-full p-[16px] border border-[#D1D5DB] h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
             rows={4}
-            placeholder="Press Enter for new line"
+            placeholder={`• Example :
+• Basic understanding of HTML and CSS
+• Familiarity with JavaScript programming concepts
+`}
           />
         </div>
       </div>
@@ -214,7 +204,7 @@ function AboutCourse() {
       {/* Who can enroll for this course */}
       <div className="mb-6">
         <label className="block text-sm text-gray-600 mb-2">
-          Who can enrol for this course * (Press Enter for new line)
+          Who can enrol for this course * 
         </label>
         <div>
           <textarea
@@ -245,9 +235,11 @@ function AboutCourse() {
                 target.selectionStart = target.selectionEnd = cursorPos + 3;
               }
             }}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            className="w-full p-[16px] border border-[#D1D5DB] h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
             rows={4}
-            placeholder="Press Enter for new line"
+            placeholder={`• Example :
+• Students interested in learning web development
+• Beginners looking to start a career in programming `}
           />
         </div>
       </div>
@@ -257,14 +249,46 @@ function AboutCourse() {
         <label className="block text-sm text-gray-600 mb-2">
           Most useful reviews if any *
         </label>
-        <select
-          value={about.reviews || ''}
-          onChange={(e) => handleChange('reviews', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white"
-        >
-          <option value="">Multi Select</option>
-          {/* ... keep existing options ... */}
-        </select>
+        <div className="relative">
+          <div 
+            onClick={() => setIsOpen(!isOpen)}
+            className="w-full text-sm border border-[#D1D5DB] focus:outline-none focus:border-[#bbbfc4] bg-white cursor-pointer flex justify-between items-center"
+            style={{ padding: '8px 16px 8px 16px' }}
+          >
+            <span className="text-gray-500">
+              {selectedReviews.length ? `${selectedReviews.length} reviews selected` : 'Select Top 10 reviews to Display'}
+            </span>
+            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          
+          {isOpen && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+              {reviews.map(review => (
+                <div 
+                  key={review.id}
+                  className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleReviewSelect(review.id)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedReviews.includes(review.id)}
+                    onChange={() => {}}
+                    className="mr-3 h-4 w-4"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{review.author}</span>
+                      <span className="text-yellow-500">({review.rating}★)</span>
+                    </div>
+                    <p className="text-sm text-gray-500 truncate">{review.review}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Description */}
@@ -275,9 +299,12 @@ function AboutCourse() {
         <textarea
           value={about.courseDescription || ''}
           onChange={(e) => handleChange('courseDescription', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          className="w-full p-[16px] border border-[#D1D5DB] h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
           rows={4}
-          placeholder="Enter course description"
+          placeholder={`Example :
+User Experience, or UX, is an exciting field. It's essentially about empowering people to do the things they want to do, which is both fun and gratifying. And, having a great user
+ 
+`}
         />
       </div>
 
