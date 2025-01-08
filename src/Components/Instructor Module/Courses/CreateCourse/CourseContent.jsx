@@ -981,17 +981,18 @@ function CourseContent() {
   }, []); // Run once after component mounts
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 ">
       
-      <div className="flex gap-6">
+      <div className="flex ">
         {/* Left Sidebar - Chapters and Lessons */}
-        <div className="w-1/3 bg-white rounded-lg p-4  h-[80vh] overflow-y-auto">
-          <h2 className="font-medium mb-4">Curriculum</h2>
+        <div className="w-[310px] h-[707px] bg-white gap-4  p-4 border-2 border-[#E2E8F0] overflow-x-hidden  overflow-y-auto">
+          <h2 className="font-medium mb-4 w-[84px] h-[24px] relative" style={{fontSize: '16px', fontWeight: '500', lineHeight: '24px', letterSpacing: '0.15px', textAlign: 'left', color: '#1A202C'}}>Curriculum</h2>
           <button 
             onClick={handleAddChapter}
-            className="flex font-normal items-center gap-2 text-[#0056B3] bg-[#f2f9ff] mb-4 w-full justify-center p-2"
+            className="flex font-normal items-center text-[14px] h-[36px] w-[278px] gap-2 text-[#0056B3] bg-[#f2f9ff] mb-4 justify-center "
+          style={{padding: '6px 8px 6px 8px',fontWeight:"400"}}
           >
-            <span className="material-icons text-sm">add</span>
+            <span className="material-icons text-xl">add</span>
             Add Chapter
           </button>
 
@@ -1003,7 +1004,7 @@ function CourseContent() {
             >
               {/* Chapter Header */}
               <div 
-                className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
+                className={`flex items-center w-[278px] h-[32px]  gap-2 p-2 rounded cursor-pointer ${
                   selectedChapter === chapterIndex ? 'bg-white' : ''
                 }`}
               >
