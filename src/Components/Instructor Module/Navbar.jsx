@@ -77,7 +77,7 @@ const Navbar = () => {
           onClick={toggleSidebar}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
         >
-          <HiMenu className="text-gray-600 text-xl" />
+          <HiMenu className="text-gray-600 text-2xl" />
         </button>
         
         <div className="relative flex-1 max-w-xl">

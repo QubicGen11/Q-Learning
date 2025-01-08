@@ -140,12 +140,12 @@ function BasicInfo() {
             name="courseName"
             value={basicInfo?.courseName || ''}
             onChange={(e) => handleChange('courseName', e.target.value)}
-            maxLength={100}
+            maxLength={80}
             placeholder="Real World UX Learn User Experience & Start Your Career"
             className="w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9"
           />
-          <span className="absolute right-2 top-1.5 text-xs text-gray-500">
-            {(basicInfo?.courseName?.length || 0)}/100
+          <span className="absolute right-2 bottom-1.5 text-xs text-gray-500">
+            {(basicInfo?.courseName?.length || 0)}/80 
           </span>
         </div>
       </div>
@@ -164,7 +164,7 @@ function BasicInfo() {
             rows={3}
             className="w-full px-4 py-2 border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] "
           />
-          <span className="absolute right-2 top-2 text-xs text-gray-500">
+          <span className="absolute right-2 bottom-2 text-xs text-gray-500">
             {(basicInfo?.courseTagline?.length || 0)}/300
           </span>
         </div>

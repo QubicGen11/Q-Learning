@@ -226,7 +226,7 @@ const StepIndicator = () => {
               <div className="flex flex-col items-center">
                 <div className="flex items-center w-4/5">
                   <div className={`
-                    relative
+                    relative group z-[999]
                     ${currentStep === step.number ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' : ''}
                   `}>
                     <div className={`
@@ -245,6 +245,14 @@ const StepIndicator = () => {
                       ) : (
                         step.number
                       )}
+                    </div>
+                    
+                    {/* Tooltip */}
+                    <div className="absolute left-[40px] top-[50%] -translate-y-1/2
+                                    bg-gray-800 text-white text-sm rounded px-2 py-1
+                                    opacity-0 group-hover:opacity-100 pointer-events-none 
+                                    transition-opacity duration-200 whitespace-nowrap">
+                      {step.title}
                     </div>
                   </div>
                   <div className="ml-3 ">
@@ -276,18 +284,15 @@ const StepIndicator = () => {
 
         {/* Navigation Buttons */}
         <div className="flex items-center gap-4">
-          <button 
-            onClick={handlePrevious}
-            disabled={currentStep === 1 && currentTab === 'info'}
-            className={`flex items-center gap-2 px-4 py-2 h-8 rounded-md ${
-              currentStep === 1 && currentTab === 'info'
-                ? 'text-gray-400 bg-gray-100 cursor-not-allowed' 
-                : 'text-[#0056B3] hover:text-blue bg-[#F5F5F5]'
-            }`}
-          >
-            <span className="material-icons text-sm">arrow_back</span>
-            Previous
-          </button>
+          {(currentStep > 1 || currentTab !== 'info' || location.pathname.includes('/settings')) && (
+            <button 
+              onClick={handlePrevious}
+              className="flex items-center gap-2 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-4 py-2 h-8 rounded-md"
+            >
+              <span className="material-icons text-sm">arrow_back</span>
+              Previous
+            </button>
+          )}
           {(currentStep < steps.length || currentTab !== 'settings') && (
             <button 
               onClick={handleNext}

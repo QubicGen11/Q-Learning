@@ -55,15 +55,15 @@ const InstructorLayout = () => {
 
   return (
     <div className="flex min-h-screen">
-      <div className="fixed h-screen">
+      <div className="fixed h-screen z-40">
         <Sidebar />
       </div>
 
       <div className={`flex-1 ${isCollapsed ? 'ml-[60px]' : 'ml-64'}`}>
-        <div className="sticky top-0 z-10 ">
+        <div className="sticky top-0 z-30">
           <Navbar />
         </div>
-        <main className="p-[2px] bg-[#f2f9ff] ">
+        <main className="p-[2px] bg-[#f2f9ff] relative z-20">
           <Outlet />
         </main>
       </div>

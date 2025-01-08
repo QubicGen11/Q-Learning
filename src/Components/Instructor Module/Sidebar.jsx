@@ -22,7 +22,10 @@ const Sidebar = () => {
   ];
 
   const isActive = (path) => {
-    return location.pathname === path;
+    if (path === '/instructor') {
+      return location.pathname === '/instructor';
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
@@ -43,44 +46,72 @@ const Sidebar = () => {
       <nav className="flex-1 flex flex-col">
         <div className="flex-1 py-2">
           {menuItems.filter(item => !item.isBottom).map((item, index) => (
-            <Link
-              key={index}
-              to={item.path}
-              className={`flex items-center transition-colors duration-200
-                ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
-                ${isActive(item.path) 
-                  ? 'bg-white text-[#0056B3]' 
-                  : 'text-white/90 hover:bg-white/10'}`}
-            >
-              <span className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}>
-                {item.icon}
-              </span>
-              {!isCollapsed && (
-                <span className="text-[14px] font-normal">{item.label}</span>
+            <div key={index} className="relative group">
+              <Link
+                to={item.path}
+                className={`flex items-center transition-colors duration-200
+                  ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
+                  ${isActive(item.path) 
+                    ? 'bg-white text-[#0056B3]' 
+                    : 'text-white/90 hover:bg-white/10'}`}
+              >
+                <span className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}>
+                  {item.icon}
+                </span>
+                {!isCollapsed && (
+                  <span className="text-[14px] font-normal">{item.label}</span>
+                )}
+              </Link>
+              {/* Tooltip */}
+              {isCollapsed && (
+                <div 
+                  className="absolute left-12 top-1/2 -translate-y-1/2 
+                            bg-gray-800 text-white text-sm rounded px-2 py-1
+                            opacity-0 group-hover:opacity-100 pointer-events-none 
+                            transition-opacity duration-200 whitespace-nowrap z-[99999]
+                            shadow-lg"
+                  style={{ transform: 'translateY(-50%)' }}
+                >
+                  {item.label}
+                </div>
               )}
-            </Link>
+            </div>
           ))}
         </div>
 
         {/* Bottom Items */}
         <div className="py-2 border-t border-white/10">
           {menuItems.filter(item => item.isBottom).map((item, index) => (
-            <Link
-              key={index}
-              to={item.path}
-              className={`flex items-center transition-colors duration-200
-                ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
-                ${isActive(item.path) 
-                  ? 'bg-white text-[#0056B3]' 
-                  : 'text-white/90 hover:bg-white/10'}`}
-            >
-              <span className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}>
-                {item.icon}
-              </span>
-              {!isCollapsed && (
-                <span className="text-[14px] font-normal">{item.label}</span>
+            <div key={index} className="relative group">
+              <Link
+                to={item.path}
+                className={`flex items-center transition-colors duration-200
+                  ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
+                  ${isActive(item.path) 
+                    ? 'bg-white text-[#0056B3]' 
+                    : 'text-white/90 hover:bg-white/10'}`}
+              >
+                <span className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}>
+                  {item.icon}
+                </span>
+                {!isCollapsed && (
+                  <span className="text-[14px] font-normal">{item.label}</span>
+                )}
+              </Link>
+              {/* Tooltip */}
+              {isCollapsed && (
+                <div 
+                  className="absolute left-12 top-1/2 -translate-y-1/2 
+                            bg-gray-800 text-white text-sm rounded px-2 py-1
+                            opacity-0 group-hover:opacity-100 pointer-events-none 
+                            transition-opacity duration-200 whitespace-nowrap z-[99999]
+                            shadow-lg"
+                  style={{ transform: 'translateY(-50%)' }}
+                >
+                  {item.label}
+                </div>
               )}
-            </Link>
+            </div>
           ))}
         </div>
       </nav>
