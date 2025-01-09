@@ -11,8 +11,9 @@ import './Coursecontent.css'
 import { BsQuestionOctagon } from "react-icons/bs";
 import { LiaUploadSolid } from "react-icons/lia";
 import { IoIosAddCircleOutline } from 'react-icons/io';
-import { CiPlay1 } from "react-icons/ci";
+import { CiFileOn, CiPlay1 } from "react-icons/ci";
 import { RiDeleteBinLine } from "react-icons/ri";
+import { LuFileQuestion } from "react-icons/lu";
 
 function CourseContent() {
   const navigate = useNavigate();
@@ -1129,7 +1130,12 @@ function CourseContent() {
                         <span className="material-icons text-[#4b5563] text-xl font-bold">
                           {lesson.lessonType === 'Video' ? 
                             <CiPlay1 className="w-5 h-5 font-extrabold stroke-1" /> : 
-                            lesson.lessonType === 'Quiz' ? 'quiz' : 'article'}
+                            
+                            lesson.lessonType === 'Quiz' ?   <LuFileQuestion  className="w-5 h-5 font-extrabold stroke-1" /> : 
+
+                            lesson.lessonType === 'Content' ?  <CiFileOn  className="w-5 h-5 font-extrabold stroke-1" /> : 
+
+                             'article'}
                         </span>
 
                         <div className="flex items-center flex-1 min-w-0">
@@ -1191,7 +1197,7 @@ function CourseContent() {
     handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value);
   }}
   onClick={(e) => e.stopPropagation()}
-  className="text-xs border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
+  className="text-xs border ml-3 rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
   style={{
     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
     backgroundRepeat: 'no-repeat',
@@ -1201,7 +1207,7 @@ function CourseContent() {
   }}
 >
   <option value="Video">Video</option>
-  <option value="PDF">PDF</option>
+  <option value="PDF">Content</option>
   <option value="Quiz">Quiz</option>
 </select>
 
