@@ -12,6 +12,7 @@ import { BsQuestionOctagon } from "react-icons/bs";
 import { LiaUploadSolid } from "react-icons/lia";
 import { IoIosAddCircleOutline } from 'react-icons/io';
 import { CiPlay1 } from "react-icons/ci";
+import { RiDeleteBinLine } from "react-icons/ri";
 
 function CourseContent() {
   const navigate = useNavigate();
@@ -1009,18 +1010,14 @@ function CourseContent() {
             >
               {/* Chapter Header */}
               <div
-                className={`flex items-center w-[278px] h-[32px] gap-2 p-2 bg-white  rounded cursor-pointer ${selectedChapter === chapterIndex ? 'bg-white' : ''
-                  }`}
+                className={`flex items-center w-[278px] h-[32px] gap-2 p-2 bg-white rounded cursor-pointer ${
+                  selectedChapter === chapterIndex ? 'bg-white' : ''
+                }`}
               >
-                <span className="material-icons text-gray-400 text-sm">drag_indicator</span>
-                <div
-                  className="flex items-center flex-1"
-                  onClick={(e) => {
-                    setSelectedChapter(selectedChapter === chapterIndex ? null : chapterIndex);
-                  }}
-                >
-                  <span className="text-xs text-gray-700 ">Chapter {chapterIndex + 1}: </span>
-                  {editingChapter === chapterIndex ? (
+                <span className="material-icons text-[#d1d5db] text-2xl h-[36px] ">drag_indicator</span>
+                {editingChapter === chapterIndex ? (
+                  <div className="flex items-center flex-1">
+                    <span className="text-xs text-gray-700">Chapter {chapterIndex + 1}: </span>
                     <input
                       type="text"
                       value={editName}
@@ -1048,165 +1045,190 @@ function CourseContent() {
                       autoFocus
                       onClick={(e) => e.stopPropagation()}
                     />
-                  ) : (
-                    <span
-                      className="text-xs text-gray-700 font-bold flex-1 ml-1 truncate"
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        setEditName(chapter.chapterName || '');
-                        setEditingChapter(chapterIndex);
-                      }}
-                      title={chapter.chapterName || ''}
-                      style={{
-                        maxWidth: '150px',
-                        display: 'inline-block'
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className="flex items-center flex-1"
+                      onClick={(e) => {
+                        setSelectedChapter(selectedChapter === chapterIndex ? null : chapterIndex);
                       }}
                     >
-                      {chapter.chapterName ?
-                        (chapter.chapterName.length > 10 ?
-                          `${chapter.chapterName.substring(0, 10)}...` :
-                          chapter.chapterName
-                        ) : ''
-                      }
-                    </span>
-                  )}
-                </div>
+                      <span className="text-xs text-gray-700">Chapter {chapterIndex + 1}: </span>
+                      <span
+                        className="text-xs text-gray-700 font-bold flex-1 ml-1 truncate"
+                        onDoubleClick={(e) => {
+                          e.stopPropagation();
+                          setEditName(chapter.chapterName || '');
+                          setEditingChapter(chapterIndex);
+                        }}
+                        title={chapter.chapterName || ''}
+                        style={{
+                          maxWidth: '150px',
+                          display: 'inline-block'
+                        }}
+                      >
+                        {chapter.chapterName ?
+                          (chapter.chapterName.length > 10 ?
+                            `${chapter.chapterName.substring(0, 10)}...` :
+                            chapter.chapterName
+                          ) : ''
+                        }
+                      </span>
+                    </div>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const updatedChapters = [...chapters];
-                    updatedChapters.splice(chapterIndex, 1);
-                    setChapters(updatedChapters);
-                    if (selectedChapter === chapterIndex) {
-                      setSelectedChapter(null);
-                    }
-                  }}
-                  className="text-red-500 hover:text-red-700 p-1 text-lg"
-                  title="Delete chapter"
-                >
-                  <span className="material-icons text-lg">delete_outline</span>
-                </button>
-                <span
-                  className="material-icons text-gray-700 text-2xl"
-                  onClick={() => {
-                    setSelectedChapter(selectedChapter === chapterIndex ? null : chapterIndex);
-                  }}
-                >
-                  {selectedChapter === chapterIndex ? 'expand_less' : 'expand_more'}
-                </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const updatedChapters = [...chapters];
+                        updatedChapters.splice(chapterIndex, 1);
+                        setChapters(updatedChapters);
+                        if (selectedChapter === chapterIndex) {
+                          setSelectedChapter(null);
+                        }
+                      }}
+                      className="text-[#DC3545] hover:text-red-700 p-1 text-lg"
+                      title="Delete chapter"
+                    >
+                      <span className="material-icons text-lg"><RiDeleteBinLine style={{borderRadius:"500px"}} /> </span>
+                    </button>
+                    <span
+                      className="material-icons text-gray-700 text-2xl"
+                      onClick={() => {
+                        setSelectedChapter(selectedChapter === chapterIndex ? null : chapterIndex);
+                      }}
+                    >
+                      {selectedChapter === chapterIndex ? 'expand_less' : 'expand_more'}
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Lessons List - Only show if chapter is selected */}
               {selectedChapter === chapterIndex && (
                 <div className="mt-2 space-y-1 p-2 bg-[#f3f4f6]">
-                  {chapter.lessons.map((lesson, lessonIndex) => (
-                    <div
-                      key={lessonIndex}
-                      className={`flex items-center gap-2 p-2 rounded cursor-pointer    ${
-                        selectedLesson?.chapterIndex === chapterIndex &&
-                        selectedLesson?.lessonIndex === lessonIndex
-                          ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
-                          : 'bg-white'
-                      }`}
-                      onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
-                    >
-                      {/* Lesson Icon based on type */}
-                      <span className="material-icons text-[#4b5563] text-xl font-bold">
-                        {lesson.lessonType === 'Video' ? 
-                          <CiPlay1 className="w-5 h-5 font-extrabold stroke-1" /> : 
-                          lesson.lessonType === 'Quiz' ? 'quiz' : 'article'}
-                      </span>
-
-                      <div className="flex items-center flex-1 min-w-0">
-                        <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span>
-                        {editingLesson === `${chapterIndex}-${lessonIndex}` ? (
-                          <>
-                            <input
-                              type="text"
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              onBlur={() => {
-                                if (editName.trim() !== '') {
-                                  const updatedChapters = [...chapters];
-                                  updatedChapters[chapterIndex].lessons[lessonIndex] = {
-                                    ...lesson,
-                                    lessonTitle: editName.trim()
-                                  };
-                                  setChapters(updatedChapters);
-                                }
-                                setEditingLesson(null);
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.target.blur();
-                                }
-                                if (e.key === 'Escape') {
-                                  setEditingLesson(null);
-                                }
-                              }}
-                              className="text-xs flex-1 outline-none border-b border-blue-500 ml-1"
-                              autoFocus
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </>
-                        ) : (
-                          <>
-                            <span
-                              className="text-xs text-gray-700 font-bold flex-1 ml-1 truncate"
-                              onDoubleClick={(e) => {
-                                e.stopPropagation();
-                                setEditName(lesson.lessonTitle || '');
-                                setEditingLesson(`${chapterIndex}-${lessonIndex}`);
-                              }}
-                              title={lesson.lessonTitle || ''}
-                            >
-                              {lesson.lessonTitle ?
-                                (lesson.lessonTitle.length > 10 ?
-                                  `${lesson.lessonTitle.substring(0, 10)}...` :
-                                  lesson.lessonTitle
-                                ) : ''
-                              }
-                            </span>
-                            
-                            {/* Only show dropdown and delete when not editing */}
-                            <select
-                              value={lesson.lessonType}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value);
-                              }}
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-xs border rounded bg-transparent"
-                            >
-                              <option value="Video">Video</option>
-                              <option value="PDF">PDF</option>
-                              <option value="Quiz">Quiz</option>
-                            </select>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveLesson(chapterIndex, lessonIndex);
-                              }}
-                              className="text-red-500 hover:text-red-700 p-1"
-                              title="Delete lesson"
-                            >
-                              <span className="material-icons text-sm">delete_outline</span>
-                            </button>
-                          </>
-                        )}
-                      </div>
+                  {chapter.lessons.length === 0 ? (
+                    // No lessons message
+                    <div className="flex items-center justify-center h-[32px] text-xs text-gray-500 italic">
+                      No lessons under this chapter
                     </div>
-                  ))}
+                  ) : (
+                    // Existing lessons mapping
+                    chapter.lessons.map((lesson, lessonIndex) => (
+                      <div
+                        key={lessonIndex}
+                        className={`flex items-center h-[32px] ml-2 gap-2 p-2 rounded cursor-pointer ${
+                          selectedLesson?.chapterIndex === chapterIndex &&
+                          selectedLesson?.lessonIndex === lessonIndex
+                            ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
+                            : 'bg-white'
+                        }`}
+                        onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
+                      >
+                        {/* Lesson Icon based on type */}
+                        <span className="material-icons text-[#4b5563] text-xl font-bold">
+                          {lesson.lessonType === 'Video' ? 
+                            <CiPlay1 className="w-5 h-5 font-extrabold stroke-1" /> : 
+                            lesson.lessonType === 'Quiz' ? 'quiz' : 'article'}
+                        </span>
 
-                  {/* Add Lesson Button */}
-                  <div className='flex justify-center '>
+                        <div className="flex items-center flex-1 min-w-0">
+                          <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span>
+                          {editingLesson === `${chapterIndex}-${lessonIndex}` ? (
+                            <>
+                              <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                onBlur={() => {
+                                  if (editName.trim() !== '') {
+                                    const updatedChapters = [...chapters];
+                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                      ...lesson,
+                                      lessonTitle: editName.trim()
+                                    };
+                                    setChapters(updatedChapters);
+                                  }
+                                  setEditingLesson(null);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.target.blur();
+                                  }
+                                  if (e.key === 'Escape') {
+                                    setEditingLesson(null);
+                                  }
+                                }}
+                                className="text-xs flex-1 outline-none border-b border-blue-500 ml-1"
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </>
+                          ) : (
+                            <>
+                              <span
+                                className="text-xs text-gray-700 font-bold flex-1 ml-1 truncate"
+                                onDoubleClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditName(lesson.lessonTitle || '');
+                                  setEditingLesson(`${chapterIndex}-${lessonIndex}`);
+                                }}
+                                title={lesson.lessonTitle || ''}
+                              >
+                                {lesson.lessonTitle ?
+                                  (lesson.lessonTitle.length > 10 ?
+                                    `${lesson.lessonTitle.substring(0, 10)}...` :
+                                    lesson.lessonTitle
+                                  ) : ''
+                                }
+                              </span>
+                              
+                              {/* Only show dropdown and delete when not editing */}
+                              <select
+  value={lesson.lessonType}
+  onChange={(e) => {
+    e.stopPropagation();
+    handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value);
+  }}
+  onClick={(e) => e.stopPropagation()}
+  className="text-xs border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
+  style={{
+    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0.5rem center',
+    backgroundSize: '1em',
+    paddingRight: '1.5rem'
+  }}
+>
+  <option value="Video">Video</option>
+  <option value="PDF">PDF</option>
+  <option value="Quiz">Quiz</option>
+</select>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveLesson(chapterIndex, lessonIndex);
+                                }}
+                                className="text-red-500 hover:text-red-700 p-1"
+                                title="Delete lesson"
+                              >
+                               <span className=" text-sm"><RiDeleteBinLine style={{borderRadius:"1000px"}} /> </span>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+
+                  {/* Add Lesson Button - Keep outside the conditional rendering */}
+                  <div className='flex justify-center'>
                     <button
                       onClick={() => handleAddLesson(chapterIndex)}
                       className="flex items-center mt-9 px-2 py-2 rounded-md gap-1 bg-white text-[#0056B3] text-xs w-3/5 justify-center"
                     >
-                      <span className=" text-sm"><IoIosAddCircleOutline /></span>
+                      <span className="text-sm"><IoIosAddCircleOutline /></span>
                       Add Lesson
                     </button>
                   </div>
