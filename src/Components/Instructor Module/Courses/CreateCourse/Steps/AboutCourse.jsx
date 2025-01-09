@@ -112,7 +112,7 @@ function AboutCourse() {
  
 
   return (
-    <div className="max-w-[800px] mx-auto">
+    <div className="max-w-[800px] mx-auto mt-5 p-4">
       {/* What will you get */}
       <div className="mb-6">
         <label className="block text-sm text-gray-600 mb-2">

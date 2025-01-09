@@ -85,20 +85,26 @@ const InstructorLayout = () => {
         </div>
         <main className="p-6 bg-[#f2f9ff] relative z-20">
           <div className='text-md text-[#0077FF] flex items-center gap-1 relative bottom-3'>
-            <PiPresentationBold className='text-lg font-bold' />
-            <a href="/instructor/courses"><p className='text-md'>Courses</p></a>
             
-            {location.pathname.match(/^\/instructor\/courses\/create(\/.*)?$/) && (
-              location.pathname !== '/instructor/courses/create' && (
+            {/* {location.pathname.includes('/instructor/courses') && (
+              <>
+                <PiPresentationBold className='text-lg font-bold' />
+                <a href="/instructor/courses"><p className='text-md'>Courses</p></a>
+              </>
+            )} */}
+            
+            {location.pathname.match(/^\/instructor\/courses\/create/) && (
                 <>
+                 <PiPresentationBold className='text-lg font-bold' />
+                 <a href="/instructor/courses"><p className='text-md'>Courses</p></a>
                   <span>
                     <PiCaretRightBold className='text-xs' />
                   </span>
-               <Link to="/instructor/courses/create">
-               <p className='text-md text-[#4B5563] inline-flex items-center'>
-                    {breadcrumbTitle || 'Untitled Course'}
-                  </p>
-                </Link>  
+                  <Link to="/instructor/courses/create">
+                    <p className='text-md text-[#4B5563] inline-flex items-center'>
+                      {breadcrumbTitle || 'Untitled Course'}
+                    </p>
+                  </Link>  
                   
                   {/* Show step and substep */}
                   {location.pathname.includes('/settings') ? (
@@ -140,12 +146,13 @@ const InstructorLayout = () => {
                     </>
                   )}
                 </>
-              )
             )}
 
-            <div className='bg-[#6B7280] text-white  rounded-md ml-3 w-[70px] text-center' style={{padding:"1px 8px 1px 8px"}}>
-              Drafts
-            </div>
+            {location.pathname.match(/^\/instructor\/courses\/create/) && (
+              <div className='bg-gray-500 text-white rounded-md ml-3 w-[70px] text-center' style={{padding:"1px 8px 1px 8px"}}>
+                Drafts
+              </div>
+            )}
           </div>
           <Outlet />
         </main>

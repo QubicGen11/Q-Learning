@@ -134,7 +134,7 @@ function Media() {
   };
  
   return (
-    <div className="max-w-[800px] mx-auto">
+    <div className="max-w-[800px] mx-auto p-4 mt-5">
       <div className="space-y-6">
         {/* Course Banner Video */}
         <div>

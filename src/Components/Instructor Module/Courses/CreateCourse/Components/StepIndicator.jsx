@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
+import { IoIosArrowRoundBack, IoIosArrowRoundForward } from 'react-icons/io';
 
 
 const StepIndicator = () => {
@@ -354,19 +355,19 @@ const StepIndicator = () => {
           {(currentStep > 1 || currentTab !== 'info' || location.pathname.includes('/settings')) && (
             <button 
               onClick={handlePrevious}
-              className="flex items-center gap-2 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-4 py-2 h-8 rounded-md"
+              className="flex items-center gap-1 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-4 py-2 h-8 rounded-md"
             >
-              <span className="material-icons text-sm">arrow_back</span>
+              <span className="text-2xl font-bold mt-1"><IoIosArrowRoundBack /></span>
               Previous
             </button>
           )}
           {(currentStep < steps.length || currentTab !== 'settings') && (
             <button 
               onClick={handleNext}
-              className="flex items-center gap-2 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-4 h-8 py-2 rounded-md"
+              className="flex items-center gap-1 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-4 h-8 py-2 rounded-md"
             >
               {getNextButtonText()}
-              <span className="material-icons text-sm">arrow_forward</span>
+              <span className=" text-2xl font-bold mt-1"><IoIosArrowRoundForward   /></span>
             </button>
           )}
         </div>

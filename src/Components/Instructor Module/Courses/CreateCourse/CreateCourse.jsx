@@ -80,7 +80,7 @@ function CreateCourse() {
       </div>
 
       {/* Content Area */}
-      <div className=" h-[70vh] overflow-y-auto">
+      <div className=" h-[59vh] overflow-y-auto">
         
         <Outlet />
       </div>

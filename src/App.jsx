@@ -30,6 +30,7 @@ import BasicInformation from './Components/Instructor Module/Courses/CreateCours
 import AddMedia from './Components/Instructor Module/Courses/CreateCourse/Steps/AddMedia';
 import AboutCourse from './Components/Instructor Module/Courses/CreateCourse/Steps/AboutCourse';
 import MoreInfo from './Components/Instructor Module/Courses/CreateCourse/Steps/MoreInfo';
+import Testskillsec from './Components/Testskillsec';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -111,6 +112,10 @@ function App() {
      
               <Route path="/learn-course/:courseId" element={<CourseLearnInterface />} />
               <Route path="/course/assignment/:chapterName" element={<AssignmentView />} />
+              <Route path="/instructor/skill-assessments" element={<Testskillsec />} />
+            
+
+
               <Route path="/instructor" element={<InstructorLayout />}>
                 <Route path="courses">
                   <Route index element={<CoursesPage />} />

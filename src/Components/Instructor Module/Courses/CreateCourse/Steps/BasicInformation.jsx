@@ -220,7 +220,7 @@ function BasicInfo() {
   ];
 
   return (
-    <div className="max-w-[700px] mx-auto space-y-6">
+    <div className="max-w-[700px] mx-auto space-y-6 mt-5 p-4">
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Name *
