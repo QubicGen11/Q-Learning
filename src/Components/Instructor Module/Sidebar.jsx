@@ -69,10 +69,15 @@ const Sidebar = () => {
               {isCollapsed && (
                 <div 
                   className="absolute left-12 top-1/2 -translate-y-1/2 
-                            bg-gray-800 text-white text-sm rounded px-2 py-1
+                            bg-gray-600 text-white text-sm rounded-lg px-3 py-2
                             opacity-0 group-hover:opacity-100 pointer-events-none 
                             transition-opacity duration-200 whitespace-nowrap z-[99999]
-                            shadow-lg"
+                            border border-gray-200
+                            before:content-[''] before:absolute before:left-[-8px] 
+                            before:top-1/2 before:-translate-y-1/2 
+                            before:w-3 before:h-3 before:rotate-45
+                            before:border-l before:border-b before:border-gray-200
+                            before:bg-gray-600"
                   style={{ transform: 'translateY(-50%)' }}
                 >
                   {item.label}
@@ -91,7 +96,7 @@ const Sidebar = () => {
                 className={`flex items-center transition-colors duration-200
                   ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
                   ${isActive(item.path) 
-                    ? 'bg-white text-[#0056B3]' 
+                    ? 'bg-gray-600 text-white' 
                     : 'text-white/90 hover:bg-white/10'}`}
               >
                 <span className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}>
@@ -105,10 +110,15 @@ const Sidebar = () => {
               {isCollapsed && (
                 <div 
                   className="absolute left-12 top-1/2 -translate-y-1/2 
-                            bg-gray-800 text-white text-sm rounded px-2 py-1
+                            bg-gray-600 text-white text-sm rounded-lg px-3 py-2
                             opacity-0 group-hover:opacity-100 pointer-events-none 
                             transition-opacity duration-200 whitespace-nowrap z-[99999]
-                            shadow-lg"
+                            border border-gray-200
+                            before:content-[''] before:absolute before:left-[-8px] 
+                            before:top-1/2 before:-translate-y-1/2 
+                            before:w-3 before:h-3 before:rotate-45
+                            before:border-l before:border-b before:border-gray-200
+                            before:bg-gray-600"
                   style={{ transform: 'translateY(-50%)' }}
                 >
                   {item.label}

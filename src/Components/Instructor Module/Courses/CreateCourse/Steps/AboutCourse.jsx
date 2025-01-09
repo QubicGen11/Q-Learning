@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import { toast } from 'react-hot-toast';
 import './Aboucourse.css'
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 function AboutCourse() {
   const { courseData, updateCourseData, setStep, currentStep } = useCourseCreationStore();
@@ -103,13 +105,18 @@ function AboutCourse() {
     }
   };
 
+  const modules = {
+    toolbar: [
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['clean']
+    ]
+  };
 
-
-
-
- 
-
- 
+  const formats = [
+    'bold', 'italic', 'underline',
+    'list', 'bullet'
+  ];
 
   return (
     <div className="max-w-[800px] mx-auto mt-5 p-4">
@@ -144,7 +151,7 @@ function AboutCourse() {
               target.selectionStart = target.selectionEnd = cursorPos + 3;
             }
           }}
-          className="w-full p-[16px] h-[110px] border border-[#D1D5DB] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
+          className="w-full rounded p-[16px] h-[110px] border border-[#D1D5DB] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
           rows={4}
           placeholder={`• Example :
 • Gain UX skills you can immediately apply to improve your projects and career
@@ -158,7 +165,7 @@ function AboutCourse() {
         <label className="block text-sm text-gray-600 mb-2">
           Prerequisites * 
         </label>
-        <div>
+        <div >
           <textarea
             value={about.coursePreRequisites?.map(prereq => `• ${prereq.preRequisiteRequired}`).join('\n') || ''}
             onChange={(e) => {
@@ -191,8 +198,9 @@ function AboutCourse() {
                 target.selectionStart = target.selectionEnd = cursorPos + 3;
               }
             }}
-            className="w-full p-[16px] border border-[#D1D5DB] h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
+            className="w-full rounded p-[16px] border border-[#D1D5DB]  h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
             rows={4}
+            
             placeholder={`• Example :
 • Basic understanding of HTML and CSS
 • Familiarity with JavaScript programming concepts
@@ -235,7 +243,7 @@ function AboutCourse() {
                 target.selectionStart = target.selectionEnd = cursorPos + 3;
               }
             }}
-            className="w-full p-[16px] border border-[#D1D5DB] h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
+            className="w-full rounded p-[16px] border border-[#D1D5DB] h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
             rows={4}
             placeholder={`• Example :
 • Students interested in learning web development
@@ -252,7 +260,7 @@ function AboutCourse() {
         <div className="relative">
           <div 
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full text-sm border border-[#D1D5DB] focus:outline-none focus:border-[#bbbfc4] bg-white cursor-pointer flex justify-between items-center"
+            className="w-full rounded text-sm border border-[#D1D5DB] focus:outline-none focus:border-[#bbbfc4] bg-white cursor-pointer flex justify-between items-center"
             style={{ padding: '8px 16px 8px 16px' }}
           >
             <span className="text-gray-500">
@@ -296,15 +304,15 @@ function AboutCourse() {
         <label className="block text-sm text-gray-600 mb-2">
           Description *
         </label>
-        <textarea
+        <ReactQuill
           value={about.courseDescription || ''}
-          onChange={(e) => handleChange('courseDescription', e.target.value)}
-          className="w-full p-[16px] border border-[#D1D5DB] h-[100px] focus:outline-none focus:border-[#bbbfc4] placeholder:text-sm placeholder:text-gray-400"
-          rows={4}
-          placeholder={`Example :
-User Experience, or UX, is an exciting field. It's essentially about empowering people to do the things they want to do, which is both fun and gratifying. And, having a great user
- 
-`}
+          onChange={(content) => handleChange('courseDescription', content)}
+          modules={modules}
+          formats={formats}
+          className="h-[110px] mb-12"
+          placeholder={`Example:
+User Experience, or UX, is an exciting field. It's essentially about empowering people to do the things they want to do, which is both fun and gratifying.`}
+          theme="snow"
         />
       </div>
 

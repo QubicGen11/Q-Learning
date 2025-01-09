@@ -86,12 +86,7 @@ const InstructorLayout = () => {
         <main className="p-6 bg-[#f2f9ff] relative z-20">
           <div className='text-md text-[#0077FF] flex items-center gap-1 relative bottom-3'>
             
-            {/* {location.pathname.includes('/instructor/courses') && (
-              <>
-                <PiPresentationBold className='text-lg font-bold' />
-                <a href="/instructor/courses"><p className='text-md'>Courses</p></a>
-              </>
-            )} */}
+     
             
             {location.pathname.match(/^\/instructor\/courses\/create/) && (
                 <>
@@ -102,7 +97,12 @@ const InstructorLayout = () => {
                   </span>
                   <Link to="/instructor/courses/create">
                     <p className='text-md text-[#4B5563] inline-flex items-center'>
-                      {breadcrumbTitle || 'Untitled Course'}
+                      {breadcrumbTitle 
+                        ? (breadcrumbTitle.length > 15
+                            ? `${breadcrumbTitle.substring(0, 15)}...` 
+                            : breadcrumbTitle)
+                        : 'Untitled Course'
+                      }
                     </p>
                   </Link>  
                   

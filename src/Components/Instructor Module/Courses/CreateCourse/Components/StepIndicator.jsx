@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
-import { IoIosArrowRoundForward } from 'react-icons/io';
+import { IoIosArrowRoundBack, IoIosArrowRoundForward } from 'react-icons/io';
 
 
 const StepIndicator = () => {
@@ -240,6 +240,39 @@ const StepIndicator = () => {
     </svg>
   );
 
+  const getStepText = (direction) => {
+    const currentPath = location.pathname;
+    
+    // Course Information steps
+    if (currentPath.includes('basic-info')) {
+      return direction === 'next' ? 'Add Media' : 'Course Details';
+    }
+    if (currentPath.includes('media')) {
+      return direction === 'next' ? 'About Course' : 'Course Details';
+    }
+    if (currentPath.includes('about')) {
+      return direction === 'next' ? 'Course Content' : 'Add Media';
+    }
+    
+    // Course Content steps
+    if (currentPath.includes('/content')) {
+      return direction === 'next' ? 'Glossary and References' : 'About Course';
+    }
+    if (currentPath.includes('more-info')) {
+      return direction === 'next' ? "FAQ's" : 'Course Content';
+    }
+    if (currentPath.includes('faq')) {
+      return direction === 'next' ? 'Settings' : 'Glossary and References';
+    }
+    
+    // Settings
+    if (currentPath.includes('settings')) {
+      return direction === 'next' ? '' : "FAQ's";
+    }
+    
+    return direction === 'next' ? 'Next' : 'Previous';
+  };
+
   return (
     <div className="space-y-2">
       {/* Main Navigation Tabs */}
@@ -359,19 +392,23 @@ const StepIndicator = () => {
           {(currentStep > 1 || currentTab !== 'info' || location.pathname.includes('/settings')) && (
             <button 
               onClick={handlePrevious}
-              className="flex items-center gap-2 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-4 py-2 h-8 rounded-md"
+              className="flex items-center justify-center gap-1 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-3 h-8 rounded-md"
             >
-              <span className="material-icons text-sm">arrow_back</span>
+            
+              <IoIosArrowRoundBack className="text-xl" />
               Previous
+              <span className="text-sm">{getStepText('previous')}</span>
             </button>
           )}
+
           {(currentStep < steps.length || currentTab !== 'settings') && (
             <button 
               onClick={handleNext}
-              className="flex items-center gap-2 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-4 h-8 py-2 rounded-md"
+              className="flex items-center justify-center gap-1 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-3 h-8 rounded-md"
             >
-              {getNextButtonText()}
-              <span className=" text-2xl font-b"><IoIosArrowRoundForward   /></span>
+              Next
+              <span className="text-sm">{getStepText('next')}</span>
+              <IoIosArrowRoundForward className="text-xl" />
             </button>
           )}
         </div>
