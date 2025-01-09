@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 /* Add these styles for lesson content */
+
+
+body{
+  font-size: 14px
+}
+
+@media (max-width: 768px) {
+  body{
+    font-size: 16px
+  }
+}
 .lesson-content h3 {
     @apply text-xl font-semibold mb-4 mt-6;
   }
