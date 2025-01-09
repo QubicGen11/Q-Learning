@@ -80,10 +80,19 @@ function CreateCourse() {
       </div>
 
       {/* Content Area */}
-      <div className=" h-[59vh] overflow-y-auto">
-        
+      <div className="calc-height overflow-y-auto">
         <Outlet />
       </div>
+
+      {/* Add this CSS to your stylesheet */}
+      <style>
+        {`
+          .calc-height {
+            height: calc(100vh - 300px); /* Adjust the pixel value based on your header and navigation heights */
+            min-height: 400px; /* Set a minimum height to prevent content from being too compressed */
+          }
+        `}
+      </style>
 
       {/* Bottom Navigation */}
       {/* <div className="border-t border-gray-200 px-6 py-4">
