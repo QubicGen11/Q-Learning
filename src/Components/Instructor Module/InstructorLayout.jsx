@@ -95,7 +95,7 @@ const InstructorLayout = () => {
                   <span>
                     <PiCaretRightBold className='text-xs' />
                   </span>
-                  <Link to="/instructor/courses/create">
+                
                     <p className='text-md text-[#4B5563] inline-flex items-center'>
                       {breadcrumbTitle 
                         ? (breadcrumbTitle.length > 15
@@ -104,7 +104,7 @@ const InstructorLayout = () => {
                         : 'Untitled Course'
                       }
                     </p>
-                  </Link>  
+                  
                   
                   {/* Show step and substep */}
                   {location.pathname.includes('/settings') ? (
