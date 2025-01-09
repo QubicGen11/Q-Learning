@@ -390,7 +390,7 @@ function CourseContent() {
 
               {/* Show Questions if they exist */}
               {selectedLesson.questions && selectedLesson.questions.length > 0 && (
-                <div className="flex-1 pl-6 h-full overflow-hidden">
+                <div className="flex-1  h-full overflow-hidden w-[829px]">
                   <div className="h-full flex flex-col">
                     <div className="flex justify-between items-center mb-4 flex-shrink-0">
                       <h2 className="font-medium">Quiz</h2>
@@ -433,7 +433,7 @@ function CourseContent() {
                                 onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
                                 className="text-red-500 hover:text-red-700"
                               >
-                                <span className="material-icons">delete_outline</span>
+                                 <span className=" text-lg"><RiDeleteBinLine style={{ borderRadius: "500px" }} /> </span>
                               </button>
                               <button
                                 onClick={() => toggleQuestion(qIndex)}
@@ -597,17 +597,20 @@ function CourseContent() {
 
               <div className=''>
                 <label className="block mt-12 relative">Additional Materials *</label>
-                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-2">
                   <div className="text-center relative">
-                    <div className="absolute top-0 right-0 flex items-center px-4 py-2 rounded-md bg-[#6B7280] hover:bg-[#4B5563] gap-2">
+                  <div className="absolute top-0 right-0">
                       <label
-                        htmlFor={`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                        className="text-white rounded cursor-pointer"
+                        htmlFor={getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') ? undefined : `video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                        className={`px-4 py-1.5 ${getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video')
+                          ? 'bg-gray-300 cursor-not-allowed'
+                          : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'} text-white rounded flex items-center gap-1`}
                       >
                         Browse
+                        <span className="text-xl"><MdOutlineFileUpload /></span>
                       </label>
-                      <LiaUploadSolid color='white' size={22} fontWeight={900} />
                     </div>
+ 
 
                     <input
                       type="file"
@@ -621,9 +624,7 @@ function CourseContent() {
                       className="cursor-pointer"
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                          <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                      <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
                         <p className="mt-1 text-sm text-gray-500">
                           Drag and Drop Or Browse<br />
                           PDF, DOC, DOCX... up to _MB
@@ -678,7 +679,7 @@ function CourseContent() {
                             onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
                             className="text-red-500 hover:text-red-700"
                           >
-                            <span className="material-icons">delete_outline</span>
+                             <span className=" text-lg"><RiDeleteBinLine style={{ borderRadius: "500px" }} /> </span>
                           </button>
                           <button
                             onClick={() => toggleQuestion(qIndex)}

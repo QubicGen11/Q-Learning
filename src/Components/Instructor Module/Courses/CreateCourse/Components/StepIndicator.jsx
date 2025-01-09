@@ -249,10 +249,10 @@ const StepIndicator = () => {
             <button
               key={tab.id}
               onClick={() => navigate(tab.path)}
-              className={` text-md font-medium border-b-2 -mb-[2px]  ${
+              className={` text-md font-medium  -mb-[2px]  ${
                 tab.id === currentTab
                   ? ' text-[#0056B3] bg-[#f2f9ff] px-4 py-1 rounded-md'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : ' text-gray-500 hover:text-gray-700'
               }`}
             >
               {tab.label}
@@ -264,6 +264,7 @@ const StepIndicator = () => {
                 <button
                   onClick={() => {/* Save as draft logic */}}
                   className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
+                  style={{borderRadius:"4px"}}
                 >
                  Preview
                   <span className="material-icons text-sm">expand_more</span>
@@ -272,6 +273,7 @@ const StepIndicator = () => {
               <button
                 onClick={() => {/* Submit for review logic */}}
                 className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
+                style={{borderRadius:"4px"}}
               >
                 Submit for review
               </button>

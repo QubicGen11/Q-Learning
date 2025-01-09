@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import axios from 'axios';
 
@@ -79,6 +79,25 @@ function BasicInfo() {
 
   // Add state for validation errors
   const [errors, setErrors] = useState({});
+  const [filteredLanguages, setFilteredLanguages] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState('bottom');
+  const inputRef = useRef(null);
+  const [filteredSubCategories, setFilteredSubCategories] = useState([]);
+  const [showSubCategorySuggestions, setShowSubCategorySuggestions] = useState(false);
+  const subCategoryInputRef = useRef(null);
+  const [subCategoryDropdownPosition, setSubCategoryDropdownPosition] = useState('bottom');
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
+  const categoryInputRef = useRef(null);
+  const [categoryDropdownPosition, setCategoryDropdownPosition] = useState('bottom');
+  const [filteredDifficultyLevels, setFilteredDifficultyLevels] = useState([]);
+  const [showDifficultyLevelSuggestions, setShowDifficultyLevelSuggestions] = useState(false);
+  const difficultyLevelInputRef = useRef(null);
+  const [difficultyLevelDropdownPosition, setDifficultyLevelDropdownPosition] = useState('bottom');
+
+  // Add this constant at the top with other constants
+  const difficultyLevels = ["Beginner", "Intermediate", "Advanced"];
 
   // Validation function
   const validateField = (field, value) => {
@@ -219,8 +238,84 @@ function BasicInfo() {
     { id: 10, category: "Teaching & Academics" }
   ];
 
+  useEffect(() => {
+    const handleDropdownPosition = () => {
+      if (inputRef.current) {
+        const rect = inputRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setDropdownPosition(spaceBelow < 200 ? 'top' : 'bottom');
+      }
+    };
+
+    window.addEventListener('scroll', handleDropdownPosition);
+    window.addEventListener('resize', handleDropdownPosition);
+    handleDropdownPosition();
+
+    return () => {
+      window.removeEventListener('scroll', handleDropdownPosition);
+      window.removeEventListener('resize', handleDropdownPosition);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleDropdownPosition = () => {
+      if (subCategoryInputRef.current) {
+        const rect = subCategoryInputRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setSubCategoryDropdownPosition(spaceBelow < 200 ? 'top' : 'bottom');
+      }
+    };
+
+    window.addEventListener('scroll', handleDropdownPosition);
+    window.addEventListener('resize', handleDropdownPosition);
+    handleDropdownPosition();
+
+    return () => {
+      window.removeEventListener('scroll', handleDropdownPosition);
+      window.removeEventListener('resize', handleDropdownPosition);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleDropdownPosition = () => {
+      if (categoryInputRef.current) {
+        const rect = categoryInputRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setCategoryDropdownPosition(spaceBelow < 200 ? 'top' : 'bottom');
+      }
+    };
+
+    window.addEventListener('scroll', handleDropdownPosition);
+    window.addEventListener('resize', handleDropdownPosition);
+    handleDropdownPosition();
+
+    return () => {
+      window.removeEventListener('scroll', handleDropdownPosition);
+      window.removeEventListener('resize', handleDropdownPosition);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleDropdownPosition = () => {
+      if (difficultyLevelInputRef.current) {
+        const rect = difficultyLevelInputRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setDifficultyLevelDropdownPosition(spaceBelow < 200 ? 'top' : 'bottom');
+      }
+    };
+
+    window.addEventListener('scroll', handleDropdownPosition);
+    window.addEventListener('resize', handleDropdownPosition);
+    handleDropdownPosition();
+
+    return () => {
+      window.removeEventListener('scroll', handleDropdownPosition);
+      window.removeEventListener('resize', handleDropdownPosition);
+    };
+  }, []);
+
   return (
-    <div className="max-w-[700px] mx-auto space-y-6 mt-5 p-4">
+    <div className="max-w-[828px] h-[600px] mx-auto space-y-6 mt-5">
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Course Name *
@@ -234,9 +329,9 @@ function BasicInfo() {
             onBlur={() => handleBlur('courseName')}
             maxLength={80}
             placeholder="Real World UX Learn User Experience & Start Your Career"
-            className={`w-full px-3 py-1.5 text-sm border ${
+            className={`w-full px-3 py-1.5  h-[48px] text-sm border rounded ${
               validationErrors.courseName ? 'border-red-500' : 'border-[#D1D5DB]'
-            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
+            } focus:outline-none focus:ring-1 focus:ring-gray-600 h-9`}
           />
           {validationErrors.courseName && (
             <p className="text-red-500 text-xs mt-1">{validationErrors.courseName}</p>
@@ -259,9 +354,9 @@ function BasicInfo() {
             placeholder="UX based on real world examples..."
             maxLength={300}
             rows={3}
-            className={`w-full px-4 py-2 border ${
+            className={`w-full px-4 py-2 w-[828px] h-[113px] border rounded ${
               validationErrors.courseTagline ? 'border-red-500' : 'border-[#D1D5DB]'
-            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4]`}
+            } focus:outline-none focus:ring-1 focus:ring-gray-600`}
           />
           {validationErrors.courseTagline && (
             <p className="text-red-500 text-xs mt-1">{validationErrors.courseTagline}</p>
@@ -288,7 +383,7 @@ function BasicInfo() {
             min="0"
             max="100"
             step="0.1"
-            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+            className="w-full px-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 h-9"
           />
         </div> */}
 
@@ -301,9 +396,9 @@ function BasicInfo() {
             name="courseDuration"
             value={basicInfo?.courseDuration || ''}
             onChange={(e) => handleChange('courseDuration', e.target.value.toString())}
-            className={`w-full px-3 py-1.5 text-sm border ${
+            className={`w-full px-3 py-1.5 w-[406px] h-[48px] text-sm border rounded ${
               validationErrors.courseDuration ? 'border-red-500' : 'border-[#D1D5DB]'
-            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
+            } focus:outline-none focus:ring-1 focus:ring-gray-600 h-9`}
           />
           {validationErrors.courseDuration && (
             <p className="text-red-500 text-xs mt-1">{validationErrors.courseDuration}</p>
@@ -314,89 +409,377 @@ function BasicInfo() {
           <label className="block text-xs font-medium text-gray-700 mb-1">
             Difficulty Level *
           </label>
-          <select
-            name="difficultyLevel"
-            value={basicInfo?.difficultyLevel || ''}
-            onChange={(e) => handleChange('difficultyLevel', e.target.value)}
-            className={`w-full px-3 py-1.5 text-sm border ${
-              validationErrors.difficultyLevel ? 'border-red-500' : 'border-[#D1D5DB]'
-            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
-          >
-            <option value="">Select Difficulty Level</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-          </select>
-          {validationErrors.difficultyLevel && (
-            <p className="text-red-500 text-xs mt-1">{validationErrors.difficultyLevel}</p>
-          )}
+          <div className="relative">
+            <input
+              ref={difficultyLevelInputRef}
+              type="text"
+              name="difficultyLevel"
+              value={basicInfo?.difficultyLevel || ''}
+              onChange={(e) => {
+                updateCourseData('basicInfo', {
+                  ...basicInfo,
+                  difficultyLevel: e.target.value
+                });
+                const filtered = difficultyLevels.filter(level => 
+                  level.toLowerCase().includes(e.target.value.toLowerCase())
+                );
+                setFilteredDifficultyLevels(filtered);
+                setShowDifficultyLevelSuggestions(true);
+              }}
+              onFocus={() => {
+                setFilteredDifficultyLevels(difficultyLevels);
+                setShowDifficultyLevelSuggestions(true);
+              }}
+              onBlur={() => {
+                setTimeout(() => setShowDifficultyLevelSuggestions(false), 200);
+              }}
+              className={`text-sm border rounded px-3 py-1.5 w-[406px] h-[48px] ${
+                validationErrors.difficultyLevel ? 'border-red-500' : 'border-[#D1D5DB]'
+              } focus:outline-none focus:ring-1 focus:ring-gray-600 pr-8`}
+              placeholder="Select Difficulty Level"
+            />
+            {/* Icon logic: dropdown (default) -> search (focused) -> cross (typing) */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+              {basicInfo?.difficultyLevel ? (
+                // Show cross mark when there's text
+                <button
+                  type="button"
+                  className="hover:text-gray-600"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateCourseData('basicInfo', {
+                      ...basicInfo,
+                      difficultyLevel: ''
+                    });
+                    setShowDifficultyLevelSuggestions(false);
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : showDifficultyLevelSuggestions ? (
+                // Show search icon when focused but no text
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              ) : (
+                // Show dropdown icon by default
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
+            </div>
+            {showDifficultyLevelSuggestions && filteredDifficultyLevels.length > 0 && (
+              <ul 
+                className={`absolute z-10 w-full ${
+                  difficultyLevelDropdownPosition === 'top' 
+                    ? 'bottom-full mb-1' 
+                    : 'top-full mt-1'
+                } max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg`}
+              >
+                {filteredDifficultyLevels.map((level, index) => (
+                  <li
+                    key={index}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      updateCourseData('basicInfo', {
+                        ...basicInfo,
+                        difficultyLevel: level
+                      });
+                      setShowDifficultyLevelSuggestions(false);
+                    }}
+                  >
+                    {level}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {validationErrors.difficultyLevel && (
+              <p className="text-red-500 text-xs mt-1">{validationErrors.difficultyLevel}</p>
+            )}
+          </div>
         </div>
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
             Category *
           </label>
-          <select
-            name="category"
-            value={basicInfo?.category || ''}
-            onChange={(e) => handleChange('category', e.target.value)}
-            className={`w-full px-3 py-1.5 text-sm border ${
-              validationErrors.category ? 'border-red-500' : 'border-[#D1D5DB]'
-            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
-          >
-            <option value="">Select a category</option>
-            {(categories.length > 0 ? categories : testCategories).map((cat) => (
-              <option key={cat.id} value={cat.category}>{cat.category}</option>
-            ))}
-          </select>
-          {validationErrors.category && (
-            <p className="text-red-500 text-xs mt-1">{validationErrors.category}</p>
-          )}
+          <div className="relative">
+            <input
+              ref={categoryInputRef}
+              type="text"
+              name="category"
+              value={basicInfo?.category || ''}
+              onChange={(e) => {
+                handleChange('category', e.target.value);
+                const filtered = (categories.length > 0 ? categories : testCategories).filter(cat => 
+                  cat.category.toLowerCase().includes(e.target.value.toLowerCase())
+                );
+                setFilteredCategories(filtered);
+                setShowCategorySuggestions(true);
+              }}
+              onFocus={() => {
+                setFilteredCategories(categories.length > 0 ? categories : testCategories);
+                setShowCategorySuggestions(true);
+              }}
+              onBlur={() => {
+                setTimeout(() => setShowCategorySuggestions(false), 200);
+              }}
+              className={`text-sm border rounded px-3 py-1.5 w-[406px] h-[48px] ${
+                validationErrors.category ? 'border-red-500' : 'border-[#D1D5DB]'
+              } focus:outline-none focus:ring-1 focus:ring-gray-600 pr-8`}
+              placeholder="Type or select a category"
+            />
+            {/* Icon logic: dropdown (default) -> search (focused) -> cross (typing) */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+              {basicInfo?.category ? (
+                // Show cross mark when there's text
+                <button
+                  type="button"
+                  className="hover:text-gray-600"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateCourseData('basicInfo', {
+                      ...basicInfo,
+                      category: '',
+                      subCategory: ''
+                    });
+                    setShowCategorySuggestions(false);
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : showCategorySuggestions ? (
+                // Show search icon when focused but no text
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              ) : (
+                // Show dropdown icon by default
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
+            </div>
+            {showCategorySuggestions && filteredCategories.length > 0 && (
+              <ul 
+                className={`absolute z-10 w-full ${
+                  categoryDropdownPosition === 'top' 
+                    ? 'bottom-full mb-1' 
+                    : 'top-full mt-1'
+                } max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg`}
+              >
+                {filteredCategories.map((cat) => (
+                  <li
+                    key={cat.id}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      updateCourseData('basicInfo', {
+                        ...basicInfo,
+                        category: cat.category,
+                        subCategory: ''
+                      });
+                      setShowCategorySuggestions(false);
+                    }}
+                  >
+                    {cat.category}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {validationErrors.category && (
+              <p className="text-red-500 text-xs mt-1">{validationErrors.category}</p>
+            )}
+          </div>
         </div>
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
             Subcategory *
           </label>
-          <select
-            name="subCategory"
-            value={basicInfo?.subCategory || ''}
-            onChange={(e) => handleChange('subCategory', e.target.value)}
-            disabled={!basicInfo.category}
-            className={`w-full px-3 py-1.5 text-sm border ${
-              validationErrors.subCategory ? 'border-red-500' : 'border-[#D1D5DB]'
-            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
-          >
-            <option value="">Select a subcategory</option>
-            {subCategories.map((subCat) => (
-              <option key={subCat.id} value={subCat.subCategory}>{subCat.subCategory}</option>
-            ))}
-          </select>
-          {validationErrors.subCategory && (
-            <p className="text-red-500 text-xs mt-1">{validationErrors.subCategory}</p>
-          )}
+          <div className="relative">
+            <input
+              ref={subCategoryInputRef}
+              type="text"
+              name="subCategory"
+              value={basicInfo?.subCategory || ''}
+              onChange={(e) => {
+                handleChange('subCategory', e.target.value);
+                const filtered = subCategories.filter(subCat => 
+                  subCat.subCategory.toLowerCase().includes(e.target.value.toLowerCase())
+                );
+                setFilteredSubCategories(filtered);
+                setShowSubCategorySuggestions(true);
+              }}
+              onFocus={() => {
+                setFilteredSubCategories(subCategories);
+                setShowSubCategorySuggestions(true);
+              }}
+              onBlur={() => {
+                setTimeout(() => setShowSubCategorySuggestions(false), 200);
+              }}
+              disabled={!basicInfo.category}
+              className={`text-sm border rounded px-3 py-1.5 w-[406px] h-[48px] ${
+                validationErrors.subCategory ? 'border-red-500' : 'border-[#D1D5DB]'
+              } focus:outline-none focus:ring-1 focus:ring-gray-600 pr-8 ${
+                !basicInfo.category ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
+              placeholder={basicInfo.category ? "Type or select a subcategory" : "Select a category first"}
+            />
+            {/* Icon logic: dropdown (default) -> search (focused) -> cross (typing) */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+              {basicInfo?.subCategory ? (
+                // Show cross mark when there's text
+                <button
+                  type="button"
+                  className="hover:text-gray-600"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleChange('subCategory', '');
+                    setShowSubCategorySuggestions(false);
+                  }}
+                  disabled={!basicInfo.category}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : showSubCategorySuggestions ? (
+                // Show search icon when focused but no text
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              ) : (
+                // Show dropdown icon by default
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
+            </div>
+            {showSubCategorySuggestions && filteredSubCategories.length > 0 && basicInfo.category && (
+              <ul 
+                className={`absolute z-10 w-full ${
+                  subCategoryDropdownPosition === 'top' 
+                    ? 'bottom-full mb-1' 
+                    : 'top-full mt-1'
+                } max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg`}
+              >
+                {filteredSubCategories.map((subCat) => (
+                  <li
+                    key={subCat.id}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleChange('subCategory', subCat.subCategory);
+                      setShowSubCategorySuggestions(false);
+                    }}
+                  >
+                    {subCat.subCategory}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {validationErrors.subCategory && (
+              <p className="text-red-500 text-xs mt-1">{validationErrors.subCategory}</p>
+            )}
+          </div>
         </div>
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
             Teaching Language *
           </label>
-          <select
-            name="teachingLanguage"
-            value={basicInfo?.teachingLanguage || ''}
-            onChange={(e) => handleChange('teachingLanguage', e.target.value)}
-            className={`w-full px-3 py-1.5 text-sm border ${
-              validationErrors.teachingLanguage ? 'border-red-500' : 'border-[#D1D5DB]'
-            } focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9`}
-          >
-            <option value="">Select a language</option>
-            {languages.map((language, index) => (
-              <option key={index} value={language}>{language}</option>
-            ))}
-          </select>
-          {validationErrors.teachingLanguage && (
-            <p className="text-red-500 text-xs mt-1">{validationErrors.teachingLanguage}</p>
-          )}
+          <div className="relative">
+            <input
+              ref={inputRef}
+              type="text"
+              name="teachingLanguage"
+              value={basicInfo?.teachingLanguage || ''}
+              onChange={(e) => {
+                handleChange('teachingLanguage', e.target.value);
+                const filtered = languages.filter(lang => 
+                  lang.toLowerCase().includes(e.target.value.toLowerCase())
+                );
+                setFilteredLanguages(filtered);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => {
+                setFilteredLanguages(languages);
+                setShowSuggestions(true);
+              }}
+              onBlur={() => {
+                setTimeout(() => setShowSuggestions(false), 200);
+              }}
+              className={`text-sm border rounded px-3 py-1.5 w-[406px] h-[48px] ${
+                validationErrors.teachingLanguage ? 'border-red-500' : 'border-[#D1D5DB]'
+              } focus:outline-none focus:ring-1 focus:ring-gray-600 pr-8`}
+              placeholder="Type or select a language"
+            />
+            {/* Icon logic: dropdown (default) -> search (focused) -> cross (typing) */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+              {basicInfo?.teachingLanguage ? (
+                // Show cross mark when there's text
+                <button
+                  type="button"
+                  className="hover:text-gray-600"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleChange('teachingLanguage', '');
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : showSuggestions ? (
+                // Show search icon when focused but no text
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              ) : (
+                // Show dropdown icon by default
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
+            </div>
+            {showSuggestions && filteredLanguages.length > 0 && (
+              <ul 
+                className={`absolute z-10 w-full ${
+                  dropdownPosition === 'top' 
+                    ? 'bottom-full mb-1' 
+                    : 'top-full mt-1'
+                } max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg`}
+              >
+                {filteredLanguages.map((language, index) => (
+                  <li
+                    key={index}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleChange('teachingLanguage', language);
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    {language}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {validationErrors.teachingLanguage && (
+              <p className="text-red-500 text-xs mt-1">{validationErrors.teachingLanguage}</p>
+            )}
+          </div>
         </div>
 
 
@@ -411,23 +794,34 @@ function BasicInfo() {
               name="transcript"
               accept=".pdf,.doc,.docx,.txt"
               onChange={(e) => handleChange('transcript', e.target.files[0])}
-              className="hidden"
+              className="hidden rounded"
               id="transcript-upload"
             />
             <div className="relative">
               <input 
                 type="text"
                 value={basicInfo?.transcript?.name || ''}
-                className="w-full px-3 py-1.5 text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-2 focus:ring-[#bbbfc4] h-9 pr-20"
+                className=" px-3 rounded py-1.5 w-[406px] h-[48px] text-sm  border border-[#D1D5DB]  focus:outline-none focus:ring-1 focus:ring-gray-600 h-9 pr-20"
                 placeholder="No file chosen"
                 readOnly
               />
               <label
                 htmlFor="transcript-upload"
-                className="absolute right-1 top-1/2 -translate-y-1/2 px-4 py-1 text-sm bg-[#6b7280] text-white rounded cursor-pointer hover:bg-gray-600"
+                className="absolute right-1 top-1/2 -translate-y-1/2 
+                  w-[67px] h-[32px] 
+                  px-2 py-1.5
+                  mr-2
+                  flex items-center justify-center gap-2
+                  rounded-tl-default
+                  bg-[#6B7280] text-neutral-white 
+                  cursor-pointer 
+                  hover:bg-neutral-dark
+                  transition-colors
+                  rounded"
               >
                 Browse
               </label>
+              
             </div>
           </div>
         </div>

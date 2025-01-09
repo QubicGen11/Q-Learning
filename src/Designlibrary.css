@@ -1,0 +1,40 @@
+:root {
+  /* Primary Colors */
+  --primary-blue: #0077FF;
+  --dark-blue: #0056B3;
+  --light-blue: #F2F9FF;
+
+  /* Secondary Colors */
+  --orange: #FF6700;
+  --gold: #FFC107;
+  --green: #28A745;
+
+  /* Neutral Colors */
+  --white: #FFFFFF;
+  --light-gray: #F5F5F5;
+  --medium-gray: #CCCCCC;
+  --dark-gray: #333333;
+  --black: #000000;
+
+  /* Tertiary Colors */
+  --purple: #6F42C1;
+  --teal: #20C997;
+  --red: #DC3545;
+
+  /* Common Color Applications */
+  --cta-button: var(--primary-blue);
+  --cta-button-hover: var(--dark-blue);
+  --background-primary: var(--white);
+  --background-secondary: var(--light-blue);
+  --background-tertiary: var(--light-gray);
+  --text-primary: var(--dark-gray);
+  --text-secondary: var(--medium-gray);
+  --text-emphasis: var(--black);
+  --border-color: var(--medium-gray);
+  --success-color: var(--green);
+  --warning-color: var(--orange);
+  --error-color: var(--red);
+  --premium-color: var(--purple);
+  --info-color: var(--teal);
+  --award-color: var(--gold);
+}

@@ -34,9 +34,12 @@ const Sidebar = () => {
     ${isCollapsed ? 'w-[60px]' : 'w-[240px]'}`}
   >
       {/* Logo */}
-      <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-4' : 'px-5'} border-b border-white/10`}>
+      <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-4' : 'px-5'}  border-white/10`}>
         <img 
-          src="https://res.cloudinary.com/devewerw3/image/upload/v1734594088/Logo_7_ulr2j8.png" 
+          src={isCollapsed 
+            ? "https://res.cloudinary.com/defsu5bfc/image/upload/v1736435279/Icon_Logo_tn7bcr.png"
+            : "https://res.cloudinary.com/devewerw3/image/upload/v1734594088/Logo_7_ulr2j8.png"
+          }
           alt="QubiNest" 
           className={`${isCollapsed ? 'w-8' : 'h-8'}`}
         />
