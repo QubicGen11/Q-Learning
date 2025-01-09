@@ -286,7 +286,7 @@ const StepIndicator = () => {
               <div className="flex flex-col items-center">
                 <div className="flex items-center w-4/5">
                   <div className={`
-                    relative group z-[999]
+                    relative group 
                     ${(currentTab === 'info' && currentStep === step.number) || 
                       (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
                       ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' 

@@ -9,11 +9,12 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './Coursecontent.css'
 import { BsQuestionOctagon } from "react-icons/bs";
-import { LiaUploadSolid } from "react-icons/lia";
+import { LiaEdit, LiaUploadSolid } from "react-icons/lia";
 import { IoIosAddCircleOutline } from 'react-icons/io';
 import { CiFileOn, CiPlay1 } from "react-icons/ci";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { LuFileQuestion } from "react-icons/lu";
+import { MdOutlineFileUpload } from 'react-icons/md';
 
 function CourseContent() {
   const navigate = useNavigate();
@@ -30,13 +31,16 @@ function CourseContent() {
   const [editingChapter, setEditingChapter] = useState(null);
   const [editingLesson, setEditingLesson] = useState(null);
   const [editName, setEditName] = useState('');
+  const [editingContentTitle, setEditingContentTitle] = useState(false);
+  const [isMandatory, setIsMandatory] = useState(false);
 
   // Add new chapter
   const handleAddChapter = () => {
     const newChapter = {
       chapterName: `Chapter ${chapters.length + 1}`,
       lessons: [],
-      questions: []
+      questions: [],
+      isMandatory: false
     };
     const updatedChapters = [...chapters, newChapter];
     setChapters(updatedChapters);
@@ -165,20 +169,95 @@ function CourseContent() {
       case 'video':
         return (
           <div className="p-4">
-            <h3>Lessons</h3>
-            <div className="space-y-4">
+            <div className="flex justify-between items-center gap-2 w-[790px] ">
               <div>
-                <label className="block mb-2">Lesson *</label>
-                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+                {editingContentTitle ? (
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onBlur={() => {
+                      if (editName.trim() !== '') {
+                        const updatedChapters = [...chapters];
+                        updatedChapters[selectedLesson.chapterIndex]
+                          .lessons[selectedLesson.lessonIndex].lessonTitle = editName.trim();
+                        setChapters(updatedChapters);
+                      }
+                      setEditingContentTitle(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.target.blur();
+                      }
+                      if (e.key === 'Escape') {
+                        setEditingContentTitle(false);
+                      }
+                    }}
+                    className="text-lg font-medium outline-none border-b border-blue-500"
+                    autoFocus
+                  />
+                ) : (
+                  <>
+
+                    <div className='flex justify-between items-center gap-2'>
+
+                      <h3 className="font-bold text-lg">
+                        <p className='text-[#4b5563]'> <span className='font-bold'> Lesson Name: </span >
+                          {chapters[selectedLesson.chapterIndex]?.lessons[selectedLesson.lessonIndex]?.lessonTitle || ''}
+                        </p>
+                      </h3>
+
+                      <button
+                        onClick={() => {
+                          setEditName(chapters[selectedLesson.chapterIndex]?.lessons[selectedLesson.lessonIndex]?.lessonTitle || '');
+                          setEditingContentTitle(true);
+                        }}
+                        className="text-gray-500 hover:text-gray-700 "
+                      >
+                        <span className=" font-bold text-xl text-[#4b5563]"><LiaEdit style={{ fontWeight: "bold", borderRadius: "1000px" }} /></span>
+                      </button>
+                    </div>
+                  </>
+                )}
+
+
+
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer h-[24px] w-[42px]"
+                    checked={isMandatory}
+                    onChange={(e) => setIsMandatory(e.target.checked)}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+                <span className="text-sm text-gray-600" style={{ fontWeight: "" }}>Mandatory</span>
+
+              </div>
+
+
+            </div>
+
+
+
+            <div className="space-y-4 mt-6">
+              <div>
+                <label className="block mb-2">Upload Lesson Video*</label>
+                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-2">
                   <div className="text-center relative">
-                    <div className="absolute top-0 right-0 flex items-center px-4 py-2 rounded-md bg-[#6B7280] hover:bg-[#4B5563] gap-2">
+                    <div className="absolute top-0 right-0">
                       <label
-                        htmlFor={`video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                        className=" text-white rounded  cursor-pointer"
+                        htmlFor={getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') ? undefined : `video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                        className={`px-4 py-1.5 ${getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') 
+                          ? 'bg-gray-300 cursor-not-allowed' 
+                          : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'} text-white rounded flex items-center gap-1`}
                       >
                         Browse
+                        <span className="text-xl"><MdOutlineFileUpload /></span>
                       </label>
-                      <LiaUploadSolid color='white' size={22} fontWeight={900} />
                     </div>
 
                     <input
@@ -187,56 +266,62 @@ function CourseContent() {
                       className="hidden"
                       accept="video/*"
                       onChange={(e) => handleFileUpload(e, 'video', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+                      disabled={getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video')}
                     />
                     <label
-                      htmlFor={`video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                      className="cursor-pointer"
+                      htmlFor={getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') ? undefined : `video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                      className={`cursor-${getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') ? 'default' : 'pointer'}`}
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                          <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
                         <p className="mt-1 text-sm text-gray-500">
                           Drag and Drop Or Browse<br />
-                          MP4, MKW... up to _MB
+                          MP4, ... up to 200 MB
                         </p>
-
                       </div>
                     </label>
                   </div>
-                  {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') && (
-                    <div className="mt-2 text-sm text-gray-600 text-center flex items-center justify-center gap-2">
-                      <p
-                        className="cursor-pointer hover:text-[#0056B3]"
-                        onClick={() => handlePreviewClick('video', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonVideo)}
-                      >
-                        {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video').name}
-                      </p>
-                      <button
-                        onClick={() => handleRemoveFile('video', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
+              <div className=' flex relative bottom-2 '>
+
+<div >
+
+  {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') && (
+    <div className=" text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer flex space-x-3 items-center">
+      <p
+        className="cursor-pointer hover:text-[#0056B3] underline  underline-offset-4 text-[#4B5563]"
+        onClick={() => handlePreviewClick('video', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonVideo)}
+      >
+        {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video').name}
+      </p>
+
+      <button
+        onClick={() => handleRemoveFile('video', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+        className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
+      >
+        ×
+      </button>
+    </div>
+  )}
+</div>
+
+</div>
 
               <div>
-                <label className="block mb-2">Materials *</label>
-                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+                <label className="block mb-2">Upload Lesson Materials (Optional)</label>
+                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-2">
                   <div className="text-center relative">
                     {/* Add Browse button to top right */}
-                    <div className="absolute top-0 right-0 flex items-center px-4 py-2 rounded-md bg-[#6B7280] hover:bg-[#4B5563] gap-2">
-                      <label
-                        htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                        className=" text-white rounded  cursor-pointer"
-                      >
-                        Browse
-                      </label>
-                      <LiaUploadSolid color='white' size={22} fontWeight={900} />
-                    </div>
+                    <div className="absolute top-0 right-0">
+              <label
+                htmlFor="category-upload"
+                className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
+              >
+                Browse
+                <span className=" text-xl"><MdOutlineFileUpload /></span>
+              </label>
+            </div>
 
                     <input
                       type="file"
@@ -250,9 +335,7 @@ function CourseContent() {
                       className="cursor-pointer"
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                          <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
                         <p className="mt-1 text-sm text-gray-500">
                           Drag and Drop Or Browse<br />
                           PDF, DOC, DOCX... up to 20 MB
@@ -260,22 +343,37 @@ function CourseContent() {
                       </div>
                     </label>
                   </div>
+
+
+
+                </div>
+              </div>
+              <div className=' flex relative bottom-2 '>
+                <div>
                   {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
-                    <div className="mt-2 text-sm text-gray-600 text-center flex items-center justify-center gap-2">
+                    <div className="  text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer flex space-x-3 items-center">
                       <p
-                        className="cursor-pointer hover:text-[#0056B3]"
+                        className="cursor-pointer hover:text-[#0056B3] underline  underline-offset-4 text-[#4B5563]"
                         onClick={() => handlePreviewClick('materials', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonMaterials)}
                       >
                         {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
                       </p>
                       <button
                         onClick={() => handleRemoveFile('materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
                       >
                         ×
                       </button>
                     </div>
                   )}
+
+                </div>
+
+
+
+
+                <div >
+
                 </div>
               </div>
 
@@ -438,6 +536,8 @@ function CourseContent() {
                 </div>
               )}
             </div>
+
+            
           </div>
         );
 
@@ -988,11 +1088,19 @@ function CourseContent() {
   }, []); // Run once after component mounts
 
   return (
-    <div className="min-h-screen bg-gray-50 ">
+    <div className="min-h-screen bg-white ">
 
-      <div className="flex ">
+      <div className="flex">
         {/* Left Sidebar - Chapters and Lessons */}
-        <div className="w-[310px] h-[707px]  gap-4  p-4 border-2 border-[#E2E8F0] overflow-x-hidden  overflow-y-auto">
+        <div className="fixed calc-height w-[310px] h-[600px] gap-4 p-4 border-2 border-[#E2E8F0] overflow-x-hidden overflow-y-auto bg-white">
+          <style>
+            {`
+          .calc-height {
+            height: calc(100vh - 300px); /* Adjust the pixel value based on your header and navigation heights */
+            min-height: 400px; /* Set a minimum height to prevent content from being too compressed */
+          }
+        `}
+          </style>
           <h2 className="font-medium mb-4 w-[84px] h-[24px] relative" style={{ fontSize: '16px', fontWeight: '500', lineHeight: '24px', letterSpacing: '0.15px', textAlign: 'left', color: '#1A202C' }}>Curriculum</h2>
           <button
             onClick={handleAddChapter}
@@ -1011,9 +1119,8 @@ function CourseContent() {
             >
               {/* Chapter Header */}
               <div
-                className={`flex items-center w-[278px] h-[32px] gap-2 p-2 bg-white rounded cursor-pointer ${
-                  selectedChapter === chapterIndex ? 'bg-white' : ''
-                }`}
+                className={`flex items-center w-[278px] h-[32px] gap-2 p-2 bg-white rounded cursor-pointer ${selectedChapter === chapterIndex ? 'bg-white' : ''
+                  }`}
               >
                 <span className="material-icons text-[#d1d5db] text-2xl h-[36px] ">drag_indicator</span>
                 {editingChapter === chapterIndex ? (
@@ -1091,7 +1198,7 @@ function CourseContent() {
                       className="text-[#DC3545] hover:text-red-700 p-1 text-lg"
                       title="Delete chapter"
                     >
-                      <span className="material-icons text-lg"><RiDeleteBinLine style={{borderRadius:"500px"}} /> </span>
+                      <span className="material-icons text-lg"><RiDeleteBinLine style={{ borderRadius: "500px" }} /> </span>
                     </button>
                     <span
                       className="material-icons text-gray-700 text-2xl"
@@ -1118,24 +1225,23 @@ function CourseContent() {
                     chapter.lessons.map((lesson, lessonIndex) => (
                       <div
                         key={lessonIndex}
-                        className={`flex items-center h-[32px] ml-2 gap-2 p-2 rounded cursor-pointer ${
-                          selectedLesson?.chapterIndex === chapterIndex &&
-                          selectedLesson?.lessonIndex === lessonIndex
+                        className={`flex items-center h-[32px] ml-2 gap-2 p-2 rounded cursor-pointer ${selectedLesson?.chapterIndex === chapterIndex &&
+                            selectedLesson?.lessonIndex === lessonIndex
                             ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
                             : 'bg-white'
-                        }`}
+                          }`}
                         onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
                       >
                         {/* Lesson Icon based on type */}
                         <span className="material-icons text-[#4b5563] text-xl font-bold">
-                          {lesson.lessonType === 'Video' ? 
-                            <CiPlay1 className="w-5 h-5 font-extrabold stroke-1" /> : 
-                            
-                            lesson.lessonType === 'Quiz' ?   <LuFileQuestion  className="w-5 h-5 font-extrabold stroke-1" /> : 
+                          {lesson.lessonType === 'Video' ?
+                            <CiPlay1 className="w-5 h-5 font-extrabold stroke-1" /> :
 
-                            lesson.lessonType === 'Content' ?  <CiFileOn  className="w-5 h-5 font-extrabold stroke-1" /> : 
+                            lesson.lessonType === 'Quiz' ? <LuFileQuestion className="w-5 h-5 font-extrabold stroke-1" /> :
 
-                             'article'}
+                              lesson.lessonType === 'Content' ? <CiFileOn className="w-5 h-5 font-extrabold stroke-1" /> :
+
+                                'article'}
                         </span>
 
                         <div className="flex items-center flex-1 min-w-0">
@@ -1188,28 +1294,28 @@ function CourseContent() {
                                   ) : ''
                                 }
                               </span>
-                              
+
                               {/* Only show dropdown and delete when not editing */}
                               <select
-  value={lesson.lessonType}
-  onChange={(e) => {
-    e.stopPropagation();
-    handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value);
-  }}
-  onClick={(e) => e.stopPropagation()}
-  className="text-xs border ml-3 rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
-  style={{
-    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 0.5rem center',
-    backgroundSize: '1em',
-    paddingRight: '1.5rem'
-  }}
->
-  <option value="Video">Video</option>
-  <option value="PDF">Content</option>
-  <option value="Quiz">Quiz</option>
-</select>
+                                value={lesson.lessonType}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value);
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs border ml-3 rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
+                                style={{
+                                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                                  backgroundRepeat: 'no-repeat',
+                                  backgroundPosition: 'right 0.5rem center',
+                                  backgroundSize: '1em',
+                                  paddingRight: '1.5rem'
+                                }}
+                              >
+                                <option value="Video">Video</option>
+                                <option value="PDF">Content</option>
+                                <option value="Quiz">Quiz</option>
+                              </select>
 
                               <button
                                 onClick={(e) => {
@@ -1219,7 +1325,7 @@ function CourseContent() {
                                 className="text-red-500 hover:text-red-700 p-1"
                                 title="Delete lesson"
                               >
-                               <span className=" text-sm"><RiDeleteBinLine style={{borderRadius:"1000px"}} /> </span>
+                                <span className=" text-sm"><RiDeleteBinLine style={{ borderRadius: "1000px" }} /> </span>
                               </button>
                             </>
                           )}
@@ -1254,26 +1360,25 @@ function CourseContent() {
 
 
 
-        {/* Right Content Area */}
-        <div className="flex-1 bg-white rounded-lg">
-          {renderRightContent()}
+        {/* Right Content Area - Adjusted positioning */}
+        <div className="flex-1  flex justify-center items-center ml-[310px]">
+          <div className='w-[830px] h-[700px]'>
+            {renderRightContent()}
+          </div>
         </div>
       </div>
 
 
       {previewOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto relative">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">
-                {previewContent.type === 'video' ? 'Video Preview' : 'Material Preview'}
-              </h3>
-              <button
-                onClick={() => setPreviewOpen(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          <div className="bg-white max-w-3xl h-[538px] w-[732px] overflow-auto">
+            <div className="flex justify-start border-b-2 border-[#E5E7EB] w-[732px] h-[56px]">
+              <p 
+                className='text-lg text-[16px] line-height-[24px] text-[#6B7280] p-1' 
+                style={{padding:"16px 24px 16px 24px", fontWeight:"700"}}
               >
-                <span className="material-icons">close</span>
-              </button>
+                {previewContent.type === 'video' ? 'Video Preview' : 'Material Preview'}
+              </p>
             </div>
 
             <div className="mb-6">
@@ -1282,33 +1387,38 @@ function CourseContent() {
                   <video
                     src={previewContent.url}
                     controls
-                    className="w-full rounded-lg"
+                    className="mt-3 ml-[20px] w-[692px] h-[360px]"
                     autoPlay
                   />
                 </div>
               ) : (
                 <iframe
                   src={previewContent.url}
-                  className="w-full h-[70vh] rounded-lg"
+                  className="mt-3 ml-[20px] w-[692px] h-[360px]"
                   title="Material Preview"
                 />
               )}
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-between gap-3 mt-4 border-t pt-4">
+            <div className='flex justify-between border-t-2 mt-9 border-[#E5E7EB] w-[732px] px-8'>
               <button
                 onClick={() => {
-                  handleRemoveFile(previewContent.type === 'video' ? 'video' : 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex);
+                  handleRemoveFile(
+                    previewContent.type === 'video' ? 'video' : 'materials', 
+                    selectedLesson.chapterIndex, 
+                    selectedLesson.lessonIndex
+                  );
                   setPreviewOpen(false);
                 }}
-                className="px-4 py-2 text-[#0056B3] hover:bg-gray-50 rounded border border-[#0056B3]"
+                className="bg-white px-4 h-8 mt-6 rounded-md text-[#0056B3] hover:text-gray-700 mt-3 border border-[#0056B3]"
               >
                 Remove
               </button>
+
               <button
                 onClick={() => setPreviewOpen(false)}
-                className="px-4 py-2 bg-[#0056B3] text-white hover:bg-blue-700 rounded"
+                className="bg-[#0056b3] mt-6 px-4 h-8 rounded-md text-white hover:text-white mt-3"
               >
                 Keep
               </button>

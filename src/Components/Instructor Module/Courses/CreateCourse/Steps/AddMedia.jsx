@@ -146,21 +146,26 @@ function Media() {
             {/* Browse button in top right corner */}
 
             <div className="absolute top-3 right-3">
-
-              <label
-
-                htmlFor="banner-upload"
-
-                className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
-
-              >
-
-                Browse
-
-                <span className=" text-xl"><MdOutlineFileUpload /></span>
-
-              </label>
-
+              <div className="relative group">
+                <label
+                  htmlFor={selectedFiles.banner ? undefined : "banner-upload"}
+                  className={`px-4 py-1.5 ${
+                    selectedFiles.banner 
+                      ? 'bg-gray-300 cursor-not-allowed' 
+                      : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'
+                  } text-white rounded flex items-center gap-1`}
+                >
+                  Browse
+                  <span className="text-xl"><MdOutlineFileUpload /></span>
+                </label>
+                
+                {/* Tooltip */}
+                {selectedFiles.banner && (
+                  <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-xs rounded py-1 px-2 right-0 top-full mt-1 whitespace-nowrap">
+                    Remove current file to upload new one
+                  </div>
+                )}
+              </div>
             </div>
 
 
@@ -179,9 +184,17 @@ function Media() {
 
                 accept="video/*"
 
+                disabled={selectedFiles.banner}
+
               />
 
-              <label htmlFor="banner-upload" className="cursor-pointer w-full">
+              <label 
+
+                htmlFor={selectedFiles.banner ? undefined : "banner-upload"}
+
+                className={`cursor-${selectedFiles.banner ? 'default' : 'pointer'} w-full`}
+
+              >
 
                 <div className="flex flex-col items-center justify-center">
 
@@ -271,13 +284,26 @@ function Media() {
           <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
             {/* Browse button in top right corner */}
             <div className="absolute top-3 right-3">
-              <label
-                htmlFor="course-upload"
-                className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
-              >
-                Browse
-                <span className=" text-xl"><MdOutlineFileUpload /></span>
-              </label>
+              <div className="relative group">
+                <label
+                  htmlFor={selectedFiles.course ? undefined : "course-upload"}
+                  className={`px-4 py-1.5 ${
+                    selectedFiles.course 
+                      ? 'bg-gray-300 cursor-not-allowed' 
+                      : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'
+                  } text-white rounded flex items-center gap-1`}
+                >
+                  Browse
+                  <span className="text-xl"><MdOutlineFileUpload /></span>
+                </label>
+                
+                {/* Tooltip */}
+                {selectedFiles.course && (
+                  <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-xs rounded py-1 px-2 right-0 top-full mt-1 whitespace-nowrap">
+                    Remove current file to upload new one
+                  </div>
+                )}
+              </div>
             </div>
  
             <div className="text-center">
@@ -339,13 +365,26 @@ function Media() {
           <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
             {/* Browse button in top right corner */}
             <div className="absolute top-3 right-3">
-              <label
-                htmlFor="category-upload"
-                className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
-              >
-                Browse
-                <span className=" text-xl"><MdOutlineFileUpload /></span>
-              </label>
+              <div className="relative group">
+                <label
+                  htmlFor={selectedFiles.category ? undefined : "category-upload"}
+                  className={`px-4 py-1.5 ${
+                    selectedFiles.category 
+                      ? 'bg-gray-300 cursor-not-allowed' 
+                      : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'
+                  } text-white rounded flex items-center gap-1`}
+                >
+                  Browse
+                  <span className="text-xl"><MdOutlineFileUpload /></span>
+                </label>
+                
+                {/* Tooltip */}
+                {selectedFiles.category && (
+                  <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-xs rounded py-1 px-2 right-0 top-full mt-1 whitespace-nowrap">
+                    Remove current file to upload new one
+                  </div>
+                )}
+              </div>
             </div>
  
             <div className="text-center">
