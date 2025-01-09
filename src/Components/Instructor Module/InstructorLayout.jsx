@@ -120,29 +120,67 @@ const InstructorLayout = () => {
                       <span>
                         <PiCaretRightBold className='text-xs' />
                       </span>
-                      <p className='text-md text-[#4B5563] inline-flex items-center whitespace-nowrap'>
-                        {/* Course Information sub-steps */}
-                        {location.pathname.includes('basic-info') && 'Course Details'}
-                        {location.pathname.includes('media') && 'Add Media'}
-                        {location.pathname.includes('about') && 'About Course'}
-                        
-                        {/* Course Content with sub-steps */}
-                        {(location.pathname.includes('/content') || 
-                          location.pathname.includes('more-info') || 
-                          location.pathname.includes('faq')) && (
-                          <>
-                            Course Content
-                            <span>
-                              <PiCaretRightBold className='text-xs mx-1' />
+                      {/* Add Course Information as parent level */}
+                      {(location.pathname.includes('basic-info') || 
+                        location.pathname.includes('media') || 
+                        location.pathname.includes('about')) && (
+                        <>
+                          <p className='text-md text-[#4B5563]'>Course Information</p>
+                          <span><PiCaretRightBold className='text-xs' /></span>
+                          {/* Course Information sub-steps with links */}
+                          <Link to="/instructor/courses/create/basic-info">
+                            <span className={`${!location.pathname.includes('basic-info') ? 'text-[#0077FF] underline' : 'text-[#4B5563]'}`}>
+                              Course Details
                             </span>
-                            <span>
-                              {location.pathname.includes('/content') && 'Add sections and lectures'}
-                              {location.pathname.includes('more-info') && 'Glossary and References'}
-                              {location.pathname.includes('faq') && "FAQ's"}
+                          </Link>
+                          {(location.pathname.includes('media') || location.pathname.includes('about')) && (
+                            <>
+                              <span><PiCaretRightBold className='text-xs mx-1' /></span>
+                              <Link to="/instructor/courses/create/media">
+                                <span className={`${!location.pathname.includes('media') ? 'text-[#0077FF] underline' : 'text-[#4B5563]'}`}>
+                                  Add Media
+                                </span>
+                              </Link>
+                            </>
+                          )}
+                          {location.pathname.includes('about') && (
+                            <>
+                              <span><PiCaretRightBold className='text-xs mx-1' /></span>
+                              <span className='text-[#4B5563]'>About Course</span>
+                            </>
+                          )}
+                        </>
+                      )}
+                      {/* Course Content with sub-steps */}
+                      {(location.pathname.includes('/content') || 
+                        location.pathname.includes('more-info') || 
+                        location.pathname.includes('faq')) && (
+                        <>
+                          <span className='text-[#4B5563]'>Course Content</span>
+                          <span><PiCaretRightBold className='text-xs mx-1' /></span>
+                          <Link to="/instructor/courses/create/content">
+                            <span className={`${!location.pathname.includes('/content') ? 'text-[#0077FF] underline' : 'text-[#4B5563]'}`}>
+                              Add sections and lectures
                             </span>
-                          </>
-                        )}
-                      </p>
+                          </Link>
+                          {(location.pathname.includes('more-info') || location.pathname.includes('faq')) && (
+                            <>
+                              <span><PiCaretRightBold className='text-xs mx-1' /></span>
+                              <Link to="/instructor/courses/create/more-info">
+                                <span className={`${!location.pathname.includes('more-info') ? 'text-[#0077FF] underline' : 'text-[#4B5563]'}`}>
+                                  Glossary and References
+                                </span>
+                              </Link>
+                            </>
+                          )}
+                          {location.pathname.includes('faq') && (
+                            <>
+                              <span><PiCaretRightBold className='text-xs mx-1' /></span>
+                              <span className='text-[#4B5563]'>FAQ's</span>
+                            </>
+                          )}
+                        </>
+                      )}
                     </>
                   )}
                 </>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../stores/courseCreationStore';
 import StepIndicator from './Components/StepIndicator';
@@ -66,6 +66,10 @@ function CreateCourse() {
     }
   };
 
+  const [basicInfo, setBasicInfo] = useState({});
+  const [mediaInfo, setMediaInfo] = useState({});
+  const [aboutInfo, setAboutInfo] = useState({});
+
   return (
     <div className="bg-white">
       {/* Header */}
@@ -76,7 +80,14 @@ function CreateCourse() {
           
           </div>
         </div>
-        <StepIndicator />
+        <StepIndicator 
+          basicInfo={basicInfo}
+          mediaInfo={mediaInfo}
+          aboutInfo={aboutInfo}
+          currentStep={currentStep}
+          setStep={setStep}
+          steps={steps}
+        />
       </div>
 
       {/* Content Area */}

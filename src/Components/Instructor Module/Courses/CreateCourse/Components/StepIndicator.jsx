@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
-import { IoIosArrowRoundBack, IoIosArrowRoundForward } from 'react-icons/io';
+import { IoIosArrowRoundForward } from 'react-icons/io';
 
 
 const StepIndicator = () => {
@@ -243,7 +243,7 @@ const StepIndicator = () => {
   return (
     <div className="space-y-2">
       {/* Main Navigation Tabs */}
-      <div className="border-b flex justify-between">
+      <div className=" flex justify-between">
         <div className="flex gap-8 ml-5  py-2 p-4">
           {mainTabs.map((tab) => (
             <button
@@ -252,7 +252,7 @@ const StepIndicator = () => {
               className={` text-md font-medium  -mb-[2px]  ${
                 tab.id === currentTab
                   ? ' text-[#0056B3] bg-[#f2f9ff] px-4 py-1 rounded-md'
-                  : ' text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
               {tab.label}
@@ -264,7 +264,6 @@ const StepIndicator = () => {
                 <button
                   onClick={() => {/* Save as draft logic */}}
                   className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
-                  style={{borderRadius:"4px"}}
                 >
                  Preview
                   <span className="material-icons text-sm">expand_more</span>
@@ -273,7 +272,6 @@ const StepIndicator = () => {
               <button
                 onClick={() => {/* Submit for review logic */}}
                 className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
-                style={{borderRadius:"4px"}}
               >
                 Submit for review
               </button>
@@ -288,7 +286,7 @@ const StepIndicator = () => {
               <div className="flex flex-col items-center">
                 <div className="flex items-center w-4/5">
                   <div className={`
-                    relative group 
+                    relative group z-[999]
                     ${(currentTab === 'info' && currentStep === step.number) || 
                       (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
                       ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' 
@@ -335,13 +333,17 @@ const StepIndicator = () => {
                     </p>
                   </div>
                 </div>
-                <div className={`
+
+                {/* course highlighter */}
+                {/* <div className={`
                   h-1 w-full relative top-5 right-4
                   ${(currentTab === 'info' && currentStep === step.number) || 
                     (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
                     ? 'bg-[#0056B3]' 
                     : 'bg-transparent'}
-                `} />
+                `} /> */}
+
+                
               </div>
               {index < steps.length - 1 && (
                 <div className={`w-24 h-[1px] ${
@@ -357,19 +359,19 @@ const StepIndicator = () => {
           {(currentStep > 1 || currentTab !== 'info' || location.pathname.includes('/settings')) && (
             <button 
               onClick={handlePrevious}
-              className="flex items-center gap-1 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-4 py-2 h-8 rounded-md"
+              className="flex items-center gap-2 text-[#0056B3] hover:text-blue bg-[#F5F5F5] px-4 py-2 h-8 rounded-md"
             >
-              <span className="text-2xl font-bold mt-1"><IoIosArrowRoundBack /></span>
+              <span className="material-icons text-sm">arrow_back</span>
               Previous
             </button>
           )}
           {(currentStep < steps.length || currentTab !== 'settings') && (
             <button 
               onClick={handleNext}
-              className="flex items-center gap-1 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-4 h-8 py-2 rounded-md"
+              className="flex items-center gap-2 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-4 h-8 py-2 rounded-md"
             >
               {getNextButtonText()}
-              <span className=" text-2xl font-bold mt-1"><IoIosArrowRoundForward   /></span>
+              <span className=" text-2xl font-b"><IoIosArrowRoundForward   /></span>
             </button>
           )}
         </div>

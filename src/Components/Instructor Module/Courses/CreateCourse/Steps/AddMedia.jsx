@@ -141,7 +141,7 @@ function Media() {
 
           <label className="block text-sm font-medium mb-2">Upload a banner Video & Image *</label>
 
-          <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+          <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6 ">
 
             {/* Browse button in top right corner */}
 

@@ -348,6 +348,8 @@ function CourseContent() {
 
                 </div>
               </div>
+
+              
               <div className=' flex relative bottom-2 '>
                 <div>
                   {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
