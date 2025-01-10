@@ -273,18 +273,23 @@ const StepIndicator = () => {
     return direction === 'next' ? 'Next' : 'Previous';
   };
 
+  // Add this function to check if we're on settings page
+  const isSettingsPage = () => {
+    return location.pathname.includes('/settings');
+  };
+
   return (
     <div className="space-y-2">
       {/* Main Navigation Tabs */}
-      <div className=" flex justify-between">
-        <div className="flex gap-8 ml-5  py-2 p-4">
+      <div className="flex justify-between">
+        <div className="flex gap-8 ml-5 py-2 p-4">
           {mainTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => navigate(tab.path)}
-              className={` text-md font-medium  -mb-[2px]  ${
+              className={`text-md font-medium -mb-[2px] ${
                 tab.id === currentTab
-                  ? ' text-[#0056B3] bg-[#f2f9ff] px-4 py-1 rounded-md'
+                  ? 'text-[#0056B3] bg-[#f2f9ff] px-4 py-1 rounded-md'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -293,101 +298,122 @@ const StepIndicator = () => {
           ))}
         </div>
         <div className="flex items-center gap-4 p-2">
-              <div className="relative">
-                <button
-                  onClick={() => {/* Save as draft logic */}}
-                  className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
-                >
-                 Preview
-                  <span className="material-icons text-sm">expand_more</span>
-                </button>
-              </div>
-              <button
-                onClick={() => {/* Submit for review logic */}}
-                className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
-              >
-                Submit for review
-              </button>
-            </div>
+          <div className="relative">
+            <button
+              onClick={() => {/* Save as draft logic */}}
+              className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
+            >
+             Preview
+              <span className="material-icons text-sm">expand_more</span>
+            </button>
+          </div>
+          <button
+            onClick={() => {/* Submit for review logic */}}
+            className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
+          >
+            Submit for review
+          </button>
+        </div>
       </div>
 
-      {/* Step Indicator with Navigation */}
-      <div className="flex items-center justify-between p-4 ">
+      {/* Keep existing Step Indicator and add Settings heading when on settings page */}
+      <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-4">
-          {steps.length > 0 && steps.map((step, index) => (
-            <React.Fragment key={step.number}>
-              <div className="flex flex-col items-center">
-                <div className="flex items-center w-4/5">
-                  <div className={`
-                    relative group z-[1]
-                    ${(currentTab === 'info' && currentStep === step.number) || 
-                      (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
-                      ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' 
-                      : ''}
-                  `}>
-                    <div className={`
-                      w-8 h-8 rounded-full flex items-center justify-center text-md border
+          {/* Left side: Steps or Settings heading */}
+          <div className="flex items-center">
+            {isSettingsPage() ? (
+              <h2 
+                className="font-medium h-[24px] relative" 
+                style={{ 
+                  fontSize: '16px', 
+                  fontWeight: '700', 
+                  lineHeight: '24px', 
+                  letterSpacing: '0.15px', 
+                  textAlign: 'left', 
+                  color: '#6b7280', 
+                  width:"24px",
+                  height:"24px"
+                }}
+              >
+                Settings
+              </h2>
+            ) : (
+              steps.length > 0 && steps.map((step, index) => (
+                <React.Fragment key={step.number}>
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center w-4/5">
+                      <div className={`
+                        relative group z-[1]
+                        ${(currentTab === 'info' && currentStep === step.number) || 
+                          (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
+                          ? 'after:content-[""] after:absolute after:-inset-1 after:border-2 after:border-[#0056B3] after:rounded-full' 
+                          : ''}
+                      `}>
+                        <div className={`
+                          w-8 h-8 rounded-full flex items-center justify-center text-md border
+                          ${(currentTab === 'info' && currentStep === step.number) || 
+                            (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
+                            ? 'bg-[#0056B3] text-white' 
+                            : ((currentTab === 'info' && currentStep > step.number) || 
+                               (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber > step.number))
+                                ? 'bg-[#0056B3] text-white'
+                                : 'border-2 border-gray-300 text-gray-400'
+                          }
+                        `}>
+                          {(currentStep > step.number && currentTab !== 'content') || 
+                           (currentTab === 'content' && location.pathname.includes(step.path)) || 
+                           (location.pathname.includes('faq') && step.path === 'content') ? (
+                            <CheckIcon />
+                          ) : (
+                            step.number
+                          )}
+                        </div>
+                        
+                        {/* Tooltip */}
+                        <div className="absolute left-[40px] top-[50%] -translate-y-1/2
+                                          bg-gray-800 text-white text-sm rounded px-2 py-1
+                                          opacity-0 group-hover:opacity-100 pointer-events-none 
+                                          transition-opacity duration-200 whitespace-nowrap">
+                          {step.title}
+                        </div>
+                      </div>
+                      <div className="ml-3 ">
+                        <p className={`text-sm font-medium ${
+                          currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'
+                        }`}>
+                          {step.title}
+                        </p>
+                        <p className={`text-xs ${
+                          currentStep >= step.number ? 'text-gray-500' : 'text-gray-400'
+                        }`}>
+                          {step.subtitle}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* course highlighter */}
+                    {/* <div className={`
+                      h-1 w-full relative top-5 right-4
                       ${(currentTab === 'info' && currentStep === step.number) || 
                         (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
-                        ? 'bg-[#0056B3] text-white' 
-                        : ((currentTab === 'info' && currentStep > step.number) || 
-                           (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber > step.number))
-                            ? 'bg-[#0056B3] text-white'
-                            : 'border-2 border-gray-300 text-gray-400'
-                      }
-                    `}>
-                      {(currentStep > step.number && currentTab !== 'content') || 
-                       (currentTab === 'content' && location.pathname.includes(step.path)) || 
-                       (location.pathname.includes('faq') && step.path === 'content') ? (
-                        <CheckIcon />
-                      ) : (
-                        step.number
-                      )}
-                    </div>
+                        ? 'bg-[#0056B3]' 
+                        : 'bg-transparent'}
+                    `} /> */}
+
                     
-                    {/* Tooltip */}
-                    <div className="absolute left-[40px] top-[50%] -translate-y-1/2
-                                    bg-gray-800 text-white text-sm rounded px-2 py-1
-                                    opacity-0 group-hover:opacity-100 pointer-events-none 
-                                    transition-opacity duration-200 whitespace-nowrap">
-                      {step.title}
-                    </div>
                   </div>
-                  <div className="ml-3 ">
-                    <p className={`text-sm font-medium ${
-                      currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'
-                    }`}>
-                      {step.title}
-                    </p>
-                    <p className={`text-xs ${
-                      currentStep >= step.number ? 'text-gray-500' : 'text-gray-400'
-                    }`}>
-                      {step.subtitle}
-                    </p>
-                  </div>
-                </div>
-
-                {/* course highlighter */}
-                {/* <div className={`
-                  h-1 w-full relative top-5 right-4
-                  ${(currentTab === 'info' && currentStep === step.number) || 
-                    (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
-                    ? 'bg-[#0056B3]' 
-                    : 'bg-transparent'}
-                `} /> */}
-
-                
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`w-24 h-[1px] ${
-                  currentStep > step.number ? 'bg-[#0056B3]' : 'bg-gray-200'
-                }`} />
-              )}
-            </React.Fragment>
-          ))}
+                  {index < steps.length - 1 && (
+                    <div className={`w-24 h-[1px] ${
+                      currentStep > step.number ? 'bg-[#0056B3]' : 'bg-gray-200'
+                    }`} />
+                  )}
+                </React.Fragment>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* Navigation Buttons */}
+        {/* Right side: Navigation Buttons */}
         <div className="flex items-center gap-4">
           {(currentStep > 1 || currentTab !== 'info' || location.pathname.includes('/settings')) && (
             <button 
