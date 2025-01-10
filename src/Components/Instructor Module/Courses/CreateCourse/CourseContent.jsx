@@ -1501,93 +1501,134 @@ function CourseContent() {
                         <div className="flex items-center flex-1 min-w-0">
                           <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span>
                           {editingLesson === `${chapterIndex}-${lessonIndex}` ? (
-                            <div className="flex items-center flex-1 gap-1  ml-1">
-                            <div className='flex items-center flex-1  '>
-                              <input
-                                type="text"
-                                value={editName}
-                                onChange={(e) => {
-                                  setEditName(e.target.value);
-                                  if (lesson.isNew) {
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
-                                      ...lesson,
-                                      showDropdown: e.target.value.trim() === ''
-                                    };
-                                    setChapters(updatedChapters);
-                                  }
-                                }}
-                                onBlur={() => {
-                                  if (editName.trim() !== '') {
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
-                                      ...lesson,
-                                      lessonTitle: editName.trim(),
-                                      isNew: false,
-                                      showDropdown: false
-                                    };
-                                    setChapters(updatedChapters);
-                                    setEditingLesson(null);
-                                    handleSelectLesson(chapterIndex, lessonIndex);
-                                  } else {
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
-                                      ...lesson,
-                                      showDropdown: true
-                                    };
-                                    setChapters(updatedChapters);
-                                  }
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.target.blur();
-                                  }
-                                  if (e.key === 'Escape') {
-                                    setEditingLesson(null);
-                                  }
-                                }}
-                                className="text-xs w-[80px] flex-1 outline-none rounded border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 "
-                                autoFocus
-                                placeholder="Lesson name"
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            
-                            </div>
-                            
-                              <div>
-                               {lesson.isNew && lesson.showDropdown && (
-                                <select
-                                  value={lesson.lessonType}
+                            <div className="flex items-center flex-1 gap-1 ml-1">
+                              <div className='flex items-center flex-1'>
+                                <input
+                                  type="text"
+                                  value={editName}
                                   onChange={(e) => {
-                                    e.stopPropagation();
-                                    const lessonType = e.target.value;
-                                    const updatedChapters = [...chapters];
-                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
-                                      ...lesson,
-                                      lessonType,
-                                      showDropdown: true  // Keep dropdown visible after selection
-                                    };
-                                    setChapters(updatedChapters);
-                                    handleLessonTypeChange(chapterIndex, lessonIndex, lessonType);
+                                    setEditName(e.target.value);
+                                    if (lesson.isNew) {
+                                      const updatedChapters = [...chapters];
+                                      updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                        ...lesson,
+                                        showDropdown: true  // Always keep dropdown visible for new lessons
+                                      };
+                                      setChapters(updatedChapters);
+                                    }
                                   }}
+                                  onBlur={(e) => {
+                                    // Check if clicking dropdown
+                                    const relatedTarget = e.relatedTarget;
+                                    const isClickingDropdown = relatedTarget && 
+                                      (relatedTarget.tagName === 'SELECT' || 
+                                       relatedTarget.tagName === 'OPTION');
+
+                                    if (isClickingDropdown) {
+                                      // If clicking dropdown and name is empty, keep the lesson but don't save it
+                                      if (editName.trim() === '') {
+                                        return;
+                                      }
+                                    }
+
+                                    if (lesson.isNew) {
+                                      if (editName.trim() !== '') {
+                                        // Save only if name is not empty
+                                        const updatedChapters = [...chapters];
+                                        updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                          ...lesson,
+                                          lessonTitle: editName.trim(),
+                                          isNew: false,
+                                          showDropdown: false
+                                        };
+                                        setChapters(updatedChapters);
+                                        setEditingLesson(null);
+                                        handleSelectLesson(chapterIndex, lessonIndex);
+                                      } else if (!isClickingDropdown) {
+                                        // Remove only if not clicking dropdown and name is empty
+                                        const updatedChapters = [...chapters];
+                                        updatedChapters[chapterIndex].lessons.splice(lessonIndex, 1);
+                                        setChapters(updatedChapters);
+                                        setEditingLesson(null);
+                                      }
+                                    } else {
+                                      // For existing lessons, keep old name if empty
+                                      const updatedChapters = [...chapters];
+                                      updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                        ...lesson,
+                                        lessonTitle: editName.trim() || lesson.lessonTitle
+                                      };
+                                      setChapters(updatedChapters);
+                                      setEditingLesson(null);
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      if (editName.trim() === '' && lesson.isNew) {
+                                        const updatedChapters = [...chapters];
+                                        updatedChapters[chapterIndex].lessons.splice(lessonIndex, 1);
+                                        setChapters(updatedChapters);
+                                      }
+                                      e.target.blur();
+                                    }
+                                    if (e.key === 'Escape') {
+                                      if (lesson.isNew) {
+                                        const updatedChapters = [...chapters];
+                                        updatedChapters[chapterIndex].lessons.splice(lessonIndex, 1);
+                                        setChapters(updatedChapters);
+                                      }
+                                      setEditingLesson(null);
+                                    }
+                                  }}
+                                  className="text-xs w-[80px] flex-1 outline-none rounded border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                  autoFocus
+                                  placeholder="Lesson name"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="text-xs mb-1 w-[70px] border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
-                                  style={{
-                                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'right 0.5rem center',
-                                    backgroundSize: '1em',
-                                   
-                                  
-                                  }}
-                                >
-                                  <option value="Video">Video</option>
-                                  <option value="PDF">Content</option>
-                                  <option value="Quiz">Quiz</option>
-                                </select>
-                              )}
+                                />
                               </div>
-                             
+                              
+                              <div>
+                                {lesson.isNew && lesson.showDropdown && (
+                                  <select
+                                    value={lesson.lessonType}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      const lessonType = e.target.value;
+                                      const updatedChapters = [...chapters];
+                                      // Only update the type, don't save the lesson yet
+                                      updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                        ...lesson,
+                                        lessonType,
+                                        showDropdown: true,
+                                        isNew: true  // Keep it marked as new
+                                      };
+                                      setChapters(updatedChapters);
+                                    }}
+                                    onBlur={(e) => {
+                                      // If name is empty when leaving dropdown, remove the lesson
+                                      if (editName.trim() === '') {
+                                        const updatedChapters = [...chapters];
+                                        updatedChapters[chapterIndex].lessons.splice(lessonIndex, 1);
+                                        setChapters(updatedChapters);
+                                        setEditingLesson(null);
+                                      }
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-xs mb-1 w-[70px] border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                    style={{
+                                      backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                                      backgroundRepeat: 'no-repeat',
+                                      backgroundPosition: 'right 0.5rem center',
+                                      backgroundSize: '1em',
+                                      paddingRight: '1.5rem'
+                                    }}
+                                  >
+                                    <option value="Video">Video</option>
+                                    <option value="PDF">Content</option>
+                                    <option value="Quiz">Quiz</option>
+                                  </select>
+                                )}
+                              </div>
                             </div>
                           ) : (
                             <>
