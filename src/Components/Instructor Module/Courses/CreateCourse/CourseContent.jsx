@@ -57,6 +57,18 @@ function CourseContent() {
   // Select lesson and show right content
   const handleSelectLesson = (chapterIndex, lessonIndex) => {
     const lesson = chapters[chapterIndex].lessons[lessonIndex];
+    
+    // Initialize questions array if needed
+    if ((lesson.lessonType === 'Quiz' || lesson.lessonType === 'PDF') && !lesson.questions) {
+      const updatedChapters = [...chapters];
+      updatedChapters[chapterIndex].lessons[lessonIndex] = {
+        ...lesson,
+        questions: []
+      };
+      setChapters(updatedChapters);
+    }
+
+    // Set selected chapter and lesson
     setSelectedChapter(chapterIndex);
     setSelectedLesson({
       ...lesson,
@@ -67,18 +79,21 @@ function CourseContent() {
 
   // Add new lesson to chapter
   const handleAddLesson = (chapterIndex) => {
-    const newLesson = {
-      lessonTitle: `Lesson ${chapters[chapterIndex].lessons.length + 1}`,
+    const updatedChapters = [...chapters];
+    const newLessonIndex = updatedChapters[chapterIndex].lessons.length;
+    
+    updatedChapters[chapterIndex].lessons.push({
+      lessonTitle: '',
       lessonType: 'Video',
       lessonContent: '',
-      lessonVideo: '',
-      lessonMaterials: ''
-    };
-
-    const updatedChapters = [...chapters];
-    updatedChapters[chapterIndex].lessons.push(newLesson);
+      isNew: true,
+      showDropdown: true
+    });
+    
     setChapters(updatedChapters);
-    updateCourseData('content', { chapters: updatedChapters });
+    handleSelectLesson(chapterIndex, newLessonIndex);
+    setEditName('');
+    setEditingLesson(`${chapterIndex}-${newLessonIndex}`);
   };
 
   // Add question to quiz
@@ -86,30 +101,24 @@ function CourseContent() {
 
   // Handle lesson type change
   const handleLessonTypeChange = (chapterIndex, lessonIndex, newType) => {
+    // First select the lesson
+    handleSelectLesson(chapterIndex, lessonIndex);
+    
+    // Then update the type
     const updatedChapters = [...chapters];
     const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
     
-    // Create a new lesson object with the new type and default values
     const updatedLesson = {
       ...lesson,
       lessonType: newType,
-      // Reset content based on new type
-      lessonContent: '',
-      questions: newType.toLowerCase() === 'quiz' ? [] : undefined,
-      videoUrl: newType.toLowerCase() === 'video' ? '' : undefined,
-      materials: newType.toLowerCase() === 'pdf' ? [] : undefined,
+      lessonContent: newType === 'PDF' ? '' : lesson.lessonContent,
+      questions: (newType === 'Quiz' || newType === 'PDF') ? [] : undefined,
+      videoUrl: newType === 'Video' ? '' : undefined,
+      materials: newType === 'PDF' ? [] : undefined,
     };
     
     updatedChapters[chapterIndex].lessons[lessonIndex] = updatedLesson;
     setChapters(updatedChapters);
-
-    // Immediately update the selected lesson to trigger re-render
-    setSelectedLesson({
-      ...selectedLesson,
-      lessonType: newType,
-      chapterIndex,
-      lessonIndex
-    });
   };
 
   // Save course content
@@ -262,8 +271,8 @@ function CourseContent() {
                     <div className="absolute top-0 right-0">
                       <label
                         htmlFor={getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') ? undefined : `video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                        className={`px-4 py-1.5 ${getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') 
-                          ? 'bg-gray-300 cursor-not-allowed' 
+                        className={`px-4 py-1.5 ${getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video')
+                          ? 'bg-gray-300 cursor-not-allowed'
                           : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'} text-white rounded flex items-center gap-1`}
                       >
                         Browse
@@ -296,28 +305,28 @@ function CourseContent() {
               </div>
               <div className=' flex relative bottom-2 '>
 
-<div >
+                <div >
 
-  {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') && (
-    <div className=" text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer flex space-x-3 items-center">
-      <p
-        className="cursor-pointer hover:text-[#0056B3] underline  underline-offset-4 text-[#4B5563]"
-        onClick={() => handlePreviewClick('video', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonVideo)}
-      >
-        {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video').name}
-      </p>
+                  {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') && (
+                    <div className=" text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer flex space-x-3 items-center">
+                      <p
+                        className="cursor-pointer hover:text-[#0056B3] underline  underline-offset-4 text-[#4B5563]"
+                        onClick={() => handlePreviewClick('video', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonVideo)}
+                      >
+                        {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video').name}
+                      </p>
 
-      <button
-        onClick={() => handleRemoveFile('video', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-        className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
-      >
-        ×
-      </button>
-    </div>
-  )}
-</div>
+                      <button
+                        onClick={() => handleRemoveFile('video', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+                        className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-</div>
+              </div>
 
               <div>
                 <label className="block mb-2">Upload Lesson Materials (Optional)</label>
@@ -325,14 +334,14 @@ function CourseContent() {
                   <div className="text-center relative">
                     {/* Add Browse button to top right */}
                     <div className="absolute top-0 right-0">
-              <label
-                htmlFor="category-upload"
-                className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
-              >
-                Browse
-                <span className=" text-xl"><MdOutlineFileUpload /></span>
-              </label>
-            </div>
+                      <label
+                        htmlFor="category-upload"
+                        className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
+                      >
+                        Browse
+                        <span className=" text-xl"><MdOutlineFileUpload /></span>
+                      </label>
+                    </div>
 
                     <input
                       type="file"
@@ -360,7 +369,7 @@ function CourseContent() {
                 </div>
               </div>
 
-              
+
               <div className=' flex relative bottom-2 '>
                 <div>
                   {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
@@ -392,7 +401,6 @@ function CourseContent() {
 
               {/* Quiz Section */}
               {selectedLesson.questions?.length === 0 ? (
-                // Show this when there are no questions
                 <div className="mt-8 flex justify-center items-center">
                   <button
                     onClick={() => handleAddQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
@@ -403,7 +411,6 @@ function CourseContent() {
                   </button>
                 </div>
               ) : (
-                // Show this when there are questions
                 <div className="flex-1 h-full overflow-hidden w-[829px]">
                   <div className="h-full flex flex-col">
                     <div className="flex justify-between items-center mb-4 flex-shrink-0">
@@ -443,7 +450,7 @@ function CourseContent() {
                                 <BsQuestionOctagon className="text-[#0056B3] font-extrabold text-xl" />
                                 <span className='text-lg font-[700]'>Question {qIndex + 1}</span>
                               </div>
-                              
+
                               <select
                                 value={q.questionType || 'mcq'}
                                 onChange={(e) => {
@@ -466,7 +473,7 @@ function CourseContent() {
                                 className="text-gray-500 hover:text-gray-700"
                                 title="Copy question"
                               >
-                                <TbCopy  className="text-lg" />
+                                <TbCopy className="text-lg" />
                               </button>
                               <button
                                 onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
@@ -599,7 +606,7 @@ function CourseContent() {
               )}
             </div>
 
-            
+
           </div>
         );
 
@@ -660,7 +667,7 @@ function CourseContent() {
                 <label className="block mt-12 relative">Additional Materials *</label>
                 <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-2">
                   <div className="text-center relative">
-                  <div className="absolute top-0 right-0">
+                    <div className="absolute top-0 right-0">
                       <label
                         htmlFor={getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') ? undefined : `video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
                         className={`px-4 py-1.5 ${getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video')
@@ -671,7 +678,7 @@ function CourseContent() {
                         <span className="text-xl"><MdOutlineFileUpload /></span>
                       </label>
                     </div>
- 
+
 
                     <input
                       type="file"
@@ -685,7 +692,7 @@ function CourseContent() {
                       className="cursor-pointer"
                     >
                       <div className="flex flex-col items-center justify-center">
-                      <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
+                        <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
                         <p className="mt-1 text-sm text-gray-500">
                           Drag and Drop Or Browse<br />
                           PDF, DOC, DOCX... up to _MB
@@ -763,7 +770,7 @@ function CourseContent() {
                                 <BsQuestionOctagon className="text-[#0056B3] font-extrabold text-xl" />
                                 <span className='text-lg font-[700]'>Question {qIndex + 1}</span>
                               </div>
-                              
+
                               <select
                                 value={q.questionType || 'mcq'}
                                 onChange={(e) => {
@@ -923,205 +930,205 @@ function CourseContent() {
 
       case 'quiz':
         return (
-          <div className="bg-white rounded-lg p-6 h-[calc(100vh-280px)]">
-            <div className="flex h-full">
-              {/* Left Sidebar */}
-
-              {/* Content Area */}
-              <div className="flex-1 pl-6 h-full overflow-hidden">
-                <div className="h-full flex flex-col">
-                  <div className="flex justify-between items-center mb-4 flex-shrink-0">
-                    <h2 className="font-medium">Quiz</h2>
-                    <button
-                      onClick={() => {
-                        const updatedChapters = [...chapters];
-                        if (!updatedChapters[selectedLesson.chapterIndex]
-                          .lessons[selectedLesson.lessonIndex].questions) {
+          <>
+            <div className="bg-white rounded-lg p-6 h-[calc(100vh-280px)]">
+              <div className="flex h-full">
+                {/* Content Area */}
+                <div className="flex-1 pl-6 h-full overflow-hidden">
+                  <div className="h-full flex flex-col">
+                    <div className="flex justify-between items-center mb-4 flex-shrink-0">
+                      <h2 className="font-medium">Quiz</h2>
+                      <button
+                        onClick={() => {
+                          const updatedChapters = [...chapters];
+                          if (!updatedChapters[selectedLesson.chapterIndex]
+                            .lessons[selectedLesson.lessonIndex].questions) {
+                            updatedChapters[selectedLesson.chapterIndex]
+                              .lessons[selectedLesson.lessonIndex].questions = [];
+                          }
                           updatedChapters[selectedLesson.chapterIndex]
-                            .lessons[selectedLesson.lessonIndex].questions = [];
-                        }
-                        updatedChapters[selectedLesson.chapterIndex]
-                          .lessons[selectedLesson.lessonIndex].questions.push({
-                            question: '',
-                            questionType: 'mcq',
-                            options: [
-                              { option: '', isCorrect: false },
-                              { option: '', isCorrect: false }
-                            ]
-                          });
-                        setChapters(updatedChapters);
-                      }}
-                      className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
-                    >
-                      <span className="material-icons text-sm">add_circle_outline</span>
-                      Add Another
-                    </button>
-                  </div>
+                            .lessons[selectedLesson.lessonIndex].questions.push({
+                              question: '',
+                              questionType: 'mcq',
+                              options: [
+                                { option: '', isCorrect: false },
+                                { option: '', isCorrect: false }
+                              ]
+                            });
+                          setChapters(updatedChapters);
+                        }}
+                        className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                      >
+                        <span className="material-icons text-sm">add_circle_outline</span>
+                        Add Another
+                      </button>
+                    </div>
 
-                  <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
-                    {selectedLesson.questions?.map((q, qIndex) => (
-                      <div key={qIndex} className="border rounded-lg bg-white shadow-sm">
-                        <div className="flex justify-between items-center p-4 border-b bg-[#f3f4f6]">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                              <BsQuestionOctagon className="text-[#0056B3] font-extrabold" />
-                              <span>Question {qIndex + 1}</span>
-                            </div>
-                            
-                            <select
-                              value={q.questionType || 'mcq'}
-                              onChange={(e) => {
-                                const updatedChapters = [...chapters];
-                                updatedChapters[selectedLesson.chapterIndex]
-                                  .lessons[selectedLesson.lessonIndex]
-                                  .questions[qIndex].questionType = e.target.value;
-                                setChapters(updatedChapters);
-                              }}
-                              className="text-sm border rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
-                            >
-                              <option value="mcq">MCQs</option>
-                              <option value="best">Choose the best answer</option>
-                            </select>
-                          </div>
+                    <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
+                      {selectedLesson.questions?.map((q, qIndex) => (
+                        <div key={qIndex} className="border rounded-lg bg-white shadow-sm">
+                          <div className="flex justify-between items-center p-4 border-b bg-[#f3f4f6]">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <BsQuestionOctagon className="text-[#0056B3] font-extrabold" />
+                                <span>Question {qIndex + 1}</span>
+                              </div>
 
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleCopyQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
-                              className="text-gray-500 hover:text-gray-700"
-                              title="Copy question"
-                            >
-                              <MdContentCopy className="text-lg" />
-                            </button>
-                            <button
-                              onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <span className="text-lg">
-                                <RiDeleteBinLine style={{ borderRadius: "500px" }} />
-                              </span>
-                            </button>
-                            <button
-                              onClick={() => toggleQuestion(qIndex)}
-                              className="text-gray-500"
-                            >
-                              <span className="material-icons">
-                                {collapsedQuestions.has(qIndex) ? 'expand_more' : 'expand_less'}
-                              </span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {!collapsedQuestions.has(qIndex) && (
-                          <div className="p-4 space-y-4">
-                            <div>
-                              <input
-                                type="text"
-                                placeholder="Enter your question"
-                                value={q.question}
+                              <select
+                                value={q.questionType || 'mcq'}
                                 onChange={(e) => {
                                   const updatedChapters = [...chapters];
                                   updatedChapters[selectedLesson.chapterIndex]
                                     .lessons[selectedLesson.lessonIndex]
-                                    .questions[qIndex].question = e.target.value;
+                                    .questions[qIndex].questionType = e.target.value;
                                   setChapters(updatedChapters);
                                 }}
-                                className="w-full p-2 border rounded"
-                              />
+                                className="text-sm border rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
+                              >
+                                <option value="mcq">MCQs</option>
+                                <option value="best">Choose the best answer</option>
+                              </select>
                             </div>
 
-                            <div className="space-y-3">
-                              {q.options.map((option, oIndex) => (
-                                <div key={oIndex} className="flex items-center gap-2">
-                                  {q.questionType === 'mcq' ? (
-                                    // Checkbox for MCQ questions
-                                    <input
-                                      type="checkbox"
-                                      checked={option.isCorrect}
-                                      onChange={() => {
-                                        const updatedChapters = [...chapters];
-                                        const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
-                                          .lessons[selectedLesson.lessonIndex]
-                                          .questions[qIndex];
-
-                                        // Update the current option's isCorrect value
-                                        currentQuestion.options[oIndex].isCorrect = !option.isCorrect;
-                                        setChapters(updatedChapters);
-                                      }}
-                                      className="form-checkbox text-[#0056B3]"
-                                    />
-                                  ) : (
-                                    // Radio for "Choose the best" questions
-                                    <input
-                                      type="radio"
-                                      name={`question-${qIndex}`}
-                                      checked={option.isCorrect}
-                                      onChange={() => {
-                                        const updatedChapters = [...chapters];
-                                        const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
-                                          .lessons[selectedLesson.lessonIndex]
-                                          .questions[qIndex];
-
-                                        // Set all options to false, then set the selected one to true
-                                        currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
-                                          ...opt,
-                                          isCorrect: idx === oIndex
-                                        }));
-                                        setChapters(updatedChapters);
-                                      }}
-                                      className="form-radio text-[#0056B3]"
-                                    />
-                                  )}
-                                  <input
-                                    type="text"
-                                    value={option.option}
-                                    onChange={(e) => {
-                                      const updatedChapters = [...chapters];
-                                      updatedChapters[selectedLesson.chapterIndex]
-                                        .lessons[selectedLesson.lessonIndex]
-                                        .questions[qIndex].options[oIndex].option = e.target.value;
-                                      setChapters(updatedChapters);
-                                    }}
-                                    placeholder={`Option ${oIndex + 1}`}
-                                    className="flex-1 p-2 border rounded"
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      const updatedChapters = [...chapters];
-                                      updatedChapters[selectedLesson.chapterIndex]
-                                        .lessons[selectedLesson.lessonIndex]
-                                        .questions[qIndex].options.splice(oIndex, 1);
-                                      setChapters(updatedChapters);
-                                    }}
-                                    className="text-red-500 hover:text-red-700"
-                                  >
-                                    <span className="material-icons text-sm">remove_circle_outline</span>
-                                  </button>
-                                </div>
-                              ))}
-
+                            <div className="flex items-center gap-2">
                               <button
-                                onClick={() => {
-                                  const updatedChapters = [...chapters];
-                                  updatedChapters[selectedLesson.chapterIndex]
-                                    .lessons[selectedLesson.lessonIndex]
-                                    .questions[qIndex].options.push({ option: '', isCorrect: false });
-                                  setChapters(updatedChapters);
-                                }}
-                                className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                                onClick={() => handleCopyQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
+                                className="text-gray-500 hover:text-gray-700"
+                                title="Copy question"
                               >
-                                <span className="material-icons text-sm">add_circle_outline</span>
-                                Add Option
+                                <MdContentCopy className="text-lg" />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveQuestion(selectedLesson.chapterIndex, selectedLesson.lessonIndex, qIndex)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <span className="text-lg">
+                                  <RiDeleteBinLine style={{ borderRadius: "500px" }} />
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => toggleQuestion(qIndex)}
+                                className="text-gray-500"
+                              >
+                                <span className="material-icons">
+                                  {collapsedQuestions.has(qIndex) ? 'expand_more' : 'expand_less'}
+                                </span>
                               </button>
                             </div>
                           </div>
-                        )}
-                      </div>
-                    ))}
+
+                          {!collapsedQuestions.has(qIndex) && (
+                            <div className="p-4 space-y-4">
+                              <div>
+                                <input
+                                  type="text"
+                                  placeholder="Enter your question"
+                                  value={q.question}
+                                  onChange={(e) => {
+                                    const updatedChapters = [...chapters];
+                                    updatedChapters[selectedLesson.chapterIndex]
+                                      .lessons[selectedLesson.lessonIndex]
+                                      .questions[qIndex].question = e.target.value;
+                                    setChapters(updatedChapters);
+                                  }}
+                                  className="w-full p-2 border rounded"
+                                />
+                              </div>
+
+                              <div className="space-y-3">
+                                {q.options.map((option, oIndex) => (
+                                  <div key={oIndex} className="flex items-center gap-2">
+                                    {q.questionType === 'mcq' ? (
+                                      // Checkbox for MCQ questions
+                                      <input
+                                        type="checkbox"
+                                        checked={option.isCorrect}
+                                        onChange={() => {
+                                          const updatedChapters = [...chapters];
+                                          const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                            .lessons[selectedLesson.lessonIndex]
+                                            .questions[qIndex];
+
+                                          // Update the current option's isCorrect value
+                                          currentQuestion.options[oIndex].isCorrect = !option.isCorrect;
+                                          setChapters(updatedChapters);
+                                        }}
+                                        className="form-checkbox text-[#0056B3]"
+                                      />
+                                    ) : (
+                                      // Radio for "Choose the best" questions
+                                      <input
+                                        type="radio"
+                                        name={`question-${qIndex}`}
+                                        checked={option.isCorrect}
+                                        onChange={() => {
+                                          const updatedChapters = [...chapters];
+                                          const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                            .lessons[selectedLesson.lessonIndex]
+                                            .questions[qIndex];
+
+                                          // Set all options to false, then set the selected one to true
+                                          currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                            ...opt,
+                                            isCorrect: idx === oIndex
+                                          }));
+                                          setChapters(updatedChapters);
+                                        }}
+                                        className="form-radio text-[#0056B3]"
+                                      />
+                                    )}
+                                    <input
+                                      type="text"
+                                      value={option.option}
+                                      onChange={(e) => {
+                                        const updatedChapters = [...chapters];
+                                        updatedChapters[selectedLesson.chapterIndex]
+                                          .lessons[selectedLesson.lessonIndex]
+                                          .questions[qIndex].options[oIndex].option = e.target.value;
+                                        setChapters(updatedChapters);
+                                      }}
+                                      placeholder={`Option ${oIndex + 1}`}
+                                      className="flex-1 p-2 border rounded"
+                                    />
+                                    <button
+                                      onClick={() => {
+                                        const updatedChapters = [...chapters];
+                                        updatedChapters[selectedLesson.chapterIndex]
+                                          .lessons[selectedLesson.lessonIndex]
+                                          .questions[qIndex].options.splice(oIndex, 1);
+                                        setChapters(updatedChapters);
+                                      }}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <span className="material-icons text-sm">remove_circle_outline</span>
+                                    </button>
+                                  </div>
+                                ))}
+
+                                <button
+                                  onClick={() => {
+                                    const updatedChapters = [...chapters];
+                                    updatedChapters[selectedLesson.chapterIndex]
+                                      .lessons[selectedLesson.lessonIndex]
+                                      .questions[qIndex].options.push({ option: '', isCorrect: false });
+                                    setChapters(updatedChapters);
+                                  }}
+                                  className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                                >
+                                  <span className="material-icons text-sm">add_circle_outline</span>
+                                  Add Option
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         );
 
       default:
@@ -1231,13 +1238,13 @@ function CourseContent() {
   const handleCopyQuestion = (chapterIndex, lessonIndex, questionIndex) => {
     const updatedChapters = [...chapters];
     const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
-    
+
     // Deep clone the question to copy
     const questionToCopy = JSON.parse(JSON.stringify(lesson.questions[questionIndex]));
-    
+
     // Insert the copied question after the current question
     lesson.questions.splice(questionIndex + 1, 0, questionToCopy);
-    
+
     setChapters(updatedChapters);
     updateCourseData('content', { chapters: updatedChapters });
   };
@@ -1288,10 +1295,9 @@ function CourseContent() {
   }, []); // Run once after component mounts
 
   return (
-    <div className="min-h-screen bg-white ">
-
+    <div className="min-h-screen bg-white">
       <div className="flex">
-        {/* Left Sidebar - Chapters and Lessons */}
+        {/* Left Sidebar */}
         <div className="fixed calc-height w-[310px] h-[600px] gap-4 p-4 border-2 border-[#E2E8F0] overflow-x-hidden overflow-y-auto bg-white">
           <style>
             {`
@@ -1366,9 +1372,13 @@ function CourseContent() {
                       <span
                         className="text-xs text-gray-700 font-bold flex-1 ml-1 truncate"
                         onDoubleClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
-                          setEditName(chapter.chapterName || '');
-                          setEditingChapter(chapterIndex);
+                          const currentLesson = chapters[chapterIndex].lessons[lessonIndex];
+                          setEditName(currentLesson.lessonTitle || '');
+                          setEditingLesson(`${chapterIndex}-${lessonIndex}`);
+                          // Also select the lesson when starting to edit
+                          handleSelectLesson(chapterIndex, lessonIndex);
                         }}
                         title={chapter.chapterName || ''}
                         style={{
@@ -1425,11 +1435,12 @@ function CourseContent() {
                     chapter.lessons.map((lesson, lessonIndex) => (
                       <div
                         key={lessonIndex}
-                        className={`flex items-center h-[32px] ml-2 gap-2 p-2 rounded cursor-pointer ${selectedLesson?.chapterIndex === chapterIndex &&
-                            selectedLesson?.lessonIndex === lessonIndex
-                            ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
-                            : 'bg-white'
-                          }`}
+                        className={`flex items-center h-[32px] ml-2 gap-2 p-2 rounded cursor-pointer ${
+                          selectedLesson?.chapterIndex === chapterIndex &&
+                          selectedLesson?.lessonIndex === lessonIndex
+                          ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
+                          : 'bg-white'
+                        }`}
                         onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
                       >
                         {/* Lesson Icon based on type */}
@@ -1437,32 +1448,52 @@ function CourseContent() {
                           {lesson.lessonType === 'Video' ?
                             <CiPlay1 className="w-5 h-5 font-extrabold stroke-1" /> :
 
-                              lesson.lessonType === 'Quiz' ? <PiExam  className="w-5 h-5 font-extrabold stroke-1" /> :
+                            lesson.lessonType === 'Quiz' ? <PiExam className="w-5 h-5 font-extrabold stroke-1" /> :
 
-                              lesson.lessonType === 'Content' ?<BiBookContent  className="w-5 h-5 " /> :<BiBookContent  className="w-5 h-5 " /> 
+                              lesson.lessonType === 'Content' ? <BiBookContent className="w-5 h-5 " /> : <BiBookContent className="w-5 h-5 " />
 
-                                
+
                           }
                         </span>
 
                         <div className="flex items-center flex-1 min-w-0">
                           <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span>
                           {editingLesson === `${chapterIndex}-${lessonIndex}` ? (
-                            <>
+                            <div className="flex items-center flex-1 gap-2">
                               <input
                                 type="text"
                                 value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
+                                onChange={(e) => {
+                                  setEditName(e.target.value);
+                                  if (lesson.isNew) {
+                                    const updatedChapters = [...chapters];
+                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                      ...lesson,
+                                      showDropdown: e.target.value.trim() === ''
+                                    };
+                                    setChapters(updatedChapters);
+                                  }
+                                }}
                                 onBlur={() => {
                                   if (editName.trim() !== '') {
                                     const updatedChapters = [...chapters];
                                     updatedChapters[chapterIndex].lessons[lessonIndex] = {
                                       ...lesson,
-                                      lessonTitle: editName.trim()
+                                      lessonTitle: editName.trim(),
+                                      isNew: false,
+                                      showDropdown: false
+                                    };
+                                    setChapters(updatedChapters);
+                                    setEditingLesson(null);
+                                    handleSelectLesson(chapterIndex, lessonIndex);
+                                  } else {
+                                    const updatedChapters = [...chapters];
+                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                      ...lesson,
+                                      showDropdown: true
                                     };
                                     setChapters(updatedChapters);
                                   }
-                                  setEditingLesson(null);
                                 }}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
@@ -1472,19 +1503,54 @@ function CourseContent() {
                                     setEditingLesson(null);
                                   }
                                 }}
-                                className="text-xs flex-1 outline-none border-b border-blue-500 ml-1"
+                                className="text-xs w-[30px] flex-1 outline-none border-b border-gray-600 ml-1"
                                 autoFocus
+                                placeholder="Enter lesson name"
                                 onClick={(e) => e.stopPropagation()}
                               />
-                            </>
+                              
+                              {lesson.isNew && lesson.showDropdown && (
+                                <select
+                                  value={lesson.lessonType}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    const lessonType = e.target.value;
+                                    const updatedChapters = [...chapters];
+                                    updatedChapters[chapterIndex].lessons[lessonIndex] = {
+                                      ...lesson,
+                                      lessonType,
+                                      showDropdown: true  // Keep dropdown visible after selection
+                                    };
+                                    setChapters(updatedChapters);
+                                    handleLessonTypeChange(chapterIndex, lessonIndex, lessonType);
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-xs border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                  style={{
+                                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'right 0.5rem center',
+                                    backgroundSize: '1em',
+                                    paddingRight: '1.5rem'
+                                  }}
+                                >
+                                  <option value="Video">Video</option>
+                                  <option value="PDF">Content</option>
+                                  <option value="Quiz">Quiz</option>
+                                </select>
+                              )}
+                            </div>
                           ) : (
                             <>
                               <span
                                 className="text-xs text-gray-700 font-bold flex-1 ml-1 truncate"
                                 onDoubleClick={(e) => {
+                                  e.preventDefault();
                                   e.stopPropagation();
-                                  setEditName(lesson.lessonTitle || '');
+                                  const currentLesson = chapters[chapterIndex].lessons[lessonIndex];
+                                  setEditName(currentLesson.lessonTitle || '');
                                   setEditingLesson(`${chapterIndex}-${lessonIndex}`);
+                                  handleSelectLesson(chapterIndex, lessonIndex);
                                 }}
                                 title={lesson.lessonTitle || ''}
                               >
@@ -1496,15 +1562,17 @@ function CourseContent() {
                                 }
                               </span>
 
-                              {/* Only show dropdown and delete when not editing */}
                               <select
                                 value={lesson.lessonType}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectLesson(chapterIndex, lessonIndex);
+                                }}
                                 onChange={(e) => {
                                   e.stopPropagation();
                                   handleLessonTypeChange(chapterIndex, lessonIndex, e.target.value);
                                 }}
-                                onClick={(e) => e.stopPropagation()}
-                                className="text-xs border ml-3 rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-[#0056B3]"
+                                className="text-xs border ml-3 rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
                                 style={{
                                   backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
                                   backgroundRepeat: 'no-repeat',
@@ -1551,32 +1619,21 @@ function CourseContent() {
           ))}
         </div>
 
-
-
-
-
-
-
-
-
-
-
-        {/* Right Content Area - Adjusted positioning */}
-        <div className="flex-1  flex justify-center items-center ml-[310px]">
+        {/* Right Content Area */}
+        <div className="flex-1 flex justify-center items-center ml-[310px]">
           <div className='w-[830px] h-[700px]'>
             {renderRightContent()}
           </div>
         </div>
       </div>
 
-
       {previewOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white max-w-3xl h-[538px] w-[732px] overflow-auto">
             <div className="flex justify-start border-b-2 border-[#E5E7EB] w-[732px] h-[56px]">
-              <p 
-                className='text-lg text-[16px] line-height-[24px] text-[#6B7280] p-1' 
-                style={{padding:"16px 24px 16px 24px", fontWeight:"700"}}
+              <p
+                className='text-lg text-[16px] line-height-[24px] text-[#6B7280] p-1'
+                style={{ padding: "16px 24px 16px 24px", fontWeight: "700" }}
               >
                 {previewContent.type === 'video' ? 'Video Preview' : 'Material Preview'}
               </p>
@@ -1606,8 +1663,8 @@ function CourseContent() {
               <button
                 onClick={() => {
                   handleRemoveFile(
-                    previewContent.type === 'video' ? 'video' : 'materials', 
-                    selectedLesson.chapterIndex, 
+                    previewContent.type === 'video' ? 'video' : 'materials',
+                    selectedLesson.chapterIndex,
                     selectedLesson.lessonIndex
                   );
                   setPreviewOpen(false);
