@@ -6,6 +6,7 @@ import useCourseCreationStore from '../../../../stores/courseCreationStore';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 import { TbCopy } from "react-icons/tb";
+import './CourseSettings.css'
 // import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './Coursecontent.css'
@@ -227,6 +228,18 @@ function CourseContent() {
                         <p className='text-[#4b5563]'> <span className='font-bold'> Lesson Name: </span >
                           {chapters[selectedLesson.chapterIndex]?.lessons[selectedLesson.lessonIndex]?.lessonTitle || ''}
                         </p>
+                        <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveLesson(chapterIndex, lessonIndex);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 p-1"
+                                  title="Delete lesson"
+                                >
+                                  <span className="text-sm">
+                                    <RiDeleteBinLine style={{ borderRadius: "1000px" }} />
+                                  </span>
+                                </button>
                       </h3>
 
                       <button
@@ -1608,7 +1621,7 @@ function CourseContent() {
 
               {/* Lessons List - Only show if chapter is selected */}
               {selectedChapter === chapterIndex && (
-                <div className="mt-2 space-y-1 p-2 bg-[#f3f4f6]">
+                <div className="mt-2 space-y-1.5 p-3 bg-[#f3f4f6]">
                   {chapter.lessons.length === 0 ? (
                     // No lessons message
                     <div className="flex items-center justify-center h-[32px] text-xs text-gray-500 italic">
@@ -1619,12 +1632,13 @@ function CourseContent() {
                     chapter.lessons.map((lesson, lessonIndex) => (
                       <div
                         key={lessonIndex}
-                        className={`flex items-center h-[32px] rounded cursor-pointer   ${
+                        className={`flex items-center h-[32px] w-[250px] rounded cursor-pointer   ${
                           selectedLesson?.chapterIndex === chapterIndex &&
                           selectedLesson?.lessonIndex === lessonIndex
                           ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
                           : 'bg-white'
                         }`}
+                        style={{padding:"6px 16px 6px 16px"}}
                         onClick={() => handleSelectLesson(chapterIndex, lessonIndex)}
                       >
                         {/* Lesson Icon based on type */}
@@ -1641,7 +1655,7 @@ function CourseContent() {
                         </span>
 
                         <div className="flex items-center flex-1 min-w-0">
-                          <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span>
+                          {/* <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span> */}
                           {editingLesson === `${chapterIndex}-${lessonIndex}` ? (
                             <div className="flex items-center justify-between w-full">
                               <div className="flex items-center flex-1">
@@ -1712,7 +1726,7 @@ function CourseContent() {
                                       setEditingLesson(null);
                                     }
                                   }}
-                                  className="text-xs w-[80px] flex-1 outline-none rounded border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                  className="text-xs ml-2 w-[80px] flex-1 outline-none rounded border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 placeholder:pl-2"
                                   autoFocus
                                   placeholder="Lesson name"
                                   onClick={(e) => e.stopPropagation()}
@@ -1731,18 +1745,21 @@ function CourseContent() {
                                         ...lesson,
                                         lessonType,
                                         showDropdown: true,
-                                        isNew: true  // Keep it marked as new
+                                        isNew: lesson.isNew  // Keep existing isNew state
                                       };
                                       setChapters(updatedChapters);
+                                      
+                                      // Update selected lesson to trigger right side content update
+                                      handleSelectLesson(chapterIndex, lessonIndex);
                                     }}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="text-xs  w-[70px] ml-2 border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                    className="text-xs w-[70px] border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
                                     style={{
                                       backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                                      backgroundRepeat: 'no-repeat',
+                                      backgroundRepeat: 'no-repeat', 
                                       backgroundPosition: 'right 0.5rem center',
                                       backgroundSize: '1em',
-                                      paddingRight: '1.5rem'
+                                      padding: '4px 8px'
                                     }}
                                   >
                                     <option value="Video">Video</option>
@@ -1751,18 +1768,7 @@ function CourseContent() {
                                   </select>
                                 )}
                                 
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveLesson(chapterIndex, lessonIndex);
-                                  }}
-                                  className="text-red-500 hover:text-red-700 p-1"
-                                  title="Delete lesson"
-                                >
-                                  <span className="text-sm">
-                                    <RiDeleteBinLine style={{ borderRadius: "1000px" }} />
-                                  </span>
-                                </button>
+                               
                               </div>
                             </div>
                           ) : (
@@ -1780,8 +1786,8 @@ function CourseContent() {
                                 title={lesson.lessonTitle || ''}
                               >
                                 {lesson.lessonTitle ?
-                                  (lesson.lessonTitle.length > 10 ?
-                                    `${lesson.lessonTitle.substring(0, 10)}...` :
+                                  (lesson.lessonTitle.length > 13 ?
+                                    `${lesson.lessonTitle.substring(0, 13)}...` :
                                     lesson.lessonTitle
                                   ) : ''
                                 }
@@ -1811,18 +1817,7 @@ function CourseContent() {
                                 <option value="Quiz">Quiz</option>
                               </select>
 
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveLesson(chapterIndex, lessonIndex);
-                                }}
-                                className="text-red-500 hover:text-red-700 p-1"
-                                title="Delete lesson"
-                              >
-                                <span className="text-sm">
-                                  <RiDeleteBinLine style={{ borderRadius: "1000px" }} />
-                                </span>
-                              </button>
+                           
                             </>
                           )}
                         </div>
