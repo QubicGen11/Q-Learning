@@ -42,10 +42,10 @@ function CourseContent() {
   const handleAddChapter = () => {
     const newChapter = {
       chapterName: '',
-      lessons: []
+      lessons: [],
+      isNew: true  // Add this flag to identify new chapters
     };
     setChapters([...chapters, newChapter]);
-    // Set this new chapter as selected and in edit mode
     setSelectedChapter(chapters.length);
     setEditingChapter(chapters.length);
     setEditName('');
@@ -1509,17 +1509,35 @@ function CourseContent() {
                           const updatedChapters = [...chapters];
                           updatedChapters[chapterIndex] = {
                             ...chapter,
-                            chapterName: editName.trim()
+                            chapterName: editName.trim(),
+                            isNew: false
                           };
+                          setChapters(updatedChapters);
+                        } else if (chapter.isNew) {
+                          // Remove the chapter if it's new and name is empty
+                          const updatedChapters = [...chapters];
+                          updatedChapters.splice(chapterIndex, 1);
                           setChapters(updatedChapters);
                         }
                         setEditingChapter(null);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
+                          if (editName.trim() === '' && chapter.isNew) {
+                            // Remove the chapter if it's new and name is empty
+                            const updatedChapters = [...chapters];
+                            updatedChapters.splice(chapterIndex, 1);
+                            setChapters(updatedChapters);
+                          }
                           e.target.blur();
                         }
                         if (e.key === 'Escape') {
+                          if (chapter.isNew) {
+                            // Remove the chapter if it's new
+                            const updatedChapters = [...chapters];
+                            updatedChapters.splice(chapterIndex, 1);
+                            setChapters(updatedChapters);
+                          }
                           setEditingChapter(null);
                         }
                       }}
