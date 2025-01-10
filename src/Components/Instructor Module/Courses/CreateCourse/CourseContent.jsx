@@ -177,10 +177,11 @@ function CourseContent() {
 
   // Render right content based on selection
   const renderRightContent = () => {
-    if (!selectedLesson) {
+    // Show message when no lesson is selected or when there are no lessons
+    if (!selectedLesson || !chapters.some(chapter => chapter.lessons.length > 0)) {
       return (
-        <div className="flex items-center justify-center h-full text-gray-500">
-          Select a lesson to view content
+        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+          <span className="text-lg mb-2">Add lesson to show content</span>
         </div>
       );
     }
@@ -400,7 +401,7 @@ function CourseContent() {
               </div>
 
               {/* Quiz Section */}
-              <div className="mt-8">
+              <div className="mt-8 h-[50vh] overflow-y-auto overflow-x-hidden w-[829px]">
                 {(!selectedLesson.questions || selectedLesson.questions.length === 0) ? (
                   <div className="flex justify-center items-center">
                     <button
@@ -419,7 +420,7 @@ function CourseContent() {
                         });
                         setChapters(updatedChapters);
                       }}
-                      className="flex items-center text-xl text-center gap-2 text-[#0056B3] hover:text-blue-700"
+                      className="flex items-center  bg-[#f2f9ff] px-2 py-1  rounded text-xl text-center gap-2 text-[#4B5563] border border-[#0056B3] hover:text-blue-700"
                     >
                       <span className="material-icons text-xl">add_circle_outline</span>
                       Add Quiz Question
@@ -430,30 +431,56 @@ function CourseContent() {
                     <div className="h-full flex flex-col">
                       <div className="flex justify-between items-center mb-4 flex-shrink-0">
                         <h2 className="font-[700] text-2xl text-gray-600">Quiz</h2>
-                        <button
-                          onClick={() => {
-                            const updatedChapters = [...chapters];
-                            if (!updatedChapters[selectedLesson.chapterIndex]
-                              .lessons[selectedLesson.lessonIndex].questions) {
-                              updatedChapters[selectedLesson.chapterIndex]
-                                .lessons[selectedLesson.lessonIndex].questions = [];
+                        <div className="flex gap-4">
+                          <button
+                            onClick={() => {
+                              if (selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))) {
+                                // If any question is expanded, collapse all
+                                const allIndices = new Set(selectedLesson.questions?.map((_, idx) => idx));
+                                setCollapsedQuestions(allIndices);
+                              } else {
+                                // If all are collapsed, expand all
+                                setCollapsedQuestions(new Set());
+                              }
+                            }}
+                            className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                          >
+                            <span className="material-icons text-sm">
+                              {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx)) 
+                                ? 'unfold_less' 
+                                : 'unfold_more'
+                              }
+                            </span>
+                            {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx)) 
+                              ? 'Collapse All' 
+                              : 'Expand All'
                             }
-                            updatedChapters[selectedLesson.chapterIndex]
-                              .lessons[selectedLesson.lessonIndex].questions.push({
-                                question: '',
-                                questionType: 'mcq',
-                                options: [
-                                  { option: '', isCorrect: false },
-                                  { option: '', isCorrect: false }
-                                ]
-                              });
-                            setChapters(updatedChapters);
-                          }}
-                          className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
-                        >
-                          <span className="material-icons text-sm">add_circle_outline</span>
-                          Add Question
-                        </button>
+                          </button>
+                          <button
+                            onClick={() => {
+                              const updatedChapters = [...chapters];
+                              if (!updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex].questions) {
+                                updatedChapters[selectedLesson.chapterIndex]
+                                  .lessons[selectedLesson.lessonIndex].questions = [];
+                              }
+                              updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex].questions.push({
+                                  question: '',
+                                  questionType: 'mcq',
+                                  options: [
+                                    { option: '', isCorrect: false },
+                                    { option: '', isCorrect: false }
+                                  ]
+                                });
+                              setChapters(updatedChapters);
+                            }}
+                            className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                          >
+                            <span className="material-icons text-sm">add_circle_outline</span>
+                            Add Question
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
@@ -630,53 +657,77 @@ function CourseContent() {
         return (
           <div className="p-4">
             <div className="space-y-4">
-              <div>
-                <label className="block mb-2">PDF Content *</label>
-                <ReactQuill
-                  value={chapters[selectedLesson.chapterIndex]?.lessons[selectedLesson.lessonIndex]?.lessonContent || ''}
-                  onChange={(content) => {
-                    const updatedChapters = [...chapters];
-                    if (!updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent) {
-                      updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = '';
-                    }
-                    updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = content;
-                    setChapters(updatedChapters);
-                  }}
-                  modules={{
-                    toolbar: {
-                      container: [
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'align': [] }],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        ['link'],
-                        ['clean']
-                      ],
-                      handlers: {},
-                      tooltip: {
-                        bold: 'Bold',
-                        italic: 'Italic',
-                        underline: 'Underline',
-                        strike: 'Strikethrough',
-                        link: 'Insert Link',
-                        'list-ordered': 'Numbered List',
-                        'list-bullet': 'Bullet List',
-                        'header-1': 'Heading 1',
-                        'header-2': 'Heading 2',
-                        'header-3': 'Heading 3',
-                        'align-left': 'Left Align',
-                        'align-center': 'Center Align',
-                        'align-right': 'Right Align',
-                        'align-justify': 'Justify',
-                        'background': 'Background Color',
-                        'color': 'Text Color',
-                        'clean': 'Clear Formatting'
+              <div className="">
+                <label className="block mb-2">Lesson Content *</label>
+                <div className="quill-wrapper">
+                  <ReactQuill
+                    value={chapters[selectedLesson.chapterIndex]?.lessons[selectedLesson.lessonIndex]?.lessonContent || ''}
+                    onChange={(content) => {
+                      const updatedChapters = [...chapters];
+                      if (!updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent) {
+                        updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = '';
                       }
-                    }
-                  }}
-                  className="h-40"
-                />
+                      updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonContent = content;
+                      setChapters(updatedChapters);
+                    }}
+                    modules={{
+                      toolbar: {
+                        container: [
+                          [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ 'align': [] }],
+                          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                          [{ 'color': [] }, { 'background': [] }],
+                          ['link'],
+                          ['clean']
+                        ],
+                      }
+                    }}
+                    className="rounded-lg"
+                  />
+                  <style>
+                    {`
+                      .quill-wrapper {
+                        position: relative;
+                        border-radius: 0.5rem;
+                      }
+                      .quill-wrapper:focus-within {
+                        outline: none;
+                        box-shadow: 0 0 0 2px rgb(75 85 99);
+                      }
+                      .quill-wrapper .ql-container {
+                        border: 1px solid #e2e8f0;
+                        border-top: none;
+                        height: 400px !important;
+                        overflow-y: auto;
+                        border-bottom-left-radius: 0.5rem;
+                        border-bottom-right-radius: 0.5rem;
+                      }
+                      .quill-wrapper .ql-editor {
+                        height: 100%;
+                        overflow-y: auto;
+                      }
+                      .quill-wrapper .ql-toolbar {
+                        border: 1px solid #e2e8f0;
+                        border-top-left-radius: 0.5rem;
+                        border-top-right-radius: 0.5rem;
+                        position: sticky;
+                        top: 0;
+                        background: white;
+                        z-index: 1;
+                      }
+                      .quill-wrapper .ql-toolbar .ql-picker {
+                        color: rgb(75 85 99);
+                      }
+                      .quill-wrapper .ql-toolbar .ql-stroke {
+                        stroke: rgb(75 85 99);
+                      }
+                      .quill-wrapper .ql-toolbar .ql-fill {
+                        fill: rgb(75 85 99);
+                      }
+                    `}
+                  </style>
+                </div>
               </div>
 
               <div className=''>
@@ -742,20 +793,23 @@ function CourseContent() {
                     <button
                       onClick={() => {
                         const updatedChapters = [...chapters];
-                        if (!updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].questions) {
-                          updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].questions = [];
+                        if (!updatedChapters[selectedLesson.chapterIndex]
+                          .lessons[selectedLesson.lessonIndex].questions) {
+                          updatedChapters[selectedLesson.chapterIndex]
+                            .lessons[selectedLesson.lessonIndex].questions = [];
                         }
-                        updatedChapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].questions.push({
-                          question: '',
-                          questionType: 'mcq',
-                          options: [
-                            { option: '', isCorrect: false },
-                            { option: '', isCorrect: false }
-                          ]
-                        });
+                        updatedChapters[selectedLesson.chapterIndex]
+                          .lessons[selectedLesson.lessonIndex].questions.push({
+                            question: '',
+                            questionType: 'mcq',
+                            options: [
+                              { option: '', isCorrect: false },
+                              { option: '', isCorrect: false }
+                            ]
+                          });
                         setChapters(updatedChapters);
                       }}
-                      className="flex items-center text-xl text-center gap-2 text-[#0056B3] hover:text-blue-700"
+                      className="fflex items-center  bg-[#f2f9ff] px-2 py-1  rounded text-xl text-center gap-2 text-[#4B5563] border border-[#0056B3] hover:text-blue-700"
                     >
                       <span className="material-icons text-xl">add_circle_outline</span>
                       Add Quiz Question
@@ -766,30 +820,56 @@ function CourseContent() {
                     <div className="h-full flex flex-col">
                       <div className="flex justify-between items-center mb-4 flex-shrink-0">
                         <h2 className="font-[700] text-2xl text-gray-600">Quiz</h2>
-                        <button
-                          onClick={() => {
-                            const updatedChapters = [...chapters];
-                            if (!updatedChapters[selectedLesson.chapterIndex]
-                              .lessons[selectedLesson.lessonIndex].questions) {
-                              updatedChapters[selectedLesson.chapterIndex]
-                                .lessons[selectedLesson.lessonIndex].questions = [];
+                        <div className="flex gap-4">
+                          <button
+                            onClick={() => {
+                              if (selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))) {
+                                // If any question is expanded, collapse all
+                                const allIndices = new Set(selectedLesson.questions?.map((_, idx) => idx));
+                                setCollapsedQuestions(allIndices);
+                              } else {
+                                // If all are collapsed, expand all
+                                setCollapsedQuestions(new Set());
+                              }
+                            }}
+                            className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                          >
+                            <span className="material-icons text-sm">
+                              {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx)) 
+                                ? 'unfold_less' 
+                                : 'unfold_more'
+                              }
+                            </span>
+                            {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx)) 
+                              ? 'Collapse All' 
+                              : 'Expand All'
                             }
-                            updatedChapters[selectedLesson.chapterIndex]
-                              .lessons[selectedLesson.lessonIndex].questions.push({
-                                question: '',
-                                questionType: 'mcq',
-                                options: [
-                                  { option: '', isCorrect: false },
-                                  { option: '', isCorrect: false }
-                                ]
-                              });
-                            setChapters(updatedChapters);
-                          }}
-                          className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
-                        >
-                          <span className="material-icons text-sm">add_circle_outline</span>
-                          Add Question
-                        </button>
+                          </button>
+                          <button
+                            onClick={() => {
+                              const updatedChapters = [...chapters];
+                              if (!updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex].questions) {
+                                updatedChapters[selectedLesson.chapterIndex]
+                                  .lessons[selectedLesson.lessonIndex].questions = [];
+                              }
+                              updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex].questions.push({
+                                  question: '',
+                                  questionType: 'mcq',
+                                  options: [
+                                    { option: '', isCorrect: false },
+                                    { option: '', isCorrect: false }
+                                  ]
+                                });
+                              setChapters(updatedChapters);
+                            }}
+                            className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                          >
+                            <span className="material-icons text-sm">add_circle_outline</span>
+                            Add Question
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
@@ -1341,8 +1421,8 @@ function CourseContent() {
       <div className="flex">
         {/* Left Sidebar */}
         <div className="fixed calc-height w-[310px] h-[600px] gap-4 p-4 border-2 border-[#E2E8F0] overflow-x-hidden overflow-y-auto bg-white">
-          <style>
-            {`
+                  <style>
+                    {`
           .calc-height {
             height: calc(100vh - 300px); /* Adjust the pixel value based on your header and navigation heights */
             min-height: 400px; /* Set a minimum height to prevent content from being too compressed */
@@ -1401,7 +1481,7 @@ function CourseContent() {
                       autoFocus
                       onClick={(e) => e.stopPropagation()}
                     />
-                  </div>
+                </div>
                 ) : (
                   <>
                     <div
@@ -1435,7 +1515,7 @@ function CourseContent() {
                           ) : ''
                         }
                       </span>
-                    </div>
+              </div>
 
                     <button
                       onClick={(e) => {
@@ -1477,7 +1557,7 @@ function CourseContent() {
                     chapter.lessons.map((lesson, lessonIndex) => (
                       <div
                         key={lessonIndex}
-                        className={`flex items-center h-[32px] ml-2 gap-1 p-2 rounded cursor-pointer  ${
+                        className={`flex items-center h-[32px] ml-2 gap-1 p-2 rounded cursor-pointer   ${
                           selectedLesson?.chapterIndex === chapterIndex &&
                           selectedLesson?.lessonIndex === lessonIndex
                           ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
@@ -1595,7 +1675,6 @@ function CourseContent() {
                                       e.stopPropagation();
                                       const lessonType = e.target.value;
                                       const updatedChapters = [...chapters];
-                                      // Only update the type, don't save the lesson yet
                                       updatedChapters[chapterIndex].lessons[lessonIndex] = {
                                         ...lesson,
                                         lessonType,
@@ -1603,15 +1682,6 @@ function CourseContent() {
                                         isNew: true  // Keep it marked as new
                                       };
                                       setChapters(updatedChapters);
-                                    }}
-                                    onBlur={(e) => {
-                                      // If name is empty when leaving dropdown, remove the lesson
-                                      if (editName.trim() === '') {
-                                        const updatedChapters = [...chapters];
-                                        updatedChapters[chapterIndex].lessons.splice(lessonIndex, 1);
-                                        setChapters(updatedChapters);
-                                        setEditingLesson(null);
-                                      }
                                     }}
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-xs mb-1 w-[70px] border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
