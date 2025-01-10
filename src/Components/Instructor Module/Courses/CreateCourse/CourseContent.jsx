@@ -41,14 +41,14 @@ function CourseContent() {
   // Add new chapter
   const handleAddChapter = () => {
     const newChapter = {
-      chapterName: `Chapter ${chapters.length + 1}`,
-      lessons: [],
-      questions: [],
-      isMandatory: false
+      chapterName: '',
+      lessons: []
     };
-    const updatedChapters = [...chapters, newChapter];
-    setChapters(updatedChapters);
-    updateCourseData('content', { chapters: updatedChapters });
+    setChapters([...chapters, newChapter]);
+    // Set this new chapter as selected and in edit mode
+    setSelectedChapter(chapters.length);
+    setEditingChapter(chapters.length);
+    setEditName('');
   };
 
   // Select chapter
@@ -181,7 +181,7 @@ function CourseContent() {
     if (!selectedLesson || !chapters.some(chapter => chapter.lessons.length > 0)) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-gray-500">
-          <span className="text-lg mb-2">Add lesson to show content</span>
+          <span className="text-lg translate-y-[-700%]">Add lesson to show content</span>
         </div>
       );
     }
@@ -1495,8 +1495,9 @@ function CourseContent() {
                 className={`flex items-center w-[278px] h-[32px] gap-2 p-2 bg-white rounded cursor-pointer ${selectedChapter === chapterIndex ? 'bg-white' : ''
                   }`}
               >
-                <span className="material-icons text-[#d1d5db] text-2xl h-[36px] ">drag_indicator</span>
+                <span className="material-icons text-[#d1d5db] text-2xl h-[36px] mt-1 ">drag_indicator</span>
                 {editingChapter === chapterIndex ? (
+                  
                   <div className="flex items-center flex-1">
                     <span className="text-xs text-gray-700">Chapter {chapterIndex + 1}: </span>
                     <input
@@ -1541,11 +1542,8 @@ function CourseContent() {
                         onDoubleClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          const currentLesson = chapters[chapterIndex].lessons[lessonIndex];
-                          setEditName(currentLesson.lessonTitle || '');
-                          setEditingLesson(`${chapterIndex}-${lessonIndex}`);
-                          // Also select the lesson when starting to edit
-                          handleSelectLesson(chapterIndex, lessonIndex);
+                          setEditName(chapter.chapterName || '');
+                          setEditingChapter(chapterIndex);
                         }}
                         title={chapter.chapterName || ''}
                         style={{
