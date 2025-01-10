@@ -19,6 +19,7 @@ import { MdOutlineFileUpload } from 'react-icons/md';
 import { BiBookContent } from 'react-icons/bi';
 import { PiExam } from 'react-icons/pi';
 import { MdContentCopy } from "react-icons/md";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 function CourseContent() {
   const navigate = useNavigate();
@@ -181,7 +182,7 @@ function CourseContent() {
     if (!selectedLesson || !chapters.some(chapter => chapter.lessons.length > 0)) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-gray-500">
-          <span className="text-lg translate-y-[-700%]">Add lesson to show content</span>
+          <span className=" translate-y-[-700%] text-gray-500 text-lg">Add lesson to show content</span>
         </div>
       );
     }
@@ -1618,7 +1619,7 @@ function CourseContent() {
                     chapter.lessons.map((lesson, lessonIndex) => (
                       <div
                         key={lessonIndex}
-                        className={`flex items-center h-[32px] ml-2 gap-1 p-2 rounded cursor-pointer   ${
+                        className={`flex items-center h-[32px] rounded cursor-pointer   ${
                           selectedLesson?.chapterIndex === chapterIndex &&
                           selectedLesson?.lessonIndex === lessonIndex
                           ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
@@ -1642,22 +1643,12 @@ function CourseContent() {
                         <div className="flex items-center flex-1 min-w-0">
                           <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span>
                           {editingLesson === `${chapterIndex}-${lessonIndex}` ? (
-                            <div className="flex items-center flex-1 gap-1 ml-1">
-                              <div className='flex items-center flex-1'>
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center flex-1">
                                 <input
                                   type="text"
                                   value={editName}
-                                  onChange={(e) => {
-                                    setEditName(e.target.value);
-                                    if (lesson.isNew) {
-                                      const updatedChapters = [...chapters];
-                                      updatedChapters[chapterIndex].lessons[lessonIndex] = {
-                                        ...lesson,
-                                        showDropdown: true  // Always keep dropdown visible for new lessons
-                                      };
-                                      setChapters(updatedChapters);
-                                    }
-                                  }}
+                                  onChange={(e) => setEditName(e.target.value)}
                                   onBlur={(e) => {
                                     // Check if clicking dropdown
                                     const relatedTarget = e.relatedTarget;
@@ -1728,8 +1719,8 @@ function CourseContent() {
                                 />
                               </div>
                               
-                              <div>
-                                {lesson.isNew && lesson.showDropdown && (
+                              <div className="flex items-center gap-2">
+                                {lesson.isNew && (
                                   <select
                                     value={lesson.lessonType}
                                     onChange={(e) => {
@@ -1745,7 +1736,7 @@ function CourseContent() {
                                       setChapters(updatedChapters);
                                     }}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="text-xs mb-1 w-[70px] border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                    className="text-xs  w-[70px] ml-2 border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
                                     style={{
                                       backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
                                       backgroundRepeat: 'no-repeat',
@@ -1759,6 +1750,19 @@ function CourseContent() {
                                     <option value="Quiz">Quiz</option>
                                   </select>
                                 )}
+                                
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveLesson(chapterIndex, lessonIndex);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 p-1"
+                                  title="Delete lesson"
+                                >
+                                  <span className="text-sm">
+                                    <RiDeleteBinLine style={{ borderRadius: "1000px" }} />
+                                  </span>
+                                </button>
                               </div>
                             </div>
                           ) : (
@@ -1815,7 +1819,9 @@ function CourseContent() {
                                 className="text-red-500 hover:text-red-700 p-1"
                                 title="Delete lesson"
                               >
-                                <span className=" text-sm"><RiDeleteBinLine style={{ borderRadius: "1000px" }} /> </span>
+                                <span className="text-sm">
+                                  <RiDeleteBinLine style={{ borderRadius: "1000px" }} />
+                                </span>
                               </button>
                             </>
                           )}
@@ -1824,11 +1830,17 @@ function CourseContent() {
                     ))
                   )}
 
-                  {/* Add Lesson Button - Keep outside the conditional rendering */}
+                  {/* Add Lesson Button - with conditional disabled state and tooltip */}
                   <div className='flex justify-center'>
                     <button
                       onClick={() => handleAddLesson(chapterIndex)}
-                      className="flex items-center mt-9 px-2 py-2 rounded-md gap-1 bg-white text-[#0056B3] text-xs w-3/5 justify-center"
+                      disabled={chapter.lessons.some(lesson => !lesson.lessonTitle?.trim())}
+                      title={chapter.lessons.some(lesson => !lesson.lessonTitle?.trim()) ? "Please enter lesson name before adding new lesson" : ""}
+                      className={`flex items-center mt-9 px-2 py-2 rounded-md gap-1 bg-white text-xs w-3/5 justify-center ${
+                        chapter.lessons.some(lesson => !lesson.lessonTitle?.trim())
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-[#0056B3] hover:bg-[#f2f9ff]'
+                      }`}
                     >
                       <span className="text-sm"><IoIosAddCircleOutline /></span>
                       Add Lesson
