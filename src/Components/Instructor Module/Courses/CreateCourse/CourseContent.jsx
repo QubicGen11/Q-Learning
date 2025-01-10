@@ -436,8 +436,7 @@ function CourseContent() {
                             onClick={() => {
                               if (selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))) {
                                 // If any question is expanded, collapse all
-                                const allIndices = new Set(selectedLesson.questions?.map((_, idx) => idx));
-                                setCollapsedQuestions(allIndices);
+                                setCollapsedQuestions(new Set(selectedLesson.questions.map((_, idx) => idx)));
                               } else {
                                 // If all are collapsed, expand all
                                 setCollapsedQuestions(new Set());
@@ -451,8 +450,8 @@ function CourseContent() {
                                 : 'unfold_more'
                               }
                             </span>
-                            {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx)) 
-                              ? 'Collapse All' 
+                            {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))
+                              ? 'Collapse All'
                               : 'Expand All'
                             }
                           </button>
@@ -478,7 +477,7 @@ function CourseContent() {
                             className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
                           >
                             <span className="material-icons text-sm">add_circle_outline</span>
-                            Add Question
+                            Add Another
                           </button>
                         </div>
                       </div>
@@ -716,14 +715,19 @@ function CourseContent() {
                         background: white;
                         z-index: 1;
                       }
-                      .quill-wrapper .ql-toolbar .ql-picker {
-                        color: rgb(75 85 99);
+                      .quill-wrapper .ql-picker:focus-within {
+                        outline: none;
+                        box-shadow: 0 0 0 2px rgb(75 85 99);
+                        border-radius: 0.25rem;
                       }
-                      .quill-wrapper .ql-toolbar .ql-stroke {
-                        stroke: rgb(75 85 99);
+                      .quill-wrapper .ql-picker-options {
+                        border: 1px solid #e2e8f0;
+                        border-radius: 0.25rem;
                       }
-                      .quill-wrapper .ql-toolbar .ql-fill {
-                        fill: rgb(75 85 99);
+                      .quill-wrapper .ql-picker-label:focus {
+                        outline: none;
+                        box-shadow: 0 0 0 2px rgb(75 85 99);
+                        border-radius: 0.25rem;
                       }
                     `}
                   </style>
@@ -825,8 +829,7 @@ function CourseContent() {
                             onClick={() => {
                               if (selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))) {
                                 // If any question is expanded, collapse all
-                                const allIndices = new Set(selectedLesson.questions?.map((_, idx) => idx));
-                                setCollapsedQuestions(allIndices);
+                                setCollapsedQuestions(new Set(selectedLesson.questions.map((_, idx) => idx)));
                               } else {
                                 // If all are collapsed, expand all
                                 setCollapsedQuestions(new Set());
@@ -840,8 +843,8 @@ function CourseContent() {
                                 : 'unfold_more'
                               }
                             </span>
-                            {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx)) 
-                              ? 'Collapse All' 
+                            {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))
+                              ? 'Collapse All'
                               : 'Expand All'
                             }
                           </button>
@@ -867,7 +870,7 @@ function CourseContent() {
                             className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
                           >
                             <span className="material-icons text-sm">add_circle_outline</span>
-                            Add Question
+                            Add Another
                           </button>
                         </div>
                       </div>
@@ -1045,35 +1048,59 @@ function CourseContent() {
           <>
             <div className="bg-white rounded-lg p-6 h-[calc(100vh-280px)]">
               <div className="flex h-full">
-                {/* Content Area */}
                 <div className="flex-1 pl-6 h-full overflow-hidden">
                   <div className="h-full flex flex-col">
                     <div className="flex justify-between items-center mb-4 flex-shrink-0">
-                      <h2 className="font-medium">Quiz</h2>
-                      <button
-                        onClick={() => {
-                          const updatedChapters = [...chapters];
-                          if (!updatedChapters[selectedLesson.chapterIndex]
-                            .lessons[selectedLesson.lessonIndex].questions) {
-                            updatedChapters[selectedLesson.chapterIndex]
-                              .lessons[selectedLesson.lessonIndex].questions = [];
+                    <h2 className="font-[700] text-2xl text-gray-600">Quiz</h2>
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => {
+                            if (selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))) {
+                              // If any question is expanded, collapse all
+                              setCollapsedQuestions(new Set(selectedLesson.questions.map((_, idx) => idx)));
+                            } else {
+                              // If all are collapsed, expand all
+                              setCollapsedQuestions(new Set());
+                            }
+                          }}
+                          className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                        >
+                          <span className="material-icons text-sm">
+                            {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx)) 
+                              ? 'unfold_less' 
+                              : 'unfold_more'
+                            }
+                          </span>
+                          {selectedLesson.questions?.some((_, idx) => !collapsedQuestions.has(idx))
+                            ? 'Collapse All'
+                            : 'Expand All'
                           }
-                          updatedChapters[selectedLesson.chapterIndex]
-                            .lessons[selectedLesson.lessonIndex].questions.push({
-                              question: '',
-                              questionType: 'mcq',
-                              options: [
-                                { option: '', isCorrect: false },
-                                { option: '', isCorrect: false }
-                              ]
-                            });
-                          setChapters(updatedChapters);
-                        }}
-                        className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
-                      >
-                        <span className="material-icons text-sm">add_circle_outline</span>
-                        Add Another
-                      </button>
+                        </button>
+                        <button
+                          onClick={() => {
+                            const updatedChapters = [...chapters];
+                            if (!updatedChapters[selectedLesson.chapterIndex]
+                              .lessons[selectedLesson.lessonIndex].questions) {
+                              updatedChapters[selectedLesson.chapterIndex]
+                                .lessons[selectedLesson.lessonIndex].questions = [];
+                            }
+                            updatedChapters[selectedLesson.chapterIndex]
+                              .lessons[selectedLesson.lessonIndex].questions.push({
+                                question: '',
+                                questionType: 'mcq',
+                                options: [
+                                  { option: '', isCorrect: false },
+                                  { option: '', isCorrect: false }
+                                ]
+                              });
+                            setChapters(updatedChapters);
+                          }}
+                          className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
+                        >
+                          <span className="material-icons text-sm">add_circle_outline</span>
+                          Add Another
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
