@@ -1477,7 +1477,7 @@ function CourseContent() {
                     chapter.lessons.map((lesson, lessonIndex) => (
                       <div
                         key={lessonIndex}
-                        className={`flex items-center h-[32px] ml-2 gap-2 p-2 rounded cursor-pointer ${
+                        className={`flex items-center h-[32px] ml-2 gap-1 p-2 rounded cursor-pointer  ${
                           selectedLesson?.chapterIndex === chapterIndex &&
                           selectedLesson?.lessonIndex === lessonIndex
                           ? 'bg-[#f2f9ff] border-l-4 border-[#0056B3]'
@@ -1501,7 +1501,8 @@ function CourseContent() {
                         <div className="flex items-center flex-1 min-w-0">
                           <span className="text-xs whitespace-nowrap">Lesson {lessonIndex + 1}: </span>
                           {editingLesson === `${chapterIndex}-${lessonIndex}` ? (
-                            <div className="flex items-center flex-1 gap-2">
+                            <div className="flex items-center flex-1 gap-1  ml-1">
+                            <div className='flex items-center flex-1  '>
                               <input
                                 type="text"
                                 value={editName}
@@ -1545,13 +1546,16 @@ function CourseContent() {
                                     setEditingLesson(null);
                                   }
                                 }}
-                                className="text-xs w-[30px] flex-1 outline-none border-b border-gray-600 ml-1"
+                                className="text-xs w-[80px] flex-1 outline-none rounded border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 "
                                 autoFocus
-                                placeholder="Enter lesson name"
+                                placeholder="Lesson name"
                                 onClick={(e) => e.stopPropagation()}
                               />
-                              
-                              {lesson.isNew && lesson.showDropdown && (
+                            
+                            </div>
+                            
+                              <div>
+                               {lesson.isNew && lesson.showDropdown && (
                                 <select
                                   value={lesson.lessonType}
                                   onChange={(e) => {
@@ -1567,7 +1571,7 @@ function CourseContent() {
                                     handleLessonTypeChange(chapterIndex, lessonIndex, lessonType);
                                   }}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="text-xs border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                  className="text-xs mb-1 w-[70px] border rounded bg-transparent appearance-none focus:outline-none focus:ring-2 focus:ring-gray-600"
                                   style={{
                                     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
                                     backgroundRepeat: 'no-repeat',
@@ -1582,6 +1586,8 @@ function CourseContent() {
                                   <option value="Quiz">Quiz</option>
                                 </select>
                               )}
+                              </div>
+                             
                             </div>
                           ) : (
                             <>
