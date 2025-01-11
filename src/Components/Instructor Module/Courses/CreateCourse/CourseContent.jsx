@@ -40,16 +40,36 @@ function CourseContent() {
   const [editingContentTitle, setEditingContentTitle] = useState(false);
   const [isMandatory, setIsMandatory] = useState(false);
 
-  // Add new chapter
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem('courseCreationData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      if (parsedData.content && parsedData.content.chapters) {
+        setChapters(parsedData.content.chapters);
+      }
+    }
+  }, []);
+
+  // Update localStorage whenever chapters change
+  useEffect(() => {
+    if (chapters.length > 0) {
+      updateCourseData('content', { chapters });
+    }
+  }, [chapters, updateCourseData]);
+
+  // Add new chapter with immediate localStorage update
   const handleAddChapter = () => {
     const newChapter = {
       chapterName: '',
-      lessons: [],
-      isNew: true  // Add this flag to identify new chapters
+      lessons: [], // Initialize empty lessons array
+      isNew: true
     };
+
     setChapters([...chapters, newChapter]);
-    setSelectedChapter(chapters.length);
-    setEditingChapter(chapters.length);
+    const newChapterIndex = chapters.length;
+    setSelectedChapter(newChapterIndex);
+    setEditingChapter(newChapterIndex);
     setEditName('');
   };
 
@@ -81,21 +101,29 @@ function CourseContent() {
 
   // Add new lesson to chapter
   const handleAddLesson = (chapterIndex) => {
-    const updatedChapters = [...chapters];
-    const newLessonIndex = updatedChapters[chapterIndex].lessons.length;
-    
-    updatedChapters[chapterIndex].lessons.push({
+    const newLesson = {
       lessonTitle: '',
-      lessonType: 'Video',
+      lessonType: 'Video', // Default type
       lessonContent: '',
+      lessonVideo: '',
+      lessonMaterials: '',
+      questions: [], // Initialize empty questions array
       isNew: true,
       showDropdown: true
-    });
-    
+    };
+
+    const updatedChapters = [...chapters];
+    if (!updatedChapters[chapterIndex].lessons) {
+      updatedChapters[chapterIndex].lessons = []; // Initialize lessons array if it doesn't exist
+    }
+    updatedChapters[chapterIndex].lessons.push(newLesson);
     setChapters(updatedChapters);
-    handleSelectLesson(chapterIndex, newLessonIndex);
-    setEditName('');
+    
+    // Set editing state for the new lesson
+    const newLessonIndex = updatedChapters[chapterIndex].lessons.length - 1;
     setEditingLesson(`${chapterIndex}-${newLessonIndex}`);
+    setEditName('');
+    handleSelectLesson(chapterIndex, newLessonIndex);
   };
 
   // Add question to quiz

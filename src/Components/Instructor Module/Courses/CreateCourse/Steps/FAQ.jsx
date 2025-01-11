@@ -11,15 +11,19 @@ function FAQ() {
   const [collapsedFaqs, setCollapsedFaqs] = useState(new Set());
 
   useEffect(() => {
-    let initialFaqs = courseData.courseFaqs || [];
+    let initialFaqs = courseData.faq || [];
     setLocalFaqs(initialFaqs);
-  }, [courseData.courseFaqs]);
+  }, [courseData.faq]);
 
   const handleAddQuestion = () => {
-    const newFaq = { question: '', answer: '' };
+    const newFaq = { 
+      id: `faq-${Date.now()}`,  // Add unique ID
+      question: '', 
+      answer: '' 
+    };
     const updatedFaqs = [...localFaqs, newFaq];
     setLocalFaqs(updatedFaqs);
-    updateCourseData('courseFaqs', updatedFaqs);
+    updateCourseData('faq', updatedFaqs);
   };
 
   const handleCopyFaq = (index) => {
@@ -36,13 +40,13 @@ function FAQ() {
     toast.success('FAQ removed successfully');
   };
 
-  const toggleFaq = (index) => {
+  const toggleFaq = (id) => {
     setCollapsedFaqs(prev => {
       const newCollapsed = new Set(prev);
-      if (newCollapsed.has(index)) {
-        newCollapsed.delete(index);
+      if (newCollapsed.has(id)) {
+        newCollapsed.delete(id);
       } else {
-        newCollapsed.add(index);
+        newCollapsed.add(id);
       }
       return newCollapsed;
     });
@@ -53,7 +57,7 @@ function FAQ() {
       i === index ? { ...faq, [field]: value } : faq
     );
     setLocalFaqs(updatedFaqs);
-    updateCourseData('courseFaqs', updatedFaqs);
+    updateCourseData('faq', updatedFaqs);
   };
 
   return (
@@ -127,17 +131,17 @@ function FAQ() {
                           <RiDeleteBinLine className="text-lg" />
                         </button>
                         <button
-                          onClick={() => toggleFaq(index)}
+                          onClick={() => toggleFaq(faq.id)}
                           className="text-gray-500"
                         >
                           <span className="material-icons">
-                            {collapsedFaqs.has(index) ? 'expand_more' : 'expand_less'}
+                            {collapsedFaqs.has(faq.id) ? 'expand_more' : 'expand_less'}
                           </span>
                         </button>
                       </div>
                     </div>
 
-                    {!collapsedFaqs.has(index) && (
+                    {!collapsedFaqs.has(faq.id) && (
                       <div className="p-4 space-y-4">
                         <div className="space-y-2">
                           <label className="block text-gray-700 text-sm mb-1">

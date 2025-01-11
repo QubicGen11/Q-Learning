@@ -32,6 +32,9 @@ function CourseSettings() {
     'Qubinest Suggestions for you'
   ];
 
+  // Log initial settings
+  console.log('Initial courseSettings:', courseData.courseSettings);
+
   const calculateDropdownPosition = (inputRef) => {
     if (!inputRef.current) return 'bottom';
     
@@ -56,34 +59,16 @@ function CourseSettings() {
   }, []);
 
   const handleSettingChange = (field, value) => {
-    let processedValue = value;
+    console.log(`Changing setting ${field} to:`, value);
+    console.log('Current settings before change:', courseData.courseSettings);
     
-    // Special handling for pricingType
-    if (field === 'pricingType') {
-      const updatedSettings = [{
-        ...courseData.courseSettings?.[0],
-        pricingType: value,
-        // Reset promotionType if freemium is selected
-        promotionType: value === 'freemium' ? '' : courseData.courseSettings?.[0]?.promotionType
-      }];
-      updateCourseData('courseSettings', updatedSettings);
-      return;
-    }
-
-    // Handle other fields
-    if (['accessDuration', 'returnPeriod'].includes(field)) {
-      processedValue = String(value);
-    } else if (field === 'offeredPrice') {
-      processedValue = parseFloat(value) || 0;
-    } else if (['maxStudents', 'price', 'discount'].includes(field)) {
-      processedValue = parseInt(value, 10) || 0;
-    }
-    
+    const currentSettings = courseData.courseSettings?.[0] || {};
     const updatedSettings = [{
-      ...courseData.courseSettings?.[0],
-      [field]: processedValue
+      ...currentSettings,
+      [field]: value
     }];
-
+    
+    console.log('Updated settings to be saved:', updatedSettings);
     updateCourseData('courseSettings', updatedSettings);
   };
 
@@ -459,9 +444,9 @@ function CourseSettings() {
                       <input
                         type="number"
                         className="w-[290px] px-3 py-1.5 border rounded text-sm h-9 bg-[#e5e7eb]"
-                        value={settings.certificatePercentage || ''}
-                        onChange={(e) => handleSettingChange('certificatePercentage', e.target.value)}
-                        placeholder="Enter"
+                        value={settings.percentageRequired || ''}
+                        onChange={(e) => handleSettingChange('percentageRequired', e.target.value)}
+                        placeholder="Enter percentage required"
                       />
                     </div>
                     <div className="flex items-center space-x-3 w-[450px] mt-6">

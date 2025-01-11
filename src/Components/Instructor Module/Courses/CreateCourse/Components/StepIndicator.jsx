@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import { IoIosArrowRoundBack, IoIosArrowRoundForward } from 'react-icons/io';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 
 const StepIndicator = () => {
@@ -12,7 +14,8 @@ const StepIndicator = () => {
     setStep, 
     courseData, 
     validationErrors,
-    setValidationErrors
+    setValidationErrors,
+    submitCourse
   } = useCourseCreationStore();
 
   const mainTabs = [
@@ -278,6 +281,28 @@ const StepIndicator = () => {
     return location.pathname.includes('/settings');
   };
 
+  const handleSubmit = async () => {
+    console.log('🔵 Submit button clicked in StepIndicator');
+    try {
+      const token = Cookies.get('accessToken');
+      console.log('🔑 Token in StepIndicator:', token);
+
+      if (!token) {
+        console.log('❌ No token found in StepIndicator');
+        toast.error('Please login to submit the course');
+        return;
+      }
+
+      console.log('🚀 Calling submitCourse from StepIndicator...');
+      await submitCourse(navigate);
+      
+      console.log('✅ Course submitted successfully from StepIndicator');
+    } catch (error) {
+      console.error('❌ Error in StepIndicator submit:', error);
+      toast.error(error.message || 'Failed to submit course');
+    }
+  };
+  
   return (
     <div className="space-y-2">
       {/* Main Navigation Tabs */}
@@ -303,16 +328,26 @@ const StepIndicator = () => {
               onClick={() => {/* Save as draft logic */}}
               className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
             >
-             Preview
+              Preview
               <span className="material-icons text-sm">expand_more</span>
             </button>
           </div>
-          <button
-            onClick={() => {/* Submit for review logic */}}
-            className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
-          >
-            Submit for review
-          </button>
+          {location.pathname.includes('/settings') ? (
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
+            >
+              Submit for Review
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
+            >
+              Next
+              <IoIosArrowRoundForward className="text-2xl" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -398,6 +433,7 @@ const StepIndicator = () => {
                         (currentTab === 'content' && getCurrentTabAndSteps().currentStepNumber === step.number)
                         ? 'bg-[#0056B3]' 
                         : 'bg-transparent'}
+                    `
                     `} /> */}
 
                     
@@ -427,7 +463,14 @@ const StepIndicator = () => {
             </button>
           )}
 
-          {(currentStep < steps.length || currentTab !== 'settings') && (
+          {location.pathname.includes('/settings') ? (
+            <button 
+              onClick={handleSubmit}
+              className="flex items-center justify-center gap-1 text-white bg-[#0056B3] hover:bg-[#004494] px-3 h-8 rounded-md"
+            >
+              Submit for Reviews
+            </button>
+          ) : (currentStep < steps.length || currentTab !== 'settings') && (
             <button 
               onClick={handleNext}
               className="flex items-center justify-center gap-1 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-3 h-8 rounded-md"

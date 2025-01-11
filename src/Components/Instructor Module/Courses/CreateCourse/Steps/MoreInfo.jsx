@@ -5,17 +5,6 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { BsBook } from 'react-icons/bs';
 function MoreInfo() {
   const { courseData, updateCourseData } = useCourseCreationStore();
-  
-  // Initialize with empty arrays if undefined
-  useEffect(() => {
-    if (!Array.isArray(courseData.glossary)) {
-      updateCourseData('glossary', []);
-    }
-    if (!Array.isArray(courseData.references)) {
-      updateCourseData('references', []);
-    }
-  }, []);
-
   const [state, setState] = useState({
     activeTab: 'glossary',
     glossaryItems: Array.isArray(courseData.glossary) ? courseData.glossary : [],
@@ -23,15 +12,8 @@ function MoreInfo() {
     collapsed: new Set()
   });
 
-  // Update local state when courseData changes
-  useEffect(() => {
-    setState(prev => ({
-      ...prev,
-      glossaryItems: Array.isArray(courseData.glossary) ? courseData.glossary : [],
-      references: Array.isArray(courseData.references) ? courseData.references : []
-    }));
-  }, [courseData.glossary, courseData.references]);
-
+  // Remove the courseData effect that was causing loops
+  
   const updateStore = useCallback((type, data) => {
     // Prevent unnecessary store updates
     if (JSON.stringify(courseData[type]) !== JSON.stringify(data)) {
@@ -72,27 +54,33 @@ function MoreInfo() {
   };
 
   const handleAddGlossaryItem = () => {
-    const newItems = [
-      ...state.glossaryItems,
-      { 
-        id: `glossary-${Date.now()}`, 
-        acronym: '', 
-        meaning: '' 
-      }
-    ];
-    updateCourseData('glossary', newItems);
+    setState(prev => {
+      const newItems = [
+        ...prev.glossaryItems,
+        { 
+          id: `glossary-${Date.now()}`, 
+          acronym: '', 
+          meaning: '' 
+        }
+      ];
+      updateCourseData('glossary', newItems);
+      return { ...prev, glossaryItems: newItems };
+    });
   };
 
   const handleAddReference = () => {
-    const newRefs = [
-      ...state.references,
-      { 
-        id: `reference-${Date.now()}`, 
-        reference: '', 
-        link: '' 
-      }
-    ];
-    updateCourseData('references', newRefs);
+    setState(prev => {
+      const newRefs = [
+        ...prev.references,
+        { 
+          id: `reference-${Date.now()}`, 
+          reference: '', 
+          link: '' 
+        }
+      ];
+      updateCourseData('references', newRefs);
+      return { ...prev, references: newRefs };
+    });
   };
 
   const handleRemoveItem = (type, index) => {
