@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -23,6 +23,17 @@ function Media() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const videoRef = useRef(null);
+ 
+  // Load saved files from courseData on mount
+  useEffect(() => {
+    if (courseData?.media) {
+      setSelectedFiles({
+        banner: courseData.media.courseBanner ? { name: 'Saved banner video' } : null,
+        course: courseData.media.courseImage ? { name: 'Saved course image' } : null,
+        category: courseData.media.categoryImage ? { name: 'Saved category image' } : null
+      });
+    }
+  }, []);
  
   const handleFileSelect = (e, type) => {
     const file = e.target.files[0];
@@ -91,22 +102,42 @@ function Media() {
       formData.append('file', file);
  
       const response = await axios.post('https://image.qubinest.com/upload', formData, {
+      // const response = await axios.post('http://localhost:8082/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-        }
+          'Accept': 'application/json'
+        },
+        withCredentials: false,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 30000
       });
  
-      if (response.data.url) {
+      if (response.data?.url) {
         updateCourseData('media', {
           ...courseData.media,
           [`${type === 'banner' ? 'courseBanner' : type === 'course' ? 'courseImage' : 'categoryImage'}`]:
             response.data.url
         });
         toast.success(`${type} uploaded successfully`);
+      } else {
+        throw new Error('Invalid response format');
       }
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error(`Failed to upload ${type}`);
+      console.error('Upload error details:', {
+        message: error.message,
+        response: error.response,
+        request: error.request,
+        status: error.response?.status
+      });
+      
+      if (error.code === 'ECONNABORTED') {
+        toast.error(`Upload timeout - please try again`);
+      } else if (!error.response) {
+        toast.error(`Network error - please check your connection`);
+      } else {
+        toast.error(`Failed to upload ${type}: ${error.message}`);
+      }
     } finally {
       setUploading(prev => ({ ...prev, [type]: false }));
     }
@@ -115,11 +146,17 @@ function Media() {
   const handlePreviewClick = (file, type) => {
     if (type === 'banner') {
       setPreviewFile(courseData.media.courseBanner);
+    } else if (type === 'course') {
+      // For course image, use stored URL if available, otherwise create object URL
+      setPreviewFile(courseData.media.courseImage || (file instanceof File ? URL.createObjectURL(file) : file));
     } else {
-      setPreviewFile(URL.createObjectURL(file));
+      // For category image, use stored URL if available, otherwise create object URL
+      setPreviewFile(courseData.media.categoryImage || (file instanceof File ? URL.createObjectURL(file) : file));
     }
     setPreviewOpen(true);
   };
+
+  
  
   const handlePlayPause = () => {
     if (videoRef.current) {
@@ -138,13 +175,9 @@ function Media() {
       <div className="space-y-6">
         {/* Course Banner Video */}
         <div>
-
           <label className="block text-sm font-medium mb-2">Upload a banner Video & Image *</label>
-
           <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6 ">
-
             {/* Browse button in top right corner */}
-
             <div className="absolute top-3 right-3">
               <div className="relative group">
                 <label
@@ -168,114 +201,62 @@ function Media() {
               </div>
             </div>
 
-
-
             <div className="text-center">
-
               <input
-
                 type="file"
-
                 id="banner-upload"
-
                 className="hidden"
-
                 onChange={(e) => handleFileSelect(e, 'banner')}
-
                 accept="video/*"
-
                 disabled={selectedFiles.banner}
-
               />
-
               <label 
-
                 htmlFor={selectedFiles.banner ? undefined : "banner-upload"}
-
                 className={`cursor-${selectedFiles.banner ? 'default' : 'pointer'} w-full`}
-
               >
-
                 <div className="flex flex-col items-center justify-center">
-
                   {uploading.banner ? (
-
                     <div className="flex flex-col items-center gap-2">
-
                       <Spinner className="h-12 w-12" />
-
                       <p className="text-sm text-gray-500">Uploading...</p>
-
                     </div>
-
                   ) : (
-
                     <>
-
-<img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
-
+                      <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
                       <p className="mt-1 text-sm text-gray-500">
-
                         Drag and Drop Or Browse<br />
-
                         MP4, MKW, up to 20MB
-
                       </p>
-
                     </>
-
                   )}
-
                 </div>
-
               </label>
-
             </div>
-
           </div>
-
          
-
           {/* File names display */}
-
           <div className="mt-2 flex flex-wrap gap-2">
-
-            {selectedFiles.banner && (
-
+            {(selectedFiles.banner || courseData?.media?.courseBanner) && (
               <div
-
                 className="flex items-center gap-1 h-8 text-sm text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer"
-
                 onClick={() => handlePreviewClick(selectedFiles.banner, 'banner')}
-
               >
-
-                <span className='underline  underline-offset-4'>{selectedFiles.banner.name}</span>
-
+                <span className='underline underline-offset-4'>
+                  {selectedFiles.banner?.name || 'Saved banner video'}
+                </span>
                 <button
-
                   onClick={(e) => {
-
                     e.stopPropagation();
-
                     handleRemoveFile('banner');
-
+                    handleRemoveMedia('banner');
                   }}
-
                   className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
-
                 >
-
                   ×
-
                 </button>
-
               </div>
-
             )}
-
           </div>
-
         </div>
  
         {/* Course Image */}
@@ -337,18 +318,19 @@ function Media() {
          
           {/* File names display */}
           <div className="mt-2 flex flex-wrap gap-2">
-            {selectedFiles.course && (
+            {(selectedFiles.course || courseData?.media?.courseImage) && (
               <div
-                className="flex items-center gap-1 text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer"
+                className="flex items-center gap-1 h-8 text-sm text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer"
                 onClick={() => handlePreviewClick(selectedFiles.course, 'course')}
               >
- 
-               
-                <span className="underline  underline-offset-4">{selectedFiles.course.name}</span>
+                <span className='underline underline-offset-4'>
+                  {selectedFiles.course?.name || 'Saved course image'}
+                </span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveFile('course');
+                    handleRemoveMedia('course');
                   }}
                   className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
                 >
@@ -418,16 +400,19 @@ function Media() {
          
           {/* File names display */}
           <div className="mt-2 flex flex-wrap gap-2">
-            {selectedFiles.category && (
+            {(selectedFiles.category || courseData?.media?.categoryImage) && (
               <div
                 className="flex items-center gap-1 h-8 text-sm text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer"
                 onClick={() => handlePreviewClick(selectedFiles.category, 'category')}
               >
-                <span className='underline  underline-offset-4'>{selectedFiles.category.name}</span>
+                <span className='underline underline-offset-4'>
+                  {selectedFiles.category?.name || 'Saved category image'}
+                </span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveFile('category');
+                    handleRemoveMedia('category');
                   }}
                   className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
                 >

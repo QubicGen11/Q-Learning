@@ -7,15 +7,19 @@ import 'react-quill/dist/quill.snow.css';
 
 function AboutCourse() {
   const { courseData, updateCourseData, setStep, currentStep } = useCourseCreationStore();
-  const { about } = courseData;
+  
+  // Add this to ensure about object exists
+  const about = courseData?.about || {
+    courseOutcome: '',
+    coursePreRequisites: [],
+    courseAudience: [],
+    courseDescription: '',
+    reviews: []
+  };
 
-  // const [prerequisite, setPrerequisite] = useState({
-  //   preRequisiteRequired: '',
-  //   preRequisiteLevel: 'Beginner'
-  // });
-
+  // Initialize state with default values
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedReviews, setSelectedReviews] = useState([]);
+  const [selectedReviews, setSelectedReviews] = useState(about.reviews || []);
 
   const reviews = [
     {
@@ -64,8 +68,17 @@ function AboutCourse() {
   const handleChange = (field, value) => {
     console.log(`Updating ${field}:`, value);
     
+    // Create a new about object with existing or default values
+    const updatedAbout = {
+      ...about,
+      courseOutcome: about.courseOutcome || '',
+      coursePreRequisites: about.coursePreRequisites || [],
+      courseAudience: about.courseAudience || [],
+      courseDescription: about.courseDescription || '',
+      reviews: about.reviews || []
+    };
+
     if (field === 'coursePreRequisites') {
-      // Handle prerequisites as objects with level
       const prerequisites = value.split(',')
         .map(item => item.trim())
         .filter(Boolean)
@@ -74,35 +87,20 @@ function AboutCourse() {
           preRequisiteLevel: 'Beginner'
         }));
 
-      updateCourseData('about', {
-        ...about,
-        coursePreRequisites: prerequisites
-      });
+      updatedAbout.coursePreRequisites = prerequisites;
     } 
     else if (field === 'courseAudience') {
-      // Handle audience as simple array
       const audiences = value.split(',')
         .map(item => item.trim())
         .filter(Boolean);
 
-      updateCourseData('about', {
-        ...about,
-        courseAudience: audiences
-      });
-    }
-    else if (field === 'courseOutcome') {
-      // Handle outcome as simple string
-      updateCourseData('about', {
-        ...about,
-        courseOutcome: value
-      });
+      updatedAbout.courseAudience = audiences;
     }
     else {
-      updateCourseData('about', {
-        ...about,
-        [field]: value
-      });
+      updatedAbout[field] = value;
     }
+
+    updateCourseData('about', updatedAbout);
   };
 
   const modules = {
@@ -126,7 +124,7 @@ function AboutCourse() {
           What Audience will get ?* 
         </label>
         <textarea
-          value={about.courseOutcome ? about.courseOutcome.split('\n').map(line => `• ${line.replace('• ', '')}`).join('\n') : ''}
+          value={about?.courseOutcome ? about.courseOutcome.split('\n').map(line => `• ${line.replace('• ', '')}`).join('\n') : ''}
           onChange={(e) => {
             const outcomes = e.target.value
               .split('\n')

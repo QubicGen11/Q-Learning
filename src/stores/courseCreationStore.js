@@ -1,6 +1,34 @@
 import { create } from 'zustand';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
+import axios from 'axios';
+
+// Helper function to load from localStorage
+const loadFromCourseLocalStorage = () => {
+  try {
+    const savedData = localStorage.getItem('courseCreationData');
+    return savedData ? JSON.parse(savedData) : null;
+  } catch (error) {
+    console.error('Error loading from localStorage:', error);
+    return null;
+  }
+};
+
+// Get initial data
+const initialData = loadFromCourseLocalStorage() || {
+  basicInfo: {},
+  media: {},
+  curriculum: {},
+  pricing: {},
+  settings: {},
+  about: {
+    courseOutcome: '',
+    coursePreRequisites: [],
+    courseAudience: [],
+    courseDescription: '',
+    reviews: []
+  }
+};
 
 const useCourseCreationStore = create((set, get) => ({
   currentStep: 1,
@@ -13,51 +41,7 @@ const useCourseCreationStore = create((set, get) => ({
     { id: 6, title: 'Settings', path: 'settings' }
   ],
   
-  courseData: {
-    basicInfo: {
-      courseName: '',
-      courseTagline: '',
-      courseDuration: '',
-      difficultyLevel: '',
-      category: '',
-      subCategory: '',
-      teachingLanguage: '',
-      hashtags: [],
-      courseType: '',
-      percentageRequired: '',
-    },
-    media: {
-      courseBanner: null,
-      courseImage: null,
-      categoryImage: null
-    },
-    about: {
-      courseOutcome: '',
-      courseDescription: '',
-      coursePreRequisites: [],
-      courseAudience: []
-    },
-    content: { 
-      chapters: []
-    },
-    courseFaqs: [],
-    settings: {
-      courseVisibility: { public: false, enablePreview: false },
-      courseAccess: { duration: '', lifetimeAccess: false },
-      pricing: { originalPrice: '', discountedPrice: '', startDate: null, endDate: null },
-      enrollment: {
-        maxStudents: '',
-        certificateEligibility: false,
-        notifications: { notifyUpdates: false, notifyAssignments: false }
-      }
-    },
-    courseSettings: [{
-      pricingType: '',
-      promotionType: '',
-      publicAccess: false,
-      enablePreview: false,
-    }]
-  },
+  courseData: initialData,
 
   categories: [],
   subCategories: [],
@@ -72,33 +56,44 @@ const useCourseCreationStore = create((set, get) => ({
   },
 
   updateCourseData: (section, data) => {
+    set(state => {
+      const newCourseData = {
+        ...state.courseData,
+        [section]: data
+      };
+      
+      // Save to localStorage
+      try {
+        localStorage.setItem('courseCreationData', JSON.stringify(newCourseData));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+      
+      return {
+        ...state,
+        courseData: newCourseData
+      };
+    });
+  },
+
+  updateChapters: (chapters) => {
     set((state) => ({
       courseData: {
         ...state.courseData,
-        [section]: section === 'courseSettings' ? 
-          // Handle settings as array
-          (Array.isArray(data) ? data : [data])
-          :
-          section === 'courseFaqs' ?
-          // Handle FAQs as array
-          (Array.isArray(data) ? data : Object.values(data))
-          :
-          // Handle other sections as before
-          {
-            ...state.courseData[section],
-            ...data
-          }
+        content: {
+          ...state.courseData.content,
+          chapters: chapters
+        }
       }
     }));
   },
 
   // Function to handle next button click and API calls
   handleNext: (navigate) => {
-    const { currentStep } = get();
-    // Just handle navigation, no API call
+    const { currentStep, steps } = get();
     if (currentStep < 6) {
       set({ currentStep: currentStep + 1 });
-      const nextStep = get().steps[currentStep];
+      const nextStep = steps[currentStep];
       navigate(`/instructor/courses/create/${nextStep.path}`);
     }
   },
@@ -111,7 +106,8 @@ const useCourseCreationStore = create((set, get) => ({
       const formattedSettings = courseData.courseSettings.map(setting => ({
         ...setting,
         startDate: setting.startDate ? new Date(setting.startDate).toISOString() : null,
-        endDate: setting.endDate ? new Date(setting.endDate).toISOString() : null
+        endDate: setting.endDate ? new Date(setting.endDate).toISOString() : null,
+        lifeTimeAccess: false
       }));
 
       // Correctly format hashtags as array of objects with tagName
@@ -145,6 +141,8 @@ const useCourseCreationStore = create((set, get) => ({
           courseData.courseFaqs : 
           Object.values(courseData.courseFaqs || {}),
         courseSettings: formattedSettings,
+        glossary: Array.isArray(courseData.glossary) ? courseData.glossary : [],
+        references: Array.isArray(courseData.references) ? courseData.references : [],
         isDraft: false,
         courseStatus: 'pending'
       };
@@ -220,7 +218,19 @@ const useCourseCreationStore = create((set, get) => ({
           promotionType: '',
           publicAccess: false,
           enablePreview: false,
-        }]
+        }],
+        glossary: [
+          {
+            acronym: '',
+            meaning: ''
+          }
+        ],
+        references: [
+          {
+            reference: '',
+            link: ''
+          }
+        ]
       }
     });
   },

@@ -208,10 +208,10 @@ function BasicInfo() {
       };
     }
 
-    // Update course data
+    // Update course data (this will trigger localStorage save)
     updateCourseData('basicInfo', newBasicInfo);
 
-    // Only validate if there are existing validation errors
+    // Validate if there are existing errors
     if (Object.keys(validationErrors).length > 0) {
       const newErrors = validateAllFields(newBasicInfo);
       setValidationErrors(newErrors);
@@ -312,6 +312,20 @@ function BasicInfo() {
       window.removeEventListener('scroll', handleDropdownPosition);
       window.removeEventListener('resize', handleDropdownPosition);
     };
+  }, []);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('courseCreationData');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData.basicInfo) {
+          updateCourseData('basicInfo', parsedData.basicInfo);
+        }
+      } catch (error) {
+        console.error('Error loading saved course data:', error);
+      }
+    }
   }, []);
 
   return (

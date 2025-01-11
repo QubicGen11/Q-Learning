@@ -5,6 +5,17 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { BsBook } from 'react-icons/bs';
 function MoreInfo() {
   const { courseData, updateCourseData } = useCourseCreationStore();
+  
+  // Initialize with empty arrays if undefined
+  useEffect(() => {
+    if (!Array.isArray(courseData.glossary)) {
+      updateCourseData('glossary', []);
+    }
+    if (!Array.isArray(courseData.references)) {
+      updateCourseData('references', []);
+    }
+  }, []);
+
   const [state, setState] = useState({
     activeTab: 'glossary',
     glossaryItems: Array.isArray(courseData.glossary) ? courseData.glossary : [],
@@ -12,8 +23,15 @@ function MoreInfo() {
     collapsed: new Set()
   });
 
-  // Remove the courseData effect that was causing loops
-  
+  // Update local state when courseData changes
+  useEffect(() => {
+    setState(prev => ({
+      ...prev,
+      glossaryItems: Array.isArray(courseData.glossary) ? courseData.glossary : [],
+      references: Array.isArray(courseData.references) ? courseData.references : []
+    }));
+  }, [courseData.glossary, courseData.references]);
+
   const updateStore = useCallback((type, data) => {
     // Prevent unnecessary store updates
     if (JSON.stringify(courseData[type]) !== JSON.stringify(data)) {
@@ -33,42 +51,12 @@ function MoreInfo() {
     });
   };
 
-  const handleAddGlossaryItem = () => {
-    setState(prev => {
-      const newItems = [
-        ...prev.glossaryItems,
-        { 
-          id: `glossary-${Date.now()}`, 
-          term: '', 
-          meaning: '' 
-        }
-      ];
-      updateStore('glossary', newItems);
-      return { ...prev, glossaryItems: newItems };
-    });
-  };
-
-  const handleAddReference = () => {
-    setState(prev => {
-      const newRefs = [
-        ...prev.references,
-        { 
-          id: `reference-${Date.now()}`, 
-          title: '', 
-          link: '' 
-        }
-      ];
-      updateStore('references', newRefs);
-      return { ...prev, references: newRefs };
-    });
-  };
-
   const handleGlossaryChange = (index, field, value) => {
     setState(prev => {
       const newItems = prev.glossaryItems.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       );
-      updateStore('glossary', newItems);
+      updateCourseData('glossary', newItems);
       return { ...prev, glossaryItems: newItems };
     });
   };
@@ -78,9 +66,33 @@ function MoreInfo() {
       const newRefs = prev.references.map((ref, i) =>
         i === index ? { ...ref, [field]: value } : ref
       );
-      updateStore('references', newRefs);
+      updateCourseData('references', newRefs);
       return { ...prev, references: newRefs };
     });
+  };
+
+  const handleAddGlossaryItem = () => {
+    const newItems = [
+      ...state.glossaryItems,
+      { 
+        id: `glossary-${Date.now()}`, 
+        acronym: '', 
+        meaning: '' 
+      }
+    ];
+    updateCourseData('glossary', newItems);
+  };
+
+  const handleAddReference = () => {
+    const newRefs = [
+      ...state.references,
+      { 
+        id: `reference-${Date.now()}`, 
+        reference: '', 
+        link: '' 
+      }
+    ];
+    updateCourseData('references', newRefs);
   };
 
   const handleRemoveItem = (type, index) => {
@@ -88,10 +100,10 @@ function MoreInfo() {
       const newState = { ...prev };
       if (type === 'glossary') {
         newState.glossaryItems = prev.glossaryItems.filter((_, i) => i !== index);
-        updateStore('glossary', newState.glossaryItems);
+        updateCourseData('glossary', newState.glossaryItems);
       } else {
         newState.references = prev.references.filter((_, i) => i !== index);
-        updateStore('references', newState.references);
+        updateCourseData('references', newState.references);
       }
       return newState;
     });
@@ -142,8 +154,8 @@ function MoreInfo() {
                     type="text"
                     placeholder="Enter"
                     className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
-                    value={item.term || ''}
-                    onChange={(e) => handleGlossaryChange(index, 'term', e.target.value)}
+                    value={item.acronym || ''}
+                    onChange={(e) => handleGlossaryChange(index, 'acronym', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -168,8 +180,8 @@ function MoreInfo() {
                     type="text"
                     placeholder="Enter text"
                     className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
-                    value={item.title || ''}
-                    onChange={(e) => handleReferenceChange(index, 'title', e.target.value)}
+                    value={item.reference || ''}
+                    onChange={(e) => handleReferenceChange(index, 'reference', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -194,7 +206,7 @@ function MoreInfo() {
 
   console.log('Rendering with state:', state);
   return (
-    <div className="bg-white rounded-lg  h-[calc(100vh-280px)]">
+    <div className="bg-white rounded-lg  mt-2">
       <div className="flex h-full">
         <div className="fixed calc-height w-[310px] h-[600px] gap-4 p-4 border-2 border-[#E2E8F0] overflow-x-hidden overflow-y-auto bg-white">
           <div className="flex flex-col space-y-1">

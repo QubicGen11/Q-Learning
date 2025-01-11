@@ -106,7 +106,7 @@ function CreateCourse() {
       </style>
 
       {/* Bottom Navigation */}
-      {/* <div className="border-t border-gray-200 px-6 py-4">
+      <div className="border-t border-gray-200 px-6 py-4">
         <div className="flex justify-between">
           {currentStep > 1 && (
             <button
@@ -135,7 +135,7 @@ function CreateCourse() {
             </button>
           )}
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }
