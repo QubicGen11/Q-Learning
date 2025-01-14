@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import { IoIosArrowRoundBack, IoIosArrowRoundForward } from 'react-icons/io';
@@ -17,6 +17,8 @@ const StepIndicator = () => {
     setValidationErrors,
     submitCourse
   } = useCourseCreationStore();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const mainTabs = [
     { 
@@ -140,8 +142,104 @@ const StepIndicator = () => {
   };
 
   const handleNext = () => {
-    const { currentTab } = getCurrentTabAndSteps();
+    console.log('Current path:', location.pathname);
+    console.log('Validation errors:', validationErrors);
+
+    // Check for validation errors in About section
+    if (location.pathname.includes('/about')) {
+      // Check if any validation errors exist
+      const hasErrors = Object.values(validationErrors).some(error => error !== null && error !== undefined);
+      
+      if (hasErrors) {
+        toast.error('Please fix all validation errors before proceeding');
+        return; // Stop navigation if there are errors
+      }
+      
+      // Also check if required fields are filled
+      const { about } = courseData || {};
+      if (!about?.courseOutcome || 
+          !about?.coursePreRequisites?.length || 
+          !about?.courseAudience?.length || 
+          !about?.courseDescription) {
+        toast.error('Please complete all required fields');
+        return;
+      }
+    }
+
+    // Add this new check for MoreInfo step
+    if (location.pathname.includes('/more-info')) {
+      const { glossary, references } = courseData;
+      
+      // Check if there are any validation errors
+      const hasErrors = Object.keys(validationErrors).some(key => 
+        ['glossary', 'references'].includes(key) && validationErrors[key]
+      );
+
+      if (hasErrors) {
+        // Display each validation error as a separate toast
+        Object.values(validationErrors).forEach(error => {
+          alert(error);
+        });
+        return;
+      }
+
+      // Check if required data exists
+      const hasValidGlossary = Array.isArray(glossary) && 
+        glossary.some(item => item.acronym?.trim() && item.meaning?.trim());
+      
+      const hasValidReferences = Array.isArray(references) && 
+        references.some(item => item.reference?.trim() && item.link?.trim());
+
+      if (!hasValidGlossary || !hasValidReferences) {
+        if (!hasValidGlossary) {
+          toast.error('At least one glossary item with both acronym and meaning is required');
+        }
+        if (!hasValidReferences) {
+          toast.error('At least one reference with both title and link is required');
+        }
+        return;
+      }
+    }
+
+    // Add this new check for FAQ step
+    if (location.pathname.includes('/faq')) {
+      const { faq } = courseData;
+      
+      // Check if there are any validation errors
+      if (validationErrors.faq) {
+        toast.error(validationErrors.faq);
+        return;
+      }
+
+      // Check if FAQs exist and are valid
+      const hasValidFaqs = Array.isArray(faq) && 
+        faq.length > 0 && 
+        faq.every(item => item.question?.trim() && item.answer?.trim());
+
+      if (!hasValidFaqs) {
+        toast.error('Please add at least one FAQ with both question and answer');
+        return;
+      }
+    }
+
+    // Rest of your navigation logic...
+    const { currentTab, steps } = getCurrentTabAndSteps();
     
+    if (currentTab === 'info' && location.pathname.includes('/about')) {
+      if (Object.keys(validationErrors).length > 0) {
+        toast.error('Please fix all validation errors before proceeding');
+        return;
+      }
+    }
+
+    // Your existing navigation code
+    if (currentTab === 'info' && location.pathname.includes('/about')) {
+      if (Object.keys(validationErrors).length > 0) {
+        toast.error('Please fix all validation errors before proceeding');
+        return;
+      }
+    }
+
     if (currentTab === 'info' && location.pathname.includes('/basic-info')) {
       const { isValid, errors } = validateBasicInfo();
       
@@ -282,24 +380,13 @@ const StepIndicator = () => {
   };
 
   const handleSubmit = async () => {
-    console.log('🔵 Submit button clicked in StepIndicator');
+    setIsSubmitting(true);
     try {
-      const token = Cookies.get('accessToken');
-      console.log('🔑 Token in StepIndicator:', token);
-
-      if (!token) {
-        console.log('❌ No token found in StepIndicator');
-        toast.error('Please login to submit the course');
-        return;
-      }
-
-      console.log('🚀 Calling submitCourse from StepIndicator...');
       await submitCourse(navigate);
-      
-      console.log('✅ Course submitted successfully from StepIndicator');
     } catch (error) {
-      console.error('❌ Error in StepIndicator submit:', error);
-      toast.error(error.message || 'Failed to submit course');
+      console.error('Error in handleSubmit:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -333,11 +420,19 @@ const StepIndicator = () => {
             </button>
           </div>
           {location.pathname.includes('/settings') ? (
-            <button
+            <button 
               onClick={handleSubmit}
-              className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md"
+              disabled={isSubmitting}
+              className="flex items-center justify-center gap-1 text-white bg-[#0056B3] hover:bg-[#004494] px-3 h-8 rounded-md"
             >
-              Submit for Review
+              {isSubmitting ? (
+                <>
+                  <span className="animate-spin mr-2">⌛</span>
+                  Submitting...
+                </>
+              ) : (
+                'Submit for Reviews'
+              )}
             </button>
           ) : (
             <button

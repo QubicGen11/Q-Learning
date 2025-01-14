@@ -6,37 +6,68 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { MdContentCopy } from 'react-icons/md';
 
 function FAQ() {
-  const { courseData, updateCourseData } = useCourseCreationStore();
+  const { courseData, updateCourseData, validationErrors, setValidationErrors } = useCourseCreationStore();
   const [localFaqs, setLocalFaqs] = useState([]);
   const [collapsedFaqs, setCollapsedFaqs] = useState(new Set());
+
+  const validateAllFields = (faqs) => {
+    const errors = {};
+
+    if (!Array.isArray(faqs) || faqs.length === 0) {
+      errors.faq = 'At least one FAQ is required';
+      return errors;
+    }
+
+    const hasIncompleteFaq = faqs.some(faq => 
+      !faq.question?.trim() || !faq.answer?.trim()
+    );
+
+    if (hasIncompleteFaq) {
+      errors.faq = 'All FAQs must have both question and answer filled';
+    }
+
+    return errors;
+  };
 
   useEffect(() => {
     let initialFaqs = courseData.faq || [];
     setLocalFaqs(initialFaqs);
+    
+    const errors = validateAllFields(initialFaqs);
+    setValidationErrors(errors);
   }, [courseData.faq]);
 
   const handleAddQuestion = () => {
     const newFaq = { 
-      id: `faq-${Date.now()}`,  // Add unique ID
+      id: `faq-${Date.now()}`,
       question: '', 
       answer: '' 
     };
     const updatedFaqs = [...localFaqs, newFaq];
     setLocalFaqs(updatedFaqs);
     updateCourseData('faq', updatedFaqs);
+    
+    const newErrors = validateAllFields(updatedFaqs);
+    setValidationErrors(newErrors);
   };
 
   const handleCopyFaq = (index) => {
     const faqToCopy = localFaqs[index];
-    const updatedFaqs = [...localFaqs, { ...faqToCopy }];
+    const updatedFaqs = [...localFaqs, { ...faqToCopy, id: `faq-${Date.now()}` }];
     setLocalFaqs(updatedFaqs);
-    updateCourseData('courseFaqs', updatedFaqs);
+    updateCourseData('faq', updatedFaqs);
+    
+    const newErrors = validateAllFields(updatedFaqs);
+    setValidationErrors(newErrors);
   };
 
   const handleRemoveQuestion = (index) => {
     const updatedFaqs = localFaqs.filter((_, i) => i !== index);
     setLocalFaqs(updatedFaqs);
-    updateCourseData('courseFaqs', updatedFaqs);
+    updateCourseData('faq', updatedFaqs);
+    
+    const newErrors = validateAllFields(updatedFaqs);
+    setValidationErrors(newErrors);
     toast.success('FAQ removed successfully');
   };
 
@@ -58,11 +89,21 @@ function FAQ() {
     );
     setLocalFaqs(updatedFaqs);
     updateCourseData('faq', updatedFaqs);
+
+    const newErrors = validateAllFields(updatedFaqs);
+    setValidationErrors(newErrors);
   };
 
   return (
     <div className="bg-white rounded-lg p-6 h-[calc(100vh-280px)] flex justify-center items-center">
       <div className="flex h-full w-[830px] h-[700px]">
+        {validationErrors.faq && (
+          <div className="absolute top-4 right-4">
+            <p className="text-red-500 bg-red-50 px-4 py-2 rounded-md border border-red-200">
+              {validationErrors.faq}
+            </p>
+          </div>
+        )}
         <div className="flex-1 pl-6 h-full overflow-hidden">
           <div className="h-full flex flex-col">
             <div className="flex justify-between items-center mb-4 flex-shrink-0">

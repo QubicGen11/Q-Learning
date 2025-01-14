@@ -92,12 +92,28 @@ const useRegisterStore = create((set, get) => ({
       throw new Error('Registration failed');
     } catch (error) {
       set({ loading: false });
-      Swal.fire({
-        icon: 'error',
-        title: 'Registration Failed',
-        text: error.response?.data?.message || 'Something went wrong',
-        confirmButtonColor: '#0056B3'
-      });
+      
+      // Check if error is for existing user
+      if (error.response?.data?.error === "User with this email already exists.") {
+        Swal.fire({
+          icon: 'info',
+          title: 'Account Exists',
+          text: 'An account with this email already exists. Redirecting to login...',
+          confirmButtonColor: '#0056B3',
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.href = '/login';
+        });
+      } else {
+        // Handle other errors
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: error.response?.data?.message || 'Something went wrong',
+          confirmButtonColor: '#0056B3'
+        });
+      }
       return false;
     }
   },

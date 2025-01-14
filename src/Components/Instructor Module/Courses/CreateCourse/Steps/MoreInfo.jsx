@@ -3,8 +3,9 @@ import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import { IoBookOutline, IoMenu } from "react-icons/io5";
 import { RiDeleteBinLine } from 'react-icons/ri';
 import { BsBook } from 'react-icons/bs';
-function MoreInfo() {
-  const { courseData, updateCourseData } = useCourseCreationStore();
+
+const MoreInfo = () => {
+  const { courseData, updateCourseData, validationErrors, setValidationErrors } = useCourseCreationStore();
   const [state, setState] = useState({
     activeTab: 'glossary',
     glossaryItems: Array.isArray(courseData.glossary) ? courseData.glossary : [],
@@ -12,8 +13,71 @@ function MoreInfo() {
     collapsed: new Set()
   });
 
-  // Remove the courseData effect that was causing loops
-  
+  const validateAllFields = (currentData) => {
+    const errors = {};
+    
+    // Glossary validation
+    const validGlossary = currentData?.glossary?.filter(item => 
+      item.acronym.trim() && item.meaning.trim()
+    );
+    if (!validGlossary || validGlossary.length < 1) {
+      errors.glossary = 'At least one glossary item with both acronym and meaning is required';
+    }
+
+    // References validation
+    const validReferences = currentData?.references?.filter(item => 
+      item.reference.trim() && item.link.trim()
+    );
+    if (!validReferences || validReferences.length < 1) {
+      errors.references = 'At least one reference with both title and link is required';
+    }
+
+    return errors;
+  };
+
+  const handleChange = (type, index, field, value) => {
+    let updatedItems;
+    
+    if (type === 'glossary') {
+      updatedItems = [...state.glossaryItems];
+      updatedItems[index] = { ...updatedItems[index], [field]: value };
+      setState(prev => ({ ...prev, glossaryItems: updatedItems }));
+    } else {
+      updatedItems = [...state.references];
+      updatedItems[index] = { ...updatedItems[index], [field]: value };
+      setState(prev => ({ ...prev, references: updatedItems }));
+    }
+
+    // Update course data
+    updateCourseData(type, updatedItems);
+
+    // If there are any existing errors, validate all fields again
+    if (Object.keys(validationErrors).length > 0) {
+      const newErrors = validateAllFields({ glossary: state.glossaryItems, references: state.references });
+      setValidationErrors(newErrors);
+    }
+  };
+
+  // Add initial validation on mount
+  useEffect(() => {
+    const errors = validateAllFields({ 
+      glossary: state.glossaryItems, 
+      references: state.references 
+    });
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+    }
+  }, []); // Only run once on mount
+
+  // Add blur handler
+  const handleBlur = (type) => {
+    const newErrors = validateAllFields({ 
+      glossary: state.glossaryItems, 
+      references: state.references 
+    });
+    setValidationErrors(newErrors);
+  };
+
   const updateStore = useCallback((type, data) => {
     // Prevent unnecessary store updates
     if (JSON.stringify(courseData[type]) !== JSON.stringify(data)) {
@@ -39,6 +103,14 @@ function MoreInfo() {
         i === index ? { ...item, [field]: value } : item
       );
       updateCourseData('glossary', newItems);
+
+      // Validate immediately after change
+      const newErrors = validateAllFields({ 
+        glossary: newItems, 
+        references: prev.references 
+      });
+      setValidationErrors(newErrors);
+
       return { ...prev, glossaryItems: newItems };
     });
   };
@@ -49,6 +121,14 @@ function MoreInfo() {
         i === index ? { ...ref, [field]: value } : ref
       );
       updateCourseData('references', newRefs);
+
+      // Validate immediately after change
+      const newErrors = validateAllFields({ 
+        glossary: prev.glossaryItems, 
+        references: newRefs 
+      });
+      setValidationErrors(newErrors);
+
       return { ...prev, references: newRefs };
     });
   };
@@ -187,6 +267,12 @@ function MoreInfo() {
               </>
             )}
           </div>
+        )}
+        {type === 'glossary' && validationErrors.glossary && index === 0 && (
+          <p className="text-red-500 text-xs mt-1">{validationErrors.glossary}</p>
+        )}
+        {type === 'references' && validationErrors.references && index === 0 && (
+          <p className="text-red-500 text-xs mt-1">{validationErrors.references}</p>
         )}
       </div>
     );

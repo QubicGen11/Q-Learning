@@ -6,7 +6,7 @@ import { Spinner } from '@material-tailwind/react';
 import { MdOutlineFileUpload } from "react-icons/md";
  
 function Media() {
-  const { courseData, updateCourseData } = useCourseCreationStore();
+  const { courseData, updateCourseData,validationErrors,setValidationErrors } = useCourseCreationStore();
   const [selectedFiles, setSelectedFiles] = useState({
     banner: null,
     course: null,
@@ -176,7 +176,7 @@ function Media() {
         {/* Course Banner Video */}
         <div>
           <label className="block text-sm font-medium mb-2">Upload a banner Video & Image *</label>
-          <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6 ">
+          <div className={`relative w-full border-2 border-dashed rounded-lg ${validationErrors?.mediaBanner ? 'border-red-500' : 'border-gray-300'} p-6`}>
             {/* Browse button in top right corner */}
             <div className="absolute top-3 right-3">
               <div className="relative group">
@@ -262,7 +262,7 @@ function Media() {
         {/* Course Image */}
         <div>
           <label className="block text-sm font-medium mb-2">Course Image *</label>
-          <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+          <div className={`relative w-full border-2 border-dashed rounded-lg ${validationErrors?.mediaCourse ? 'border-red-500' : 'border-gray-300'} p-6`}>
             {/* Browse button in top right corner */}
             <div className="absolute top-3 right-3">
               <div className="relative group">
@@ -344,7 +344,7 @@ function Media() {
         {/* Category Image */}
         <div>
           <label className="block text-sm font-medium mb-2">Category Image *</label>
-          <div className="relative w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+          <div className={`relative w-full border-2 border-dashed rounded-lg ${validationErrors?.mediaCategory ? 'border-red-500' : 'border-gray-300'} p-6`}>
             {/* Browse button in top right corner */}
             <div className="absolute top-3 right-3">
               <div className="relative group">

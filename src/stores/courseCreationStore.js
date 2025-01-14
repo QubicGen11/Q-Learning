@@ -197,6 +197,17 @@ const useCourseCreationStore = create((set, get) => ({
       // Log localStorage data
       console.log('💾 localStorage Data:', localStorage.getItem('courseCreationData'));
 
+      // Format dates to ISO string if they exist
+      const formatDate = (date) => {
+        if (!date) return null;
+        try {
+          return new Date(date).toISOString();
+        } catch (error) {
+          console.error('Invalid date:', date);
+          return null;
+        }
+      };
+
       const requestBody = {
         courseName: courseData.basicInfo?.courseName || '',
         courseTagline: courseData.basicInfo?.courseTagline || '',
@@ -265,8 +276,8 @@ const useCourseCreationStore = create((set, get) => ({
           price: parseFloat(settings.price) || 0,
           discount: parseFloat(settings.discount) || 0,
           offeredPrice: parseFloat(settings.offeredPrice) || 0,
-          startDate: settings.startDate || null,
-          endDate: settings.endDate || null,
+          startDate: formatDate(settings.startDate),
+          endDate: formatDate(settings.endDate),
           maxStudents: parseInt(settings.maxStudents) || 100,
           certificateEligibility: Boolean(settings.certificateEligibility),
           accessDuration: settings.accessDuration || '',
@@ -287,6 +298,11 @@ const useCourseCreationStore = create((set, get) => ({
           hashtags: settings.hashtags || ''
         }]
       };
+
+      // Validate dates before sending
+      if (!requestBody.courseSettings[0].startDate || !requestBody.courseSettings[0].endDate) {
+        throw new Error('Invalid date format. Please check your course settings dates.');
+      }
 
       // Add courseType to top level if it exists
       if (settings.courseType) {
