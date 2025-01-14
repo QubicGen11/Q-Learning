@@ -63,6 +63,29 @@ const connectWebSocket = (token) => {
   };
 };
 
+// Enhanced token expiration check
+const isTokenExpired = (token) => {
+  if (!token) return true;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeUntilExpiry = payload.exp - currentTime;
+    
+    // Debug logs with more precise timing
+    console.log('🕒 Token Check:');
+    console.log(`Current time: ${new Date(currentTime * 1000).toLocaleString()}`);
+    console.log(`Token expires: ${new Date(payload.exp * 1000).toLocaleString()}`);
+    console.log(`Time until expiration: ${timeUntilExpiry} seconds`);
+    
+    // Return true only if actually expired
+    return currentTime >= payload.exp;
+  } catch (error) {
+    console.error('Error checking token expiration:', error);
+    return true;
+  }
+};
+
 const useAuthStore = create((set) => ({
   isLoggedIn: false,
   userName: '',
@@ -236,6 +259,12 @@ const useAuthStore = create((set) => ({
   checkAuth: () => {
     const accessToken = Cookies.get('accessToken');
     if (accessToken) {
+      if (isTokenExpired(accessToken)) {
+        // Token is expired, show popup and logout
+        useAuthStore.getState().showSessionExpiredPopup();
+        return;
+      }
+      
       try {
         const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
         set({
@@ -252,88 +281,103 @@ const useAuthStore = create((set) => ({
   },
 
   showSessionExpiredPopup: async () => {
-    if (!useAuthStore.getState().loading && useAuthStore.getState().isLoggedIn) {
-      set({ loading: true });
-      
+    if (useAuthStore.getState().loading || !useAuthStore.getState().isLoggedIn) {
+      return;
+    }
+
+    set({ loading: true });
+    
+    try {
       await Swal.fire({
         title: 'Session Expired',
         text: 'Your session has expired. Please login again.',
         icon: 'warning',
         confirmButtonText: 'Login',
         confirmButtonColor: '#0056B3',
-        showCloseButton: true,
-        closeButtonHtml: '&times;',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         showClass: {
-          popup: 'animate__animated animate__fadeInDown animate__faster'
+          popup: 'animate__animated animate__fadeInDown'
         },
         hideClass: {
-          popup: 'animate__animated animate__fadeOutUp animate__faster'
-        },
-        customClass: {
-          closeButton: 'swal2-close-button',
-          popup: 'swal2-popup-custom'
-        },
-        didOpen: (popup) => {
-          const closeButton = popup.querySelector('.swal2-close');
-          if (closeButton) {
-            closeButton.style.position = 'absolute';
-            closeButton.style.right = '8px';
-            closeButton.style.top = '8px';
-            closeButton.style.fontSize = '22px';
-            closeButton.style.color = '#666';
-            closeButton.style.transition = 'color 0.2s';
-            closeButton.addEventListener('mouseover', () => { 
-              closeButton.style.color = '#333';
-            });
-            closeButton.addEventListener('mouseout', () => {
-              closeButton.style.color = '#666';
-            });
-          }
+          popup: 'animate__animated animate__fadeOutUp'
         }
-      }).then((result) => {
-        set({
-          isLoggedIn: false,
-          userName: '',
-          userEmail: '',
-          loading: false
-        });
-        
-        window.location.href = '/whenuserlogout';
       });
+
+      // Clear cookies and state
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
+      
+      set({
+        isLoggedIn: false,
+        userName: '',
+        userEmail: '',
+        loading: false
+      });
+
+      // Redirect to login page
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error showing session expired popup:', error);
+      set({ loading: false });
     }
   },
 
   initializeTokenListener: () => {
     let isChecking = false;
     
-    const checkToken = () => {
+    const checkToken = async () => {
       if (isChecking) return;
       isChecking = true;
       
-      const state = useAuthStore.getState();
-      const token = Cookies.get('accessToken');
+      try {
+        const token = Cookies.get('accessToken');
+        const state = useAuthStore.getState();
 
-      if (state.isLoggedIn && !token && !state.loading) {
-        if (ws) {
-          ws.close();
-          ws = null;
+        if (state.isLoggedIn && token) {
+          // Check if token exists and is about to expire
+          if (isTokenExpired(token)) {
+            console.log('Token is expired or about to expire');
+            
+            // Try to refresh the token first
+            try {
+              const refreshToken = Cookies.get('refreshToken');
+              if (refreshToken) {
+                const response = await axios.post('http://localhost:8089/qlms/refresh-token', {
+                  refreshToken
+                });
+                
+                if (response.data && response.data.accessToken) {
+                  // Update the access token
+                  Cookies.set('accessToken', response.data.accessToken);
+                  console.log('Token refreshed successfully');
+                  return; // Exit if token refresh was successful
+                }
+              }
+            } catch (error) {
+              console.error('Token refresh failed:', error);
+            }
+
+            // If we get here, token refresh failed or wasn't possible
+            if (ws) {
+              ws.close();
+              ws = null;
+            }
+            useAuthStore.getState().showSessionExpiredPopup();
+          }
         }
-        useAuthStore.getState().showSessionExpiredPopup();
-      } else if (state.isLoggedIn && token && !ws) {
-        // Reconnect WebSocket if needed
-        connectWebSocket(token);
+      } catch (error) {
+        console.error('Error in token check:', error);
+      } finally {
+        isChecking = false;
       }
-      
-      isChecking = false;
     };
 
-    const intervalCheck = setInterval(checkToken, 5000);
+    // Check every 15 seconds
+    const intervalCheck = setInterval(checkToken, 15000);
 
-    // Initialize WebSocket if user is already logged in
-    const token = Cookies.get('accessToken');
-    if (token) {
-      connectWebSocket(token);
-    }
+    // Initial check
+    checkToken();
 
     return () => {
       clearInterval(intervalCheck);

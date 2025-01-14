@@ -201,7 +201,9 @@ const useRegisterStore = create((set, get) => ({
         position: 'center',
       });
     }
-  }
+  },
+
+  closeOtpModal: () => set({ showOtpModal: false }),
 }));
 
 export default useRegisterStore;

@@ -12,14 +12,15 @@ const SkillsHomepage = ({ categories }) => {
   const defaultCategory = uniqueCategories.length > 0 ? uniqueCategories[0] : 'Web Development';
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
 
-  // Get subcategories with their actual images from the API
+  // Get subcategories with their actual images from the API and limit to 6
   const getSubcategoriesWithImages = (category) => {
     return categories
       .filter(item => item.category === category)
       .map(item => ({
         title: item.subCategory,
         image: item.categoryImage // Using the actual image from API
-      }));
+      }))
+      .slice(0, 6); // Limit to first 6 items
   };
 
   // Get current subcategories based on selected category

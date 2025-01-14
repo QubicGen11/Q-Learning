@@ -128,7 +128,37 @@ const NewRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await register();
+    
+    // Validate all fields first
+    const newErrors = {
+      firstName: validateField('firstName', formData.firstName),
+      lastName: validateField('lastName', formData.lastName),
+      email: validateField('email', formData.email),
+      password: validateField('password', formData.password),
+      confirmPassword: validateField('confirmPassword', formData.confirmPassword)
+    };
+
+    // Update error state
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some(error => error !== '');
+    
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setErrors(prev => ({
+        ...prev,
+        confirmPassword: 'Passwords do not match'
+      }));
+      return;
+    }
+
+    // Only proceed if there are no errors
+    if (!hasErrors) {
+      await register();
+    } else {
+      toast.error('Please fix all errors before submitting');
+    }
   };
 
   const handleVerifyOtp = async () => {
@@ -143,6 +173,36 @@ const NewRegister = () => {
     } finally {
       setIsVerifying(false);
     }
+  };
+
+  const isFormValid = () => {
+    // Check if all required fields are filled
+    const requiredFields = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword
+    };
+
+    // Check if any field is empty
+    const hasEmptyFields = Object.values(requiredFields).some(field => !field);
+    if (hasEmptyFields) return false;
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(errors).some(error => error !== '');
+    if (hasErrors) return false;
+
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) return false;
+
+    // Check email format
+    if (!validateEmail(formData.email)) return false;
+
+    // Check password strength
+    if (!validatePassword(formData.password)) return false;
+
+    return true;
   };
 
   return (
@@ -317,8 +377,12 @@ const NewRegister = () => {
               <div className="mt-6">
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70 transition-colors"
+                  disabled={loading || !isFormValid()}
+                  className={`w-full py-2.5 rounded-lg font-medium transition-colors ${
+                    loading || !isFormValid()
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-[#0056B3] hover:bg-blue-700 text-white'
+                  }`}
                 >
                   {loading ? "Registering..." : "Register"}
                 </button>
@@ -359,7 +423,9 @@ const NewRegister = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg w-96 relative">
             <button
-              onClick={() => setShowOtpModal(false)}
+              onClick={() => {
+                useRegisterStore.getState().closeOtpModal();
+              }}
               className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
             >
               ✕
