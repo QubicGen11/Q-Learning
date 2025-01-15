@@ -376,40 +376,49 @@ const StepIndicator = () => {
             ))}
           </div>
           <div className="flex items-center gap-4 p-2">
-            <div className="relative">
-              <button
-                onClick={() => {}}
-                className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
-              >
-                Preview
-                <span className="material-icons text-sm">expand_more</span>
-              </button>
-            </div>
-            {location.pathname.includes('/settings') ? (
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex items-center justify-center gap-1 text-white bg-[#0056B3] hover:bg-[#004494] px-3 h-8 rounded-md"
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="animate-spin mr-2">⌛</span>
-                    Submitting...
-                  </>
-                ) : (
-                  'Submit for Reviews'
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={handleNext}
-                className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
-              >
-                Next
-                <IoIosArrowRoundForward className="text-2xl" />
-              </button>
-            )}
-          </div>
+  <div className="relative">
+    <button
+      onClick={() => {}}
+      className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
+    >
+      Preview
+      <span className="material-icons text-sm">expand_more</span>
+    </button>
+  </div>
+  <button
+    onClick={async () => {
+      const { basicInfo, media, content, courseSettings } = courseData || {};
+      
+      // Check if all mandatory sections are filled
+      if (!basicInfo?.courseName || !media?.courseBanner || !content?.chapters?.length || !courseSettings?.[0]) {
+        displayToast('error', 'Please complete all mandatory fields before submitting for review');
+        return;
+      }
+
+      try {
+        setIsSubmitting(true);
+        await submitCourse(navigate);
+        localStorage.removeItem('courseCreationData');
+        displayToast('success', 'Course submitted for review successfully!');
+      } catch (error) {
+        displayToast('error', 'Failed to submit course');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }}
+    disabled={isSubmitting}
+    className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
+  >
+    {isSubmitting ? (
+      <>
+        <span className="animate-spin mr-2">⌛</span>
+        Submitting...
+      </>
+    ) : (
+      'Submit for Review'
+    )}
+  </button>
+</div>
         </div>
  
         {/* Keep existing Step Indicator and add Settings heading when on settings page */}

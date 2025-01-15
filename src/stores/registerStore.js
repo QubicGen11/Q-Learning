@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+import { displayToast } from '../Components/Common/Toast/Toast';
 
 const useRegisterStore = create((set, get) => ({
   formData: {
@@ -79,40 +79,29 @@ const useRegisterStore = create((set, get) => ({
         });
         
         get().startTimer();
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Registration Initiated!',
-          text: 'Please check your email for OTP',
-          confirmButtonColor: '#0056B3',
-          iconColor: '#0056B3'
-        });
+        displayToast('success', 'Please check your email for OTP', 'Registration Initiated');
         return true;
       }
       throw new Error('Registration failed');
     } catch (error) {
       set({ loading: false });
       
-      // Check if error is for existing user
-      if (error.response?.data?.error === "User with this email already exists.") {
-        Swal.fire({
-          icon: 'info',
-          title: 'Account Exists',
-          text: 'An account with this email already exists. Redirecting to login...',
-          confirmButtonColor: '#0056B3',
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          window.location.href = '/login';
-        });
-      } else {
+      // Check if error is for existing registered user
+      if (error.response?.data?.error === "User with this email already exists and is already registered.") {
+        displayToast('info', 'This email is already registered. Please login.');
+        setTimeout(() => {
+          // window.location.href = '/login';
+        }, 2000);
+      } 
+      // Check if error is for existing unregistered user
+      else if (error.response?.data?.error === "User with this email already exists.") {
+        displayToast('info', 'You have already started registration. Please complete OTP verification.');
+        set({ showOtpModal: true });
+        get().startTimer();
+      }
+      else {
         // Handle other errors
-        Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: error.response?.data?.message || 'Something went wrong',
-          confirmButtonColor: '#0056B3'
-        });
+        displayToast('error', error.response?.data?.message || 'Something went wrong');
       }
       return false;
     }

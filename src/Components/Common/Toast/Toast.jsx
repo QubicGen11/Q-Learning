@@ -1,20 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { IoWarning, IoClose } from 'react-icons/io5';
+import { IoWarning, IoClose, IoInformation, IoCheckmarkCircle } from 'react-icons/io5';
 
-const Toast = ({ message, type = 'info', title, onClose }) => {
+const Toast = ({ message, type = 'info', onClose }) => {
   const variants = {
     info: {
       bg: 'bg-[#0056B3]',
-      icon: <IoWarning className="w-8 h-8 text-white" />
+      icon: <IoInformation className="w-5 h-5 text-white" />
     },
     error: {
       bg: 'bg-[#DC3545]',
-      icon: <IoWarning className="w-8 h-8 text-white" />
+      icon: <IoWarning className="w-5 h-5 text-white" />
     },
     success: {
       bg: 'bg-[#28A745]',
-      icon: <IoWarning className="w-8 h-8 text-white" />
+      icon: <IoCheckmarkCircle className="w-5 h-5 text-white" />
     }
   };
 
@@ -25,13 +25,12 @@ const Toast = ({ message, type = 'info', title, onClose }) => {
       className={`
         ${variant.bg} 
         fixed
-        top-16
+        top-20
         right-6
         text-white 
-        rounded
+        rounded-lg
         
-        w-[350px] 
-        h-[50px] 
+        p-2
         flex 
         items-center 
         justify-between 
@@ -39,42 +38,33 @@ const Toast = ({ message, type = 'info', title, onClose }) => {
         transition-all
         duration-200
         ease-in-out
+        gap-3
+        min-w-[300px]
+        max-w-[400px]
       `}
-      style={{
-        padding: '8px 16px',
-        gap: '6px'
-      }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {variant.icon}
-        <span className="font-['Plus_Jakarta_Sans'] text-[14px] font-[400] leading-[20px]">
+        <span className="text-sm">
           {message}
         </span>
       </div>
-      <div className="flex items-center gap-3">
-        {title && (
-          <span className="text-[14px] font-['Plus_Jakarta_Sans'] border border-white rounded px-4 py-1">
-            {title}
-          </span>
-        )}
-        <button 
-          onClick={onClose}
-          className="text-white hover:text-opacity-80 transition-colors duration-200 ml-2"
-          aria-label="Close"
-        >
-          <IoClose className="w-7 h-7" />
-        </button>
-      </div>
+      <button 
+        onClick={onClose}
+        className="text-white/80 hover:text-white transition-colors duration-200"
+      >
+        <IoClose className="w-5 h-5" />
+      </button>
     </div>
   );
 };
 
-export const displayToast = (type, message, title) => {
+export const displayToast = (type, message) => {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
     container.id = 'toast-container';
-    container.className = 'fixed top-6 right-6 z-50 space-y-[10px]';
+    container.className = 'fixed top-4 right-4 z-50 flex flex-col gap-3';
     document.body.appendChild(container);
   }
 
@@ -82,25 +72,24 @@ export const displayToast = (type, message, title) => {
   const root = ReactDOM.createRoot(toastElement);
   
   const handleClose = () => {
-    if (container.contains(toastElement)) {
-      container.removeChild(toastElement);
-    }
+    toastElement.classList.add('animate-fadeOut');
+    setTimeout(() => {
+      if (container.contains(toastElement)) {
+        container.removeChild(toastElement);
+      }
+    }, 200);
   };
 
-  // Always pass handleClose to ensure close button is functional
   root.render(
     <Toast 
       type={type} 
-      message={message} 
-      title={title}
-      onClose={handleClose}  // Make sure this is always passed
+      message={message}
+      onClose={handleClose}
     />
   );
   
   container.appendChild(toastElement);
-
-  // Auto remove after 3 seconds
-  setTimeout(handleClose, 3000);
+  setTimeout(handleClose, 4000);
 };
 
 export default Toast; 
