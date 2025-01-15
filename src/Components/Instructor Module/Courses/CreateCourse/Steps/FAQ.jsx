@@ -97,13 +97,7 @@ function FAQ() {
   return (
     <div className="bg-white rounded-lg p-6 h-[calc(100vh-280px)] flex justify-center items-center">
       <div className="flex h-full w-[830px] h-[700px]">
-        {validationErrors.faq && (
-          <div className="absolute top-4 right-4">
-            <p className="text-red-500 bg-red-50 px-4 py-2 rounded-md border border-red-200">
-              {validationErrors.faq}
-            </p>
-          </div>
-        )}
+      
         <div className="flex-1 pl-6 h-full overflow-hidden">
           <div className="h-full flex flex-col">
             <div className="flex justify-between items-center mb-4 flex-shrink-0">

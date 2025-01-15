@@ -10,7 +10,7 @@ const commonStyles = {
 };
 
 function CourseSettings() {
-  const { courseData, updateCourseData } = useCourseCreationStore();
+  const { courseData, updateCourseData, validationErrors } = useCourseCreationStore();
   const [activeSection, setActiveSection] = useState('courseSettings');
   const [courseTypes, setCourseTypes] = useState([]);
   const settings = courseData.courseSettings?.[0] || {};
@@ -59,17 +59,16 @@ function CourseSettings() {
   }, []);
 
   const handleSettingChange = (field, value) => {
-    console.log(`Changing setting ${field} to:`, value);
-    console.log('Current settings before change:', courseData.courseSettings);
+    console.log('Updating setting:', field, 'with value:', value);
     
-    const currentSettings = courseData.courseSettings?.[0] || {};
-    const updatedSettings = [{
-      ...currentSettings,
+    const updatedSettings = {
+      ...settings,
       [field]: value
-    }];
+    };
     
-    console.log('Updated settings to be saved:', updatedSettings);
-    updateCourseData('courseSettings', updatedSettings);
+    console.log('Updated settings:', updatedSettings);
+    
+    updateCourseData('courseSettings', [updatedSettings]);
   };
 
   return (
@@ -124,7 +123,7 @@ function CourseSettings() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex justify-start ml-[60px] items-center  p-6">
+        <div className="flex-1 flex justify-start ml-[60px] items-center  p-6 overflow-x-hidden">
           <div className="h-full flex flex-col ">
             {activeSection === 'courseSettings' && (
               <div className="space-y-8 overflow-y-auto pr-2 ml-[250px] scrollbar-hide">
@@ -418,7 +417,7 @@ function CourseSettings() {
             )}
 
             {activeSection === 'enrollment' && (
-              <div className="space-y-8 overflow-y-auto pr-2 ml-[250px]">
+              <div className="space-y-8 overflow-y-auto pr-2 ml-[240px]  overflow-x-hidden">
                 {/* Enrollment Settings */}
                 <div>
                   <h3 className="text-sm font-medium mb-4  text-gray-600" style={{ fontWeight: '700' }}>Enrollment Settings</h3>
@@ -449,7 +448,7 @@ function CourseSettings() {
                         placeholder="Enter percentage required"
                       />
                     </div>
-                    <div className="flex items-center space-x-3 w-[450px] mt-6">
+                    <div className="flex items-center space-x-3 w-[400px] mt-6">
                       <label className="flex items-center cursor-pointer">
                         <input 
                           type="checkbox"

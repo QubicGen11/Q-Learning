@@ -3,6 +3,7 @@ import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import { IoBookOutline, IoMenu } from "react-icons/io5";
 import { RiDeleteBinLine } from 'react-icons/ri';
 import { BsBook } from 'react-icons/bs';
+import { displayToast } from '../../../../Common/Toast/Toast';
 
 const MoreInfo = () => {
   const { courseData, updateCourseData, validationErrors, setValidationErrors } = useCourseCreationStore();
@@ -70,13 +71,7 @@ const MoreInfo = () => {
   }, []); // Only run once on mount
 
   // Add blur handler
-  const handleBlur = (type) => {
-    const newErrors = validateAllFields({ 
-      glossary: state.glossaryItems, 
-      references: state.references 
-    });
-    setValidationErrors(newErrors);
-  };
+
 
   const updateStore = useCallback((type, data) => {
     // Prevent unnecessary store updates
@@ -268,12 +263,7 @@ const MoreInfo = () => {
             )}
           </div>
         )}
-        {type === 'glossary' && validationErrors.glossary && index === 0 && (
-          <p className="text-red-500 text-xs mt-1">{validationErrors.glossary}</p>
-        )}
-        {type === 'references' && validationErrors.references && index === 0 && (
-          <p className="text-red-500 text-xs mt-1">{validationErrors.references}</p>
-        )}
+
       </div>
     );
   };
