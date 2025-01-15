@@ -359,8 +359,8 @@ const StepIndicator = () => {
  
       <div className="space-y-2">
         {/* Main Navigation Tabs */}
-        <div className="flex justify-between">
-          <div className="flex gap-8 ml-5 py-2 p-4">
+        <div className="flex justify-between  relative top-3 ">
+          <div className="flex gap-8 ml-5 py-2 p-4 ">
             {mainTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -375,7 +375,7 @@ const StepIndicator = () => {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-4 p-2">
+          <div className="flex items-center gap-4 p-2 ">
   <div className="relative">
     <button
       onClick={() => {}}
@@ -533,23 +533,18 @@ const StepIndicator = () => {
               </button>
             )}
  
-            {location.pathname.includes('/settings') ? (
-              <button
-                onClick={handleSubmit}
-                className="flex items-center justify-center gap-1 text-white bg-[#0056B3] hover:bg-[#004494] px-3 h-8 rounded-md"
-              >
-                Submit for Reviews
-              </button>
-            ) : (currentStep < steps.length || currentTab !== 'settings') && (
-              <button
-                onClick={handleNext}
-                className="flex items-center justify-center gap-1 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-3 h-8 rounded-md"
-              >
-                Next
-                <span className="text-sm">{getStepText('next')}</span>
-                <IoIosArrowRoundForward className="text-xl" />
-              </button>
-            )}
+ {location.pathname.includes('/settings') ? (
+ <p></p>
+) : (currentStep < steps.length || currentTab !== 'settings') && (
+  <button
+    onClick={handleNext}
+    className="flex items-center justify-center gap-1 text-[#0056B3] hover:text-[#004494] bg-[#F5F5F5] px-3 h-8 rounded-md"
+  >
+    Next
+    <span className="text-sm">{getStepText('next')}</span>
+    <IoIosArrowRoundForward className="text-xl" />
+  </button>
+)}
           </div>
          
         </div>
