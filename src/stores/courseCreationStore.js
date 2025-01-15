@@ -81,14 +81,7 @@ const initialData = loadFromCourseLocalStorage() || {
 };
 
 // Add these validation functions to your store
-const validateBasicInfo = (basicInfo) => {
-  const errors = {};
-  if (!basicInfo?.courseName || basicInfo.courseName.length < 10) {
-    errors.courseName = 'Course name is required and must be at least 10 characters';
-  }
-  // ... rest of your basic info validations  
-  return errors;
-};
+
 
 const validateAboutCourse = (about) => {
   const errors = {};

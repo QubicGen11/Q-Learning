@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+import { displayToast } from '../Components/Common/Toast/Toast';
 
 
 
@@ -30,15 +30,7 @@ const connectWebSocket = (token) => {
           useAuthStore.getState().showSessionExpiredPopup();
           break;
         case 'NOTIFICATION':
-          Swal.fire({
-            title: 'New Notification',
-            text: data.message,
-            icon: 'info',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000
-          });
+          displayToast('info', data.message);
           break;
         default:
           // console.log('Received WebSocket message:', data);
@@ -122,15 +114,7 @@ const useAuthStore = create((set) => ({
 
         console.log('State after login:', useAuthStore.getState());
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Login Successful!',
-          text: 'Welcome back!',
-          timer: 2000,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          iconColor: '#0056B3'
-        });
+        displayToast('success', 'Welcome back!');
         return true;
       } else {
         throw new Error('Invalid response format');
@@ -139,12 +123,7 @@ const useAuthStore = create((set) => ({
       console.error('Login Error:', error);
       set({ loading: false });
       
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: error.response?.data?.message || 'Invalid credentials',
-        confirmButtonColor: '#0056B3'
-      });
+      displayToast('error', error.response?.data?.message || 'Invalid credentials');
       return false;
     }
   },
@@ -161,13 +140,7 @@ const useAuthStore = create((set) => ({
       
       set({ loading: false });
       
-      Swal.fire({
-        icon: 'success',
-        title: 'OTP Sent Successfully!',
-        text: 'Please check your email for the OTP',
-        confirmButtonColor: '#0056B3',
-        iconColor: '#0056B3'
-      });
+      displayToast('success', 'Please check your email for the OTP');
       
       return true;
       
@@ -175,12 +148,7 @@ const useAuthStore = create((set) => ({
       console.error('OTP Error:', error);
       set({ loading: false });
       
-      Swal.fire({
-        icon: 'error',
-        title: 'Failed to Send OTP',
-        text: error.response?.data?.message || 'Something went wrong',
-        confirmButtonColor: '#0056B3'
-      });
+      displayToast('error', error.response?.data?.message || 'Something went wrong');
       
       return false;
     }
@@ -215,13 +183,7 @@ const useAuthStore = create((set) => ({
           loading: false
         });
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Login Successful!',
-          text: 'Welcome back!',
-          confirmButtonColor: '#0056B3',
-          iconColor: '#0056B3'
-        });
+        displayToast('success', 'Welcome back!');
         return true;
       }
       throw new Error(response.data.message || 'Invalid OTP');
@@ -229,12 +191,7 @@ const useAuthStore = create((set) => ({
       console.error('OTP Verification Error:', error.response?.data || error);
       set({ loading: false });
       
-      Swal.fire({
-        icon: 'error',
-        title: 'Verification Failed',
-        text: error.response?.data?.message || 'Invalid OTP',
-        confirmButtonColor: '#0056B3'
-      });
+      displayToast('error', error.response?.data?.message || 'Invalid OTP');
       return false;
     }
   },
@@ -288,21 +245,7 @@ const useAuthStore = create((set) => ({
     set({ loading: true });
     
     try {
-      await Swal.fire({
-        title: 'Session Expired',
-        text: 'Your session has expired. Please login again.',
-        icon: 'warning',
-        confirmButtonText: 'Login',
-        confirmButtonColor: '#0056B3',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showClass: {
-          popup: 'animate__animated animate__fadeInDown'
-        },
-        hideClass: {
-          popup: 'animate__animated animate__fadeOutUp'
-        }
-      });
+      displayToast('error', 'Your session has expired. Please login again.');
 
       // Clear cookies and state
       Cookies.remove('accessToken');

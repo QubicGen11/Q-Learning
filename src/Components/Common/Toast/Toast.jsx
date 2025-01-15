@@ -1,20 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { IoWarning, IoClose, IoInformation, IoCheckmarkCircle } from 'react-icons/io5';
+import { BsExclamationCircle, BsExclamationTriangle } from 'react-icons/bs';
+import { IoMdCheckmark } from 'react-icons/io';
+import { IoClose,  IoCheckmarkCircle } from 'react-icons/io5';
 
 const Toast = ({ message, type = 'info', onClose }) => {
   const variants = {
     info: {
       bg: 'bg-[#0056B3]',
-      icon: <IoInformation className="w-5 h-5 text-white" />
+      icon: <BsExclamationCircle  className="w-5 h-5 text-white rotate-180" />
+      
     },
     error: {
       bg: 'bg-[#DC3545]',
-      icon: <IoWarning className="w-5 h-5 text-white" />
+      icon: <BsExclamationTriangle   className="w-5 h-5 text-white" />
     },
     success: {
       bg: 'bg-[#28A745]',
-      icon: <IoCheckmarkCircle className="w-5 h-5 text-white" />
+      icon: <IoMdCheckmark  className="w-5 h-5 text-white" />
     }
   };
 

@@ -16,11 +16,11 @@ const InstructorLayout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { breadcrumbTitle, currentStep } = useCourseCreationStore();
   
-  const isCreateCoursePath = location.pathname.includes('/instructor/courses/create');
+  
 
   // Check for route changes and collapse sidebar if on course routes
   useEffect(() => {
-    if (location.pathname.includes('/instructor/courses') && !isCollapsed) {
+    if (location.pathname.includes('/instructor/courses/create') && !isCollapsed) {
       toggleSidebar();
     }
   }, [location.pathname, isCollapsed, toggleSidebar]);
@@ -55,19 +55,7 @@ const InstructorLayout = () => {
     checkAuth();
   }, [navigate]);
 
-  // Function to get current step label
-  const getCurrentStepLabel = () => {
-    const path = location.pathname.split('/').pop();
-    
-    if (path.includes('basic-info') || path.includes('media') || path.includes('about')) {
-      return 'Course Information';
-    } else if (path.includes('content') || path.includes('more-info') || path.includes('faq')) {
-      return 'Course Content';
-    } else if (path.includes('settings')) {
-      return 'Settings';
-    }
-    return '';
-  };
+  
 
   if (!isAuthenticated) {
     return null;

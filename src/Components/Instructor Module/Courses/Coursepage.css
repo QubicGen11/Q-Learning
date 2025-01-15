@@ -1,0 +1,32 @@
+
+/* Toggle Switch Styles */
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #0056B3;
+  }
+  
+  .toggle-checkbox:checked + .toggle-label {
+    background-color: #0056B3;
+  }
+  
+  .toggle-label {
+    transition: background-color 0.2s ease-in;
+  }
+
+  /* Pagination Styles */
+.pagination-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination-button:hover {
+  background-color: #f3f4f6;
+}
+
+.pagination-button.active {
+  background-color: #0056B3;
+  color: white;
+}
+
+.pagination-dots {
+  user-select: none;
+}

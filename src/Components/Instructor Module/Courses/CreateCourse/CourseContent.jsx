@@ -1447,32 +1447,7 @@ function CourseContent() {
 
 
   // Add new question to lesson
-  const handleAddQuestion = (chapterIndex, lessonIndex) => {
-    const updatedChapters = [...chapters];
-    const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
-
-    if (!lesson.questions) {
-      lesson.questions = [];
-    }
-
-    lesson.questions.push({
-      question: '',
-      questionType: 'mcq', // Add default question type
-      isOpenSource: true,
-      options: [
-        { option: '', isCorrect: false },
-        { option: '', isCorrect: false }
-      ]
-    });
-
-    setChapters(updatedChapters);
-    updateCourseData('content', { chapters: updatedChapters });
-    setSelectedLesson({
-      ...lesson,
-      chapterIndex,
-      lessonIndex
-    });
-  };
+  
 
   // Remove question
   const handleRemoveQuestion = (chapterIndex, lessonIndex, questionIndex) => {
@@ -1492,18 +1467,7 @@ function CourseContent() {
   };
 
   // Add function to remove lesson
-  const handleRemoveLesson = (chapterIndex, lessonIndex) => {
-    const updatedChapters = [...chapters];
-    updatedChapters[chapterIndex].lessons.splice(lessonIndex, 1);
-    setChapters(updatedChapters);
-    updateCourseData('content', { chapters: updatedChapters });
 
-    // Clear selected lesson if it was deleted
-    if (selectedLesson?.chapterIndex === chapterIndex &&
-      selectedLesson?.lessonIndex === lessonIndex) {
-      setSelectedLesson(null);
-    }
-  };
 
   // Add this function to handle preview clicks
   const handlePreviewClick = (type, url) => {
