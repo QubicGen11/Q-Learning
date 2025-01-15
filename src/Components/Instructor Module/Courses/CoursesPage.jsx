@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import CoursePopover from "./CreateCourse/CoursePopover";
 
 import { HiArrowsUpDown } from "react-icons/hi2";
 
@@ -101,6 +102,8 @@ const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const rowsPerPage = 9; // Number of rows per page
+  const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
  
   const [courses] = useState([
     {
@@ -394,6 +397,12 @@ const Courses = () => {
     course.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
  
+  const handleCourseClick = (course) => {
+    setSelectedCourse(course);
+    setIsOffcanvasOpen(true);
+    console.log("success");
+  };
+ 
   return (
     <div className="container mx-auto p-6 bg-[#ffffff]  ">
       <h1 className="text-[18px] font-bold text-[#1F2A37]">Courses</h1>
@@ -495,7 +504,12 @@ const Courses = () => {
                           checked:focus:bg-[#0056B3]
                           accent-[#0056B3]" />
                 </td>
-                <td className="px-4 py-2 underline underline-offset-2 decoration-[#0056B3] text-[#0056B3]">{course.name}</td>
+                <td 
+                  className="px-4 py-2 text-[#0056B3] cursor-pointer hover:underline"
+                  onClick={() => handleCourseClick(course)}
+                >
+                  {course.name}
+                </td>
                 <td className="px-4 py-2">{course.collaboration}</td>
                 <td className="px-4 py-2">
                   <span
@@ -610,6 +624,12 @@ const Courses = () => {
           </div>
         </div>
       </div>
+
+      <CoursePopover 
+        isOpen={isOffcanvasOpen}
+        onClose={() => setIsOffcanvasOpen(false)}
+        course={selectedCourse}
+      />
     </div>
   );
 };
