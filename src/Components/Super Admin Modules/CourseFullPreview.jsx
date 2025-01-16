@@ -126,105 +126,105 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
 
                     {/* Tab Content */}
                     <div className="mt-4 grid grid-cols-2 gap-6">
-  {/* Left Column */}
-  <div className="space-y-3 w-[550px] border-r border-gray-300">
-    {/* Course Duration */}
-    <div className="flex items-start">
-      <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Course Duration</label>
-      <div className="text-[12px] font-[500] flex justify-end w-[400px]">DD-Mon-YYYY</div>
-    </div>
+                        {/* Left Column */}
+                        <div className="space-y-3 w-[550px] border-r border-gray-300">
+                            {/* Course Duration */}
+                            <div className="flex items-start">
+                                <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Course Duration</label>
+                                <div className="text-[12px] font-[500] flex justify-end w-[400px]">DD-Mon-YYYY</div>
+                            </div>
 
-    {/* Difficulty Level */}
-    <div className="flex">
-      <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Difficulty Level</label>
-      <div className='text-[12px] font-[500] flex justify-end w-[400px]'>Beginner</div>
-    </div>
+                            {/* Difficulty Level */}
+                            <div className="flex">
+                                <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Difficulty Level</label>
+                                <div className='text-[12px] font-[500] flex justify-end w-[400px]'>Beginner</div>
+                            </div>
 
-    {/* Transcript Attached */}
-    <div className="flex">
-      <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Transcript Attached</label>
-      <div className='text-[12px] font-[500] flex justify-end w-[400px]'>No</div>
-    </div>
+                            {/* Transcript Attached */}
+                            <div className="flex">
+                                <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Transcript Attached</label>
+                                <div className='text-[12px] font-[500] flex justify-end w-[400px]'>No</div>
+                            </div>
 
-    {/* Banner Video & Image */}
-    <div className="flex">
-      <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Banner Video & Image</label>
-      <div className="flex gap-2 w-[420px] justify-end">
-        {/* Graph/Chart Image */}
-        <div className="w-[180px] h-[100px] rounded-md border overflow-hidden">
-          <img
-            src="https://placehold.co/400x240/png?text=Graph"
-            alt="Analytics Graph"
-            className="w-full h-full object-cover"
-          />
-        </div>
+                            {/* Banner Video & Image */}
+                            <div className="flex">
+                                <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Banner Video & Image</label>
+                                <div className="flex gap-2 w-[420px] justify-end">
+                                    {/* Graph/Chart Image */}
+                                    <div className="w-[180px] h-[100px] rounded-md border overflow-hidden">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1735542214686-a745d3684c39?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8"
+                                            alt="Analytics Graph"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
 
-        {/* Video Container */}
-        <div className="w-[180px] h-[100px] rounded-md border overflow-hidden relative">
-          <video
-            src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            poster="https://placehold.co/400x240/png?text=Video+Thumbnail"
-            className="w-full h-full object-cover"
-          />
-          {/* Play Button Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="white"
-                className="ml-1"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                                    {/* Video Container */}
+                                    <div className="w-[180px] h-[100px] rounded-md border overflow-hidden relative">
+                                        <video
+                                            src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                                            poster="https://images.unsplash.com/photo-1479936343636-73cdc5aae0c3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cGVvcGxlfGVufDB8fDB8fHww"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        {/* Play Button Overlay */}
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="white"
+                                                    className="ml-1"
+                                                >
+                                                    <path d="M8 5v14l11-7z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    {/* What Will you get */}
-    <div className="flex space-x-5">
-      <label className="w-[150px] text-gray-600 text-[14px] font-[600]">What Will you get</label>
-      <div className="w-[420px]">
-        <ul className="list-disc pl-5 space-y-2 text-[12px] font-[500]">
-          <li>Gain UX skills you can immediately apply to improve your projects and career</li>
-          <li>Learn how to conduct effective and useful research</li>
-          <li>Understand how to apply UX Strategy to set goals and define success</li>
-        </ul>
-      </div>
-    </div>
+                            {/* What Will you get */}
+                            <div className="flex space-x-5">
+                                <label className="w-[150px] text-gray-600 text-[14px] font-[600]">What Will you get</label>
+                                <div className="w-[420px]">
+                                    <ul className="list-disc pl-5 space-y-2 text-[12px] font-[500]">
+                                        <li>Gain UX skills you can immediately apply to improve your projects and career</li>
+                                        <li>Learn how to conduct effective and useful research</li>
+                                        <li>Understand how to apply UX Strategy to set goals and define success</li>
+                                    </ul>
+                                </div>
+                            </div>
 
-    {/* Prerequisites */}
-    <div className="flex space-x-5">
-      <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Prerequisites</label>
-      <div className="text-[12px] font-[500] w-[400px] text-right">
-        Basic familiarity with Adobe and Microsoft products will be helpful.
-      </div>
-    </div>
-  </div>
+                            {/* Prerequisites */}
+                            <div className="flex space-x-5">
+                                <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Prerequisites</label>
+                                <div className="text-[12px] font-[500] w-[400px] text-right">
+                                    Basic familiarity with Adobe and Microsoft products will be helpful.
+                                </div>
+                            </div>
+                        </div>
 
-  {/* Right Column */}
-  <div className="space-y-3">
-    <div className="flex justify-between">
-      <label className="w-[120px] text-gray-600 text-[14px] font-[600]">
-        Who can enrol for this course
-      </label>
-      <div className="text-[12px] font-[500] text-gray-700 w-[400px]">
-        People who want to enter the UX field and become practitioners
-        <br />
-        Professionals who want or need to add UX to their skill set
-      </div>
-    </div>
-    <div className="flex justify-between">
-      <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Description</label>
-      <div className="text-[12px] font-[500] w-[400px]">
-        User Experience, or UX, is an exciting field. It's essentially about empowering people to do the things they want to do, which is both fun and gratifying. And, having a great user experience drives business success.
-      </div>
-    </div>
-  </div>
-</div>
+                        {/* Right Column */}
+                        <div className="space-y-3">
+                            <div className="flex justify-between">
+                                <label className="w-[120px] text-gray-600 text-[14px] font-[600]">
+                                    Who can enrol for this course
+                                </label>
+                                <div className="text-[12px] font-[500] text-gray-700 w-[400px]">
+                                    People who want to enter the UX field and become practitioners
+                                    <br />
+                                    Professionals who want or need to add UX to their skill set
+                                </div>
+                            </div>
+                            <div className="flex justify-between">
+                                <label className="w-[120px] text-gray-600 text-[14px] font-[600]">Description</label>
+                                <div className="text-[12px] font-[500] w-[400px]">
+                                    User Experience, or UX, is an exciting field. It's essentially about empowering people to do the things they want to do, which is both fun and gratifying. And, having a great user experience drives business success.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Approve Button - Bottom Left */}
