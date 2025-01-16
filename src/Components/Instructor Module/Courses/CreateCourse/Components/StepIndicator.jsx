@@ -336,7 +336,7 @@ const StepIndicator = () => {
 
     await submitCourse(navigate);
     displayToast('success', 'Course submitted successfully!');
-    localStorage.removeItem('courseCreationData');
+    // localStorage.removeItem('courseCreationData');
   } catch (error) {
     console.error('Error submitting course:', error);
     displayToast('error', 'Failed to submit course');
@@ -398,7 +398,7 @@ const StepIndicator = () => {
       try {
         setIsSubmitting(true);
         await submitCourse(navigate);
-        localStorage.removeItem('courseCreationData');
+        // localStorage.removeItem('courseCreationData');
         displayToast('success', 'Course submitted for review successfully!');
       } catch (error) {
         displayToast('error', 'Failed to submit course');

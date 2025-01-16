@@ -75,7 +75,9 @@ function BasicInfo() {
     setValidationErrors,
     setBreadcrumbTitle
   } = useCourseCreationStore();
-  const { basicInfo } = courseData;
+  
+  // Add default value for basicInfo
+  const { basicInfo = {} } = courseData || {};
 
   // Add state for validation errors
   const [errors, setErrors] = useState({});
@@ -128,13 +130,13 @@ function BasicInfo() {
 
   // Fetch subcategories when category changes
   useEffect(() => {
-    if (basicInfo.category) {
+    if (basicInfo?.category) {
       const selectedCategory = categories.find(cat => cat.category === basicInfo.category);
       if (selectedCategory) {
         fetchSubCategories(selectedCategory.id);
       }
     }
-  }, [basicInfo.category, categories, fetchSubCategories]);
+  }, [basicInfo?.category, categories, fetchSubCategories]);
 
   // Fetch course types on component mount
   useEffect(() => {

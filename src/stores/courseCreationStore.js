@@ -16,68 +16,157 @@ const loadFromCourseLocalStorage = () => {
 };
 
 // Get initial data
-const initialData = loadFromCourseLocalStorage() || {
-  basicInfo: {},
-  media: {},
-  curriculum: {},
-  pricing: {},
-  settings: {},
-  content: {
-    chapters: [
-      {
-        chapterName: '',
-        lessons: [
-          {
-            lessonTitle: '',
-            lessonType: '',
-            lessonContent: '',
-            isNew: false,
-            showDropdown: false,
-            questions: [], // This will store the questions array
-            lessonVideo: '',
-            lessonMaterials: ''
-          }
-        ],
-        isNew: false
-      }
-    ]
-  },
-  about: {
-    courseOutcome: '',
-    coursePreRequisites: [],
-    courseAudience: [],
-    courseDescription: '',
-    reviews: []
-  },
-  faq: [
-    {
-      id: '',
-      question: '',
-      answer: ''
-    }
-  ],
+const initialData = {
+  trainerId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
+  trainerName: "Shaik Sajid Hussain",
+  courseName: "",
+  courseTagline: "",
+  courseDuration: "",
+  difficultyLevel: "",
+  category: "", 
+  subCategory: "",
+  categoryImage: null,
+  teachingLanguage: "",
+  courseBanner: null,
+  courseImage: null,
+  courseOutCome: "",
+  courseDescription: "",
+  isDraft: true,
+  isFeatured: false,
+  status: "DRAFT",
+  version: "1.0",
+  
   glossary: [
-    {
-      acronym: '',
-      meaning: ''
+    { 
+      acronym: "",
+      meaning: "" 
     }
   ],
+  
   references: [
-    {
-      reference: '',
-      link: ''
+    { 
+      reference: "",
+      link: "" 
     }
   ],
-  courseSettings: [{
-    courseType: '',
-    pricingType: '',
+  
+  coursePreRequisites: [
+    { 
+      preRequisiteRequired: "",
+      preRequisiteLevel: "" 
+    }
+  ],
+  
+  courseAudience: [],
+  
+  courseChapters: [
+    {
+      chapterName: "",
+      chapterLessons: [
+        {
+          lessonTitle: "",
+          lessonType: "", // "Video", "Content", "Quiz", "PDF"
+          lessonContent: "",
+          lessonVideo: "",
+          materials: [
+            {
+              materialTitle: "",
+              materialLink: ""
+            }
+          ],
+          questions: [
+            {
+              question: "",
+              questionType: "MCQ",
+              correctAnswer: null,
+              options: [
+                { 
+                  option: "",
+                  isCorrect: false 
+                }
+              ]
+            },
+            {
+              question: "",
+              questionType: "True/False",
+              correctAnswer: null,
+              options: [
+                { 
+                  option: "True",
+                  isCorrect: true 
+                },
+                { 
+                  option: "False",
+                  isCorrect: false 
+                }
+              ]
+            },
+            {
+              question: "",
+              questionType: "Free Text",
+              correctAnswer: null
+            },
+            {
+              question: "",
+              questionType: "CBA",
+              correctAnswer: [],
+              options: [
+                { 
+                  option: "",
+                  isCorrect: false 
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  
+  courseSettings: {
+    courseType: "",
+    percentageRequired: 80,
+    pricingType: "",
+    promotionType: "Discount",
     publicAccess: false,
     enablePreview: false,
-    accessDuration: '',
+    price: 0,
+    discount: 0,
+    offeredPrice: 0,
+    startDate: null,
+    endDate: null,
+    maxStudents: 100,
+    certificateEligibility: false,
+    accessDuration: "",
     lifeTimeAccess: false,
-    returnPeriod: '',
+    notifyStudentsOnUpdate: false,
+    notifyStudentsOnAssignment: false,
+    returnPeriod: "",
     refundsAllowed: false,
-  }]
+    allowContentDownloads: false,
+    allowDiscussionParticipation: false,
+    scheduleLiveClasses: false,
+    enableSubtitles: false,
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: [],
+    hashTags: []
+  },
+  
+  courseFaqs: [
+    {
+      question: "",
+      answer: ""
+    }
+  ],
+  
+  comments: [
+    {
+      userId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
+      role: "INSTRUCTOR",
+      text: "This is a great course to get started with advanced R programming."
+    }
+  ]
 };
 
 // Add these validation functions to your store
@@ -173,7 +262,63 @@ const useCourseCreationStore = create((set, get) => ({
     { id: 6, title: 'Settings', path: 'settings' }
   ],
   
-  courseData: initialData,
+  courseData: loadFromCourseLocalStorage() || {
+    basicInfo: {
+      courseName: '',
+      courseTagline: '',
+      courseDuration: '',
+      difficultyLevel: '',
+      category: '',
+      subCategory: '',
+      teachingLanguage: '',
+      hashtags: [],
+      courseType: '',
+      percentageRequired: '',
+    },
+    media: {
+      courseBanner: null,
+      courseImage: null,
+      categoryImage: null
+    },
+    about: {
+      courseOutcome: '',
+      courseDescription: '',
+      coursePreRequisites: [],
+      courseAudience: []
+    },
+    content: { 
+      chapters: []
+    },
+    courseFaqs: [],
+    settings: {
+      courseVisibility: { public: false, enablePreview: false },
+      courseAccess: { duration: '', lifetimeAccess: false },
+      pricing: { originalPrice: '', discountedPrice: '', startDate: null, endDate: null },
+      enrollment: {
+        maxStudents: '',
+        certificateEligibility: false,
+        notifications: { notifyUpdates: false, notifyAssignments: false }
+      }
+    },
+    courseSettings: [{
+      pricingType: '',
+      promotionType: '',
+      publicAccess: false,
+      enablePreview: false,
+    }],
+    glossary: [
+      {
+        acronym: '',
+        meaning: ''
+      }
+    ],
+    references: [
+      {
+        reference: '',
+        link: ''
+      }
+    ]
+  },
 
   categories: [],
   subCategories: [],
@@ -216,6 +361,7 @@ const useCourseCreationStore = create((set, get) => ({
                   showDropdown: lesson.showDropdown,
                   questions: lesson.questions || [],
                   lessonVideo: lesson.lessonVideo || '',
+                  materials: lesson.materials || [],
                   lessonMaterials: lesson.lessonMaterials || ''
                 }))
               }))
@@ -297,176 +443,43 @@ const useCourseCreationStore = create((set, get) => ({
     return false;
   },
 
-  submitCourse: async (navigate) => {
-    try {
-      const courseData = get().courseData;
-      
-      // Validate settings before submission
-      const isSettingsValid = get().validateSettings();
-      if (!isSettingsValid) {
-        console.log('Settings validation failed');
-        return false;
-      }
+  submitCourse: async () => {
+    const { courseData } = get();
 
-      console.log('📦 Full Course Data:', courseData);
-      
-      // Get settings from courseSettings array
-      const settings = courseData.courseSettings?.[0] || {};
-      console.log('⚙️ Raw Settings:', settings);
-      
-      // Log localStorage data
-      console.log('💾 localStorage Data:', localStorage.getItem('courseCreationData'));
-
-      // Format dates to ISO string if they exist
-      const formatDate = (date) => {
-        if (!date) return null;
-        try {
-          return new Date(date).toISOString();
-        } catch (error) {
-          console.error('Invalid date:', date);
-          return null;
-        }
-      };
-
-      const requestBody = {
-        courseName: courseData.basicInfo?.courseName || '',
-        courseTagline: courseData.basicInfo?.courseTagline || '',
-        courseDuration: courseData.basicInfo?.courseDuration || '',
-        difficultyLevel: courseData.basicInfo?.difficultyLevel || '',
-        category: courseData.basicInfo?.category || '',
-        subCategory: courseData.basicInfo?.subCategory || '',
-        categoryImage: courseData.media?.categoryImage || null,
-        teachingLanguage: courseData.basicInfo?.teachingLanguage || '',
-        isDraft: true,
-        
-        hashTags: courseData.basicInfo?.hashtags?.map(tag => ({ 
-          tagName: tag 
-        })) || [],
-        
-        glossary: courseData.glossary?.map(item => ({
-          acronym: item.acronym || '',
-          meaning: item.meaning || ''
-        })) || [],
-        
-        references: courseData.references?.map(ref => ({
-          reference: ref.reference || '',
-          link: ref.link || ''
-        })) || [],
-        
-        courseBanner: courseData.media?.courseBanner || null,
-        courseImage: courseData.media?.courseImage || null,
-        courseOutcome: courseData.about?.courseOutcome || '',
-        courseType: courseData.basicInfo?.courseType || '',
-        courseDescription: courseData.about?.courseDescription || '',
-        
-        coursePreRequisites: courseData.about?.coursePreRequisites?.map(prereq => ({
-          preRequisiteRequired: prereq.preRequisiteRequired || '',
-          preRequisiteLevel: prereq.preRequisiteLevel || ''
-        })) || [],
-        
-        courseAudience: courseData.about?.courseAudience || [],
-        
-        courseChapters: courseData.content?.chapters?.map(chapter => ({
-          chapterName: chapter.chapterName,
-          lessons: chapter.lessons?.map(lesson => ({
-            lessonTitle: lesson.lessonTitle,
-            lessonType: lesson.lessonType,
-            lessonContent: lesson.lessonContent,
-            lessonVideo: lesson.lessonVideo || '',
-            lessonMaterials: lesson.lessonMaterials || '',
-            questions: lesson.questions?.map(q => ({
-              question: q.question,
-              isOpenSource: q.isOpenSource || true,
-              options: q.options?.map(opt => ({
-                option: opt.option,
-                isCorrect: opt.isCorrect
-              }))
-            })) || []
-          })) || []
-        })) || [],
-        
-        courseFaqs: courseData.faq?.map(faq => ({
-          question: faq.question || '',
-          answer: faq.answer || ''
-        })) || [],
-        
-        courseSettings: [{
-          publicAccess: Boolean(settings.publicAccess),
-          enablePreview: Boolean(settings.enablePreview),
-          price: parseFloat(settings.price) || 0,
-          discount: parseFloat(settings.discount) || 0,
-          offeredPrice: parseFloat(settings.offeredPrice) || 0,
-          startDate: formatDate(settings.startDate),
-          endDate: formatDate(settings.endDate),
-          maxStudents: parseInt(settings.maxStudents) || 100,
-          certificateEligibility: Boolean(settings.certificateEligibility),
-          accessDuration: settings.accessDuration || '',
-          lifeTimeAccess: Boolean(settings.lifeTimeAccess),
-          notifyStudentsOnUpdate: Boolean(settings.notifyStudentsOnUpdate),
-          notifyStudentsOnAssignment: Boolean(settings.notifyStudentsOnAssignment),
-          returnPeriod: settings.returnPeriod || '',
-          refundsAllowed: Boolean(settings.refundsAllowed),
-          allowContentDownloads: Boolean(settings.allowContentDownloads),
-          allowDiscussionParticipation: Boolean(settings.allowDiscussionParticipation),
-          scheduleLiveClasses: Boolean(settings.scheduleLiveClasses),
-          enableSubtitles: Boolean(settings.enableSubtitles),
-          seoTitle: settings.seoTitle || '',
-          seoDescription: settings.seoDescription || '',
-          seoKeywords: settings.seoKeywords || '',
-          courseType: settings.courseType || '',
-          pricingType: settings.pricingType || '',
-          hashtags: settings.hashtags || ''
+    // Format courseSettings and ensure promotionType has a value
+    const formattedData = {
+      ...courseData,
+      courseSettings: {
+        create: [{
+          ...courseData.courseSettings[0],
+          promotionType: courseData.courseSettings[0]?.promotionType || "Discount" // Ensure default value
         }]
-      };
+      },
+      coursePreRequisites: courseData.coursePreRequisites.map(prereq => ({
+        preRequisiteRequired: prereq.preRequisiteRequired || "",
+        preRequisiteLevel: prereq.preRequisiteLevel || ""
+      })),
+      courseAudience: Array.isArray(courseData.courseAudience) ? courseData.courseAudience : [],
+      categoryImage: courseData.categoryImage || "",
+      courseBanner: courseData.courseBanner || "",
+      courseImage: courseData.courseImage || ""
+    };
 
-      // Validate dates before sending
-      if (!requestBody.courseSettings[0].startDate || !requestBody.courseSettings[0].endDate) {
-        throw new Error('Invalid date format. Please check your course settings dates.');
-      }
-
-      // Add courseType to top level if it exists
-      if (settings.courseType) {
-        requestBody.courseType = settings.courseType;
-      }
-
-      // Add hashtags if they exist
-      if (settings.hashtags) {
-        requestBody.hashTags = settings.hashtags.split(',').map(tag => ({
-          tagName: tag.trim()
-        }));
-      }
-
-      console.log('📤 Final Request Body:', JSON.stringify(requestBody, null, 2));
-
+    try {
       const token = Cookies.get('accessToken');
-      if (!token) {
-        toast.error('Authentication token not found');
-        return;
-      }
-
-      console.log('🚀 Sending request to API...');
-      const response = await fetch('http://localhost:8089/qlms/createCourse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ API Error:', errorData);
-        throw new Error(errorData.error || 'Failed to submit course');
-      }
-
-      console.log('✅ Course submitted successfully!');
- // Clear localStorage after successful submission
-      displayToast('success', 'Course submitted successfully!');
-      navigate('/instructor/courses');
+      const response = await axios.post(
+        'http://localhost:8089/qlms/courses',
+        formattedData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
     } catch (error) {
-      console.error('❌ Error in submitCourse:', error);
-      displayToast('error', error.message || 'Failed to submit course');
+      console.error('API Error:', error.response?.data);
       throw error;
     }
   },
@@ -607,7 +620,7 @@ const useCourseCreationStore = create((set, get) => ({
       case 'basic-info':
         return get().validateBasicInfo(); // Use existing basic info validation
         
-   
+    
       case 'about':
         errors = validateAboutCourse(courseData.about);
         break;

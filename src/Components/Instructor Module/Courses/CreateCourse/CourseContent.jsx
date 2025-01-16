@@ -45,6 +45,7 @@ function CourseContent() {
     const savedData = localStorage.getItem('courseCreationData');
     if (savedData) {
       const parsedData = JSON.parse(savedData);
+      console.log('Initial course data loaded:', parsedData);
       if (parsedData.content && parsedData.content.chapters) {
         setChapters(parsedData.content.chapters);
       }
@@ -103,11 +104,11 @@ function CourseContent() {
   const handleAddLesson = (chapterIndex) => {
     const newLesson = {
       lessonTitle: '',
-      lessonType: 'Video', // Default type
+      lessonType: 'Video',
       lessonContent: '',
       lessonVideo: '',
-      lessonMaterials: '',
-      questions: [], // Initialize empty questions array
+      lessonMaterials: [], // Initialize as empty array
+      questions: [],
       isNew: true,
       showDropdown: true
     };
@@ -156,38 +157,103 @@ function CourseContent() {
 
   // Handle file upload to S3
   const handleFileUpload = async (e, type, chapterIndex, lessonIndex) => {
-    const file = e.target.files[0];
-    if (file) {
-      setIsLoading(true); // Show loader
+    if (type === 'materials') {
+      const files = Array.from(e.target.files);
+      console.log('Files selected:', files);
+      setIsLoading(true);
+      
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await axios.post('https://image.qubinest.com/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        const uploadPromises = files.map(async (file) => {
+          console.log('Processing file:', file.name);
+          const formData = new FormData();
+          formData.append('file', file);
+  
+          const response = await axios.post('https://image.qubinest.com/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          console.log('Upload response for file:', file.name, response.data);
+  
+          return {
+            materialTitle: "Course Material",
+            materialLink: response.data.url,
+            displayName: file.name
+          };
         });
-
-        if (response.data && response.data.url) {
-          const updatedChapters = [...chapters];
-          const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
-
-          if (type === 'video') {
-            lesson.lessonVideo = response.data.url;
-          } else if (type === 'materials') {
-            lesson.lessonMaterials = response.data.url;
-          }
-
-          setChapters(updatedChapters);
-          updateCourseData('content', { chapters: updatedChapters });
-          toast.success(`${type === 'video' ? 'Video' : 'Material'} uploaded successfully`);
+  
+        const uploadedFiles = await Promise.all(uploadPromises);
+        console.log('All uploaded files:', uploadedFiles);
+        
+        const updatedChapters = [...chapters];
+        const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+        
+        // Initialize materials array if it doesn't exist
+        if (!Array.isArray(lesson.materials)) {
+          console.log('Initializing materials as empty array');
+          lesson.materials = [];
         }
+        
+        console.log('Current materials:', lesson.materials);
+        
+        // Append new files to existing materials
+        lesson.materials = [...lesson.materials, ...uploadedFiles];
+        console.log('Updated materials:', lesson.materials);
+  
+        setChapters(updatedChapters);
+        
+        // Update selectedLesson to reflect the new materials immediately
+        setSelectedLesson({
+          ...selectedLesson,
+          materials: lesson.materials
+        });
+  
+        updateCourseData('content', { chapters: updatedChapters });
+        toast.success('Materials uploaded successfully');
       } catch (error) {
         console.error('Upload error:', error);
-        toast.error(`Failed to upload ${type === 'video' ? 'video' : 'material'}`);
+        toast.error('Failed to upload materials');
       } finally {
-        setIsLoading(false); // Hide loader
+        setIsLoading(false);
+      }
+    } else {
+      // Existing video upload logic
+      const file = e.target.files[0];
+      if (file) {
+        setIsLoading(true);
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+  
+          const response = await axios.post('https://image.qubinest.com/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+  
+          if (response.data && response.data.url) {
+            const updatedChapters = [...chapters];
+            const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+  
+            if (type === 'video') {
+              lesson.lessonVideo = response.data.url;
+              // Update selectedLesson for video
+              setSelectedLesson({
+                ...selectedLesson,
+                lessonVideo: response.data.url
+              });
+            }
+  
+            setChapters(updatedChapters);
+            updateCourseData('content', { chapters: updatedChapters });
+            toast.success(`${type === 'video' ? 'Video' : 'Material'} uploaded successfully`);
+          }
+        } catch (error) {
+          console.error('Upload error:', error);
+          toast.error(`Failed to upload ${type === 'video' ? 'video' : 'material'}`);
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
   };
@@ -380,74 +446,78 @@ function CourseContent() {
               </div>
 
               <div>
-                <label className="block mb-2">Upload Lesson Materials (Optional)</label>
-                <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-2">
-                  <div className="text-center relative">
-                    {/* Add Browse button to top right */}
-                    <div className="absolute top-0 right-0">
-                      <label
-                        htmlFor="category-upload"
-                        className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
-                      >
-                        Browse
-                        <span className=" text-xl"><MdOutlineFileUpload /></span>
-                      </label>
-                    </div>
+  <label className="block mb-2">Upload Lesson Materials (Optional)</label>
+  <div className={`w-full border-2 border-dashed ${selectedLesson?.materials?.length >= 5 ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded-lg p-2`}>
+    <div className="text-center relative">
+      <div className="absolute top-0 right-0">
+        <label
+          htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+          className={`px-4 py-1.5 ${
+            selectedLesson?.materials?.length >= 5 
+              ? 'bg-gray-300 cursor-not-allowed' 
+              : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'
+          } text-white rounded flex items-center gap-1`}
+        >
+          Browse
+          <span className="text-xl"><MdOutlineFileUpload /></span>
+        </label>
+      </div>
 
-                    <input
-                      type="file"
-                      id={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                      className="hidden"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => handleFileUpload(e, 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                    />
-                    <label
-                      htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                      className="cursor-pointer"
-                    >
-                      <div className="flex flex-col items-center justify-center">
-                        <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
-                        <p className="mt-1 text-sm text-gray-500">
-                          Drag and Drop Or Browse<br />
-                          PDF, DOC, DOCX... up to 20 MB
+      <input
+        type="file"
+        id={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+        className="hidden"
+        accept=".pdf,.doc,.docx"
+        multiple
+        onChange={(e) => handleFileUpload(e, 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
+        disabled={selectedLesson?.materials?.length >= 5}
+      />
+      <label
+        htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+        className={`${selectedLesson?.materials?.length >= 5 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+      >
+        <div className="flex flex-col items-center justify-center">
+          <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
+          <p className="mt-1 text-sm text-gray-500">
+            {selectedLesson?.materials?.length >= 5 
+              ? 'Maximum 5 files limit reached'
+              : 'Drag and Drop Or Browse\nPDF, DOC, DOCX... up to 20 MB each'
+            }
+          </p>
+        </div>
+      </label>
+    </div>
+  </div>
+</div>
+
+              <div className="flex flex-col gap-2 mt-2">
+                {selectedLesson?.materials && Array.isArray(selectedLesson.materials) && selectedLesson.materials.length > 0 && (
+                  <div className="space-y-2">
+                    {selectedLesson.materials.map((material, index) => (
+                      <div 
+                        key={index}
+                        className="text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer flex items-center justify-between"
+                      >
+                        <p
+                          className="cursor-pointer hover:text-[#0056B3] underline underline-offset-4 text-[#4B5563] truncate max-w-[80%]"
+                          onClick={() => handlePreviewClick('materials', material.materialLink)}
+                          title={material.displayName || material.materialLink}
+                        >
+                          {material.displayName || material.materialLink.split('/').pop()}
                         </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleRemoveFile('materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex, index)}
+                            className="text-[#4B5563] hover:text-gray-700 text-xl"
+                            title="Remove material"
+                          >
+                            ×
+                          </button>
+                        </div>
                       </div>
-                    </label>
+                    ))}
                   </div>
-
-
-
-                </div>
-              </div>
-
-
-              <div className=' flex relative bottom-2 '>
-                <div>
-                  {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
-                    <div className="  text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer flex space-x-3 items-center">
-                      <p
-                        className="cursor-pointer hover:text-[#0056B3] underline  underline-offset-4 text-[#4B5563]"
-                        onClick={() => handlePreviewClick('materials', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonMaterials)}
-                      >
-                        {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
-                      </p>
-                      <button
-                        onClick={() => handleRemoveFile('materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                        className="text-[#4B5563] hover:text-gray-700 ml-2 text-2xl mb-1"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
-
-                </div>
-
-
-
-
-                <div >
-
-                </div>
+                )}
               </div>
 
               {/* Quiz Section */}
@@ -551,15 +621,38 @@ function CourseContent() {
                                     value={q.questionType || 'mcq'}
                                     onChange={(e) => {
                                       const updatedChapters = [...chapters];
-                                      updatedChapters[selectedLesson.chapterIndex]
+                                      const questionType = e.target.value;
+                                      const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
                                         .lessons[selectedLesson.lessonIndex]
-                                        .questions[qIndex].questionType = e.target.value;
+                                        .questions[qIndex];
+                                      
+                                      currentQuestion.questionType = questionType;
+                                      
+                                      // Reset options and correctAnswer based on question type
+                                      if (questionType === 'free_text') {
+                                        currentQuestion.options = [];
+                                        currentQuestion.correctAnswer = '';
+                                      } else if (questionType === 'mcq') {
+                                        currentQuestion.options = [
+                                          { option: '', isCorrect: false },
+                                          { option: '', isCorrect: false }
+                                        ];
+                                        currentQuestion.correctAnswer = null;
+                                      } else if (questionType === 'best') {
+                                        currentQuestion.options = [
+                                          { option: '', isCorrect: false },
+                                          { option: '', isCorrect: false }
+                                        ];
+                                        currentQuestion.correctAnswer = [];
+                                      }
+                                      
                                       setChapters(updatedChapters);
                                     }}
                                     className="text-sm border rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-gray-600"
                                   >
                                     <option value="mcq">MCQs</option>
                                     <option value="best">Choose the best answer</option>
+                                    <option value="free_text">Free Text</option>
                                   </select>
                                 </div>
 
@@ -592,105 +685,105 @@ function CourseContent() {
 
                               {!collapsedQuestions.has(qIndex) && (
                                 <div className="p-4 space-y-4">
-                                  <div className="space-y-2">
-                                    <label className="block text-gray-700 text-sm mb-1">
-                                      Question *
-                                    </label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter your question"
-                                      value={q.question}
-                                      onChange={(e) => {
-                                        const updatedChapters = [...chapters];
-                                        updatedChapters[selectedLesson.chapterIndex]
-                                          .lessons[selectedLesson.lessonIndex]
-                                          .questions[qIndex].question = e.target.value;
-                                        setChapters(updatedChapters);
-                                      }}
-                                      className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
-                                    />
-                                  </div>
+                                    <div className="space-y-2">
+                                      <label className="block text-gray-700 text-sm mb-1">
+                                        Question *
+                                      </label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter your question"
+                                        value={q.question}
+                                        onChange={(e) => {
+                                          const updatedChapters = [...chapters];
+                                          updatedChapters[selectedLesson.chapterIndex]
+                                            .lessons[selectedLesson.lessonIndex]
+                                            .questions[qIndex].question = e.target.value;
+                                          setChapters(updatedChapters);
+                                        }}
+                                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                      />
+                                    </div>
 
                                   <div className="space-y-3">
-                                    <label className="block text-gray-700 text-sm mb-1">
+                                        <label className="block text-gray-700 text-sm mb-1">
                                       Options * ( Select the right answers)
-                                    </label>
+                                        </label>
                                     {q.options.map((option, oIndex) => (
                                       <div key={oIndex} className="flex items-center gap-2">
                                         {q.questionType === 'mcq' ? (
-                                          <input
+                                        <input
                                             type="checkbox"
                                             checked={option.isCorrect}
                                             onChange={() => {
-                                              const updatedChapters = [...chapters];
+                                            const updatedChapters = [...chapters];
                                               const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
-                                                .lessons[selectedLesson.lessonIndex]
+                                              .lessons[selectedLesson.lessonIndex]
                                                 .questions[qIndex];
                                               currentQuestion.options[oIndex].isCorrect = !option.isCorrect;
-                                              setChapters(updatedChapters);
-                                            }}
+                                            setChapters(updatedChapters);
+                                          }}
                                             className="form-checkbox text-[#0056B3]"
                                           />
                                         ) : (
-                                          <input
+                                            <input
                                             type="radio"
-                                            name={`question-${qIndex}`}
-                                            checked={option.isCorrect}
-                                            onChange={() => {
-                                              const updatedChapters = [...chapters];
-                                              const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
-                                                .lessons[selectedLesson.lessonIndex]
-                                                .questions[qIndex];
-                                              currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
-                                                ...opt,
-                                                isCorrect: idx === oIndex
-                                              }));
-                                              setChapters(updatedChapters);
-                                            }}
+                                              name={`question-${qIndex}`}
+                                              checked={option.isCorrect}
+                                              onChange={() => {
+                                                const updatedChapters = [...chapters];
+                                                const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                                  .lessons[selectedLesson.lessonIndex]
+                                                  .questions[qIndex];
+                                                  currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                                    ...opt,
+                                                    isCorrect: idx === oIndex
+                                                  }));
+                                                setChapters(updatedChapters);
+                                              }}
                                             className="form-radio text-[#0056B3]"
-                                          />
+                                            />
                                         )}
-                                        <input
-                                          type="text"
-                                          value={option.option}
-                                          onChange={(e) => {
-                                            const updatedChapters = [...chapters];
+                                            <input
+                                              type="text"
+                                              value={option.option}
+                                              onChange={(e) => {
+                                                const updatedChapters = [...chapters];
                                             updatedChapters[selectedLesson.chapterIndex]
-                                              .lessons[selectedLesson.lessonIndex]
+                                                  .lessons[selectedLesson.lessonIndex]
                                               .questions[qIndex].options[oIndex].option = e.target.value;
-                                            setChapters(updatedChapters);
-                                          }}
-                                          placeholder={`Enter option ${oIndex + 1}`}
-                                          className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
-                                        />
+                                                setChapters(updatedChapters);
+                                              }}
+                                              placeholder={`Enter option ${oIndex + 1}`}
+                                              className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                            />
+                                            <button
+                                              onClick={() => {
+                                                const updatedChapters = [...chapters];
+                                                updatedChapters[selectedLesson.chapterIndex]
+                                                  .lessons[selectedLesson.lessonIndex]
+                                                  .questions[qIndex].options.splice(oIndex, 1);
+                                                setChapters(updatedChapters);
+                                              }}
+                                              className="text-red-500 hover:text-red-700"
+                                            >
+                                              <span className="material-icons text-sm">remove_circle_outline</span>
+                                            </button>
+                                          </div>
+                                        ))}
+
                                         <button
                                           onClick={() => {
                                             const updatedChapters = [...chapters];
                                             updatedChapters[selectedLesson.chapterIndex]
                                               .lessons[selectedLesson.lessonIndex]
-                                              .questions[qIndex].options.splice(oIndex, 1);
+                                              .questions[qIndex].options.push({ option: '', isCorrect: false });
                                             setChapters(updatedChapters);
                                           }}
-                                          className="text-red-500 hover:text-red-700"
+                                          className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
                                         >
-                                          <span className="material-icons text-sm">remove_circle_outline</span>
+                                          <span className="material-icons text-sm">add_circle_outline</span>
+                                          Add Option
                                         </button>
-                                      </div>
-                                    ))}
-
-                                    <button
-                                      onClick={() => {
-                                        const updatedChapters = [...chapters];
-                                        updatedChapters[selectedLesson.chapterIndex]
-                                          .lessons[selectedLesson.lessonIndex]
-                                          .questions[qIndex].options.push({ option: '', isCorrect: false });
-                                        setChapters(updatedChapters);
-                                      }}
-                                      className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
-                                    >
-                                      <span className="material-icons text-sm">add_circle_outline</span>
-                                      Add Option
-                                    </button>
                                   </div>
                                 </div>
                               )}
@@ -880,54 +973,66 @@ function CourseContent() {
                   <div className="text-center relative">
                     <div className="absolute top-0 right-0">
                       <label
-                        htmlFor={getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video') ? undefined : `video-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
-                        className={`px-4 py-1.5 ${getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'video')
-                          ? 'bg-gray-300 cursor-not-allowed'
-                          : 'bg-gray-500 hover:bg-gray-600 cursor-pointer'} text-white rounded flex items-center gap-1`}
+                        htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                        className="px-4 py-1.5 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 flex items-center gap-1"
                       >
                         Browse
                         <span className="text-xl"><MdOutlineFileUpload /></span>
                       </label>
                     </div>
 
-
                     <input
                       type="file"
-                      id={`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                      id={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
                       className="hidden"
                       accept=".pdf,.doc,.docx"
+                      multiple // Add multiple attribute
                       onChange={(e) => handleFileUpload(e, 'materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
                     />
                     <label
-                      htmlFor={`pdf-materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
+                      htmlFor={`materials-${selectedLesson.chapterIndex}-${selectedLesson.lessonIndex}`}
                       className="cursor-pointer"
                     >
                       <div className="flex flex-col items-center justify-center">
                         <img src="https://res.cloudinary.com/defsu5bfc/image/upload/v1736341749/image-05_zjmxze.png" alt="" />
                         <p className="mt-1 text-sm text-gray-500">
                           Drag and Drop Or Browse<br />
-                          PDF, DOC, DOCX... up to _MB
+                          PDF, DOC, DOCX... up to 20 MB each
                         </p>
                       </div>
                     </label>
                   </div>
-                  {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials') && (
-                    <div className="mt-2 text-sm text-gray-600 text-center flex items-center justify-center gap-2">
-                      <p
-                        className="cursor-pointer hover:text-[#0056B3]"
-                        onClick={() => handlePreviewClick('materials', chapters[selectedLesson.chapterIndex].lessons[selectedLesson.lessonIndex].lessonMaterials)}
-                      >
-                        {getStoredFileInfo(selectedLesson.chapterIndex, selectedLesson.lessonIndex, 'materials').name}
-                      </p>
-                      <button
-                        onClick={() => handleRemoveFile('materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-2">
+                {selectedLesson?.materials && Array.isArray(selectedLesson.materials) && selectedLesson.materials.length > 0 && (
+                  <div className="space-y-2">
+                    {selectedLesson.materials.map((material, index) => (
+                      <div 
+                        key={index}
+                        className="text-sm h-8 text-[#4B5563] bg-[#F2F9FF] p-2 rounded-md cursor-pointer flex items-center justify-between"
+                      >
+                        <p
+                          className="cursor-pointer hover:text-[#0056B3] underline underline-offset-4 text-[#4B5563] truncate max-w-[80%]"
+                          onClick={() => handlePreviewClick('materials', material.materialLink)}
+                          title={material.displayName || material.materialLink}
+                        >
+                          {material.displayName || material.materialLink.split('/').pop()}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleRemoveFile('materials', selectedLesson.chapterIndex, selectedLesson.lessonIndex, index)}
+                            className="text-[#4B5563] hover:text-gray-700 text-xl"
+                            title="Remove material"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Quiz Section - Exactly the same as the main case */}
@@ -1034,15 +1139,38 @@ function CourseContent() {
                                     value={q.questionType || 'mcq'}
                                     onChange={(e) => {
                                       const updatedChapters = [...chapters];
-                                      updatedChapters[selectedLesson.chapterIndex]
+                                      const questionType = e.target.value;
+                                      const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
                                         .lessons[selectedLesson.lessonIndex]
-                                        .questions[qIndex].questionType = e.target.value;
+                                        .questions[qIndex];
+                                      
+                                      currentQuestion.questionType = questionType;
+                                      
+                                      // Reset options and correctAnswer based on question type
+                                      if (questionType === 'free_text') {
+                                        currentQuestion.options = [];
+                                        currentQuestion.correctAnswer = '';
+                                      } else if (questionType === 'mcq') {
+                                        currentQuestion.options = [
+                                          { option: '', isCorrect: false },
+                                          { option: '', isCorrect: false }
+                                        ];
+                                        currentQuestion.correctAnswer = null;
+                                      } else if (questionType === 'best') {
+                                        currentQuestion.options = [
+                                          { option: '', isCorrect: false },
+                                          { option: '', isCorrect: false }
+                                        ];
+                                        currentQuestion.correctAnswer = [];
+                                      }
+                                      
                                       setChapters(updatedChapters);
                                     }}
                                     className="text-sm border rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-gray-600"
                                   >
                                     <option value="mcq">MCQs</option>
                                     <option value="best">Choose the best answer</option>
+                                    <option value="free_text">Free Text</option>
                                   </select>
                                 </div>
 
@@ -1075,24 +1203,24 @@ function CourseContent() {
 
                               {!collapsedQuestions.has(qIndex) && (
                                 <div className="p-4 space-y-4">
-                                  <div className="space-y-2">
-                                    <label className="block text-gray-700 text-sm mb-1">
-                                      Question *
-                                    </label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter your question"
-                                      value={q.question}
-                                      onChange={(e) => {
-                                        const updatedChapters = [...chapters];
-                                        updatedChapters[selectedLesson.chapterIndex]
-                                          .lessons[selectedLesson.lessonIndex]
-                                          .questions[qIndex].question = e.target.value;
-                                        setChapters(updatedChapters);
-                                      }}
-                                      className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
-                                    />
-                                  </div>
+                                    <div className="space-y-2">
+                                      <label className="block text-gray-700 text-sm mb-1">
+                                        Question *
+                                      </label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter your question"
+                                        value={q.question}
+                                        onChange={(e) => {
+                                          const updatedChapters = [...chapters];
+                                          updatedChapters[selectedLesson.chapterIndex]
+                                            .lessons[selectedLesson.lessonIndex]
+                                            .questions[qIndex].question = e.target.value;
+                                          setChapters(updatedChapters);
+                                        }}
+                                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                      />
+                                    </div>
 
                                   <div className="space-y-3">
                                     <label className="block text-gray-700 text-sm mb-1">
@@ -1281,15 +1409,38 @@ function CourseContent() {
                                   value={q.questionType || 'mcq'}
                                   onChange={(e) => {
                                     const updatedChapters = [...chapters];
-                                    updatedChapters[selectedLesson.chapterIndex]
+                                    const questionType = e.target.value;
+                                    const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
                                       .lessons[selectedLesson.lessonIndex]
-                                      .questions[qIndex].questionType = e.target.value;
+                                      .questions[qIndex];
+                                    
+                                    currentQuestion.questionType = questionType;
+                                    
+                                    // Reset options and correctAnswer based on question type
+                                    if (questionType === 'free_text') {
+                                      currentQuestion.options = [];
+                                      currentQuestion.correctAnswer = '';
+                                    } else if (questionType === 'mcq') {
+                                      currentQuestion.options = [
+                                        { option: '', isCorrect: false },
+                                        { option: '', isCorrect: false }
+                                      ];
+                                      currentQuestion.correctAnswer = null;
+                                    } else if (questionType === 'best') {
+                                      currentQuestion.options = [
+                                        { option: '', isCorrect: false },
+                                        { option: '', isCorrect: false }
+                                      ];
+                                      currentQuestion.correctAnswer = [];
+                                    }
+                                    
                                     setChapters(updatedChapters);
                                   }}
                                   className="text-sm border rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-gray-600"
                                 >
                                   <option value="mcq">MCQs</option>
                                   <option value="best">Choose the best answer</option>
+                                  <option value="free_text">Free Text</option>
                                 </select>
                               </div>
 
@@ -1322,33 +1473,33 @@ function CourseContent() {
 
                             {!collapsedQuestions.has(qIndex) && (
                               <div className="p-4 space-y-4">
-                                <div className="space-y-2">
-                                  <label className="block text-gray-700 text-sm mb-1">
+                                      <div className="space-y-2">
+                                        <label className="block text-gray-700 text-sm mb-1">
                                     Question *
-                                  </label>
-                                  <input
-                                    type="text"
+                                        </label>
+                                        <input
+                                          type="text"
                                     placeholder="Enter your question"
                                     value={q.question}
-                                    onChange={(e) => {
-                                      const updatedChapters = [...chapters];
-                                      updatedChapters[selectedLesson.chapterIndex]
-                                        .lessons[selectedLesson.lessonIndex]
+                                          onChange={(e) => {
+                                            const updatedChapters = [...chapters];
+                                            updatedChapters[selectedLesson.chapterIndex]
+                                              .lessons[selectedLesson.lessonIndex]
                                         .questions[qIndex].question = e.target.value;
-                                      setChapters(updatedChapters);
-                                    }}
-                                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
-                                  />
-                                </div>
+                                            setChapters(updatedChapters);
+                                          }}
+                                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                        />
+                                      </div>
 
-                                <div className="space-y-3">
-                                  <label className="block text-gray-700 text-sm mb-1">
+                                      <div className="space-y-3">
+                                        <label className="block text-gray-700 text-sm mb-1">
                                     Options * ( Select the right answers)
-                                  </label>
-                                  {q.options.map((option, oIndex) => (
-                                    <div key={oIndex} className="flex items-center gap-2">
+                                        </label>
+                                        {q.options.map((option, oIndex) => (
+                                          <div key={oIndex} className="flex items-center gap-2">
                                       {q.questionType === 'mcq' ? (
-                                        <input
+                                            <input
                                           type="checkbox"
                                           checked={option.isCorrect}
                                           onChange={() => {
@@ -1364,58 +1515,58 @@ function CourseContent() {
                                       ) : (
                                         <input
                                           type="radio"
-                                          name={`question-${qIndex}`}
-                                          checked={option.isCorrect}
-                                          onChange={() => {
+                                              name={`question-${qIndex}`}
+                                              checked={option.isCorrect}
+                                              onChange={() => {
+                                                const updatedChapters = [...chapters];
+                                                const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                                  .lessons[selectedLesson.lessonIndex]
+                                                  .questions[qIndex];
+                                                  currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
+                                                    ...opt,
+                                                    isCorrect: idx === oIndex
+                                                  }));
+                                                setChapters(updatedChapters);
+                                              }}
+                                          className="form-radio text-[#0056B3]"
+                                            />
+                                      )}
+                                            <input
+                                              type="text"
+                                              value={option.option}
+                                              onChange={(e) => {
+                                                const updatedChapters = [...chapters];
+                                          updatedChapters[selectedLesson.chapterIndex]
+                                                  .lessons[selectedLesson.lessonIndex]
+                                            .questions[qIndex].options[oIndex].option = e.target.value;
+                                                setChapters(updatedChapters);
+                                              }}
+                                              placeholder={`Enter option ${oIndex + 1}`}
+                                              className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
+                                            />
+                                            <button
+                                              onClick={() => {
+                                                const updatedChapters = [...chapters];
+                                                updatedChapters[selectedLesson.chapterIndex]
+                                                  .lessons[selectedLesson.lessonIndex]
+                                                  .questions[qIndex].options.splice(oIndex, 1);
+                                                setChapters(updatedChapters);
+                                              }}
+                                              className="text-red-500 hover:text-red-700"
+                                            >
+                                              <span className="material-icons text-sm">remove_circle_outline</span>
+                                            </button>
+                                          </div>
+                                        ))}
+
+                                        <button
+                                          onClick={() => {
                                             const updatedChapters = [...chapters];
-                                            const currentQuestion = updatedChapters[selectedLesson.chapterIndex]
+                                            updatedChapters[selectedLesson.chapterIndex]
                                               .lessons[selectedLesson.lessonIndex]
-                                              .questions[qIndex];
-                                            currentQuestion.options = currentQuestion.options.map((opt, idx) => ({
-                                              ...opt,
-                                              isCorrect: idx === oIndex
-                                            }));
+                                              .questions[qIndex].options.push({ option: '', isCorrect: false });
                                             setChapters(updatedChapters);
                                           }}
-                                          className="form-radio text-[#0056B3]"
-                                        />
-                                      )}
-                                      <input
-                                        type="text"
-                                        value={option.option}
-                                        onChange={(e) => {
-                                          const updatedChapters = [...chapters];
-                                          updatedChapters[selectedLesson.chapterIndex]
-                                            .lessons[selectedLesson.lessonIndex]
-                                            .questions[qIndex].options[oIndex].option = e.target.value;
-                                          setChapters(updatedChapters);
-                                        }}
-                                        placeholder={`Enter option ${oIndex + 1}`}
-                                        className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-600"
-                                      />
-                                      <button
-                                        onClick={() => {
-                                          const updatedChapters = [...chapters];
-                                          updatedChapters[selectedLesson.chapterIndex]
-                                            .lessons[selectedLesson.lessonIndex]
-                                            .questions[qIndex].options.splice(oIndex, 1);
-                                          setChapters(updatedChapters);
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                      >
-                                        <span className="material-icons text-sm">remove_circle_outline</span>
-                                      </button>
-                                    </div>
-                                  ))}
-
-                                  <button
-                                    onClick={() => {
-                                      const updatedChapters = [...chapters];
-                                      updatedChapters[selectedLesson.chapterIndex]
-                                        .lessons[selectedLesson.lessonIndex]
-                                        .questions[qIndex].options.push({ option: '', isCorrect: false });
-                                      setChapters(updatedChapters);
-                                    }}
                                     className="text-[#0056B3] hover:text-[#004494] flex items-center gap-1"
                                   >
                                     <span className="material-icons text-sm">add_circle_outline</span>
@@ -1476,20 +1627,41 @@ function CourseContent() {
   };
 
   // Add this function to handle file removal
-  const handleRemoveFile = (type, chapterIndex, lessonIndex) => {
-    const updatedChapters = [...chapters];
-    const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
+  const handleRemoveFile = (type, chapterIndex, lessonIndex, materialIndex) => {
+  console.log('Removing file:', { type, chapterIndex, lessonIndex, materialIndex });
+  const updatedChapters = [...chapters];
+  const lesson = updatedChapters[chapterIndex].lessons[lessonIndex];
 
-    if (type === 'video') {
-      lesson.lessonVideo = '';
-    } else if (type === 'materials') {
-      lesson.lessonMaterials = '';
-    }
+  if (type === 'materials') {
+    console.log('Before removal:', lesson.materials);
+    lesson.materials.splice(materialIndex, 1);
+    console.log('After removal:', lesson.materials);
+    
+    // Update selectedLesson state while preserving all other properties
+    setSelectedLesson({
+      ...selectedLesson,
+      ...lesson, // Copy all lesson properties
+      chapterIndex, // Maintain indexes
+      lessonIndex,
+      materials: lesson.materials
+    });
+  } else if (type === 'video') {
+    lesson.lessonVideo = '';
+    
+    // Update selectedLesson state while preserving all other properties
+    setSelectedLesson({
+      ...selectedLesson,
+      ...lesson, // Copy all lesson properties
+      chapterIndex, // Maintain indexes
+      lessonIndex,
+      lessonVideo: ''
+    });
+  }
 
-    setChapters(updatedChapters);
-    updateCourseData('content', { chapters: updatedChapters });
-    toast.success(`${type === 'video' ? 'Video' : 'Material'} removed successfully`);
-  };
+  setChapters(updatedChapters);
+  updateCourseData('content', { chapters: updatedChapters });
+  toast.success(`${type === 'video' ? 'Video' : 'Material'} removed successfully`);
+};
 
   // Add these helper functions
   const toggleQuestion = (qIndex) => {
