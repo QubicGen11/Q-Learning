@@ -20,7 +20,7 @@ const InstructorLayout = () => {
 
   // Check for route changes and collapse sidebar if on course routes
   useEffect(() => {
-    if (location.pathname.includes('/instructor/courses/create') && !isCollapsed) {
+    if (location.pathname.includes('/instructor/courses/basicinfo') && !isCollapsed) {
       toggleSidebar();
     }
   }, [location.pathname, isCollapsed, toggleSidebar]);

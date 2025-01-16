@@ -34,6 +34,8 @@ import Testskillsec from './Components/Testskillsec';
 import ToastDemo from './pages/ToastDemo';
 import CoursePopover from './Components/Instructor Module/Courses/CreateCourse/CoursePopover';
 import SuperadminLogin from './Components/Super Admin Modules/SuperadminLogin';
+import SuperadminLayout from './Components/Super Admin Modules/SuperadminLayout';
+import ReviewAndApproval from './Components/Super Admin Modules/ReviewAndApproval';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -119,7 +121,26 @@ function App() {
               <Route path="/toast-demo" element={<ToastDemo />} />
               <Route path="/coursepopover" element={<CoursePopover />} />
               <Route path="/superadminlogin" element={<SuperadminLogin />} />
-            
+              <Route path="/superadmin" element={<SuperadminLayout />}>
+                {/* <Route path="dashboard" element={<SuperadminDashboard />} /> */}
+                {/* <Route path="users" element={<SuperadminUsers />} /> */}
+                <Route path="review" element={<ReviewAndApproval />} />
+                {/* <Route path="revenue" element={<SuperadminRevenue />} /> */}
+                {/* <Route path="license" element={<SuperadminLicense />} /> */}
+                {/* <Route path="reports" element={<SuperadminReports />} /> */}
+                {/* <Route path="platform" element={<SuperadminPlatform />} /> */}
+                {/* <Route path="support" element={<SuperadminSupport />} /> */}
+                {/* <Route path="logs" element={<SuperadminLogs />} /> */}
+              </Route>
+              {/* <Route path="/superadmin/dashboard" element={<SuperadminDashboard />} /> */}
+              {/* <Route path="/superadmin/users" element={<SuperadminUsers />} /> */}
+              {/* <Route path="/superadmin/review" element={<ReviewAndApproval />} /> */}
+              {/* <Route path="/superadmin/revenue" element={<SuperadminRevenue />} /> */}
+              {/* <Route path="/superadmin/license" element={<SuperadminLicense />} /> */}
+              {/* <Route path="/superadmin/reports" element={<SuperadminReports />} /> */}
+              {/* <Route path="/superadmin/platform" element={<SuperadminPlatform />} /> */}
+              {/* <Route path="/superadmin/support" element={<SuperadminSupport />} /> */}
+              {/* <Route path="/superadmin/logs" element={<SuperadminLogs />} /> */}
 
 
               <Route path="/instructor" element={<InstructorLayout />}>
