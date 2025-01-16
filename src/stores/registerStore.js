@@ -134,24 +134,14 @@ const useRegisterStore = create((set, get) => ({
           otp: new Array(6).fill('')
         });
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Registration Successful!',
-          text: 'You can now login to your account',
-          confirmButtonColor: '#0056B3',
-          iconColor: '#0056B3'
-        });
+        displayToast('success', 'You can now login to your account', 'Registration Successful!');
         return true;
+        // return true;
       }
       throw new Error('Verification failed');
     } catch (error) {
       set({ loading: false });
-      Swal.fire({
-        icon: 'error',
-        title: 'Verification Failed',
-        text: error.response?.data?.message || 'Invalid OTP',
-        confirmButtonColor: '#0056B3'
-      });
+      displayToast('error', error.response?.data?.message || 'Invalid OTP', 'Verification Failed');
       return false;
     }
   },

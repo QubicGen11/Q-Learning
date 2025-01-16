@@ -33,6 +33,7 @@ import MoreInfo from './Components/Instructor Module/Courses/CreateCourse/Steps/
 import Testskillsec from './Components/Testskillsec';
 import ToastDemo from './pages/ToastDemo';
 import CoursePopover from './Components/Instructor Module/Courses/CreateCourse/CoursePopover';
+import SuperadminLogin from './Components/Super Admin Modules/SuperadminLogin';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -117,6 +118,7 @@ function App() {
               <Route path="/instructor/skill-assessments" element={<Testskillsec />} />
               <Route path="/toast-demo" element={<ToastDemo />} />
               <Route path="/coursepopover" element={<CoursePopover />} />
+              <Route path="/superadminlogin" element={<SuperadminLogin />} />
             
 
 
