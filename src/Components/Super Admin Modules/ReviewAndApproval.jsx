@@ -3,9 +3,12 @@ import { BiSearch } from 'react-icons/bi';
 import { CiFilter } from 'react-icons/ci';
 import { FaRegCheckCircle } from 'react-icons/fa';
 import { FiFilter } from 'react-icons/fi';
+import CoursePreviewOffcanvas from './CoursePreviewOffcanvas';
 
 const ReviewAndApproval = () => {
   const [activeTab, setActiveTab] = useState('Courses');
+  const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const tableData = [
     { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Design", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
@@ -18,6 +21,12 @@ const ReviewAndApproval = () => {
     { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Dance", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
     { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Devotional", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
   ];
+
+  const handleCourseClick = (course) => {
+    setSelectedCourse(course);
+    setIsOffcanvasOpen(true);
+    console.log("success");
+  };
 
   return (
     <div className="bg-white rounded p-6">
@@ -86,7 +95,12 @@ const ReviewAndApproval = () => {
                 <td className="py-3 px-4">
                   <input type="checkbox" className="rounded" />
                 </td>
-                <td className="py-3 px-4 text-[#0056B3]">{row.courseName}</td>
+                <td 
+                  className="py-3 px-4 text-[#0056B3] cursor-pointer hover:underline"
+                  onClick={() => handleCourseClick(row)}
+                >
+                  {row.courseName}
+                </td>
                 <td className="py-3 px-4 text-[#0056B3]">{row.tagLine}</td>
                 <td className="py-3 px-4">
                   <select className="border rounded px-2 py-1 w-full">
@@ -101,6 +115,12 @@ const ReviewAndApproval = () => {
           </tbody>
         </table>
       </div>
+
+      <CoursePreviewOffcanvas 
+        isOpen={isOffcanvasOpen}
+        onClose={() => setIsOffcanvasOpen(false)}
+        course={selectedCourse}
+      />
 
       {/* Pagination */}
       <div className="flex justify-center items-center gap-2 mt-4">

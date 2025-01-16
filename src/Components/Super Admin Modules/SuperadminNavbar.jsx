@@ -36,7 +36,7 @@ const SuperadminNavbar = () => {
         </button>
         
         <div className="relative flex-1 max-w-xl">
-          <input
+          <input    
             type="text"
             placeholder="Type anything..."
             className="w-full px-4 py-2 pl-10 pr-4 border rounded-3xl border-gray-300 focus:outline-none focus:border-blue-500"
