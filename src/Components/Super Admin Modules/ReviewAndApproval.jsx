@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BiSearch } from 'react-icons/bi';
 import { CiFilter } from 'react-icons/ci';
 import { FaRegCheckCircle } from 'react-icons/fa';
@@ -9,6 +9,18 @@ const ReviewAndApproval = () => {
   const [activeTab, setActiveTab] = useState('Courses');
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+
+  useEffect(() => {
+    if (isOffcanvasOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOffcanvasOpen]);
 
   const tableData = [
     { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Design", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
