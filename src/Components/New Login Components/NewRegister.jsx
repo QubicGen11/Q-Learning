@@ -211,18 +211,36 @@ const NewRegister = () => {
     <div className="min-h-screen flex flex-col">
       <Newnavbar />
       <div className="flex flex-1">
-        {/* Left Side - Illustration */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
-          <img
-            src="https://res.cloudinary.com/devewerw3/image/upload/v1733812760/Frame_178_a8ta4s.png"
+        {/* Left Side - Only adding animation */}
+        <motion.div 
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12"
+        >
+          <motion.img
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            src="https://res.cloudinary.com/devewerw3/image/upload/v1733812189/Frame_176_rkq6me.png"
             alt="Learning Illustration"
-            className="max-w-[500px] w-full object-contain"
+            className="max-w-[600px] w-full object-contain"
           />
-        </div>
+        </motion.div>
 
-        {/* Right Side - Register Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-16 py-8 overflow-y-auto">
-          <div className="w-full max-w-[350px]">
+        {/* Right Side - Only adding animation */}
+        <motion.div 
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-16 py-8"
+        >
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="w-full max-w-[450px]"
+          >
             {/* Login/Register Tabs */}
             <div className="flex w-full border-b border-gray-200 mb-6">
               <Link
@@ -241,142 +259,177 @@ const NewRegister = () => {
 
             {/* Register Form */}
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* First Name Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    placeholder="Enter your first name"
-                    className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                  <FiUser
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                </div>
-                {errors.firstName && (
-                  <p className="text-red-500 text-xs mt-0.5">
-                    {errors.firstName}
-                  </p>
-                )}
-              </div>
-
-              {/* Last Name Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    placeholder="Enter your last name"
-                    className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                  <FiUser
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                </div>
-                {errors.lastName && (
-                  <p className="text-red-500 text-xs mt-0.5">
-                    {errors.lastName}
-                  </p>
-                )}
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter your email"
-                    className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                  <FiMail
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Set Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Enter your password"
-                    className="w-full pl-4 pr-12 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                  <div className="absolute right-3 top-[50%] -translate-y-[50%] w-[20px] h-[20px] flex items-center justify-center pointer-events-none">
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="text-gray-400 hover:text-gray-600 w-full h-full flex items-center justify-center pointer-events-auto"
-                    >
-                      {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                    </button>
+              {/* First Name - Only adding animation */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="Enter your first name"
+                      className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                    <FiUser
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={18}
+                    />
                   </div>
+                  {errors.firstName && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {errors.firstName}
+                    </p>
+                  )}
                 </div>
-                {errors.password && (
-                  <p className="text-red-500 text-xs mt-0.5">{errors.password}</p>
-                )}
-              </div>
+              </motion.div>
 
-              {/* Confirm Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Confirm your password"
-                    className="w-full pl-4 pr-12 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                  <div className="absolute right-3 top-[50%] -translate-y-[50%] w-[20px] h-[20px] flex items-center justify-center pointer-events-none">
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="text-gray-400 hover:text-gray-600 w-full h-full flex items-center justify-center pointer-events-auto"
-                    >
-                      {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                    </button>
+              {/* Last Name - Only adding animation */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      placeholder="Enter your last name"
+                      className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                    <FiUser
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={18}
+                    />
                   </div>
+                  {errors.lastName && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {errors.lastName}
+                    </p>
+                  )}
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-xs mt-0.5">{errors.confirmPassword}</p>
-                )}
-              </div>
+              </motion.div>
+
+              {/* Email - Only adding animation */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      className="w-full pr-10 pl-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                    <FiMail
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={18}
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Password - Only adding animation */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.4 }}
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Set Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter your password"
+                      className="w-full pl-4 pr-12 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                    <div className="absolute right-3 top-[50%] -translate-y-[50%] w-[20px] h-[20px] flex items-center justify-center pointer-events-none">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-gray-400 hover:text-gray-600 w-full h-full flex items-center justify-center pointer-events-auto"
+                      >
+                        {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-0.5">{errors.password}</p>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Confirm Password - Only adding animation */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.4 }}
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm your password"
+                      className="w-full pl-4 pr-12 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                    <div className="absolute right-3 top-[50%] -translate-y-[50%] w-[20px] h-[20px] flex items-center justify-center pointer-events-none">
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="text-gray-400 hover:text-gray-600 w-full h-full flex items-center justify-center pointer-events-auto"
+                      >
+                        {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-0.5">{errors.confirmPassword}</p>
+                  )}
+                </div>
+              </motion.div>
 
               {/* Register Button - Fixed at bottom */}
-              <div className="mt-6">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+                className="mt-6"
+              >
                 <button
                   type="submit"
                   disabled={loading || !isFormValid()}
@@ -388,7 +441,7 @@ const NewRegister = () => {
                 >
                   {loading ? "Registering..." : "Register"}
                 </button>
-              </div>
+              </motion.div>
 
               {/* Divider */}
               <div className="flex items-center my-6">
@@ -398,7 +451,11 @@ const NewRegister = () => {
               </div>
 
               {/* Social Login */}
-              <div>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+              >
                 <p className="text-sm text-center text-gray-600 mb-4">
                   GET STARTED USING
                 </p>
@@ -414,10 +471,10 @@ const NewRegister = () => {
                     />
                   </button>
                 </div>
-              </div>
+              </motion.div>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* OTP Modal */}

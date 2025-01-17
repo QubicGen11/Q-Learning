@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff, FiMail } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import Newnavbar from '../New Landingpage/New Navbar Components/Newnavbar';
-import axios from 'axios';
+
 import Swal from 'sweetalert2';
-import Cookies from 'js-cookie';
+
 import useAuthStore from '../../stores/authStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Newlogin = () => {
   const { login, sendOtp, verifyOtp, loading } = useAuthStore();
@@ -130,20 +131,43 @@ const Newlogin = () => {
     <div className="min-h-screen flex flex-col">
       <Newnavbar />
       <div className="flex flex-1">
-        {/* Left Side - Gradient Background */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12">
-          <img
+        {/* Left Side - Animated Gradient Background */}
+        <motion.div 
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-[#0056B3] to-[#00254D] items-center justify-center p-12"
+        >
+          <motion.img
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
             src="https://res.cloudinary.com/devewerw3/image/upload/v1733812189/Frame_176_rkq6me.png"
             alt="Learning Illustration"
             className="max-w-[600px] w-full object-contain"
           />
-        </div>
+        </motion.div>
 
-        {/* Right Side - Login Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-16 py-8 overflow-y-auto">
-          <div className="w-full max-w-[350px]">
-            {/* Login/Register Tabs */}
-            <div className="flex w-full border-b border-gray-200 mb-8">
+        {/* Right Side - Animated Login Form */}
+        <motion.div 
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-16 py-8 overflow-y-auto"
+        >
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="w-full max-w-[350px]"
+          >
+            {/* Animated Login/Register Tabs */}
+            <motion.div 
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="flex w-full border-b border-gray-200 mb-8"
+            >
               <Link
                 to="/login"
                 className="flex-1 text-center text-[#0056B3] font-medium relative pb-4 after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[2px] after:bg-[#0056B3]"
@@ -156,31 +180,47 @@ const Newlogin = () => {
               >
                 Register
               </Link>
-            </div>
+            </motion.div>
 
-            {/* Login Form */}
-            <form className="space-y-6">
-              {/* Email Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter Email Address"
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FiMail size={20} />
-                  </span>
+            {/* Animated Form Fields */}
+            <motion.form 
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              {/* Email Field with Animation */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter Email Address"
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <FiMail size={20} />
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Login with OTP Toggle */}
-              <div className="flex items-center space-x-2">
+              {/* Animated OTP Toggle */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.4 }}
+                className="flex items-center space-x-2"
+              >
                 <div
                   className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
                     otpLogin ? 'bg-[#0056B3]' : 'bg-gray-300'
@@ -194,47 +234,64 @@ const Newlogin = () => {
                   ></div>
                 </div>
                 <label className="text-sm text-gray-600">Login With OTP</label>
-              </div>
+              </motion.div>
 
-              {/* Conditional rendering based on OTP login */}
-              {otpLogin ? (
-                /* Remember Me Checkbox for OTP login */
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    className="w-4 h-4 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
-                    Remember Me
-                  </label>
-                </div>
-              ) : (
-                /* Password field for regular login */
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <div className="relative">
+              {/* Animated Password/Remember Me Section */}
+              <AnimatePresence mode="wait">
+                {otpLogin ? (
+                  <motion.div
+                    key="remember-me"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center"
+                  >
                     <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter Password"
-                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                      type="checkbox"
+                      id="remember"
+                      className="w-4 h-4 border-gray-300 rounded"
                     />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-gray-600"
-                    >
-                      {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                    </span>
-                  </div>
-                </div>
-              )}
+                    <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
+                      Remember Me
+                    </label>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="password"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter Password"
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                        />
+                        <span
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-gray-600"
+                        >
+                          {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-              {/* Login/Get OTP Button */}
-              <button
+              {/* Animated Login Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 onClick={otpLogin ? handleSendOtp : handleLogin}
                 disabled={loading}
@@ -249,18 +306,27 @@ const Newlogin = () => {
                     Processing...
                   </span>
                 ) : otpLogin ? 'Get OTP' : 'Login'}
-              </button>
-            </form>
+              </motion.button>
+            </motion.form>
 
-            {/* Divider */}
-            <div className="flex items-center my-6">
+            {/* Animated Divider */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="flex items-center my-6"
+            >
               <hr className="flex-1 border-gray-300" />
               <span className="px-4 text-sm text-gray-400">OR</span>
               <hr className="flex-1 border-gray-300" />
-            </div>
+            </motion.div>
 
-            {/* Social Login */}
-            <div>
+            {/* Animated Social Login */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+            >
               <p className="text-sm text-center text-gray-600 mb-4">
                 GET STARTED USING
               </p>
@@ -276,73 +342,209 @@ const Newlogin = () => {
                   />
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
 
-      {/* OTP Modal */}
-      {showOtpModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96 relative">
-            <button
-              onClick={() => {
-                console.log('Closing OTP Modal');
-                setShowOtpModal(false);
+      {/* Animated OTP Modal */}
+      <AnimatePresence>
+        {showOtpModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div 
+              initial={{ y: -100, opacity: 0, rotateX: 90 }}
+              animate={{ 
+                y: 0, 
+                opacity: 1,
+                rotateX: 0,
+                transition: {
+                  type: "spring",
+                  damping: 15,
+                  stiffness: 100,
+                  duration: 0.7
+                }
               }}
-              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-            <h2 className="text-xl font-medium mb-6">Enter OTP</h2>
-            <div className="flex gap-2 justify-center mb-6">
-              {otp.map((data, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  maxLength="1"
-                  value={data}
-                  onChange={(e) => handleOtpChange(e.target, index)}
-                  onPaste={handlePaste}
-                  onKeyUp={(e) => {
-                    if (e.key === "Backspace" && !e.target.value && e.target.previousSibling) {
-                      e.target.previousSibling.focus();
-                    }
-                  }}
-                  className="w-12 h-12 border-2 rounded text-center text-xl font-medium
-                           focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
-                           transition-all"
-                  autoFocus={index === 0}
-                />
-              ))}
-            </div>
-            {timer > 0 && (
-              <div className="text-center text-sm text-gray-600 mb-4">
-                Time remaining: {timer} seconds
-              </div>
-            )}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                handleLogin(e);
+              exit={{ 
+                y: 100,
+                opacity: 0,
+                rotateX: -90,
+                transition: {
+                  duration: 0.3
+                }
               }}
-              disabled={loading || otp.some(digit => digit === "")}
-              className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70"
+              className="bg-white p-8 rounded-lg shadow-lg w-96 relative backdrop-blur-lg"
             >
-              {loading ? "Verifying..." : "Verify OTP"}
-            </button>
-            <button
-              onClick={handleResendOtp}
-              disabled={!canResend || loading}
-              className={`mt-4 text-sm ${
-                canResend ? "text-blue-500 hover:underline" : "text-gray-400"
-              } disabled:opacity-70 w-full text-center`}
-            >
-              {canResend ? "Resend OTP" : `Wait ${timer} seconds to resend OTP`}
-            </button>
-          </div>
-        </div>
-      )}
+              <motion.button
+                whileHover={{ 
+                  scale: 1.2, 
+                  rotate: 180,
+                  transition: { duration: 0.3 }
+                }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowOtpModal(false)}
+                className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </motion.button>
+
+              <motion.h2 
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ 
+                  y: 0, 
+                  opacity: 1,
+                  transition: { delay: 0.1, duration: 0.5 }
+                }}
+                className="text-xl font-medium mb-6"
+              >
+                Enter OTP
+              </motion.h2>
+
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ 
+                  y: 0, 
+                  opacity: 1,
+                  transition: { delay: 0.2, duration: 0.5 }
+                }}
+                className="flex gap-2 justify-center mb-6"
+              >
+                {otp.map((data, index) => (
+                  <motion.input
+                    key={index}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ 
+                      scale: 1, 
+                      opacity: 1,
+                      transition: { delay: 0.3 + index * 0.1 }
+                    }}
+                    whileFocus={{ scale: 1.1 }}
+                    type="text"
+                    maxLength="1"
+                    value={data}
+                    onChange={(e) => handleOtpChange(e.target, index)}
+                    onPaste={handlePaste}
+                    onKeyUp={(e) => {
+                      if (e.key === "Backspace" && !e.target.value && e.target.previousSibling) {
+                        e.target.previousSibling.focus();
+                      }
+                    }}
+                    className="w-12 h-12 border-2 rounded text-center text-xl font-medium
+                             focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
+                             transition-all"
+                    autoFocus={index === 0}
+                  />
+                ))}
+              </motion.div>
+
+              {timer > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center text-sm text-gray-600 mb-4"
+                >
+                  Time remaining: {timer} seconds
+                </motion.div>
+              )}
+
+              <motion.button
+                whileHover={{ 
+                  scale: 1.05,
+                  transition: {
+                    type: "spring",
+                    damping: 12,
+                    stiffness: 100
+                  }
+                }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ 
+                  y: 0, 
+                  opacity: 1,
+                  transition: {
+                    type: "spring",
+                    damping: 12,
+                    stiffness: 100,
+                    delay: 0.5
+                  }
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogin(e);
+                }}
+                disabled={loading || otp.some(digit => digit === "")}
+                className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium 
+                         disabled:opacity-70 transform"
+              >
+                {loading ? (
+                  <motion.span
+                    animate={{
+                      rotate: 360
+                    }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    className="inline-block"
+                  >
+                    ⟳
+                  </motion.span>
+                ) : "Verify OTP"}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ 
+                  scale: 1.05,
+                  color: canResend ? "#0056B3" : undefined
+                }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ 
+                  y: 0, 
+                  opacity: 1,
+                  transition: {
+                    type: "spring",
+                    damping: 12,
+                    stiffness: 100,
+                    delay: 0.6
+                  }
+                }}
+                onClick={handleResendOtp}
+                disabled={!canResend || loading}
+                className={`mt-4 text-sm ${
+                  canResend ? "text-blue-500 hover:underline" : "text-gray-400"
+                } disabled:opacity-70 w-full text-center transform flex items-center justify-center gap-2`}
+              >
+                {loading ? (
+                  <>
+                    <motion.span
+                      animate={{
+                        rotate: 360
+                      }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                      className="inline-block"
+                    >
+                      ⟳
+                    </motion.span>
+                    <span>Resending...</span>
+                  </>
+                ) : (
+                  canResend ? "Resend OTP" : ``
+                )}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
