@@ -385,39 +385,98 @@ const StepIndicator = () => {
       <span className="material-icons text-sm">expand_more</span>
     </button>
   </div>
-  <button
-    onClick={async () => {
-      const { basicInfo, media, content, courseSettings } = courseData || {};
-      
-      // Check if all mandatory sections are filled
-      if (!basicInfo?.courseName || !media?.courseBanner || !content?.chapters?.length || !courseSettings?.[0]) {
-        displayToast('error', 'Please complete all mandatory fields before submitting for review');
-        return;
-      }
 
-      try {
-        setIsSubmitting(true);
-        await submitCourse(navigate);
-        // localStorage.removeItem('courseCreationData');
-        displayToast('success', 'Course submitted for review successfully!');
-      } catch (error) {
-        displayToast('error', 'Failed to submit course');
-      } finally {
-        setIsSubmitting(false);
+
+<button
+  onClick={async () => {
+    const { 
+      basicInfo, 
+      media, 
+      courseSettings,
+      glossary,
+      references,
+      courseFaqs,
+      faq  
+    } = courseData || {};
+    
+    // Comprehensive validation checks
+    const validationErrors = [];
+
+    // Basic Info validation
+    if (!basicInfo?.courseName) validationErrors.push("Course name is required");
+    if (!basicInfo?.courseTagline) validationErrors.push("Course tagline is required");
+    if (!basicInfo?.category) validationErrors.push("Category is required");
+    if (!basicInfo?.subCategory) validationErrors.push("Subcategory is required");
+    if (!basicInfo?.teachingLanguage) validationErrors.push("Teaching language is required");
+
+    // Media validation
+    if (!media?.courseBanner) validationErrors.push("Course banner is required");
+    if (!media?.courseImage) validationErrors.push("Course image is required");
+
+    // Course Settings validation
+    if (!courseSettings?.[0]) {
+      validationErrors.push("Course settings are required");
+    } else {
+      const settings = courseSettings[0];
+      // Required course settings validation
+      // if (!settings.courseType) validationErrors.push("Course type is required");
+      if (!settings.pricingType) validationErrors.push("Pricing type is required");
+      if (!settings.promotionType) validationErrors.push("Promotion type is required");
+      if (settings.pricingType === 'Paid' && !settings.price) validationErrors.push("Price is required for paid courses");
+      if (!settings.accessDuration && !settings.lifeTimeAccess) validationErrors.push("Either access duration or lifetime access must be specified");
+      if (settings.promotionType === 'Limited Time' && (!settings.startDate || !settings.endDate)) {
+        validationErrors.push("Start and end dates are required for limited time promotions");
       }
-    }}
-    disabled={isSubmitting}
-    className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
-  >
-    {isSubmitting ? (
-      <>
-        <span className="animate-spin mr-2">⌛</span>
-        Submitting...
-      </>
-    ) : (
-      'Submit for Review'
-    )}
-  </button>
+      if (typeof settings.publicAccess !== 'boolean') validationErrors.push("Public access setting is required");
+      if (typeof settings.enablePreview !== 'boolean') validationErrors.push("Preview setting is required");
+      if (typeof settings.notifyStudentsOnUpdate !== 'boolean') validationErrors.push("Student notification setting is required");
+      if (typeof settings.refundsAllowed !== 'boolean') validationErrors.push("Refund policy setting is required");
+    }
+
+    // Additional required sections
+    if (!glossary?.length) validationErrors.push("At least one glossary item is required");
+    if (!references?.length) validationErrors.push("At least one reference is required");
+    
+    // FAQ validation - check both possible FAQ data locations
+    const faqData = courseFaqs || faq || [];
+    const hasFaqs = Array.isArray(faqData) && faqData.some(faq => 
+      faq?.question?.trim() && faq?.answer?.trim()
+    );
+    
+    if (!hasFaqs) {
+      validationErrors.push("At least one FAQ with question and answer is required");
+    }
+
+    // Display validation errors if any
+    if (validationErrors.length > 0) {
+      displayToast('error', validationErrors[0]);
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await submitCourse(navigate);
+      displayToast('success', 'Course submitted for review successfully!');
+    } catch (error) {
+      displayToast('error', 'Failed to submit course');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }}
+  disabled={isSubmitting}
+  className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
+>
+  {isSubmitting ? (
+    <>
+      <span className="animate-spin mr-2">⌛</span>
+      Submitting...
+    </>
+  ) : (
+    'Submit for Review'
+  )}
+</button>
+
+
 </div>
         </div>
  
