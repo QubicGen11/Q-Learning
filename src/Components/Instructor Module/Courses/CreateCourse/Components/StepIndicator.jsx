@@ -440,14 +440,14 @@ const StepIndicator = () => {
     if (!references?.length) validationErrors.push("At least one reference is required");
     
     // FAQ validation
-    const faqData = courseFaqs || faq || [];
-    const hasFaqs = Array.isArray(faqData) && faqData.some(faq => 
-      faq?.question?.trim() && faq?.answer?.trim()
-    );
+    // const faqData = courseFaqs || faq || [];
+    // const hasFaqs = Array.isArray(faqData) && faqData.some(faq => 
+    //   faq?.question?.trim() && faq?.answer?.trim()
+    // );
     
-    if (!hasFaqs) {
-      validationErrors.push("At least one FAQ with question and answer is required");
-    }
+    // if (!hasFaqs) {
+    //   validationErrors.push("At least one FAQ with question and answer is required");
+    // }
 
     // Display validation errors if any
     if (validationErrors.length > 0) {

@@ -6,7 +6,7 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { MdContentCopy } from 'react-icons/md';
 
 function FAQ() {
-  const { courseData, updateCourseData, validationErrors, setValidationErrors } = useCourseCreationStore();
+  const { courseData, updateCourseData } = useCourseCreationStore();
   const [localFaqs, setLocalFaqs] = useState([]);
   const [collapsedFaqs, setCollapsedFaqs] = useState(new Set());
 
@@ -30,32 +30,35 @@ function FAQ() {
   };
 
   useEffect(() => {
-    let initialFaqs = courseData.faq || [];
-    setLocalFaqs(initialFaqs);
+    const initialFaqs = courseData.faq || [{
+      question: '',
+      answer: ''
+    }];
     
-    const errors = validateAllFields(initialFaqs);
-    setValidationErrors(errors);
-  }, [courseData.faq]);
+    setLocalFaqs(initialFaqs);
+    updateCourseData('courseFaqs', initialFaqs);
+  }, []);
 
   const handleAddQuestion = () => {
     const newFaq = { 
-      id: `faq-${Date.now()}`,
       question: '', 
       answer: '' 
     };
+    
     const updatedFaqs = [...localFaqs, newFaq];
     setLocalFaqs(updatedFaqs);
     updateCourseData('faq', updatedFaqs);
-    
-    const newErrors = validateAllFields(updatedFaqs);
-    setValidationErrors(newErrors);
+    updateCourseData('courseFaqs', updatedFaqs);
   };
 
   const handleCopyFaq = (index) => {
     const faqToCopy = localFaqs[index];
     const updatedFaqs = [...localFaqs, { ...faqToCopy, id: `faq-${Date.now()}` }];
     setLocalFaqs(updatedFaqs);
-    updateCourseData('faq', updatedFaqs);
+    updateCourseData({
+      ...courseData,
+      courseFaqs: updatedFaqs
+    });
     
     const newErrors = validateAllFields(updatedFaqs);
     setValidationErrors(newErrors);
@@ -65,10 +68,7 @@ function FAQ() {
     const updatedFaqs = localFaqs.filter((_, i) => i !== index);
     setLocalFaqs(updatedFaqs);
     updateCourseData('faq', updatedFaqs);
-    
-    const newErrors = validateAllFields(updatedFaqs);
-    setValidationErrors(newErrors);
-    toast.success('FAQ removed successfully');
+    updateCourseData('courseFaqs', updatedFaqs);
   };
 
   const toggleFaq = (id) => {
@@ -89,9 +89,7 @@ function FAQ() {
     );
     setLocalFaqs(updatedFaqs);
     updateCourseData('faq', updatedFaqs);
-
-    const newErrors = validateAllFields(updatedFaqs);
-    setValidationErrors(newErrors);
+    updateCourseData('courseFaqs', updatedFaqs);
   };
 
   return (

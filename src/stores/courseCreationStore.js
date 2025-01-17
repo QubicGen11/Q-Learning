@@ -153,12 +153,12 @@ const initialData = {
     hashTags: []
   },
   
-  // courseFaqs: [
-  //   {
-  //     question: "",
-  //     answer: ""
-  //   }
-  // ],
+  courseFaqs: [
+    {
+      question: '',
+      answer: ''
+    }
+  ],
   
   comments: [
     {
@@ -265,6 +265,7 @@ const useCourseCreationStore = create((set, get) => ({
   courseData: loadFromCourseLocalStorage() || {
     basicInfo: {
       courseName: '',
+      
       courseTagline: '',
       courseDuration: '',
       difficultyLevel: '',
@@ -289,7 +290,7 @@ const useCourseCreationStore = create((set, get) => ({
     content: { 
       chapters: []
     },
-    // courseFaqs: [],
+    courseFaqs: [],
     settings: {
       courseVisibility: { public: false, enablePreview: false },
       courseAccess: { duration: '', lifetimeAccess: false },
@@ -447,7 +448,7 @@ const useCourseCreationStore = create((set, get) => ({
     const { courseData } = get();
     
     try {
-      // Get the latest data from localStorage for comments
+      // Get the latest data from localStorage
       const latestData = JSON.parse(localStorage.getItem('courseCreationData') || '{}');
       
       const settings = courseData.courseSettings?.[0];
@@ -510,9 +511,8 @@ const useCourseCreationStore = create((set, get) => ({
         courseChapters: courseData.content?.chapters || [],
         glossary: courseData.glossary || [],
         references: courseData.references || [],
-        courseFaqs: courseData.courseFaqs || [],
+        courseFaqs: courseData.faq || [],
         courseSettings,
-        // Use latest comments from localStorage
         comments: latestData.comments 
           ? Object.values(latestData.comments)
           : []
@@ -575,7 +575,7 @@ const useCourseCreationStore = create((set, get) => ({
         content: { 
           chapters: []
         },
-        // courseFaqs: [],
+        faq: [],
         settings: {
           courseVisibility: { public: false, enablePreview: false },
           courseAccess: { duration: '', lifetimeAccess: false },
