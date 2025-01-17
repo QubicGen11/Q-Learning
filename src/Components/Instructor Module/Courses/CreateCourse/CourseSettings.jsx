@@ -481,84 +481,88 @@ function CourseSettings() {
 
                   {/* Course Type */}
                   <div>
-                    <h3 className="text-sm font-medium mb-4 text-gray-600" style={{ fontWeight: '700' }}>Course Type</h3>
-                    <div className="grid grid-cols-2 gap-x-32">
-                      <div>
-                        <label className="block text-sm mb-2 text-gray-600">Course type *</label>
-                        <div className="relative">
-                          <input
-                            ref={courseTypeInputRef}
-                            type="text"
-                            className="w-[290px] h-[40px] px-3 py-1.5 border rounded text-sm"
-                            value={settings.courseType || ''}
-                            onClick={() => {
-                              setFilteredCourseTypes(courseTypes);
-                              setShowCourseTypeSuggestions(true);
-                            }}
-                            onChange={(e) => {
-                              const newValue = e.target.value;
-                              setSettings(prev => ({
-                                ...prev,
-                                courseType: newValue
-                              }));
-                              handleSettingChange('courseType', newValue);
-                              const filtered = courseTypes.filter(type =>
-                                type.courseType.toLowerCase().includes(newValue.toLowerCase())
-                              );
-                              setFilteredCourseTypes(filtered);
-                            }}
-                            onBlur={handleCourseTypeBlur}
-                            placeholder="Select Course Type"
-                          />
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
-                            {settings.courseType ? (
-                              <button
-                                type="button"
-                                className="hover:text-gray-600"
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleSettingChange('courseType', '');
-                                }}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
-                            ) : showCourseTypeSuggestions ? (
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                              </svg>
-                            ) : (
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            )}
-                          </div>
-                          {showCourseTypeSuggestions && filteredCourseTypes.length > 0 && (
-                            <ul className={`absolute z-10 w-full ${calculateDropdownPosition(courseTypeInputRef) === 'top'
-                                ? 'bottom-full mb-1'
-                                : 'top-full mt-1'
-                              } max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg`}>
-                              {filteredCourseTypes.map((type) => (
-                                <li
-                                  key={type.id}
-                                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                                  onMouseDown={(e) => {
-                                    e.preventDefault();
-                                    handleSettingChange('courseType', type.courseType);
-                                    setShowCourseTypeSuggestions(false);
-                                  }}
-                                >
-                                  {type.courseType}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+  <h3 className="text-sm font-medium mb-4 text-gray-600" style={{ fontWeight: '700' }}>Course Type</h3>
+  <div className="grid grid-cols-2 gap-x-32">
+    <div>
+      <label className="block text-sm mb-2 text-gray-600">Course type *</label>
+      <div className="relative">
+        <input
+          ref={courseTypeInputRef}
+          type="text"
+          className="w-[290px] h-[40px] px-3 py-1.5 border rounded text-sm"
+          value={settings.courseType || ''}
+          onClick={() => {
+            setFilteredCourseTypes(courseTypes);
+            setShowCourseTypeSuggestions(true);
+          }}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            setSettings(prev => ({
+              ...prev,
+              courseType: newValue
+            }));
+            // Update both local state and parent state
+            handleSettingChange('courseType', newValue);
+            const filtered = courseTypes.filter(type =>
+              type.courseType.toLowerCase().includes(newValue.toLowerCase())
+            );
+            setFilteredCourseTypes(filtered);
+          }}
+          onBlur={handleCourseTypeBlur}
+          placeholder="Select Course Type"
+        />
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+          {settings.courseType ? (
+            <button
+              type="button"
+              className="hover:text-gray-600"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSettings(prev => ({ ...prev, courseType: '' })); // Update local state
+                handleSettingChange('courseType', ''); // Update parent state
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          ) : showCourseTypeSuggestions ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          )}
+        </div>
+        {showCourseTypeSuggestions && filteredCourseTypes.length > 0 && (
+          <ul className={`absolute z-10 w-full ${
+            calculateDropdownPosition(courseTypeInputRef) === 'top'
+              ? 'bottom-full mb-1'
+              : 'top-full mt-1'
+          } max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg`}>
+            {filteredCourseTypes.map((type) => (
+              <li
+                key={type.id}
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setSettings(prev => ({ ...prev, courseType: type.courseType })); // Update local state
+                  handleSettingChange('courseType', type.courseType); // Update parent state
+                  setShowCourseTypeSuggestions(false);
+                }}
+              >
+                {type.courseType}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
                 </div>
               )}
 

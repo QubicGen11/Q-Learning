@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoClose } from 'react-icons/io5';
 import { BsEmojiSmile } from 'react-icons/bs';
@@ -6,20 +6,17 @@ import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 
 const CommentDialog = ({ isOpen, onClose, onSubmit }) => {
   const [comment, setComment] = useState('');
+  const [localComments, setLocalComments] = useState({});
   const { courseData, updateCourseData } = useCourseCreationStore();
-  
-  // Ensure comments is always an array
-  const comments = Array.isArray(courseData?.comments) 
-    ? courseData.comments 
-    : [
-        {
-          userId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
-          role: "INSTRUCTOR",
-          text: "This is a great course to get started with advanced R programming."
-        }
-      ];
 
-  const handleSubmitComment = () => {
+  // Sync local state with store data
+  useEffect(() => {
+    if (courseData?.comments) {
+      setLocalComments(courseData.comments);
+    }
+  }, [courseData?.comments]);
+
+  const handleSubmitComment = async () => {
     if (comment.trim()) {
       const newComment = {
         userId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
@@ -27,14 +24,32 @@ const CommentDialog = ({ isOpen, onClose, onSubmit }) => {
         text: comment
       };
 
-      // Update the store with the new comment
-      updateCourseData({
+      // Update local state first
+      const updatedComments = {
+        "0": newComment
+      };
+      setLocalComments(updatedComments);
+
+      // Create updated course data
+      const updatedCourseData = {
         ...courseData,
-        comments: [...comments, newComment]
-      });
+        comments: updatedComments
+      };
+
+      // Update store
+      await updateCourseData(updatedCourseData);
+
+      // Update local storage
+      localStorage.setItem('courseCreationData', JSON.stringify(updatedCourseData));
       
-      onSubmit(newComment);
+      // Clear input
       setComment('');
+
+      // Wait for next tick to ensure all updates are processed
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Now submit with the latest data
+      onSubmit(updatedCourseData);
     }
   };
 
@@ -42,7 +57,6 @@ const CommentDialog = ({ isOpen, onClose, onSubmit }) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -51,7 +65,6 @@ const CommentDialog = ({ isOpen, onClose, onSubmit }) => {
             className="fixed inset-0 bg-black bg-opacity-25 z-40"
           />
 
-          {/* Dialog */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -60,20 +73,15 @@ const CommentDialog = ({ isOpen, onClose, onSubmit }) => {
             className="fixed right-0 top-0 h-full w-[400px] bg-white shadow-lg z-50"
           >
             <div className="flex flex-col h-full">
-              {/* Header */}
               <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-xl font-semibold text-gray-800">Comments</h2>
-                <button 
-                  onClick={onClose}
-                  className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                >
-                  <IoClose size={24} className="text-gray-600" />
+                <h2 className="text-lg font-semibold">Comments</h2>
+                <button onClick={onClose}>
+                  <IoClose size={24} />
                 </button>
               </div>
 
-              {/* Comments List */}
               <div className="flex-1 overflow-y-auto">
-                {comments.map((comment, index) => (
+                {Object.values(localComments).map((comment, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
@@ -95,16 +103,12 @@ const CommentDialog = ({ isOpen, onClose, onSubmit }) => {
                           <span className="text-sm text-gray-400">#{index + 1}</span>
                         </div>
                         <p className="mt-1 text-gray-600">{comment.text}</p>
-                        <button className="mt-2 text-sm text-gray-500 hover:text-gray-700">
-                          REPLY
-                        </button>
                       </div>
                     </div>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Comment Input */}
               <div className="border-t p-4">
                 <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2">
                   <input

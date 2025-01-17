@@ -447,6 +447,9 @@ const useCourseCreationStore = create((set, get) => ({
     const { courseData } = get();
     
     try {
+      // Get the latest data from localStorage for comments
+      const latestData = JSON.parse(localStorage.getItem('courseCreationData') || '{}');
+      
       const settings = courseData.courseSettings?.[0];
       
       // Format course settings as a direct object, not an array
@@ -482,14 +485,7 @@ const useCourseCreationStore = create((set, get) => ({
           settings.hashtags.split(',')
             .map(tag => tag.trim())
             .filter(Boolean) : 
-          [],
-          comments: courseData.comments || [
-            {
-              userId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
-              role: "INSTRUCTOR",
-              text: "This is a great course to get started with advanced R programming."
-            }
-          ]
+          []
       };
 
       const formattedData = {
@@ -515,17 +511,17 @@ const useCourseCreationStore = create((set, get) => ({
         glossary: courseData.glossary || [],
         references: courseData.references || [],
         courseFaqs: courseData.courseFaqs || [],
-        courseSettings // Send as direct object, not array,\
-        ,
-        comments: courseData.comments || [
-          {
-            userId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
-            role: "INSTRUCTOR",
-            text: "This is a great course to get started with advanced R programming."
-          }
-        ]
-
+        courseSettings,
+        // Use latest comments from localStorage
+        comments: latestData.comments 
+          ? Object.values(latestData.comments)
+          : []
       };
+
+      // Remove comments from courseSettings if it exists there
+      if (formattedData.courseSettings?.comments) {
+        delete formattedData.courseSettings.comments;
+      }
 
       console.log('API Request Payload:', JSON.stringify(formattedData, null, 2));
 
