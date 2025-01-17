@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import useSidebarStore from '../../stores/sidebarStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = () => {
   const { isCollapsed } = useSidebarStore();
@@ -29,13 +30,22 @@ const Sidebar = () => {
   };
 
   return (
-    <div 
-    className={`fixed top-0 left-0 h-full bg-gradient-to-b from-[#0056B3] to-[#00254D] transition-all duration-300 ease-in-out z-50 
-    ${isCollapsed ? 'w-[60px]' : 'w-[240px]'}`}
-  >
-      {/* Logo */}
-      <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-4' : 'px-5'}  border-white/10`}>
-        <img 
+    <motion.div 
+      
+      transition={{ type: "spring", damping: 20, stiffness: 100 }}
+      className={`fixed top-0 left-0 h-full bg-gradient-to-b from-[#0056B3] to-[#00254D] transition-all duration-300 ease-in-out z-50 
+      ${isCollapsed ? 'w-[60px]' : 'w-[240px]'}`}
+    >
+      {/* Logo with animation */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-4' : 'px-5'}  border-white/10`}
+      >
+        <motion.img 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           src={isCollapsed 
             ? "https://res.cloudinary.com/defsu5bfc/image/upload/v1736435279/Icon_Logo_tn7bcr.png"
             : "https://res.cloudinary.com/devewerw3/image/upload/v1734594088/Logo_7_ulr2j8.png"
@@ -43,29 +53,51 @@ const Sidebar = () => {
           alt="QubiNest" 
           className={`${isCollapsed ? 'w-8' : 'h-8'}`}
         />
-      </div>
+      </motion.div>
 
       {/* Menu Items */}
       <nav className="flex-1 flex flex-col">
         <div className="flex-1 py-2">
           {menuItems.filter(item => !item.isBottom).map((item, index) => (
-            <div key={index} className="relative group">
-              <Link
-                to={item.path}
-                className={`flex items-center transition-colors duration-200
-                  ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
-                  ${isActive(item.path) 
-                    ? 'bg-white text-[#0056B3]' 
-                    : 'text-white/90 hover:bg-white/10'}`}
+            <motion.div 
+              key={index}
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="relative group"
+            >
+              <motion.div
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 400 }}
               >
-                <span className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}>
-                  {item.icon}
-                </span>
-                {!isCollapsed && (
-                  <span className="text-[14px] font-normal">{item.label}</span>
-                )}
-              </Link>
-              {/* Tooltip */}
+                <Link
+                  to={item.path}
+                  className={`flex items-center transition-colors duration-200
+                    ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
+                    ${isActive(item.path) 
+                      ? 'bg-white text-[#0056B3]' 
+                      : 'text-white/90 hover:bg-white/10'}`}
+                >
+                  <span 
+                    className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}
+                  >
+                    {item.icon}
+                  </span>
+                  <AnimatePresence>
+                    {!isCollapsed && (
+                      <motion.span 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        className="text-[14px] font-normal"
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              </motion.div>
+              {/* Tooltip with animation */}
               {isCollapsed && (
                 <div 
                   className="absolute left-12 top-1/2 -translate-y-1/2 
@@ -78,35 +110,61 @@ const Sidebar = () => {
                             before:w-3 before:h-3 before:rotate-45
                             before:border-l before:border-b before:border-gray-200
                             before:bg-gray-600"
-                  style={{ transform: 'translateY(-50%)' }}
                 >
                   {item.label}
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Bottom Items */}
-        <div className="py-2 border-t border-white/10">
+        {/* Bottom Items with same animations */}
+        <motion.div 
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="py-2 border-t border-white/10"
+        >
           {menuItems.filter(item => item.isBottom).map((item, index) => (
-            <div key={index} className="relative group">
-              <Link
-                to={item.path}
-                className={`flex items-center transition-colors duration-200
-                  ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
-                  ${isActive(item.path) 
-                    ? 'bg-gray-600 text-white' 
-                    : 'text-white/90 hover:bg-white/10'}`}
+            <motion.div 
+              key={index}
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="relative group"
+            >
+              <motion.div
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 400 }}
               >
-                <span className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}>
-                  {item.icon}
-                </span>
-                {!isCollapsed && (
-                  <span className="text-[14px] font-normal">{item.label}</span>
-                )}
-              </Link>
-              {/* Tooltip */}
+                <Link
+                  to={item.path}
+                  className={`flex items-center transition-colors duration-200
+                    ${isCollapsed ? 'px-4 justify-center h-[50px]' : 'px-5 h-[45px]'}
+                    ${isActive(item.path) 
+                      ? 'bg-gray-600 text-white' 
+                      : 'text-white/90 hover:bg-white/10'}`}
+                >
+                  <span 
+                    className={`material-icons ${isCollapsed ? 'text-xl' : 'text-[20px] mr-3'}`}
+                  >
+                    {item.icon}
+                  </span>
+                  <AnimatePresence>
+                    {!isCollapsed && (
+                      <motion.span 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        className="text-[14px] font-normal"
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              </motion.div>
+              {/* Tooltip with animation */}
               {isCollapsed && (
                 <div 
                   className="absolute left-12 top-1/2 -translate-y-1/2 
@@ -119,16 +177,15 @@ const Sidebar = () => {
                             before:w-3 before:h-3 before:rotate-45
                             before:border-l before:border-b before:border-gray-200
                             before:bg-gray-600"
-                  style={{ transform: 'translateY(-50%)' }}
                 >
                   {item.label}
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </nav>
-    </div>
+    </motion.div>
   );
 };
 

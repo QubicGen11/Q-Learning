@@ -20,10 +20,25 @@ const InstructorLayout = () => {
 
   // Check for route changes and collapse sidebar if on course routes
   useEffect(() => {
-    if (location.pathname.includes('/instructor/courses/basicinfo') && !isCollapsed) {
-      toggleSidebar();
+    // Only auto-toggle when first navigating to these routes
+    if (!localStorage.getItem('manualToggle')) {
+      if (location.pathname.includes('/instructor/courses/create') && !isCollapsed) {
+        toggleSidebar();
+      } else if (!location.pathname.includes('/instructor/courses/create') && isCollapsed) {
+        toggleSidebar();
+      }
     }
-  }, [location.pathname, isCollapsed, toggleSidebar]);
+  }, [location.pathname]);
+  
+  // Modify your toggle handler
+
+  
+  // Clear the manual toggle flag when component unmounts
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('manualToggle');
+    };
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
