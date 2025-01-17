@@ -62,18 +62,16 @@ const isTokenExpired = (token) => {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const currentTime = Math.floor(Date.now() / 1000);
-    const timeUntilExpiry = payload.exp - currentTime;
     
-    // Debug logs with more precise timing
-    console.log('🕒 Token Check:');
-    console.log(`Current time: ${new Date(currentTime * 1000).toLocaleString()}`);
-    console.log(`Token expires: ${new Date(payload.exp * 1000).toLocaleString()}`);
-    console.log(`Time until expiration: ${timeUntilExpiry} seconds`);
+    console.log('Token Expiry Check:', {
+      currentTime,
+      expiryTime: payload.exp,
+      isExpired: currentTime >= payload.exp
+    });
     
-    // Return true only if actually expired
     return currentTime >= payload.exp;
   } catch (error) {
-    console.error('Error checking token expiration:', error);
+    console.error('Token Expiry Check Error:', error);
     return true;
   }
 };
@@ -238,97 +236,72 @@ const useAuthStore = create((set) => ({
   },
 
   showSessionExpiredPopup: async () => {
-    if (useAuthStore.getState().loading || !useAuthStore.getState().isLoggedIn) {
-      return;
-    }
-
-    set({ loading: true });
+    console.log('Attempting to show session expired popup');
     
-    try {
-      displayToast('error', 'Your session has expired. Please login again.');
+    // Force show the toast with higher priority
+    displayToast('error', 'Your session has expired. Please login again.', {
+      position: "top-center",
+      autoClose: false,  // Make it stay until user closes
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
 
-      // Clear cookies and state
-      Cookies.remove('accessToken');
-      Cookies.remove('refreshToken');
-      
-      set({
-        isLoggedIn: false,
-        userName: '',
-        userEmail: '',
-        loading: false
-      });
+    // Small delay to ensure toast is shown
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Redirect to login page
+    // Clear auth state
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    
+    set({
+      isLoggedIn: false,
+      userName: '',
+      userEmail: '',
+      loading: false
+    });
+
+    // Force reload to login page after a small delay
+    setTimeout(() => {
       window.location.href = '/login';
-    } catch (error) {
-      console.error('Error showing session expired popup:', error);
-      set({ loading: false });
-    }
+    }, 1000);
   },
 
   initializeTokenListener: () => {
-    let isChecking = false;
+    console.log('Initializing token listener');
     
     const checkToken = async () => {
-      if (isChecking) return;
-      isChecking = true;
+      const token = Cookies.get('accessToken');
+      const state = useAuthStore.getState();
       
-      try {
-        const token = Cookies.get('accessToken');
-        const state = useAuthStore.getState();
+      console.log('Token check:', {
+        hasToken: !!token,
+        isLoggedIn: state.isLoggedIn
+      });
 
-        if (state.isLoggedIn && token) {
-          // Check if token exists and is about to expire
-          if (isTokenExpired(token)) {
-            console.log('Token is expired or about to expire');
-            
-            // Try to refresh the token first
-            try {
-              const refreshToken = Cookies.get('refreshToken');
-              if (refreshToken) {
-                const response = await axios.post('http://localhost:8089/qlms/refresh-token', {
-                  refreshToken
-                });
-                
-                if (response.data && response.data.accessToken) {
-                  // Update the access token
-                  Cookies.set('accessToken', response.data.accessToken);
-                  console.log('Token refreshed successfully');
-                  return; // Exit if token refresh was successful
-                }
-              }
-            } catch (error) {
-              console.error('Token refresh failed:', error);
-            }
+      // If logged in but no token, definitely show popup
+      if (state.isLoggedIn && !token) {
+        console.log('No token found but user is logged in, showing popup');
+        useAuthStore.getState().showSessionExpiredPopup();
+        return;
+      }
 
-            // If we get here, token refresh failed or wasn't possible
-            if (ws) {
-              ws.close();
-              ws = null;
-            }
-            useAuthStore.getState().showSessionExpiredPopup();
-          }
-        }
-      } catch (error) {
-        console.error('Error in token check:', error);
-      } finally {
-        isChecking = false;
+      // If both token and logged in, check expiry
+      if (state.isLoggedIn && token && isTokenExpired(token)) {
+        console.log('Token is expired, showing popup');
+        useAuthStore.getState().showSessionExpiredPopup();
       }
     };
 
-    // Check every 15 seconds
-    const intervalCheck = setInterval(checkToken, 15000);
+    // Check more frequently - every 3 seconds
+    const intervalCheck = setInterval(checkToken, 3000);
 
     // Initial check
     checkToken();
 
-    return () => {
-      clearInterval(intervalCheck);
-      if (ws) {
-        ws.close();
-        ws = null;
-      }
-    };
+    return () => clearInterval(intervalCheck);
   }
 }));
 
