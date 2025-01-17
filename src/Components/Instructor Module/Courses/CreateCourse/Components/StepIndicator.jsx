@@ -5,6 +5,8 @@ import { IoIosArrowRoundBack, IoIosArrowRoundForward } from 'react-icons/io';
 import Cookies from 'js-cookie';
 // import { toast } from 'react-toastify';
 import Toast, { displayToast } from '../../../../Common/Toast/Toast';
+import CommentDialog from './CommentDialog';
+import ValidationDialog from './ValidationDialog';
  
  
  
@@ -29,6 +31,8 @@ const StepIndicator = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ type: '', message: '' });
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [showValidationDialog, setShowValidationDialog] = useState(false);
  
   const mainTabs = [
     {
@@ -418,8 +422,6 @@ const StepIndicator = () => {
       validationErrors.push("Course settings are required");
     } else {
       const settings = courseSettings[0];
-      // Required course settings validation
-      // if (!settings.courseType) validationErrors.push("Course type is required");
       if (!settings.pricingType) validationErrors.push("Pricing type is required");
       if (!settings.promotionType) validationErrors.push("Promotion type is required");
       if (settings.pricingType === 'Paid' && !settings.price) validationErrors.push("Price is required for paid courses");
@@ -437,7 +439,7 @@ const StepIndicator = () => {
     if (!glossary?.length) validationErrors.push("At least one glossary item is required");
     if (!references?.length) validationErrors.push("At least one reference is required");
     
-    // FAQ validation - check both possible FAQ data locations
+    // FAQ validation
     const faqData = courseFaqs || faq || [];
     const hasFaqs = Array.isArray(faqData) && faqData.some(faq => 
       faq?.question?.trim() && faq?.answer?.trim()
@@ -453,15 +455,8 @@ const StepIndicator = () => {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      await submitCourse(navigate);
-      displayToast('success', 'Course submitted for review successfully!');
-    } catch (error) {
-      displayToast('error', 'Failed to submit course');
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Show comment dialog first
+    setShowCommentDialog(true);
   }}
   disabled={isSubmitting}
   className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
@@ -479,6 +474,36 @@ const StepIndicator = () => {
 
 </div>
         </div>
+
+        <div>
+          <CommentDialog  
+  isOpen={showCommentDialog}
+  onClose={() => setShowCommentDialog(false)}
+  onSubmit={(comment) => {
+    setShowCommentDialog(false);
+    setShowValidationDialog(true); // Show validation dialog after comment submission
+  }}
+  />  
+</div>
+
+        <ValidationDialog
+          isOpen={showValidationDialog}
+          onClose={() => setShowValidationDialog(false)}
+          onConfirm={async () => {
+            try {
+              setIsSubmitting(true);
+              await submitCourse(navigate);
+              setShowValidationDialog(false);
+              displayToast('success', 'Course submitted for review successfully!');
+            } catch (error) {
+              displayToast('error', 'Failed to submit course');
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
+        />
+
+       
  
         {/* Keep existing Step Indicator and add Settings heading when on settings page */}
         <div className="flex items-center justify-between p-4">

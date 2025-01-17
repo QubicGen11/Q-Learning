@@ -482,7 +482,14 @@ const useCourseCreationStore = create((set, get) => ({
           settings.hashtags.split(',')
             .map(tag => tag.trim())
             .filter(Boolean) : 
-          []
+          [],
+          comments: courseData.comments || [
+            {
+              userId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
+              role: "INSTRUCTOR",
+              text: "This is a great course to get started with advanced R programming."
+            }
+          ]
       };
 
       const formattedData = {
@@ -508,7 +515,16 @@ const useCourseCreationStore = create((set, get) => ({
         glossary: courseData.glossary || [],
         references: courseData.references || [],
         courseFaqs: courseData.courseFaqs || [],
-        courseSettings // Send as direct object, not array
+        courseSettings // Send as direct object, not array,\
+        ,
+        comments: courseData.comments || [
+          {
+            userId: "2251f63d-33df-44a8-88a5-8a9252583e1a",
+            role: "INSTRUCTOR",
+            text: "This is a great course to get started with advanced R programming."
+          }
+        ]
+
       };
 
       console.log('API Request Payload:', JSON.stringify(formattedData, null, 2));
