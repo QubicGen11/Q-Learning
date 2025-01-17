@@ -15,6 +15,7 @@ const useRegisterStore = create((set, get) => ({
   loading: false,
   timer: 30,
   canResend: false,
+  isResending: false,
 
   decrementTimer: () => {
     const { timer } = get();
@@ -167,6 +168,8 @@ const useRegisterStore = create((set, get) => ({
     const state = get();
     if (!state.canResend) return;
 
+    set({ isResending: true });
+
     try {
       const response = await axios.post('http://localhost:8089/qlms/register', {
         firstName: state.formData.firstName,
@@ -179,22 +182,12 @@ const useRegisterStore = create((set, get) => ({
         get().startTimer();
         set({ otp: new Array(6).fill('') });
         
-        Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: 'OTP resent successfully!',
-          position: 'center',
-          confirmButtonColor: '#0056B3',
-          iconColor: '#0056B3',
-        });
+        displayToast('success', 'OTP resent successfully!');
       }
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Something went wrong resending OTP',
-        position: 'center',
-      });
+      displayToast('error', 'Something went wrong resending OTP');
+    } finally {
+      set({ isResending: false });
     }
   },
 

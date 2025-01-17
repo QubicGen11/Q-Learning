@@ -4,6 +4,7 @@ import { FiEye, FiEyeOff, FiUser, FiMail } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import Swal from "sweetalert2";
 import "react-toastify/dist/ReactToastify.css";
+import { motion, AnimatePresence } from 'framer-motion';
 
 import Newnavbar from "../New Landingpage/New Navbar Components/Newnavbar";
 import useRegisterStore from "../../stores/registerStore";
@@ -17,6 +18,7 @@ const NewRegister = () => {
     loading,
     timer,
     canResend,
+    isResending,
     updateForm,
     updateOtp,
     register,
@@ -420,65 +422,228 @@ const NewRegister = () => {
 
       {/* OTP Modal */}
       {showOtpModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96 relative">
-            <button
-              onClick={() => {
-                useRegisterStore.getState().closeOtpModal();
+        <AnimatePresence>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div 
+              initial={{ y: -100, opacity: 0, rotateX: 90 }}
+              animate={{ 
+                y: 0, 
+                opacity: 1,
+                rotateX: 0,
+                transition: {
+                  type: "spring",
+                  damping: 15,
+                  stiffness: 100,
+                  duration: 0.7
+                }
               }}
-              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+              exit={{ 
+                y: 100,
+                opacity: 0,
+                rotateX: -90,
+                transition: {
+                  duration: 0.3
+                }
+              }}
+              className="bg-white p-8 rounded-lg shadow-lg w-96 relative backdrop-blur-lg"
             >
-              ✕
-            </button>
-            <h2 className="text-xl font-medium mb-6">Enter OTP</h2>
-            <div className="flex gap-2 justify-center mb-6">
-              {otp.map((data, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  maxLength="1"
-                  value={data}
-                  onChange={(e) => handleOtpChange(e.target, index)}
-                  onPaste={handlePaste}
-                  onKeyUp={(e) => {
-                    if (
-                      e.key === "Backspace" &&
-                      !e.target.value &&
-                      e.target.previousSibling
-                    ) {
-                      e.target.previousSibling.focus();
+              <motion.button
+                whileHover={{ 
+                  scale: 1.2, 
+                  rotate: 180,
+                  transition: { duration: 0.3 }
+                }}
+                whileTap={{ scale: 0.8 }}
+                onClick={() => {
+                  useRegisterStore.getState().closeOtpModal();
+                }}
+                className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </motion.button>
+              <motion.h2 
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ 
+                  x: 0, 
+                  opacity: 1,
+                  transition: {
+                    type: "spring",
+                    damping: 10,
+                    stiffness: 100
+                  }
+                }}
+                className="text-xl font-medium mb-6"
+              >
+                Enter OTP
+              </motion.h2>
+              <div className="flex gap-2 justify-center mb-6">
+                {otp.map((data, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ y: -100, opacity: 0, rotateX: 90 }}
+                    animate={{ 
+                      y: 0, 
+                      opacity: 1,
+                      rotateX: 0,
+                      transition: {
+                        type: "spring",
+                        damping: 12,
+                        stiffness: 100,
+                        delay: index * 0.1,
+                        duration: 0.5
+                      }
+                    }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      transition: { duration: 0.2 }
+                    }}
+                    className="relative"
+                  >
+                    <motion.input
+                      whileFocus={{ 
+                        scale: 1.1,
+                        boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)",
+                        transition: { duration: 0.2 }
+                      }}
+                      type="text"
+                      maxLength="1"
+                      value={data}
+                      onChange={(e) => handleOtpChange(e.target, index)}
+                      onPaste={handlePaste}
+                      onKeyUp={(e) => {
+                        if (e.key === "Backspace" && !e.target.value && e.target.previousSibling) {
+                          e.target.previousSibling.focus();
+                        }
+                      }}
+                      className="w-12 h-12 border-2 rounded text-center text-xl font-medium
+                               focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
+                               transition-all transform"
+                    />
+                    <motion.div
+                      initial={{ scaleX: 0 }}
+                      animate={{ 
+                        scaleX: data ? 1 : 0,
+                        transition: { duration: 0.2 }
+                      }}
+                      className="absolute bottom-0 left-0 w-full h-1 bg-blue-500 origin-left"
+                    />
+                  </motion.div>
+                ))}
+              </div>
+              {timer > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ 
+                    opacity: 1, 
+                    scale: 1,
+                    transition: {
+                      type: "spring",
+                      damping: 10
                     }
                   }}
-                  className="w-12 h-12 border-2 rounded text-center text-xl font-medium
-                           focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
-                           transition-all"
-                />
-              ))}
-            </div>
-            {timer > 0 && (
-              <div className="text-center text-sm text-gray-600 mb-4">
-                Time remaining: {timer} seconds
-              </div>
-            )}
-            <button
-              onClick={handleVerifyOtp}
-              disabled={isVerifying}
-              className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-70"
-            >
-              {isVerifying ? "Verifying..." : "Verify OTP"}
-            </button>
-            <button
-              onClick={handleResendOtp}
-              disabled={!canResend || isVerifying}
-              className={`mt-4 text-sm ${
-                canResend ? "text-blue-500 hover:underline" : "text-gray-400"
-              } disabled:opacity-70 w-full text-center`}
-            >
-              {canResend ? "Resend OTP" : "Wait to resend OTP"}
-            </button>
-          </div>
-        </div>
+                  className="text-center text-sm text-gray-600 mb-4"
+                >
+                  <motion.span
+              
+                    className="inline-block"
+                  >
+                    Time remaining: {timer} seconds
+                  </motion.span>
+                </motion.div>
+              )}
+              <motion.button
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 5px 15px rgba(0, 86, 179, 0.3)"
+                }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ 
+                  y: 0, 
+                  opacity: 1,
+                  transition: {
+                    type: "spring",
+                    damping: 12,
+                    stiffness: 100,
+                    delay: 0.5
+                  }
+                }}
+                onClick={handleVerifyOtp}
+                disabled={isVerifying}
+                className="w-full bg-[#0056B3] text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium 
+                         disabled:opacity-70 transform"
+              >
+                {isVerifying ? (
+                  <motion.span
+                    animate={{
+                      rotate: 360
+                    }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    className="inline-block"
+                  >
+                    ⟳
+                  </motion.span>
+                ) : "Verify OTP"}
+              </motion.button>
+              <motion.button
+                whileHover={{ 
+                  scale: 1.05,
+                  color: canResend ? "#0056B3" : undefined
+                }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ 
+                  y: 0, 
+                  opacity: 1,
+                  transition: {
+                    type: "spring",
+                    damping: 12,
+                    stiffness: 100,
+                    delay: 0.6
+                  }
+                }}
+                onClick={handleResendOtp}
+                disabled={!canResend || isVerifying || isResending}
+                className={`mt-4 text-sm ${
+                  canResend ? "text-blue-500 hover:underline" : "text-gray-400"
+                } disabled:opacity-70 w-full text-center transform flex items-center justify-center gap-2`}
+              >
+                {isResending ? (
+                  <>
+                    <motion.span
+                      animate={{
+                        rotate: 360
+                      }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                      className="inline-block"
+                    >
+                      ⟳
+                    </motion.span>
+                    <span>Resending...</span>
+                  </>
+                ) : (
+                  canResend ? "Resend OTP" : "Wait to resend OTP"
+                )}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       )}
+
+      
     </div>
   );
 };
