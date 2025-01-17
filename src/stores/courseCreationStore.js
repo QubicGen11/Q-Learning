@@ -153,12 +153,12 @@ const initialData = {
     hashTags: []
   },
   
-  courseFaqs: [
-    {
-      question: "",
-      answer: ""
-    }
-  ],
+  // courseFaqs: [
+  //   {
+  //     question: "",
+  //     answer: ""
+  //   }
+  // ],
   
   comments: [
     {
@@ -289,7 +289,7 @@ const useCourseCreationStore = create((set, get) => ({
     content: { 
       chapters: []
     },
-    courseFaqs: [],
+    // courseFaqs: [],
     settings: {
       courseVisibility: { public: false, enablePreview: false },
       courseAccess: { duration: '', lifetimeAccess: false },
@@ -445,27 +445,74 @@ const useCourseCreationStore = create((set, get) => ({
 
   submitCourse: async () => {
     const { courseData } = get();
-
-    // Format courseSettings and ensure promotionType has a value
-    const formattedData = {
-      ...courseData,
-      courseSettings: {
-        create: [{
-          ...courseData.courseSettings[0],
-          promotionType: courseData.courseSettings[0]?.promotionType || "Discount" // Ensure default value
-        }]
-      },
-      coursePreRequisites: courseData.coursePreRequisites.map(prereq => ({
-        preRequisiteRequired: prereq.preRequisiteRequired || "",
-        preRequisiteLevel: prereq.preRequisiteLevel || ""
-      })),
-      courseAudience: Array.isArray(courseData.courseAudience) ? courseData.courseAudience : [],
-      categoryImage: courseData.categoryImage || "",
-      courseBanner: courseData.courseBanner || "",
-      courseImage: courseData.courseImage || ""
-    };
-
+    
     try {
+      const settings = courseData.courseSettings?.[0];
+      
+      // Format course settings as a direct object, not an array
+      const courseSettings = {
+        courseType: settings.courseType,
+        percentageRequired: parseInt(settings.percentageRequired),
+        pricingType: settings.pricingType,
+        promotionType: settings.promotionType,
+        publicAccess: Boolean(settings.publicAccess),
+        enablePreview: Boolean(settings.enablePreview),
+        price: parseFloat(settings.price),
+        discount: parseFloat(settings.discount),
+        offeredPrice: parseFloat(settings.offeredPrice),
+        // Format dates to ISO-8601 with time component
+        startDate: settings.startDate ? new Date(settings.startDate).toISOString() : null,
+        endDate: settings.endDate ? new Date(settings.endDate).toISOString() : null,
+        maxStudents: parseInt(settings.maxStudents),
+        certificateEligibility: Boolean(settings.certificateEligibility),
+        accessDuration: settings.accessDuration,
+        lifeTimeAccess: Boolean(settings.lifeTimeAccess),
+        notifyStudentsOnUpdate: Boolean(settings.notifyStudentsOnUpdate),
+        notifyStudentsOnAssignment: Boolean(settings.notifyStudentsOnAssignment),
+        returnPeriod: settings.returnPeriod,
+        refundsAllowed: Boolean(settings.refundsAllowed),
+        allowContentDownloads: Boolean(settings.allowContentDownloads),
+        allowDiscussionParticipation: Boolean(settings.allowDiscussionParticipation),
+        scheduleLiveClasses: Boolean(settings.scheduleLiveClasses),
+        enableSubtitles: Boolean(settings.enableSubtitles),
+        seoTitle: settings.seoTitle,
+        seoDescription: settings.seoDescription,
+        seoKeywords: settings.seoKeywords ? [settings.seoKeywords] : [],
+        hashTags: settings.hashtags ? 
+          settings.hashtags.split(',')
+            .map(tag => tag.trim())
+            .filter(Boolean) : 
+          []
+      };
+
+      const formattedData = {
+        trainerId: courseData.trainerId,
+        trainerName: courseData.trainerName,
+        courseName: courseData.basicInfo?.courseName,
+        courseTagline: courseData.basicInfo?.courseTagline,
+        courseDuration: courseData.basicInfo?.courseDuration,
+        difficultyLevel: courseData.basicInfo?.difficultyLevel,
+        category: courseData.basicInfo?.category,
+        subCategory: courseData.basicInfo?.subCategory,
+        teachingLanguage: courseData.basicInfo?.teachingLanguage,
+        courseDescription: courseData.about?.courseDescription || '',
+        courseOutcome: courseData.about?.courseOutcome || '',
+        coursePreRequisites: courseData.about?.coursePreRequisites || [],
+        courseAudience: courseData.about?.courseAudience || [],
+        categoryImage: courseData.media?.categoryImage || '',
+        courseBanner: courseData.media?.courseBanner || '',
+        courseImage: courseData.media?.courseImage || '',
+        isDraft: true,
+        status: 'DRAFT',
+        courseChapters: courseData.content?.chapters || [],
+        glossary: courseData.glossary || [],
+        references: courseData.references || [],
+        courseFaqs: courseData.courseFaqs || [],
+        courseSettings // Send as direct object, not array
+      };
+
+      console.log('API Request Payload:', JSON.stringify(formattedData, null, 2));
+
       const token = Cookies.get('accessToken');
       const response = await axios.post(
         'http://localhost:8089/qlms/courses',
@@ -473,10 +520,12 @@ const useCourseCreationStore = create((set, get) => ({
         {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         }
       );
+
       return response.data;
     } catch (error) {
       console.error('API Error:', error.response?.data);
@@ -514,7 +563,7 @@ const useCourseCreationStore = create((set, get) => ({
         content: { 
           chapters: []
         },
-        courseFaqs: [],
+        // courseFaqs: [],
         settings: {
           courseVisibility: { public: false, enablePreview: false },
           courseAccess: { duration: '', lifetimeAccess: false },
