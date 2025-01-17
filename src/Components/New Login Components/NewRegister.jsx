@@ -239,7 +239,7 @@ const NewRegister = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="w-full max-w-[450px]"
+            className="w-full max-w-[350px]"
           >
             {/* Login/Register Tabs */}
             <div className="flex w-full border-b border-gray-200 mb-6">
