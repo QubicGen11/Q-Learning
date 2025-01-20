@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import config from '../config/apiConfig';
 
 const useCourseLearnStore = create((set, get) => ({
@@ -15,7 +16,12 @@ const useCourseLearnStore = create((set, get) => ({
       set({ isLoading: true });
       console.log('Fetching course with ID:', courseId);
       
-      const response = await axios.get(`http://localhost:8089/qlms/getCourseById/${courseId}`);
+      const token = Cookies.get('accessToken');
+      const response = await axios.get(`http://localhost:8089/qlms/courses/${courseId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       console.log('Raw API response:', response.data);
       
       if (!response.data) {

@@ -1,29 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import usePreLoginFeedStore from '../../stores/preLoginFeedStore';
+import axios from 'axios';
 import Newnavbar from '../New Landingpage/New Navbar Components/Newnavbar';
 import CourseBanner from './CourseBanner';
 import Coursebarsec from './Coursebarsec';
-
 import Footer from '../New Landingpage/Footer/Footer';
 import SuperLoader from '../Common/SuperLoader';
+import Cookies from 'js-cookie';
 
 const Coursepagemain = () => {
   const { id } = useParams();
-  const { getCourseById, isLoading, fetchPreLoginFeed } = usePreLoginFeedStore();
-  
-  useEffect(() => {
-    // Fetch data when component mounts
-    fetchPreLoginFeed();
-  }, []); // Empty dependency array means this runs once when component mounts
+  const [courseData, setCourseData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const courseData = getCourseById(id);
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setIsLoading(true);
+      
+        const token = Cookies.get('accessToken');
+        const response = await axios.get(`http://localhost:8089/qlms/courses/2c0199b8-2ee7-40a6-83ac-58335a7309ac`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        setCourseData(response.data);
+        setCourseData(response.data.course); // Access the course object from the response
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching course:', error);
+        setError(error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourseData();
+  }, [id]);
 
   if (isLoading) {
     return <SuperLoader />;
   }
 
-  if (!courseData) {
+  if (error || !courseData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -34,41 +54,41 @@ const Coursepagemain = () => {
     );
   }
 
-  // Extract pricing information from courseSettings
-  const pricing = courseData.courseSettings?.[0]?.settings || {
-    price: 0,
-    discount: 0,
-    offeredPrice: 0
-  };
-
   return (
     <div>
       <Newnavbar />
       <CourseBanner 
-  title={courseData.courseName}
-  courseTagline={courseData.courseTagline}
-  description={courseData.courseDescription}
-  thumbnail={courseData.courseImage}
-  courseBanner={courseData.courseBanner}
-  categoryImage={courseData.categoryImage}
-  courseImage={courseData.courseImage}
-  category={courseData.category}
-  subCategory={courseData.subCategory}
-  updatedAt={courseData.updatedAt}
-  teachingLanguage={courseData.teachingLanguage}
-  courseRating={courseData.courseRating}
-  rating={courseData.rating}  // Add this line
-  price={courseData.courseSettings[0]?.settings.price}
-  originalPrice={courseData.courseSettings[0]?.settings.offeredPrice}
-  discount={courseData.courseSettings[0]?.settings.discount}
-/>
-      <Coursebarsec 
-       
+        title={courseData.courseName}
         courseId={courseData.id}
-        courseOutcome={courseData.courseOutcome}
+        courseTagline={courseData.courseTagline}
+        description={courseData.courseDescription}
+        thumbnail={courseData.courseImage}
+        courseBanner={courseData.courseBanner}
+        categoryImage={courseData.categoryImage}
+        courseImage={courseData.courseImage}
+        category={courseData.category}
+        subCategory={courseData.subCategory}
+        updatedAt={courseData.updatedAt}
+        teachingLanguage={courseData.teachingLanguage}
+        courseRating={courseData.courseRating}
+        rating={courseData.rating}
+        price={courseData.courseSettings?.[0]?.price}
+        originalPrice={courseData.courseSettings?.[0]?.offeredPrice}
+        discount={courseData.courseSettings?.[0]?.discount}
+        trainerName={courseData.trainerName}
+        courseDuration={courseData.courseDuration}
+        difficultyLevel={courseData.difficultyLevel}
+        prerequisites={courseData.coursePreRequisites}
+        audience={courseData.courseAudience}
+        glossary={courseData.glossary}
+        references={courseData.references}
+        faqs={courseData.courseFaqs}
       />
-    
-      
+      <Coursebarsec 
+        courseId={courseData.id}
+        courseOutcome={courseData.courseOutCome}
+        chapters={courseData.courseChapters}
+      />
       <Footer />
     </div>
   );

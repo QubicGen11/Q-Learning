@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FaHeart, FaVolumeMute } from 'react-icons/fa';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const CourseBanner = ({ 
   title, 
@@ -17,7 +19,8 @@ const CourseBanner = ({
   teachingLanguage,
   courseRating,
   categoryImage,
-  rating
+  rating,
+  courseId
 }) => {
   const [isCompact, setIsCompact] = useState(false);
   const bannerRef = useRef(null);
@@ -52,6 +55,56 @@ const CourseBanner = ({
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isCompact]);
+
+  const initializePayment = async () => {
+    try {
+      const userId = "9e7b2f75-881c-4d03-8571-8b8e5757e422"
+      
+      const response = await axios.post('http://localhost:8089/qlms/enrollments', {
+        userId: userId,
+        courseId: courseId
+      });
+
+      const options = {
+        key: "rzp_live_Uh1YNofz5Dakit",
+        amount: price * 100,
+        currency: "INR",
+        name: "QubiNest Learning",
+        description: `Enrollment for ${title}`,
+        order_id: response.data.paymentId,
+        handler: async function (response) {
+          try {
+            await axios.post('http://localhost:8089/qlms/webhook', {
+              enrollmentId: response.data.id,
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature
+            });
+            
+            alert('Payment successful! You are now enrolled in the course.');
+            window.location.reload();
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            alert('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: Cookies.get('userName'),
+          email: Cookies.get('userEmail')
+        },
+        theme: {
+          color: "#0056B3"
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+    } catch (error) {
+      console.error('Payment initialization failed:', error);
+      alert('Could not initialize payment. Please try again.');
+    }
+  };
 
   return (
     <div className="relative">
@@ -154,7 +207,10 @@ const CourseBanner = ({
                 <button className="w-full bg-[#0056b3] text-white py-3 rounded font-semibold mb-3 hover:bg-blue-700 transition-colors">
                   Add to Cart
                 </button>
-                <button className="w-full bg-[#f3f4f6] text-blue-600 border-2 py-3 rounded font-semibold hover:bg-blue-50 transition-colors">
+                <button 
+                  onClick={initializePayment}
+                  className="w-full bg-[#f3f4f6] text-blue-600 border-2 py-3 rounded font-semibold hover:bg-blue-50 transition-colors"
+                >
                   Buy Now
                 </button>
 
@@ -198,7 +254,10 @@ const CourseBanner = ({
                 <button className="bg-[#0056b3] text-white px-4 py-2 rounded hover:bg-blue-700">
                   Add to Cart
                 </button>
-                <button className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100">
+                <button 
+                  onClick={initializePayment}
+                  className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100"
+                >
                   Buy Now
                 </button>
               </div>
