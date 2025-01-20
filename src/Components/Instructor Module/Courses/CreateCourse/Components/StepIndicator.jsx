@@ -390,121 +390,152 @@ const StepIndicator = () => {
     </button>
   </div>
 
-
-<button
-  onClick={async () => {
-    const { 
-      basicInfo, 
-      media, 
-      courseSettings,
-      glossary,
-      references,
-      courseFaqs,
-      faq  
-    } = courseData || {};
-    
-    // Comprehensive validation checks
-    const validationErrors = [];
-
-    // Basic Info validation
-    if (!basicInfo?.courseName) validationErrors.push("Course name is required");
-    if (!basicInfo?.courseTagline) validationErrors.push("Course tagline is required");
-    if (!basicInfo?.category) validationErrors.push("Category is required");
-    if (!basicInfo?.subCategory) validationErrors.push("Subcategory is required");
-    if (!basicInfo?.teachingLanguage) validationErrors.push("Teaching language is required");
-
-    // Media validation
-    if (!media?.courseBanner) validationErrors.push("Course banner is required");
-    if (!media?.courseImage) validationErrors.push("Course image is required");
-
-    // Course Settings validation
-    if (!courseSettings?.[0]) {
-      validationErrors.push("Course settings are required");
-    } else {
-      const settings = courseSettings[0];
-      if (!settings.pricingType) validationErrors.push("Pricing type is required");
-      if (!settings.promotionType) validationErrors.push("Promotion type is required");
-      if (settings.pricingType === 'Paid' && !settings.price) validationErrors.push("Price is required for paid courses");
-      if (!settings.accessDuration && !settings.lifeTimeAccess) validationErrors.push("Either access duration or lifetime access must be specified");
-      if (settings.promotionType === 'Limited Time' && (!settings.startDate || !settings.endDate)) {
-        validationErrors.push("Start and end dates are required for limited time promotions");
+  {/* Add Save as Draft button */}
+  <button
+    onClick={async () => {
+      try {
+        setIsSubmitting(true);
+        await submitCourse(true); // true for draft
+        displayToast('success', 'Course saved as draft successfully!');
+      } catch (error) {
+        displayToast('error', 'Failed to save draft');
+      } finally {
+        setIsSubmitting(false);
       }
-      if (typeof settings.publicAccess !== 'boolean') validationErrors.push("Public access setting is required");
-      if (typeof settings.enablePreview !== 'boolean') validationErrors.push("Preview setting is required");
-      if (typeof settings.notifyStudentsOnUpdate !== 'boolean') validationErrors.push("Student notification setting is required");
-      if (typeof settings.refundsAllowed !== 'boolean') validationErrors.push("Refund policy setting is required");
-    }
+    }}
+    disabled={isSubmitting}
+    className="px-4 py-1 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
+  >
+    {isSubmitting ? (
+      <>
+        <span className="animate-spin mr-2">⌛</span>
+        Saving...
+      </>
+    ) : (
+      'Save as Draft'
+    )}
+  </button>
 
-    // Additional required sections
-    if (!glossary?.length) validationErrors.push("At least one glossary item is required");
-    if (!references?.length) validationErrors.push("At least one reference is required");
-    
-    // FAQ validation
-    // const faqData = courseFaqs || faq || [];
-    // const hasFaqs = Array.isArray(faqData) && faqData.some(faq => 
-    //   faq?.question?.trim() && faq?.answer?.trim()
-    // );
-    
-    // if (!hasFaqs) {
-    //   validationErrors.push("At least one FAQ with question and answer is required");
-    // }
+  {/* Submit for Review button */}
+  <button
+    onClick={async () => {
+      const { 
+        basicInfo, 
+        media, 
+        courseSettings,
+        glossary,
+        references,
+        courseFaq,
+        faq  
+      } = courseData || {};
+      
+      // Add console.log to debug
+      console.log('Course Data:', {
+        courseFaq,
+        faq,
+        courseData
+      });
 
-    // Display validation errors if any
-    if (validationErrors.length > 0) {
-      displayToast('error', validationErrors[0]);
-      return;
-    }
+      // Comprehensive validation checks
+      const validationErrors = [];
 
-    // Show comment dialog first
-    setShowCommentDialog(true);
-  }}
-  disabled={isSubmitting}
-  className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
->
-  {isSubmitting ? (
-    <>
-      <span className="animate-spin mr-2">⌛</span>
-      Submitting...
-    </>
-  ) : (
-    'Submit for Review'
-  )}
-</button>
+      // Basic Info validation
+      if (!basicInfo?.courseName) validationErrors.push("Course name is required");
+      if (!basicInfo?.courseTagline) validationErrors.push("Course tagline is required");
+      if (!basicInfo?.category) validationErrors.push("Category is required");
+      if (!basicInfo?.subCategory) validationErrors.push("Subcategory is required");
+      if (!basicInfo?.teachingLanguage) validationErrors.push("Teaching language is required");
 
+      // Media validation
+      if (!media?.courseBanner) validationErrors.push("Course banner is required");
+      if (!media?.courseImage) validationErrors.push("Course image is required");
+      
+      // Course Settings validation
+      if (!courseSettings?.[0]) {
+        validationErrors.push("Course settings are required");
+      } else {
+        const settings = courseSettings[0];
+        if (!settings.pricingType) validationErrors.push("Pricing type is required");
+        if (!settings.promotionType) validationErrors.push("Promotion type is required");
+        if (settings.pricingType === 'Paid' && !settings.price) validationErrors.push("Price is required for paid courses");
+      }
+
+      // Glossary and References validation
+      if (!glossary || glossary.length === 0) {
+        validationErrors.push("At least one glossary term is required");
+      }
+      if (!references || references.length === 0) {
+        validationErrors.push("At least one reference is required");
+      }
+
+      // FAQ validation with debug logs
+      console.log('FAQ Data:', { courseFaq, faq });
+      const faqs = courseFaq || faq;
+      console.log('Combined FAQs:', faqs);
+      
+      if (!faqs || faqs.length === 0) {
+        console.log('FAQ Validation Failed');
+        validationErrors.push("At least one FAQ is required");
+      }
+
+      // Log all validation errors
+      console.log('Validation Errors:', validationErrors);
+
+      // Display validation errors if any
+      if (validationErrors.length > 0) {
+        displayToast('error', validationErrors[0]);
+        return;
+      }
+
+      // Show validation dialog first
+      setShowValidationDialog(true);
+    }}
+    disabled={isSubmitting}
+    className="px-4 py-1 h-8 text-sm text-white bg-[#0056B3] hover:bg-[#004494] rounded-md flex items-center gap-2"
+  >
+    {isSubmitting ? (
+      <>
+        <span className="animate-spin mr-2">⌛</span>
+        Submitting...
+      </>
+    ) : (
+      'Submit for Review'
+    )}
+  </button>
 
 </div>
         </div>
 
         <div>
-          <CommentDialog  
-  isOpen={showCommentDialog}
-  onClose={() => setShowCommentDialog(false)}
-  onSubmit={(comment) => {
-    setShowCommentDialog(false);
-    setShowValidationDialog(true); // Show validation dialog after comment submission
-  }}
-  />  
-</div>
-
-        <ValidationDialog
-          isOpen={showValidationDialog}
-          onClose={() => setShowValidationDialog(false)}
-          onConfirm={async () => {
-            try {
-              setIsSubmitting(true);
-              await submitCourse(navigate);
+          {/* Validation Dialog */}
+          <ValidationDialog
+            isOpen={showValidationDialog}
+            onClose={() => setShowValidationDialog(false)}
+            onConfirm={() => {
               setShowValidationDialog(false);
-              displayToast('success', 'Course submitted for review successfully!');
-            } catch (error) {
-              displayToast('error', 'Failed to submit course');
-            } finally {
-              setIsSubmitting(false);
-            }
-          }}
-        />
+              setShowCommentDialog(true); // Show comment dialog after validation
+            }}
+          />
 
-       
- 
+          {/* Comment Dialog */}
+          <CommentDialog  
+            isOpen={showCommentDialog}
+            onClose={() => setShowCommentDialog(false)}
+            onSubmit={async (comment) => {
+              try {
+                setIsSubmitting(true);
+                await submitCourse(false); // false for direct submit
+                setShowCommentDialog(false);
+                displayToast('success', 'Course submitted for review successfully!');
+              } catch (error) {
+                displayToast('error', 'Failed to submit course');
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
+          />  
+        </div>
+
         {/* Keep existing Step Indicator and add Settings heading when on settings page */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">

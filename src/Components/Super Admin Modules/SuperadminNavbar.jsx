@@ -1,17 +1,19 @@
-import React, { useRef,useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { HiMenu } from 'react-icons/hi';
 import { BiSearch } from 'react-icons/bi';
 import { FiBell } from 'react-icons/fi';
 import { IoMdLogOut } from 'react-icons/io';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useNavbarStore from '../../stores/navbarStore';
 import useAuthStore from '../../stores/authStore';
 import useSidebarStore from '../../stores/sidebarStore';
+import Cookies from 'js-cookie';
     
 const SuperadminNavbar = () => {
+  const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const { isProfileDropdownOpen, toggleProfileDropdown, closeAll } = useNavbarStore();
-  const { userName, role } = useAuthStore();
+  const { userName, role, logout } = useAuthStore();
   const { toggleSidebar } = useSidebarStore();
 
   useEffect(() => {
@@ -24,6 +26,18 @@ const SuperadminNavbar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [closeAll]);
+
+  const handleLogout = () => {
+    // Clear cookies
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    
+    // Clear auth store
+    logout();
+    
+    // Navigate to login
+    navigate('/login');
+  };
 
   return (
     <div className="h-16 bg-white border-b flex items-center justify-between px-4">

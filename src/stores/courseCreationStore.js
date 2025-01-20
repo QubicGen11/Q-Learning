@@ -444,7 +444,7 @@ const useCourseCreationStore = create((set, get) => ({
     return false;
   },
 
-  submitCourse: async () => {
+  submitCourse: async (isDraft = true) => {
     const { courseData } = get();
     
     try {
@@ -506,8 +506,8 @@ const useCourseCreationStore = create((set, get) => ({
         categoryImage: courseData.media?.categoryImage || '',
         courseBanner: courseData.media?.courseBanner || '',
         courseImage: courseData.media?.courseImage || '',
-        isDraft: true,
-        status: 'DRAFT',
+        isDraft: isDraft,
+        status: isDraft ? 'DRAFT' : 'PENDING_APPROVAL',
         courseChapters: courseData.content?.chapters || [],
         glossary: courseData.glossary || [],
         references: courseData.references || [],
@@ -527,7 +527,7 @@ const useCourseCreationStore = create((set, get) => ({
 
       const token = Cookies.get('accessToken');
       const response = await axios.post(
-        'http://localhost:8089/qlms/courses',
+        'http://localhost:8089/qlms/courses/draft',
         formattedData,
         {
           headers: {
@@ -536,6 +536,12 @@ const useCourseCreationStore = create((set, get) => ({
             'Accept': 'application/json'
           }
         }
+      );
+
+        // Show appropriate success message
+      toast.success(isDraft 
+        ? "Course saved as draft successfully!" 
+        : "Course submitted for review successfully!"
       );
 
       return response.data;

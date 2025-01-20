@@ -31,7 +31,7 @@ const CoursePreviewOffcanvas = ({ isOpen, onClose, course }) => {
         {/* Header */}
         <div className="sticky top-0 left-0 right-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <h1 className="text-[18px] font-medium text-[#1F2A37] font-[700]">[Course] Preview</h1>
+            <h1 className="text-[18px] font-medium text-[#1F2A37] font-[700]">{course?.courseName || '[Course]'} Preview</h1>
             <div className="flex gap-2">
               <button className="text-gray-600">
                 <AiOutlineExpandAlt className='text-[18px] text-[#1F2A37] font-bold' />
@@ -51,38 +51,44 @@ const CoursePreviewOffcanvas = ({ isOpen, onClose, course }) => {
           <div className="p-4 space-y-4 text-[13px]">
             <div className="flex justify-between">
               <label className="block text-gray-600 mb-1 font-[600] w-[130px]">Course Name</label>
-              <div className="text-gray-600 font-[500] w-[290px] ml-auto text-end">[Course Name]</div>
+              <div className="text-gray-600 font-[500] w-[290px] ml-auto text-end">
+                {course?.courseName || '[Course Name]'}
+              </div>
             </div>
 
             <div className="flex justify-between">
               <label className="block text-gray-600 mb-1 font-[600] w-[130px]">Tagline</label>
               <div className="text-gray-600 font-[500] w-[290px] ml-auto text-end">
-                Engage with expert instructors in real-time through interactive
+                {course?.courseTagline || 'No tagline available'}
               </div>
             </div>
 
             <div className="flex justify-between">
               <label className="block text-gray-600 mb-1 font-[600] w-[130px]">Category</label>
-              <select className=" text-right appearance-none bg-transparent w-[290px] ml-auto">
-                <option>Design</option>
+              <select className="text-right appearance-none bg-transparent w-[290px] ml-auto">
+                <option>{course?.category || 'Design'}</option>
               </select>
             </div>
 
             <div className="flex justify-between">
               <label className="block text-gray-600 mb-1 font-[600] w-[130px]">Sub-Category</label>
-              <select className=" text-right appearance-none bg-transparent w-[290px] ml-auto">
-                <option>Sub-Category</option>
+              <select className="text-right appearance-none bg-transparent w-[290px] ml-auto">
+                <option>{course?.subCategory || 'Sub-Category'}</option>
               </select>
             </div>
 
             <div className="flex justify-between">
               <label className="block text-gray-600 mb-1 font-[600] w-[130px]">Language</label>
-              <div className="text-gray-600 font-[500] w-[290px] ml-auto text-end">Teaching in [Language]</div>
+              <div className="text-gray-600 font-[500] w-[290px] ml-auto text-end">
+                {course?.teachingLanguage || 'Teaching in [Language]'}
+              </div>
             </div>
 
             <div className="flex justify-between">
               <label className="block text-gray-600 mb-1 font-[600] w-[130px]">Instructor</label>
-              <div className="text-[#0056B3] font-[500] w-[290px] ml-auto text-end underline">Instructor Name</div>
+              <div className="text-[#0056B3] font-[500] w-[290px] ml-auto text-end underline">
+                {course?.trainerName || 'Instructor Name'}
+              </div>
             </div>
 
             <div className="">

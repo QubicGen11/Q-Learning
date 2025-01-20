@@ -4,11 +4,33 @@ import { CiFilter } from 'react-icons/ci';
 import { FaRegCheckCircle } from 'react-icons/fa';
 import { FiFilter } from 'react-icons/fi';
 import CoursePreviewOffcanvas from './CoursePreviewOffcanvas';
+import useSuperAdminStore from '../../stores/superAdminStore';
 
 const ReviewAndApproval = () => {
   const [activeTab, setActiveTab] = useState('Courses');
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+
+  const { 
+    loading, 
+    currentPage,
+    selectedCourses,
+    fetchCoursesForReview,
+    toggleCourseSelection,
+    selectAllCourses,
+    nextPage,
+    previousPage,
+    getPaginatedData,
+    getTotalPages
+  } = useSuperAdminStore();
+
+  // Get current page data
+  const currentCourses = getPaginatedData();
+  const totalPages = getTotalPages();
+
+  useEffect(() => {
+    fetchCoursesForReview();
+  }, []);
 
   useEffect(() => {
     if (isOffcanvasOpen) {
@@ -22,22 +44,9 @@ const ReviewAndApproval = () => {
     };
   }, [isOffcanvasOpen]);
 
-  const tableData = [
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Design", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Development", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Music", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "LeaderShip", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Communication", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Generative AI", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Civil Softwares", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Dance", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-    { courseName: "Course Name", tagLine: "tagline of the course c...", category: "Devotional", subCategory: "Sub Category Name", language: "Teaching in this Course", instructor: "Instructor Name" },
-  ];
-
   const handleCourseClick = (course) => {
     setSelectedCourse(course);
     setIsOffcanvasOpen(true);
-    console.log("success");
   };
 
   return (
@@ -91,7 +100,12 @@ const ReviewAndApproval = () => {
           <thead>
             <tr className="border-b">
               <th className="w-10 py-3 px-4">
-                <input type="checkbox" className="rounded" />
+                <input 
+                  type="checkbox" 
+                  className="rounded"
+                  onChange={selectAllCourses}
+                  checked={selectedCourses.length === currentCourses.length && currentCourses.length > 0}
+                />
               </th>
               <th className="text-left py-3 px-4">Course Name</th>
               <th className="text-left py-3 px-4">Tag Line</th>
@@ -99,31 +113,44 @@ const ReviewAndApproval = () => {
               <th className="text-left py-3 px-4">Sub Category</th>
               <th className="text-left py-3 px-4">Language</th>
               <th className="text-left py-3 px-4">Instructor</th>
+              <th className="text-left py-3 px-4">Status</th>
             </tr>
           </thead>
           <tbody>
-            {tableData.map((row, index) => (
-              <tr key={index} className="border-b">
-                <td className="py-3 px-4">
-                  <input type="checkbox" className="rounded" />
-                </td>
-                <td 
-                  className="py-3 px-4 text-[#0056B3] cursor-pointer hover:underline"
-                  onClick={() => handleCourseClick(row)}
-                >
-                  {row.courseName}
-                </td>
-                <td className="py-3 px-4 text-[#0056B3]">{row.tagLine}</td>
-                <td className="py-3 px-4">
-                  <select className="border rounded px-2 py-1 w-full">
-                    <option>{row.category}</option>
-                  </select>
-                </td>
-                <td className="py-3 px-4">{row.subCategory}</td>
-                <td className="py-3 px-4">{row.language}</td>
-                <td className="py-3 px-4 text-[#0056B3]">{row.instructor}</td>
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="text-center py-4">Loading...</td>
               </tr>
-            ))}
+            ) : (
+              currentCourses.map((course, index) => (
+                <tr key={course.id || index} className="border-b">
+                  <td className="py-3 px-4">
+                    <input 
+                      type="checkbox" 
+                      className="rounded"
+                      checked={selectedCourses.includes(course.id)}
+                      onChange={() => toggleCourseSelection(course.id)}
+                    />
+                  </td>
+                  <td 
+                    className="py-3 px-4 text-[#0056B3] cursor-pointer hover:underline"
+                    onClick={() => handleCourseClick(course)}
+                  >
+                    {course.courseName}
+                  </td>
+                  <td className="py-3 px-4 text-[#0056B3]">{course.courseTagline}</td>
+                  <td className="py-3 px-4">
+                    <select className="border rounded px-2 py-1 w-full">
+                      <option>{course.category}</option>
+                    </select>
+                  </td>
+                  <td className="py-3 px-4">{course.subCategory}</td>
+                  <td className="py-3 px-4">{course.teachingLanguage}</td>
+                  <td className="py-3 px-4 text-[#0056B3]">{course.trainerName}</td>
+                  <td className="py-3 px-4 text-[#0056B3]">{course.status}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -136,14 +163,26 @@ const ReviewAndApproval = () => {
 
       {/* Pagination */}
       <div className="flex justify-center items-center gap-2 mt-4">
-        <button className="px-2 py-1">Previous</button>
-        <button className="w-8 h-8 rounded-full bg-[#0056B3] text-white flex items-center justify-center">1</button>
-        <button className="w-8 h-8 rounded-full text-gray-600 flex items-center justify-center">2</button>
-        <button className="w-8 h-8 rounded-full text-gray-600 flex items-center justify-center">3</button>
-        <span className="text-gray-600">...</span>
-        <button className="w-8 h-8 rounded-full text-gray-600 flex items-center justify-center">8</button>
-        <button className="w-8 h-8 rounded-full text-gray-600 flex items-center justify-center">9</button>
-        <button className="px-2 py-1">Next</button>
+        <button 
+          className="px-2 py-1"
+          onClick={previousPage}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <button className="w-8 h-8 rounded-full bg-[#0056B3] text-white flex items-center justify-center">
+          {currentPage}
+        </button>
+        <span className="text-gray-600">
+          of {totalPages}
+        </span>
+        <button 
+          className="px-2 py-1"
+          onClick={nextPage}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
       </div>
     </div>
   );

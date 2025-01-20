@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CoursePopover from "./CreateCourse/CoursePopover";
 
 import { HiArrowsUpDown } from "react-icons/hi2";
@@ -11,6 +11,8 @@ import "react-responsive-pagination/themes/classic.css";
 import { SlPencil } from "react-icons/sl";
 import { MdOutlineAdd } from "react-icons/md";
 import './Coursepage.css'
+import useCourseStore from "../../../stores/courseStore";
+
 
 
  
@@ -100,311 +102,46 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
 const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // Pagination state
-  const rowsPerPage = 9; // Number of rows per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
- 
-  const [courses] = useState([
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 1",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 2",
-      collaboration: "Team A",
-      status: "Published",
-      enrolledStudents: 32,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 3",
-      collaboration: "Team B",
-      status: "Needs Re-Submission",
-      enrolledStudents: 12,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 4",
-      collaboration: "Team C",
-      status: "Unpublished",
-      enrolledStudents: 5,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 5",
-      collaboration: "None",
-      status: "Draft",
-      enrolledStudents: 0,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 6",
-      collaboration: "None",
-      status: "Sent for Review",
-      enrolledStudents: 10,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 7",
-      collaboration: "Team B",
-      status: "Published",
-      enrolledStudents: 6,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Needs Re-Submission",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
 
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-    {
-      name: "Course Name 8",
-      collaboration: "Team C",
-      status: "Sent for Review",
-      enrolledStudents: 2,
-      description: "Placeholder",
-      addedOn: "DD-MM-YYYY",
-      publishedOn: "DD-MM-YYYY",
-    },
-  ]);
- 
+  // Add back the queries state
   const [queries] = useState([
     { courseName: "Course Name 1", query: "Why is this draft?" },
     { courseName: "Course Name 2", query: "How do I publish this course?" },
     { courseName: "Course Name 3", query: "How to add collaborators?" },
   ]);
- 
-  const totalPages = Math.ceil(courses.length / rowsPerPage); // Total pages for pagination
- 
+
+  // Get courses from store
+  const { courses, loading, error, fetchCourses } = useCourseStore();
+
+  // Fetch courses when component mounts
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  const totalPages = Math.ceil(courses.length / rowsPerPage);
+
   // Get rows for the current page
   const paginatedCourses = courses.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
- 
+
   const filteredCourses = paginatedCourses.filter((course) =>
-    course.name.toLowerCase().includes(searchQuery.toLowerCase())
+    course.courseName.toLowerCase().includes(searchQuery.toLowerCase())
   );
- 
+
   const handleCourseClick = (course) => {
     setSelectedCourse(course);
     setIsOffcanvasOpen(true);
     console.log("success");
   };
- 
+
   return (
-    <div className="container mx-auto p-6 bg-[#ffffff]  ">
+    <div className="container mx-auto p-6 bg-[#ffffff]">
       <h1 className="text-[18px] font-bold text-[#1F2A37]">Courses</h1>
       {/* Header */}
       <div className="flex justify-between items-center mb-5 mt-3">
@@ -442,112 +179,105 @@ const Courses = () => {
       </div>
  
       {/* Courses Table */}
-      <table className="w-full  border-collapse  border border-b-[#F3F4F6] text-left">
-        <thead className="text-[#4B5563 ]">
-        <tr className="border-b border-b-[#F3F4F6]">
-  <th className="px-4 py-2 text-left">
-    <input  type="checkbox" className=" rounded border-gray-300 
-                          focus:ring-[#0056B3] focus:ring-offset-0
-                          text-[#0056B3] 
-                          checked:bg-[#0056B3] 
-                          checked:hover:bg-[#0056B3] 
-                          checked:focus:bg-[#0056B3]
-                          accent-[#0056B3]"  />
-  </th>
-  <th className="px-4 py-2 text-left ">
-    <span className="flex items-center">
-      Course Name <HiArrowsUpDown className="ml-1" />
-    </span>
-  </th>
-  <th className="px-4 py-2 text-left">
-    Collaboration
-  </th>
-  <th className="px-4 py-2 ">
-    <span className="flex items-center justify-between">
-      Status <HiArrowsUpDown className="mr-5" />
-    </span>
-  </th>
-  <th className="px-4 py-2 text-left ">
-    <span className="flex items-center">
-      Enrolled Students <HiArrowsUpDown className="ml-5" />
-    </span>
-  </th>
-  <th className="px-4 py-2 text-left">
-    Version
-  </th>
-  <th className="px-4 py-2 text-left">
-    <span className="flex items-center">
-      Added On <HiArrowsUpDown className="ml-3" />
-    </span>
-  </th>
-  <th className="px-4 py-2 text-left">
-    <span className="flex items-center">
-      Published On <HiArrowsUpDown className="ml-1" />
-    </span>
-  </th>
-</tr>
+      {loading ? (
+        <div className="text-center py-4">Loading courses...</div>
+      ) : error ? (
+        <div className="text-center py-4 text-red-500">Error: {error}</div>
+      ) : (
+        <table className="w-full border-collapse border border-b-[#F3F4F6] text-left">
+          <thead className="text-[#4B5563 ]">
+          <tr className="border-b border-b-[#F3F4F6]">
+    <th className="px-4 py-2 text-left">
+      <input  type="checkbox" className=" rounded border-gray-300 
+                            focus:ring-[#0056B3] focus:ring-offset-0
+                            text-[#0056B3] 
+                            checked:bg-[#0056B3] 
+                            checked:hover:bg-[#0056B3] 
+                            checked:focus:bg-[#0056B3]
+                            accent-[#0056B3]"  />
+    </th>
+    <th className="px-4 py-2 text-left ">
+      <span className="flex items-center">
+        Course Name <HiArrowsUpDown className="ml-1" />
+      </span>
+    </th>
+    <th className="px-4 py-2 text-left">
+      Collaboration
+    </th>
+    <th className="px-4 py-2 ">
+      <span className="flex items-center justify-between">
+        Status <HiArrowsUpDown className="mr-5" />
+      </span>
+    </th>
+    <th className="px-4 py-2 text-left ">
+      <span className="flex items-center">
+        Enrolled Students <HiArrowsUpDown className="ml-5" />
+      </span>
+    </th>
+    <th className="px-4 py-2 text-left">
+      Version
+    </th>
+    <th className="px-4 py-2 text-left">
+      <span className="flex items-center">
+        Added On <HiArrowsUpDown className="ml-3" />
+      </span>
+    </th>
+    <th className="px-4 py-2 text-left">
+      <span className="flex items-center">
+        Published On <HiArrowsUpDown className="ml-1" />
+      </span>
+    </th>
+  </tr>
  
-        </thead>
-        <tbody>
-          {filteredCourses.length > 0 ? (
-            filteredCourses.map((course, index) => (
-              <tr
-                key={index}
-                className="hover:bg-gray-100 border-b border-b-[#F3F4F6] h-[45px] "
-              >
-                <td className="px-4 py-2 h-[40px] ">
-                  <input type="checkbox" className=" rounded border-gray-300 
-                          focus:ring-[#0056B3] focus:ring-offset-0
-                          text-[#0056B3] 
-                          checked:bg-[#0056B3] 
-                          checked:hover:bg-[#0056B3] 
-                          checked:focus:bg-[#0056B3]
-                          accent-[#0056B3]" />
-                </td>
-                <td 
-                  className="px-4 py-2 text-[#0056B3] cursor-pointer hover:underline"
-                  onClick={() => handleCourseClick(course)}
+          </thead>
+          <tbody>
+            {filteredCourses.length > 0 ? (
+              filteredCourses.map((course, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-100 border-b border-b-[#F3F4F6] h-[45px]"
                 >
-                  {course.name}
-                </td>
-                <td className="px-4 py-2">{course.collaboration}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`px-2 py-1 rounded ${
-                      course.status === "Published"
-                        ? "border border-[#28A745] text-[#28A745]"
-                        : course.status === "Draft"
-                        ? "border border-[#4B5563] text-[#4B5563]"
-                        : course.status === "Needs Re-Submission"
-                        ? "bg-[#0056B3] text-[#F5F5F5]"
-                        : course.status === "Unpublished"
-                        ? "border border-[#DC3545] text-[#DC3545]"
-                        : course.status === "Sent for Review"
-                        ? "border border-[#0056B3] text-[#0056B3]"
-                        : ""
-                    }`}
+                  <td className="px-4 py-2 h-[40px]">
+                    <input type="checkbox" className="rounded border-gray-300" />
+                  </td>
+                  <td
+                    className="px-4 py-2 text-[#0056B3] cursor-pointer hover:underline"
+                    onClick={() => handleCourseClick(course)}
                   >
-                    {course.status}
-                  </span>
+                    {course.courseName}
+                  </td>
+                  <td className="px-4 py-2">{course.collaboration || 'None'}</td>
+                  <td className="px-4 py-2">
+                    <span
+                      className={`px-2 py-1 rounded ${
+                        getStatusStyle(course.status)
+                      }`}
+                    >
+                      {course.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2">{course.enrolledStudents || 0}</td>
+                  <td className="px-4 py-2">{course.version || '1.0'}</td>
+                  <td className="px-4 py-2">
+                    {new Date(course.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-2">
+                    {course.publishedOn ? 
+                      new Date(course.publishedOn).toLocaleDateString() : 
+                      'Not published'}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center py-4 text-gray-500">
+                  No courses found
                 </td>
-                <td className="px-4 py-2">{course.enrolledStudents}</td>
-                <td className="px-4 py-2">{course.description}</td>
-                <td className="px-4 py-2">{course.addedOn}</td>
-                <td className="px-4 py-2">{course.publishedOn}</td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan="8"
-                className="text-center py-4 text-gray-500 font-medium border-b border-b-[#F3F4F6]"
-              >
-                No courses found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      )}
  
       {/* Pagination */}
       <div className="mt-6">
@@ -561,15 +291,14 @@ const Courses = () => {
       {/* Bottom Section */}
       <div className="mt-6 grid grid-cols-2 gap-6">
         {/* Recent Queries */}
-        <div className="border p-6 rounded-md border-b-[#F3F4F6] ">
+        <div className="border p-6 rounded-md border-b-[#F3F4F6]">
           <div className="flex justify-between pb-3">
-          <h2 className="text-lg font-bold mb-2">Recent Queries</h2>
-          <button className="px-4 h-8 bg-[#F3F4F6] text-[#0056B3] rounded-md flex gap-3 items-center">
-          View all in Discussion forum
-          </button>
- 
+            <h2 className="text-lg font-bold mb-2">Recent Queries</h2>
+            <button className="px-4 h-8 bg-[#F3F4F6] text-[#0056B3] rounded-md flex gap-3 items-center">
+              View all in Discussion forum
+            </button>
           </div>
-          <table className="w-full  border-collapse border border-b-[#F3F4F6] text-left">
+          <table className="w-full border-collapse border border-b-[#F3F4F6] text-left">
             <thead>
               <tr>
                 <th className="border border-gray-200 px-4 py-2 bg-[#F5F5F5]">
@@ -633,5 +362,17 @@ const Courses = () => {
     </div>
   );
 };
- 
+
+// Helper function for status styles
+const getStatusStyle = (status) => {
+  const styles = {
+    PUBLISHED: "border border-[#28A745] text-[#28A745]",
+    DRAFT: "border border-[#4B5563] text-[#4B5563]",
+    NEEDS_RESUBMISSION: "bg-[#0056B3] text-[#F5F5F5]",
+    UNPUBLISHED: "border border-[#DC3545] text-[#DC3545]",
+    PENDING_APPROVAL: "border border-[#0056B3] text-[#0056B3]",
+  };
+  return styles[status] || "";
+};
+
 export default Courses;
