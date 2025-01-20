@@ -13,8 +13,6 @@ const CoursePopover = ({ isOpen, onClose, course }) => {
     setIsPopoverOpen(true);
   };
 
-
-
   return (
     <>
       {/* Backdrop */}
@@ -34,7 +32,7 @@ const CoursePopover = ({ isOpen, onClose, course }) => {
         {/* Header - Fixed */}
         <div className="absolute top-0 left-0 right-0 bg-white z-10 px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold">{course?.name || 'Course Name'}</h1>
+            <h1 className="text-xl font-bold">{course?.courseName}</h1>
             <button 
               onClick={onClose}
               className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
@@ -69,14 +67,16 @@ const CoursePopover = ({ isOpen, onClose, course }) => {
                     {course?.status || 'Sent for Review'}
                   </span>
                 </div>
-                <div className="text-sm font-semibold">Enrolled Students</div>
-                <div className="text-sm text-right">{course?.enrolledStudents || '32'}</div>
                 <div className="text-sm font-semibold">Description</div>
-                <div className="text-sm text-right">{course?.description || 'Placeholder Text'}</div>
-                <div className="text-sm font-semibold">Added On</div>
-                <div className="text-sm text-right">{course?.addedOn || 'DD-MM-YYYY'}</div>
-                <div className="text-sm font-semibold">Published On</div>
-                <div className="text-sm text-right">{course?.publishedOn || 'DD-MM-YYYY'}</div>
+                <div className="text-sm text-right" dangerouslySetInnerHTML={{ __html: course?.courseDescription }}></div>
+                <div className="text-sm font-semibold">Category</div>
+                <div className="text-sm text-right">{course?.category}</div>
+                <div className="text-sm font-semibold">Sub-Category</div>
+                <div className="text-sm text-right">{course?.subCategory}</div>
+                <div className="text-sm font-semibold">Language</div>
+                <div className="text-sm text-right">{course?.teachingLanguage}</div>
+                <div className="text-sm font-semibold">Instructor</div>
+                <div className="text-sm text-right">{course?.trainerName}</div>
               </div>
             </div>
 

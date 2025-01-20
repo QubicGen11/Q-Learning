@@ -44,6 +44,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
             const accessToken = Cookies.get('accessToken');
             if (!commentData?.comments?.[0]?.text) {
                 displayToast('error', "Please provide a rejection reason");
+                setIsCommentDialogOpen(false); // Close on validation error
                 return;
             }
             
@@ -65,6 +66,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
             console.error('Error rejecting course:', error);
             const errorMessage = error.response?.data?.error || "Failed to reject course. Please try again.";
             displayToast('error', errorMessage);
+            setIsCommentDialogOpen(false); // Close on API error
         }
     };
 
@@ -116,7 +118,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                 </div>
 
                 {/* Main Content Area - adjust top padding to account for header */}
-                <div className="h-[calc(100%-56px)] overflow-y-auto pt-16">
+                <div className="h-[calc(100%-100px)] overflow-y-auto pt-16">
                     <div className="p-11 ">
                         {/* Two Column Layout */}
                         <div className="grid grid-cols-2 gap-6">
@@ -298,7 +300,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
 
             {/* Add Video Preview Modal */}
             {previewOpen && (
-                <div className="fixed inset-0 bg-black/70 z-[1005] flex items-center justify-center">
+                <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center">
                     <div className="relative bg-white rounded-lg p-4 max-w-[732px]">
                         <div className="relative">
                             <video
@@ -328,7 +330,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                             </div>
                         </div>
 
-                        <div className='flex justify-between  border-[#E5E7EB] w-[732px] px-8'>
+                        <div className='flex justify-between border-t-2 mt-9 border-[#E5E7EB] w-[732px] px-8'>
                             <button
                                 onClick={() => {
                                     setPreviewOpen(false);

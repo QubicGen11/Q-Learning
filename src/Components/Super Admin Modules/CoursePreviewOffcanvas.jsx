@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { AiOutlineExpandAlt } from 'react-icons/ai';
 import { FaRegCheckCircle } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
-import { IoExpandOutline } from "react-icons/io5";
+
 import CourseFullPreview from './CourseFullPreview';
 
 const CoursePreviewOffcanvas = ({ isOpen, onClose, course }) => {
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
 
   const handleFullPreview = () => {
+    onClose();
     setIsFullPreviewOpen(true);
   };
 

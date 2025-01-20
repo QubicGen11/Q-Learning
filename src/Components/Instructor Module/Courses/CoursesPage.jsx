@@ -249,7 +249,7 @@ const Courses = () => {
                   <td className="px-4 py-2">{course.collaboration || 'None'}</td>
                   <td className="px-4 py-2">
                     <span
-                      className={`px-2 py-1 rounded ${
+                      className={`px-[8px] py-[1px] rounded h-[22px] w-[120px] ${
                         getStatusStyle(course.status)
                       }`}
                     >
@@ -366,11 +366,12 @@ const Courses = () => {
 // Helper function for status styles
 const getStatusStyle = (status) => {
   const styles = {
-    PUBLISHED: "border border-[#28A745] text-[#28A745]",
-    DRAFT: "border border-[#4B5563] text-[#4B5563]",
-    NEEDS_RESUBMISSION: "bg-[#0056B3] text-[#F5F5F5]",
-    UNPUBLISHED: "border border-[#DC3545] text-[#DC3545]",
-    PENDING_APPROVAL: "border border-[#0056B3] text-[#0056B3]",
+    PUBLISHED: "bg-white border border-[#28A745] text-[#28A745]", // Green outline for Published
+    DRAFT: "bg-white border border-[#4B5563] text-[#4B5563]", // Gray outline for Draft
+    NEEDS_RESUBMISSION: "bg-[#DC3545] text-white", // Red background for Needs Re-Submission
+    UNPUBLISHED: "bg-white border border-[#DC3545] text-[#DC3545]", // Red outline for Unpublished
+    SENT_FOR_REVIEW: "bg-white border border-[#0056B3] text-[#0056B3]", // Blue outline for Sent for Review
+    PENDING_APPROVAL: "bg-white border border-[#0056B3] text-[#0056B3]", // Blue outline for Pending Approval
   };
   return styles[status] || "";
 };
