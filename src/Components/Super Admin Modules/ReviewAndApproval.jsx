@@ -10,6 +10,9 @@ const ReviewAndApproval = () => {
   const [activeTab, setActiveTab] = useState('Courses');
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('ALL');
 
   const { 
     loading, 
@@ -24,9 +27,35 @@ const ReviewAndApproval = () => {
     getTotalPages
   } = useSuperAdminStore();
 
-  // Get current page data
-  const currentCourses = getPaginatedData();
+  // Filter and search logic
+  const filterCourses = (courses) => {
+    return courses?.filter(course => {
+      // First filter out DRAFT courses
+      if (course.status === 'DRAFT') return false;
+
+      // Then apply status filter if not ALL
+      if (selectedStatus !== 'ALL' && course.status !== selectedStatus) return false;
+
+      // Then apply search query
+      const searchTerm = searchQuery.toLowerCase();
+      return (
+        course.courseName?.toLowerCase().includes(searchTerm) ||
+        course.trainerName?.toLowerCase().includes(searchTerm) ||
+        course.courseTagline?.toLowerCase().includes(searchTerm)
+      );
+    }) || [];
+  };
+
+  // Get filtered courses
+  const currentCourses = filterCourses(getPaginatedData());
   const totalPages = getTotalPages();
+
+  const statusOptions = [
+    { value: 'ALL', label: 'All Status' },
+    { value: 'PENDING_APPROVAL', label: 'Pending Approval' },
+    { value: 'LIVE', label: 'Live' },
+    { value: 'REJECTED', label: 'Rejected' }
+  ];
 
   useEffect(() => {
     fetchCoursesForReview();
@@ -76,7 +105,9 @@ const ReviewAndApproval = () => {
         <div className="relative h-[40px] max-w-[300px]">
           <input
             type="text"
-            placeholder="Search"
+            placeholder="Search courses..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-4 py-2 border rounded w-[300px]"
           />
           <BiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -85,12 +116,40 @@ const ReviewAndApproval = () => {
         <div className="flex gap-2 font-[400px]">
           <button className="text-[#0056B3] text-[16px] bg-gray-100 px-4 py-2 h-[40px]">Modify</button>
           <button className="text-[#0056B3] text-[16px] bg-gray-100 px-4 py-2 h-[40px]">Ask for Re-Submit</button>
-
-          <button className="bg-[#0056B3] text-[16px] text-[#F5F5F5] px-4 py-2 rounded h-[40px] flex items-center gap-2"><FaRegCheckCircle className='text-[16px] w-[20px] h-[20px] font-bold' /> Approve</button>
-          <button className="text-[#0056B3] text-[16px] bg-gray-100 px-4 py-2 rounded flex items-center gap-2 h-[40px]">
-          <FiFilter  className=' text-[16px] w-[20px] h-[20px] font-bold' />
-            Filter
+          <button className="bg-[#0056B3] text-[16px] text-[#F5F5F5] px-4 py-2 rounded h-[40px] flex items-center gap-2">
+            <FaRegCheckCircle className='text-[16px] w-[20px] h-[20px] font-bold' /> Approve
           </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className="text-[#0056B3] text-[16px] bg-gray-100 px-4 py-2 rounded flex items-center gap-2 h-[40px]"
+            >
+              <FiFilter className='text-[16px] w-[20px] h-[20px] font-bold' />
+              Filter
+            </button>
+            
+            {/* Filter Dropdown */}
+            {showFilters && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
+                {statusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSelectedStatus(option.value);
+                      setShowFilters(false);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm ${
+                      selectedStatus === option.value 
+                        ? 'bg-blue-50 text-[#0056B3]' 
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -147,7 +206,7 @@ const ReviewAndApproval = () => {
                   <td className="py-3 px-4">{course.subCategory}</td>
                   <td className="py-3 px-4">{course.teachingLanguage}</td>
                   <td className="py-3 px-4 text-[#0056B3]">{course.trainerName}</td>
-                  <td className="py-3 px-4 text-[#0056B3]">{course.status}</td>
+                  <td className="py-3 px-4 text-[#0056B3]">{course.status?.replace(/_/g, ' ')}</td>
                 </tr>
               ))
             )}

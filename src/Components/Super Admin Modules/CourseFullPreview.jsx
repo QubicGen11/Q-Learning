@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { IoChevronBackOutline, IoClose } from 'react-icons/io5';
 import { IoArrowBack } from "react-icons/io5";
 import { FaRegCheckCircle } from 'react-icons/fa';
@@ -12,6 +12,10 @@ import { displayToast } from '../Common/Toast/Toast';
 const CourseFullPreview = ({ isOpen, onClose, course }) => {
     const [activeTab, setActiveTab] = useState('Course Information');
     const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewFile, setPreviewFile] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const videoRef = useRef(null);
 
     const handleApprove = async () => {
         try {
@@ -30,7 +34,8 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
             }, 1000);
         } catch (error) {
             console.error('Error approving course:', error);
-            displayToast('error', "Failed to approve course. Please try again.");
+            const errorMessage = error.response?.data?.error || "Failed to approve course. Please try again.";
+            displayToast('error', errorMessage);
         }
     };
 
@@ -54,23 +59,38 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                 }
             );
             displayToast('success', "Course rejected successfully!");
-            setTimeout(() => {
-                setIsCommentDialogOpen(false);
-                onClose(); // Close the preview after toast is shown
-            }, 1000);
+            setIsCommentDialogOpen(false);
+            onClose();
         } catch (error) {
             console.error('Error rejecting course:', error);
-            displayToast('error', "Failed to reject course. Please try again.");
+            const errorMessage = error.response?.data?.error || "Failed to reject course. Please try again.";
+            displayToast('error', errorMessage);
+        }
+    };
+
+    const handleVideoClick = () => {
+        setPreviewFile(course?.courseBanner);
+        setPreviewOpen(true);
+    };
+
+    const handlePlayPause = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
         }
     };
 
     return (
         <>
-            <div className={`fixed top-16 left-[240px] right-0 bottom-0 bg-white z-[40] transform transition-all duration-300 ${
+            <div className={`fixed top-16 left-[240px] right-0 bottom-0 bg-white z-[40]  inset-0 bg-white z-[1002] transform transition-all duration-300 ${
                 isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}>
                 {/* Header */}
-                <div className="h-14 border-b flex items-center px-4 justify-between bg-white">
+                <div className="h-14 border-b flex items-center px-4 justify-between bg-white sticky top-0 z-[1003]">
                     <div className="flex items-center gap-2 h-[36px]">
                         <button
                             onClick={onClose}
@@ -95,8 +115,8 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                     </div>
                 </div>
 
-                {/* Main Content Area */}
-                <div className="h-[calc(100%-56px)] overflow-y-auto">
+                {/* Main Content Area - adjust top padding to account for header */}
+                <div className="h-[calc(100%-56px)] overflow-y-auto pt-16">
                     <div className="p-11 ">
                         {/* Two Column Layout */}
                         <div className="grid grid-cols-2 gap-6">
@@ -213,7 +233,8 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
-                                        <div className="w-[180px] h-[100px] rounded-md border overflow-hidden relative">
+                                        <div className="w-[180px] h-[100px] rounded-md border overflow-hidden relative cursor-pointer"
+                                             onClick={handleVideoClick}>
                                             <video
                                                 src={course?.courseBanner}
                                                 className="w-full h-full object-cover"
@@ -257,8 +278,8 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                         </div>
                     </div>
 
-                    {/* Bottom buttons */}
-                    <div className="fixed bottom-0 left-[240px] p-4 border-t bg-white w-[calc(100%-240px)] flex gap-2 z-[41]">
+                    {/* Bottom buttons - update z-index */}
+                    <div className="fixed bottom-0 left-0 right-0 p-4 border-t bg-white flex gap-2 z-[1003]">
                         <button 
                             onClick={handleApprove}
                             className="bg-[#0056B3] text-white h-9 px-4 rounded flex items-center gap-2 text-[13px]"
@@ -275,8 +296,59 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                 </div>
             </div>
 
-            {/* Comment Dialog - Higher z-index */}
-            <div className={`${isCommentDialogOpen ? 'fixed inset-0 z-[42]' : ''}`}>
+            {/* Add Video Preview Modal */}
+            {previewOpen && (
+                <div className="fixed inset-0 bg-black/70 z-[1005] flex items-center justify-center">
+                    <div className="relative bg-white rounded-lg p-4 max-w-[732px]">
+                        <div className="relative">
+                            <video
+                                ref={videoRef}
+                                src={previewFile}
+                                className="w-[692px] h-[360px] object-cover"
+                                onPlay={() => setIsPlaying(true)}
+                                onPause={() => setIsPlaying(false)}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <button
+                                    onClick={handlePlayPause}
+                                    className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center
+                                            hover:bg-black/70 transition-all duration-300
+                                            hover:scale-110 active:scale-95"
+                                >
+                                    {isPlaying ? (
+                                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className='flex justify-between  border-[#E5E7EB] w-[732px] px-8'>
+                            <button
+                                onClick={() => {
+                                    setPreviewOpen(false);
+                                    setPreviewFile(null);
+                                    if (videoRef.current) {
+                                        videoRef.current.pause();
+                                    }
+                                    setIsPlaying(false);
+                                }}
+                                className="bg-[#0056b3] mt-6 px-4 h-8 rounded-md text-white hover:text-white mt-3"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Comment Dialog - update z-index */}
+            <div className={`${isCommentDialogOpen ? 'fixed inset-0 z-[1004]' : ''}`}>
                 <CommentDialog 
                     isOpen={isCommentDialogOpen}
                     onClose={() => setIsCommentDialogOpen(false)}
