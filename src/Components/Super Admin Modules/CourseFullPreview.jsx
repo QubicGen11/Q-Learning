@@ -301,7 +301,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
             {/* Add Video Preview Modal */}
             {previewOpen && (
                 <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center">
-                    <div className="relative bg-white rounded-lg p-4 max-w-[732px]">
+                    <div className="relative bg-white rounded p-4 max-w-[732px]">
                         <div className="relative">
                             <video
                                 ref={videoRef}
@@ -330,7 +330,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                             </div>
                         </div>
 
-                        <div className='flex justify-between border-t-2 mt-9 border-[#E5E7EB] w-[732px] px-8'>
+                        <div className='flex justify-between w-[732px] px-8'>
                             <button
                                 onClick={() => {
                                     setPreviewOpen(false);

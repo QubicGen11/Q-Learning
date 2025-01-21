@@ -57,34 +57,56 @@ const CourseBanner = ({
   }, [isCompact]);
 
   const initializePayment = async () => {
+    console.log('Starting payment initialization...', { courseId });
+    
     try {
-      const userId = "9e7b2f75-881c-4d03-8571-8b8e5757e422"
-      
-      const response = await axios.post('http://localhost:8089/qlms/enrollments', {
+      const userId = "a587c7e8-9d5e-407d-8758-2911324b5bc5";
+      console.log('User details:', { userId });
+
+      // 1. Create enrollment
+      console.log('Creating enrollment...');
+      const enrollmentResponse = await axios.post('http://localhost:8089/qlms/enrollments', {
         userId: userId,
         courseId: courseId
       });
+      console.log('Enrollment created:', enrollmentResponse.data);
 
+      // 2. Initialize Razorpay
+      console.log('Initializing Razorpay with options...');
       const options = {
         key: "rzp_live_Uh1YNofz5Dakit",
-        amount: price * 100,
+        amount: enrollmentResponse.data.amountPaid * 100,
         currency: "INR",
         name: "QubiNest Learning",
         description: `Enrollment for ${title}`,
-        order_id: response.data.paymentId,
+        order_id: enrollmentResponse.data.paymentId,
         handler: async function (response) {
+          console.log('Payment successful, Razorpay response:', response);
           try {
+            // 3. Verify payment through webhook
+            console.log('Sending verification to webhook...');
             await axios.post('http://localhost:8089/qlms/webhook', {
-              enrollmentId: response.data.id,
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              signature: response.razorpay_signature
+              payload: {
+                payment: {
+                  entity: {
+                    id: response.razorpay_payment_id,
+                    order_id: response.razorpay_order_id,
+                    status: "captured"
+                  }
+                }
+              },
+              event: "payment.captured"
             });
             
+            console.log('Payment verified successfully!');
             alert('Payment successful! You are now enrolled in the course.');
             window.location.reload();
           } catch (error) {
             console.error('Payment verification failed:', error);
+            console.error('Error details:', {
+              message: error.message,
+              response: error.response?.data
+            });
             alert('Payment verification failed. Please contact support.');
           }
         },
@@ -96,13 +118,20 @@ const CourseBanner = ({
           color: "#0056B3"
         }
       };
+      console.log('Razorpay options:', options);
 
       const razorpay = new window.Razorpay(options);
+      console.log('Opening Razorpay window...');
       razorpay.open();
 
     } catch (error) {
       console.error('Payment initialization failed:', error);
-      alert('Could not initialize payment. Please try again.');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        stack: error.stack
+      });
+      alert('Could not initialize enrollment. Please try again.');
     }
   };
 

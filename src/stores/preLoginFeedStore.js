@@ -38,7 +38,7 @@ const usePreLoginFeedStore = create((set, get) => ({
     try {
       console.log('Fetching pre-login feed...');
       const token = Cookies.get('accessToken');
-      const response = await fetch('http://localhost:8089/qlms/allcourses', {
+      const response = await fetch('http://localhost:8089/qlms/allcourse', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

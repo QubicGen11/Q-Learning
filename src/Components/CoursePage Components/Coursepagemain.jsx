@@ -20,7 +20,7 @@ const Coursepagemain = () => {
         setIsLoading(true);
       
         const token = Cookies.get('accessToken');
-        const response = await axios.get(`http://localhost:8089/qlms/courses/2c0199b8-2ee7-40a6-83ac-58335a7309ac`, {
+        const response = await axios.get(`http://localhost:8089/qlms/courses/dacc6ea6-0ef0-4235-ba24-091641328c40`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
