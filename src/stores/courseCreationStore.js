@@ -495,7 +495,21 @@ const useCourseCreationStore = create((set, get) => ({
         courseImage: courseData.media?.courseImage || '',
         isDraft: isDraft,
         status: isDraft ? 'DRAFT' : 'PENDING_APPROVAL',
-        courseChapters: courseData.content?.chapters || [],
+        courseChapters: courseData.content.chapters.map(chapter => ({
+          chapterName: chapter.chapterName,
+          chapterLessons: chapter.lessons.map(lesson => ({
+            lessonTitle: lesson.lessonTitle,
+            lessonType: lesson.lessonType,
+            lessonContent: lesson.lessonContent || '',
+            lessonVideo: lesson.lessonVideo || '',
+            lessonMaterials: [],
+            materials: lesson.materials || [],
+            questions: lesson.questions || [],
+            isNew: false,
+            showDropdown: false
+          })),
+          isNew: false
+        })),
         glossary: courseData.glossary || [],
         references: courseData.references || [],
         courseFaqs: courseData.faq || [],
@@ -776,7 +790,6 @@ const useCourseCreationStore = create((set, get) => ({
 
   // Add new function to fetch course by ID
   fetchCourseById: async (courseId) => {
-    console.log("Starting to fetch course with ID:", courseId);
     try {
       const token = Cookies.get('accessToken');
       const response = await axios.get(
@@ -788,14 +801,13 @@ const useCourseCreationStore = create((set, get) => ({
           }
         }
       );
-  
-      console.log("Raw API Response:", response.data);
+
       const courseData = response.data.course;
-  
-      // Set the data in store
+      
       set(state => {
         const newState = {
           courseData: {
+            ...state.courseData,
             trainerId: courseData.trainerId,
             trainerName: courseData.trainerName,
             basicInfo: {
@@ -814,26 +826,34 @@ const useCourseCreationStore = create((set, get) => ({
               categoryImage: courseData.categoryImage || null
             },
             about: {
-              courseOutcome: courseData.courseOutCome || '',
+              courseOutCome: courseData.courseOutCome || '',
               courseDescription: courseData.courseDescription || '',
               coursePreRequisites: courseData.coursePreRequisites?.map(item => ({
                 preRequisiteRequired: item.preRequisites?.preRequisiteRequired || '',
                 preRequisiteLevel: item.preRequisites?.preRequisiteLevel || 'Beginner'
               })) || [],
               courseAudience: courseData.courseAudience?.map(item => 
-                item.audience.replace(/^[•\s]+/, '').trim()
+                item.audience
               ) || []
             },
             content: {
-              chapters: courseData.courseChapters?.map(item => ({
-                ...item.chapter,
-                lessons: item.chapter?.chapterLessons || []
+              chapters: courseData.courseChapters?.map(chapterItem => ({
+                chapterName: chapterItem.chapter?.chapterName || '',
+                id: chapterItem.chapter?.id || '',
+                chapterId: chapterItem.chapterId || '',
+                lessons: chapterItem.chapter?.chapterLessons?.map(lesson => ({
+                  lessonTitle: lesson.lessonTitle || '',
+                  lessonType: lesson.lessonType || '',
+                  lessonContent: lesson.lessonContent || '',
+                  lessonVideo: lesson.lessonVideo || '',
+                  materials: lesson.materials || [],
+                  questions: lesson.questions || [],
+                  isNew: false,
+                  showDropdown: false
+                })) || [],
+                isNew: false
               })) || []
             },
-            faq: courseData.courseFaqs?.map(item => ({
-              question: item.faq?.question || '',
-              answer: item.faq?.answer || ''
-            })) || [],
             glossary: courseData.glossary?.map(item => ({
               acronym: item.acronym || '',
               meaning: item.meaning || ''
@@ -842,14 +862,18 @@ const useCourseCreationStore = create((set, get) => ({
               reference: item.reference || '',
               link: item.link || ''
             })) || [],
+            faq: courseData.courseFaqs?.map(item => ({
+              question: item.faq?.question || '',
+              answer: item.faq?.answer || ''
+            })) || [],
             courseSettings: courseData.courseSettings || []
           }
         };
-  
+
         console.log("New state to be set:", newState);
         return newState;
       });
-  
+
     } catch (error) {
       console.error("Error fetching course:", error);
       throw error;

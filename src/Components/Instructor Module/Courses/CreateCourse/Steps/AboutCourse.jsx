@@ -152,10 +152,7 @@ function AboutCourse() {
   };
 
   // Add blur handler for initial validation
-  const handleBlur = (field) => {
-    const newErrors = validateAllFields(about);
-    setValidationErrors(newErrors);
-  };
+
 
   const modules = {
     toolbar: [
@@ -179,16 +176,7 @@ function AboutCourse() {
   }, []); // Only run once on mount
 
   // Add a function to check if all fields are valid
-  const areAllFieldsValid = () => {
-    const requiredFields = [
-      'courseOutCome',
-      'coursePreRequisites',
-      'courseAudience',
-      'courseDescription'
-    ];
 
-    return requiredFields.every(field => !validationErrors[field]);
-  };
 
   return (
     <div className="max-w-[800px] mx-auto mt-5 p-4">
@@ -205,7 +193,7 @@ function AboutCourse() {
               .map(line => line.replace('• ', ''))
               .filter(Boolean)
               .join('\n');
-            handleChange('courseOutcome', outcomes);
+            handleChange('courseOutCome', outcomes);
           }}
           onKeyPress={(e) => {
             if (e.key === 'Enter') {
