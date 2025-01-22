@@ -340,7 +340,7 @@ const StepIndicator = () => {
 
     await submitCourse(navigate);
     displayToast('success', 'Course submitted successfully!');
-    localStorage.removeItem('courseCreationData');
+    // localStorage.removeItem('courseCreationData');
   } catch (error) {
     console.error('Error submitting course:', error);
     displayToast('error', 'Failed to submit course');
@@ -451,14 +451,14 @@ const StepIndicator = () => {
       if (!media?.courseImage) validationErrors.push("Course image is required");
       
       // Course Settings validation
-      if (!courseSettings?.[0]) {
-        validationErrors.push("Course settings are required");
-      } else {
-        const settings = courseSettings[0];
-        if (!settings.pricingType) validationErrors.push("Pricing type is required");
-        if (!settings.promotionType) validationErrors.push("Promotion type is required");
-        if (settings.pricingType === 'Paid' && !settings.price) validationErrors.push("Price is required for paid courses");
-      }
+      // if (!courseSettings?.[0]) {
+      //   validationErrors.push("Course settings are required");
+      // } else {
+      //   const settings = courseSettings[0];
+      //   if (!settings.pricingType) validationErrors.push("Pricing type is required");
+      //   if (!settings.promotionType) validationErrors.push("Promotion type is required");
+      //   if (settings.pricingType === 'Paid' && !settings.price) validationErrors.push("Price is required for paid courses");
+      // }
 
       // Glossary and References validation
       if (!glossary || glossary.length === 0) {

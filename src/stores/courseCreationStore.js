@@ -375,85 +375,102 @@ const useCourseCreationStore = create((set, get) => ({
     const { courseData } = get();
     
     try {
-      const settings = courseData.courseSettings?.[0];
-      
-      // Format course settings correctly
-      const courseSettings = {
-        courseType: settings.courseType,
-        percentageRequired: parseInt(settings.percentageRequired),
-        pricingType: settings.pricingType,
-        promotionType: settings.promotionType,
-        publicAccess: Boolean(settings.publicAccess),
-        enablePreview: Boolean(settings.enablePreview),
-        price: parseFloat(settings.price),
-        discount: parseFloat(settings.discount),
-        offeredPrice: parseFloat(settings.offeredPrice),
-        startDate: settings.startDate ? new Date(settings.startDate).toISOString() : null,
-        endDate: settings.endDate ? new Date(settings.endDate).toISOString() : null,
-        maxStudents: parseInt(settings.maxStudents),
-        certificateEligibility: Boolean(settings.certificateEligibility),
-        accessDuration: settings.accessDuration,
-        lifeTimeAccess: Boolean(settings.lifeTimeAccess),
-        notifyStudentsOnUpdate: Boolean(settings.notifyStudentsOnUpdate),
-        notifyStudentsOnAssignment: Boolean(settings.notifyStudentsOnAssignment),
-        returnPeriod: settings.returnPeriod,
-        refundsAllowed: Boolean(settings.refundsAllowed),
-        allowContentDownloads: Boolean(settings.allowContentDownloads),
-        allowDiscussionParticipation: Boolean(settings.allowDiscussionParticipation),
-        scheduleLiveClasses: Boolean(settings.scheduleLiveClasses),
-        enableSubtitles: Boolean(settings.enableSubtitles),
-        seoTitle: settings.seoTitle,
-        seoDescription: settings.seoDescription,
-        seoKeywords: settings.seoKeywords || [],
-        hashTags: settings.hashtags ? 
-          settings.hashtags.split(',').map(tag => tag.trim()).filter(Boolean) : 
-          []
-      };
+      console.log('1. Current courseData:', courseData);
 
-      const latestData = JSON.parse(localStorage.getItem('courseCreationData') || '{}');
-      
+      // Get settings from courseData
+      const rawSettings = Array.isArray(courseData.courseSettings) 
+        ? courseData.courseSettings[0] 
+        : courseData.courseSettings;
+
+      // Convert comments object to array if needed
+      const commentsArray = courseData.comments ? 
+        Object.values(courseData.comments).map(comment => ({
+          userId: comment.userId,
+          role: comment.role,
+          text: comment.text
+        })) : [];
+
+        // const formattedChapters = 
+
+      // Format the final data for submission
       const formattedData = {
-        courseId: courseData.courseId || localStorage.getItem('currentCourseId'),
-        action: isDraft ? 'DRAFT' : 'PUBLISH',
-        trainerId: courseData.trainerId || '',
-        trainerName: courseData.trainerName || '',
-        courseName: courseData.basicInfo?.courseName || '',
-        courseTagline: courseData.basicInfo?.courseTagline || '',
-        courseDuration: courseData.basicInfo?.courseDuration || '',
-        difficultyLevel: courseData.basicInfo?.difficultyLevel || '',
-        category: courseData.basicInfo?.category || '',
-        subCategory: courseData.basicInfo?.subCategory || '',
-        teachingLanguage: courseData.basicInfo?.teachingLanguage || '',
-        courseDescription: courseData.about?.courseDescription || '',
-        courseOutCome: courseData.about?.courseOutCome || '',
-        coursePreRequisites: courseData.about?.coursePreRequisites || [],
-        courseAudience: courseData.about?.courseAudience || [],
-        categoryImage: courseData.media?.categoryImage || '',
-        courseBanner: courseData.media?.courseBanner || '',
-        courseImage: courseData.media?.courseImage || '',
-        isDraft: isDraft,
-        isFeatured: false,
-        status: isDraft ? 'DRAFT' : 'PENDING_APPROVAL',
-        version: "1.0",
-        courseChapters: courseData.content?.chapters?.map(chapter => ({
-          chapterName: chapter?.chapterName || '',
-          chapterLessons: chapter?.lessons?.map(lesson => ({
-            lessonTitle: lesson?.lessonTitle || '',
-            lessonType: lesson?.lessonType || '',
-            lessonContent: lesson?.lessonContent || '',
-            lessonVideo: lesson?.lessonVideo || '',
-            materials: lesson?.materials || [],
-            questions: lesson?.questions || []
-          })) || []
-        })) || [],
+        action: isDraft ? "DRAFT" : "PENDING_APPROVAL",
+        trainerId: courseData.trainerId,
+        trainerName: courseData.trainerName,
+        courseName: courseData.basicInfo?.courseName || courseData.courseName || "",
+        courseTagline: courseData.basicInfo?.courseTagline || courseData.courseTagline || "",
+        courseDuration: courseData.basicInfo?.courseDuration || courseData.courseDuration || "",
+        difficultyLevel: courseData.basicInfo?.difficultyLevel || courseData.difficultyLevel || "",
+        category: courseData.basicInfo?.category || courseData.category || "",
+        subCategory: courseData.basicInfo?.subCategory || courseData.subCategory || "",
+        categoryImage: courseData.media?.categoryImage || courseData.categoryImage,
+        teachingLanguage: courseData.basicInfo?.teachingLanguage || courseData.teachingLanguage || "",
+        courseBanner: courseData.media?.courseBanner || courseData.courseBanner,
+        courseImage: courseData.media?.courseImage || courseData.courseImage,
+        courseOutCome: courseData.about?.courseOutCome || courseData.courseOutCome || "",
+        courseDescription: courseData.about?.courseDescription || courseData.courseDescription || "",
+        isDraft,
+        isFeatured: courseData.isFeatured || false,
+        status: isDraft ? "DRAFT" : "PENDING_APPROVAL",
+        version: courseData.version || "1.0",
         glossary: courseData.glossary || [],
         references: courseData.references || [],
-        courseFaqs: courseData.faq || [],
-        courseSettings: courseSettings,
-        comments: latestData.comments ? Object.values(latestData.comments) : []
+        coursePreRequisites: courseData.about?.coursePreRequisites || courseData.coursePreRequisites || [],
+        courseAudience: courseData.about?.courseAudience || courseData.courseAudience || [],
+
+        courseChapters: courseData.content?.chapters?.map(chapter => ({
+          chapterName: chapter.chapterName,
+          chapterLessons: chapter.lessons?.map(lesson => ({
+            lessonTitle: lesson.lessonTitle,
+            lessonType: lesson.lessonType,
+            lessonContent: lesson.lessonContent || "",
+            lessonVideo: lesson.lessonVideo || "",
+            materials: lesson.lessonMaterials || lesson.materials || [],
+            questions: lesson.questions?.map(q => ({
+              question: q.question,
+              questionType: q.questionType,
+              correctAnswer: q.correctAnswer,
+              options: q.options || []
+            })) || []
+          })) || []
+        })) || courseData.courseChapters || [],
+
+        courseSettings: {
+          courseType: rawSettings.courseType || "",
+          percentageRequired: parseInt(rawSettings.percentageRequired || 80),
+          pricingType: rawSettings.pricingType || "",
+          promotionType: rawSettings.promotionType || "No Promotion",
+          publicAccess: Boolean(rawSettings.publicAccess),
+          enablePreview: Boolean(rawSettings.enablePreview),
+          price: parseFloat(rawSettings.price || 0),
+          discount: parseFloat(rawSettings.discount || 0),
+          offeredPrice: parseFloat(rawSettings.offeredPrice || 0),
+          startDate: rawSettings.startDate ? new Date(rawSettings.startDate).toISOString() : null,
+          endDate: rawSettings.endDate ? new Date(rawSettings.endDate).toISOString() : null,
+          maxStudents: parseInt(rawSettings.maxStudents || 100),
+          certificateEligibility: Boolean(rawSettings.certificateEligibility),
+          accessDuration: rawSettings.accessDuration || "",
+          lifeTimeAccess: Boolean(rawSettings.lifeTimeAccess),
+          notifyStudentsOnUpdate: Boolean(rawSettings.notifyStudentsOnUpdate),
+          notifyStudentsOnAssignment: Boolean(rawSettings.notifyStudentsOnAssignment),
+          returnPeriod: rawSettings.returnPeriod || "",
+          refundsAllowed: Boolean(rawSettings.refundsAllowed),
+          allowContentDownloads: Boolean(rawSettings.allowContentDownloads),
+          allowDiscussionParticipation: Boolean(rawSettings.allowDiscussionParticipation),
+          scheduleLiveClasses: Boolean(rawSettings.scheduleLiveClasses),
+          enableSubtitles: Boolean(rawSettings.enableSubtitles),
+          seoTitle: rawSettings.seoTitle || "",
+          seoDescription: rawSettings.seoDescription || "",
+          seoKeywords: Array.isArray(rawSettings.seoKeywords) ? rawSettings.seoKeywords : 
+            (rawSettings.seoKeywords ? [rawSettings.seoKeywords] : []),
+          hashTags: Array.isArray(rawSettings.hashTags) ? rawSettings.hashTags : 
+            (rawSettings.hashtags ? [rawSettings.hashtags] : [])
+        },
+        courseFaqs: courseData.faq || courseData.courseFaqs || [],
+        comments: commentsArray
       };
 
-      console.log('7. Final formatted data:', formattedData); // Debug
+      console.log('2. Final formatted data:', formattedData);
 
       const token = Cookies.get('accessToken');
       const response = await axios.post(
@@ -467,27 +484,10 @@ const useCourseCreationStore = create((set, get) => ({
         }
       );
 
-      console.log('8. API Response:', response.data); // Debug
-
-      if (response.data) {
-        localStorage.removeItem('courseCreationData');
-        
-        // Update store with the new/updated courseId from response
-        set(state => ({
-          ...state,
-          courseId: response.data.draft.id
-        }));
-
-        toast.success(courseData.courseId 
-          ? "Course draft updated successfully!" 
-          : "New course draft created successfully!"
-        );
-        return response.data;
-      }
+      return response.data;
 
     } catch (error) {
-      console.error('9. API Error:', error);
-      toast.error(error.response?.data?.message || 'Failed to save course');
+      console.error('API Error:', error);
       throw error;
     }
   },
