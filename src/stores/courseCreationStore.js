@@ -246,10 +246,14 @@ const validateFAQ = (data) => {
   return errors;
 };
 
-
-
-
-
+// Add this function to save state changes to localStorage
+const saveToLocalStorage = (state) => {
+  try {
+    localStorage.setItem('courseCreationData', JSON.stringify(state.courseData));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};  
 
 const useCourseCreationStore = create((set, get) => ({
   currentStep: 1,
@@ -262,64 +266,8 @@ const useCourseCreationStore = create((set, get) => ({
     { id: 6, title: 'Settings', path: 'settings' }
   ],
   
-  courseData: loadFromCourseLocalStorage() || {
-    basicInfo: {
-      courseName: '',
-      
-      courseTagline: '',
-      courseDuration: '',
-      difficultyLevel: '',
-      category: '',
-      subCategory: '',
-      teachingLanguage: '',
-      hashtags: [],
-      courseType: '',
-      percentageRequired: '',
-    },
-    media: {
-      courseBanner: null,
-      courseImage: null,
-      categoryImage: null
-    },
-    about: {
-      courseOutCome: '',
-      courseDescription: '',
-      coursePreRequisites: [],
-      courseAudience: []
-    },
-    content: { 
-      chapters: []
-    },
-    courseFaqs: [],
-    settings: {
-      courseVisibility: { public: false, enablePreview: false },
-      courseAccess: { duration: '', lifetimeAccess: false },
-      pricing: { originalPrice: '', discountedPrice: '', startDate: null, endDate: null },
-      enrollment: {
-        maxStudents: '',
-        certificateEligibility: false,
-        notifications: { notifyUpdates: false, notifyAssignments: false }
-      }
-    },
-    courseSettings: [{
-      pricingType: '',
-      promotionType: '',
-      publicAccess: false,
-      enablePreview: false,
-    }],
-    glossary: [
-      {
-        acronym: '',
-        meaning: ''
-      }
-    ],
-    references: [
-      {
-        reference: '',
-        link: ''
-      }
-    ]
-  },
+  courseData: loadFromCourseLocalStorage() || initialData,
+  courseId: null,
 
   categories: [],
   subCategories: [],
@@ -376,12 +324,7 @@ const useCourseCreationStore = create((set, get) => ({
       console.log("Updated courseData:", newCourseData);
 
       // Save to localStorage
-      try {
-        localStorage.setItem('courseData', JSON.stringify(newCourseData));
-        console.log('Successfully saved to localStorage');
-      } catch (error) {
-        console.error('Error saving to localStorage:', error);
-      }
+      saveToLocalStorage(state);
 
       return { courseData: newCourseData };
     });
@@ -432,12 +375,9 @@ const useCourseCreationStore = create((set, get) => ({
     const { courseData } = get();
     
     try {
-      // Get the latest data from localStorage
-      const latestData = JSON.parse(localStorage.getItem('courseCreationData') || '{}');
-      
       const settings = courseData.courseSettings?.[0];
       
-      // Format course settings as a direct object, not an array
+      // Format course settings correctly
       const courseSettings = {
         courseType: settings.courseType,
         percentageRequired: parseInt(settings.percentageRequired),
@@ -448,7 +388,6 @@ const useCourseCreationStore = create((set, get) => ({
         price: parseFloat(settings.price),
         discount: parseFloat(settings.discount),
         offeredPrice: parseFloat(settings.offeredPrice),
-        // Format dates to ISO-8601 with time component
         startDate: settings.startDate ? new Date(settings.startDate).toISOString() : null,
         endDate: settings.endDate ? new Date(settings.endDate).toISOString() : null,
         maxStudents: parseInt(settings.maxStudents),
@@ -465,66 +404,56 @@ const useCourseCreationStore = create((set, get) => ({
         enableSubtitles: Boolean(settings.enableSubtitles),
         seoTitle: settings.seoTitle,
         seoDescription: settings.seoDescription,
-        seoKeywords: settings.seoKeywords ? [settings.seoKeywords] : [],
+        seoKeywords: settings.seoKeywords || [],
         hashTags: settings.hashtags ? 
-          settings.hashtags.split(',')
-            .map(tag => tag.trim())
-            .filter(Boolean) : 
+          settings.hashtags.split(',').map(tag => tag.trim()).filter(Boolean) : 
           []
       };
 
+      const latestData = JSON.parse(localStorage.getItem('courseCreationData') || '{}');
+      
       const formattedData = {
-        trainerId: courseData.trainerId,
-        trainerName: courseData.trainerName,
-        courseName: courseData.basicInfo?.courseName,
-        courseTagline: courseData.basicInfo?.courseTagline,
-        courseDuration: courseData.basicInfo?.courseDuration,
-        difficultyLevel: courseData.basicInfo?.difficultyLevel,
-        category: courseData.basicInfo?.category,
-        subCategory: courseData.basicInfo?.subCategory,
-        teachingLanguage: courseData.basicInfo?.teachingLanguage,
+        courseId: courseData.courseId || localStorage.getItem('currentCourseId'),
+        action: isDraft ? 'DRAFT' : 'PUBLISH',
+        trainerId: courseData.trainerId || '',
+        trainerName: courseData.trainerName || '',
+        courseName: courseData.basicInfo?.courseName || '',
+        courseTagline: courseData.basicInfo?.courseTagline || '',
+        courseDuration: courseData.basicInfo?.courseDuration || '',
+        difficultyLevel: courseData.basicInfo?.difficultyLevel || '',
+        category: courseData.basicInfo?.category || '',
+        subCategory: courseData.basicInfo?.subCategory || '',
+        teachingLanguage: courseData.basicInfo?.teachingLanguage || '',
         courseDescription: courseData.about?.courseDescription || '',
-        courseOutCome: courseData.about?.courseOutcome || '',
-        coursePreRequisites: courseData.about?.coursePreRequisites?.map(item => ({
-          preRequisiteRequired: item.preRequisiteRequired || '',
-          preRequisiteLevel: item.preRequisiteLevel || 'Beginner'
-        })) || [],
+        courseOutCome: courseData.about?.courseOutCome || '',
+        coursePreRequisites: courseData.about?.coursePreRequisites || [],
         courseAudience: courseData.about?.courseAudience || [],
         categoryImage: courseData.media?.categoryImage || '',
         courseBanner: courseData.media?.courseBanner || '',
         courseImage: courseData.media?.courseImage || '',
         isDraft: isDraft,
+        isFeatured: false,
         status: isDraft ? 'DRAFT' : 'PENDING_APPROVAL',
-        courseChapters: courseData.content.chapters.map(chapter => ({
-          chapterName: chapter.chapterName,
-          chapterLessons: chapter.lessons.map(lesson => ({
-            lessonTitle: lesson.lessonTitle,
-            lessonType: lesson.lessonType,
-            lessonContent: lesson.lessonContent || '',
-            lessonVideo: lesson.lessonVideo || '',
-            lessonMaterials: [],
-            materials: lesson.materials || [],
-            questions: lesson.questions || [],
-            isNew: false,
-            showDropdown: false
-          })),
-          isNew: false
-        })),
+        version: "1.0",
+        courseChapters: courseData.content?.chapters?.map(chapter => ({
+          chapterName: chapter?.chapterName || '',
+          chapterLessons: chapter?.lessons?.map(lesson => ({
+            lessonTitle: lesson?.lessonTitle || '',
+            lessonType: lesson?.lessonType || '',
+            lessonContent: lesson?.lessonContent || '',
+            lessonVideo: lesson?.lessonVideo || '',
+            materials: lesson?.materials || [],
+            questions: lesson?.questions || []
+          })) || []
+        })) || [],
         glossary: courseData.glossary || [],
         references: courseData.references || [],
         courseFaqs: courseData.faq || [],
-        courseSettings,
-        comments: latestData.comments 
-          ? Object.values(latestData.comments)
-          : []
+        courseSettings: courseSettings,
+        comments: latestData.comments ? Object.values(latestData.comments) : []
       };
 
-      // Remove comments from courseSettings if it exists there
-      if (formattedData.courseSettings?.comments) {
-        delete formattedData.courseSettings.comments;
-      }
-
-      console.log('API Request Payload:', JSON.stringify(formattedData, null, 2));
+      console.log('7. Final formatted data:', formattedData); // Debug
 
       const token = Cookies.get('accessToken');
       const response = await axios.post(
@@ -533,21 +462,32 @@ const useCourseCreationStore = create((set, get) => ({
         {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Content-Type': 'application/json'
           }
         }
       );
 
-        // Show appropriate success message
-      toast.success(isDraft 
-        ? "Course saved as draft successfully!" 
-        : "Course submitted for review successfully!"
-      );
+      console.log('8. API Response:', response.data); // Debug
 
-      return response.data;
+      if (response.data) {
+        localStorage.removeItem('courseCreationData');
+        
+        // Update store with the new/updated courseId from response
+        set(state => ({
+          ...state,
+          courseId: response.data.draft.id
+        }));
+
+        toast.success(courseData.courseId 
+          ? "Course draft updated successfully!" 
+          : "New course draft created successfully!"
+        );
+        return response.data;
+      }
+
     } catch (error) {
-      console.error('API Error:', error.response?.data);
+      console.error('9. API Error:', error);
+      toast.error(error.response?.data?.message || 'Failed to save course');
       throw error;
     }
   },
@@ -804,6 +744,45 @@ const useCourseCreationStore = create((set, get) => ({
 
       const courseData = response.data.course;
       
+      // First, let's handle the chapter data separately to ensure it's always loaded
+      const chaptersData = courseData.courseChapters?.map(chapterItem => {
+        if (!chapterItem.chapter) return null;
+        
+        return {
+          id: chapterItem.chapter.id,
+          chapterId: chapterItem.chapterId,
+          chapterName: chapterItem.chapter.chapterName,
+          lessons: chapterItem.chapter.chapterLessons?.map(lesson => ({
+            id: lesson.id,
+            lessonTitle: lesson.lessonTitle || '',
+            lessonType: lesson.lessonType || '',
+            lessonContent: lesson.lessonContent || '',
+            lessonVideo: lesson.lessonVideo || '',
+            materials: lesson.materials?.map(material => ({
+              id: material.id,
+              materialTitle: material.materialTitle,
+              materialLink: material.materialLink
+            })) || [],
+            questions: lesson.questions?.map(question => ({
+              id: question.id,
+              question: question.question,
+              questionType: question.questionType,
+              correctAnswer: question.correctAnswer || null,
+              options: question.options?.map(option => ({
+                id: option.id,
+                option: option.option,
+                isCorrect: !!option.isCorrect
+              })) || []
+            })) || [],
+            isNew: false,
+            showDropdown: false
+          })) || [],
+          isNew: false
+        };
+      }).filter(Boolean) || [];
+
+      console.log("Mapped chapters data:", chaptersData);
+      
       set(state => {
         const newState = {
           courseData: {
@@ -837,47 +816,122 @@ const useCourseCreationStore = create((set, get) => ({
               ) || []
             },
             content: {
-              chapters: courseData.courseChapters?.map(chapterItem => ({
-                chapterName: chapterItem.chapter?.chapterName || '',
-                id: chapterItem.chapter?.id || '',
-                chapterId: chapterItem.chapterId || '',
-                lessons: chapterItem.chapter?.chapterLessons?.map(lesson => ({
-                  lessonTitle: lesson.lessonTitle || '',
-                  lessonType: lesson.lessonType || '',
-                  lessonContent: lesson.lessonContent || '',
-                  lessonVideo: lesson.lessonVideo || '',
-                  materials: lesson.materials || [],
-                  questions: lesson.questions || [],
-                  isNew: false,
-                  showDropdown: false
-                })) || [],
-                isNew: false
-              })) || []
+              chapters: chaptersData // Use our separately processed chapters data
             },
             glossary: courseData.glossary?.map(item => ({
+              id: item.id || '',
               acronym: item.acronym || '',
               meaning: item.meaning || ''
             })) || [],
             references: courseData.references?.map(item => ({
+              id: item.id || '',
               reference: item.reference || '',
               link: item.link || ''
             })) || [],
             faq: courseData.courseFaqs?.map(item => ({
+              id: item.id || '',
               question: item.faq?.question || '',
               answer: item.faq?.answer || ''
             })) || [],
-            courseSettings: courseData.courseSettings || []
+            courseSettings: courseData.courseSettings?.map(setting => ({
+              id: setting.id || '',
+              courseType: setting.courseType || '',
+              percentageRequired: setting.percentageRequired || 80,
+              pricingType: setting.pricingType || '',
+              promotionType: setting.promotionType || 'No Promotion',
+              publicAccess: setting.publicAccess || false,
+              enablePreview: setting.enablePreview || false,
+              price: setting.price || 0,
+              discount: setting.discount || 0,
+              offeredPrice: setting.offeredPrice || 0,
+              startDate: setting.startDate || null,
+              endDate: setting.endDate || null,
+              maxStudents: setting.maxStudents || 100,
+              certificateEligibility: setting.certificateEligibility || false,
+              accessDuration: setting.accessDuration || '',
+              lifeTimeAccess: setting.lifeTimeAccess || false,
+              notifyStudentsOnUpdate: setting.notifyStudentsOnUpdate || false,
+              notifyStudentsOnAssignment: setting.notifyStudentsOnAssignment || false,
+              returnPeriod: setting.returnPeriod || '',
+              refundsAllowed: setting.refundsAllowed || false,
+              allowContentDownloads: setting.allowContentDownloads || false,
+              allowDiscussionParticipation: setting.allowDiscussionParticipation || false,
+              scheduleLiveClasses: setting.scheduleLiveClasses || false,
+              enableSubtitles: setting.enableSubtitles || false,
+              seoTitle: setting.seoTitle || '',
+              seoDescription: setting.seoDescription || '',
+              seoKeywords: setting.seoKeywords || [],
+              hashTags: setting.hashTags || []
+            })) || []
           }
         };
 
         console.log("New state to be set:", newState);
+        
+        // Save to localStorage after ensuring chapters are properly loaded
+        localStorage.setItem('courseCreationData', JSON.stringify(newState.courseData));
+        
         return newState;
       });
 
     } catch (error) {
-      console.error("Error fetching course:", error);
+      console.error("Error in fetchCourse:", error);
+      displayToast('error', 'Failed to fetch course data');
       throw error;
     }
+  },
+
+  // Modified setCurrentCourseId
+  setCurrentCourseId: (id) => {
+    console.log('🔑 Setting courseId:', id);
+    set({ courseId: id });
+    localStorage.setItem('currentCourseId', id);
+  },
+
+  // Modified fetchCourse
+  fetchCourse: async (id) => {
+    console.log('🔍 1. fetchCourse called with id:', id);
+    
+    try {
+      const token = Cookies.get('accessToken');
+      set({ courseId: id }); // Set ID immediately
+      
+      const response = await axios.get(`http://localhost:8089/qlms/courses/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('✅ 2. API Response received');
+      
+      set(state => ({
+        courseId: id, // Ensure ID is set again
+        courseData: {
+          ...response.data,
+          id: id // Explicitly include ID in courseData
+        }
+      }));
+
+      console.log('📊 3. Store state after update:', {
+        courseId: get().courseId,
+        hasData: !!get().courseData
+      });
+
+    } catch (error) {
+      console.error("❌ Error in fetchCourse:", error);
+      throw error;
+    }
+  },
+
+  // Add a new method to ensure courseId persistence
+  ensureCourseId: (id) => {
+    set(state => {
+      if (!state.courseId) {
+        console.log('🔄 Restoring courseId:', id);
+        return { courseId: id };
+      }
+      return state;
+    });
   }
 }));
 

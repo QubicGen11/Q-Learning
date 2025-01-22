@@ -75,7 +75,8 @@ function BasicInfo() {
     validationErrors,
     setValidationErrors,
     setBreadcrumbTitle,
-    fetchCourseById
+    fetchCourseById,
+    setCurrentCourseId
   } = useCourseCreationStore();
   
   // Add default value for basicInfo
@@ -107,25 +108,26 @@ function BasicInfo() {
   const location = useLocation();
 
   useEffect(() => {
-    console.log("Current route:", location.pathname);
-    console.log("Route params:", id);
+    const courseId = id;
+    console.log('🔄 BasicInformation mounted with courseId:', courseId);
     
-    const fetchData = async () => {
-      if (id) {
-        console.log("Fetching course with ID:", id);
+    if (courseId) {
+      // Set the ID immediately
+      setCurrentCourseId(courseId);
+      
+      // Then fetch the course data
+      const fetchData = async () => {
         try {
-          await fetchCourseById(id);
-          console.log("Fetch completed");
+          await fetchCourseById(courseId);
+          console.log('✅ Course data fetched successfully');
         } catch (error) {
-          console.error("Error fetching course:", error);
+          console.error('❌ Error fetching course:', error);
         }
-      } else {
-        console.log("No ID provided");
-      }
-    };
-
-    fetchData();
-  }, [id, location, fetchCourseById]);
+      };
+      
+      fetchData();
+    }
+  }, [id, fetchCourseById, setCurrentCourseId]);
 
   // Debug logs
   console.log("Component re-render");

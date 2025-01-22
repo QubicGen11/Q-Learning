@@ -340,7 +340,7 @@ const StepIndicator = () => {
 
     await submitCourse(navigate);
     displayToast('success', 'Course submitted successfully!');
-    // localStorage.removeItem('courseCreationData');
+    localStorage.removeItem('courseCreationData');
   } catch (error) {
     console.error('Error submitting course:', error);
     displayToast('error', 'Failed to submit course');

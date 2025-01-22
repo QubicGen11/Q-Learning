@@ -135,13 +135,12 @@ const Courses = () => {
   );
 
   const handleCourseClick = (course) => {
-    console.log("Course clicked:", course);
-    console.log("Course ID:", course.id);
+    console.log('Course clicked:', course);
+    console.log('Course ID:', course.id);
     
-    setSelectedCourse({
-      ...course
-    });
-    console.log("Selected course after setting:", selectedCourse);
+    // Set the selected course directly without any conditions
+    setSelectedCourse(course);
+    console.log('Selected course after setting:', course); // Should show the course object
     setIsOffcanvasOpen(true);
   };
 

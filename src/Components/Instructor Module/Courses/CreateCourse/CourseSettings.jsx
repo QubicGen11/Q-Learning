@@ -96,7 +96,7 @@ function CourseSettings() {
 
     console.log('Updated settings:', updatedSettings);
 
-    updateCourseData('courseSettings', [updatedSettings]);
+    updateCourseData('courseSettings', updatedSettings);
   };
 
   const handleInputBlur = () => {
