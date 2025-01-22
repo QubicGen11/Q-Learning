@@ -63,11 +63,7 @@ const isTokenExpired = (token) => {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const currentTime = Math.floor(Date.now() / 1000);
     
-    console.log('Token Expiry Check:', {
-      currentTime,
-      expiryTime: payload.exp,
-      isExpired: currentTime >= payload.exp
-    });
+  
     
     return currentTime >= payload.exp;
   } catch (error) {
@@ -270,16 +266,13 @@ const useAuthStore = create((set) => ({
   },
 
   initializeTokenListener: () => {
-    console.log('Initializing token listener');
+    
     
     const checkToken = async () => {
       const token = Cookies.get('accessToken');
       const state = useAuthStore.getState();
       
-      console.log('Token check:', {
-        hasToken: !!token,
-        isLoggedIn: state.isLoggedIn
-      });
+  
 
       // If logged in but no token, definitely show popup
       if (state.isLoggedIn && !token) {

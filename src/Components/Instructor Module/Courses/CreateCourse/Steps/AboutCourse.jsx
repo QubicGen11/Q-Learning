@@ -21,7 +21,7 @@ function AboutCourse() {
 
   // Initialize about properly
   const about = {
-    courseOutcome: courseData?.about?.courseOutcome || '',
+    courseOutCome: courseData?.about?.courseOutCome || '',
     coursePreRequisites: Array.isArray(courseData?.about?.coursePreRequisites) 
       ? courseData.about.coursePreRequisites 
       : [],
@@ -97,9 +97,9 @@ function AboutCourse() {
     const errors = {};
     
     // Course Outcomes validation
-    const outcomes = currentData?.courseOutcome?.split('\n').filter(Boolean) || [];
-    if (!currentData?.courseOutcome || outcomes.length < 3) {
-      errors.courseOutcome = 'At least 3 course outcomes are required';
+    const outcomes = currentData?.courseOutCome?.split('\n').filter(Boolean) || [];
+    if (!currentData?.courseOutCome || outcomes.length < 3) {
+      errors.courseOutCome = 'At least 3 course outcomes are required';
     }
 
     // Prerequisites validation
@@ -181,7 +181,7 @@ function AboutCourse() {
   // Add a function to check if all fields are valid
   const areAllFieldsValid = () => {
     const requiredFields = [
-      'courseOutcome',
+      'courseOutCome',
       'coursePreRequisites',
       'courseAudience',
       'courseDescription'
@@ -198,7 +198,7 @@ function AboutCourse() {
           What Audience will get ?* 
         </label>
         <textarea
-          value={about?.courseOutcome ? about.courseOutcome.split('\n').map(line => `• ${line.replace('• ', '')}`).join('\n') : ''}
+          value={about?.courseOutCome ? about.courseOutCome.split('\n').map(line => `• ${line.replace('• ', '')}`).join('\n') : ''}
           onChange={(e) => {
             const outcomes = e.target.value
               .split('\n')
@@ -224,7 +224,7 @@ function AboutCourse() {
             }
           }}
           className={`w-full rounded p-[16px] border ${
-            validationErrors?.courseOutcome 
+            validationErrors?.courseOutCome 
               ? 'border-red-500 focus:border-red-500' 
               : 'border-[#D1D5DB] focus:border-[#bbbfc4]'
           } h-[100px] focus:outline-none placeholder:text-sm placeholder:text-gray-400`}
@@ -234,9 +234,9 @@ function AboutCourse() {
 • Learn how to conduct effective and useful research
 `}
         />
-        {validationErrors?.courseOutcome && (
+        {validationErrors?.courseOutCome && (
           <p className="text-red-500 text-xs mt-1">
-            {validationErrors.courseOutcome}
+            {validationErrors.courseOutCome}
           </p>
         )}
       </div>

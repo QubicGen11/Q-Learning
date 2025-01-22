@@ -3,14 +3,29 @@ import { FiEdit2, FiTrash2, FiSend, FiPlus } from "react-icons/fi";
 import { TbUserX } from "react-icons/tb";
 import { Popover, Checkbox } from "@mui/material";
 import { IoClose } from "react-icons/io5";
+import { useNavigate } from 'react-router-dom';
 
 const CoursePopover = ({ isOpen, onClose, course }) => {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const handleOpenPopover = (event) => {
     setAnchorEl(event.currentTarget);
     setIsPopoverOpen(true);
+  };
+
+  const handleEditCourse = () => {
+    console.log("Edit Course clicked");
+    console.log("Course data:", course);
+    console.log("Course ID:", course?.id);
+    
+    if (course?.id) {
+      console.log("Navigating to:", `/instructor/courses/create/basic-info/${course.id}`);
+      navigate(`/instructor/courses/create/basic-info/${course.id}`);
+    } else {
+      console.log("No course ID found!");
+    }
   };
 
   return (
@@ -51,7 +66,10 @@ const CoursePopover = ({ isOpen, onClose, course }) => {
             {/* Course Details */}
             <div className="mt-2">
               <div className="flex gap-[12px] items-center mb-4">
-                <button className="px-[8px] py-[6px] w-[120px] h-[32px] bg-[#F3F4F6] text-[#0056B3] rounded-[4px] flex justify-center items-center text-xs gap-[8px]">
+                <button 
+                  onClick={handleEditCourse}
+                  className="px-[8px] py-[6px] w-[120px] h-[32px] bg-[#F3F4F6] text-[#0056B3] rounded-[4px] flex justify-center items-center text-xs gap-[8px]"
+                >
                   <FiEdit2 className="text-sm" />EditCourse
                 </button>
                 <button className="px-[8px] py-[6px] h-[32px] w-[181px] rounded-[4px] bg-[#F3F4F6] text-[#DC3545] justify-center flex items-center gap-[8px] text-xs">

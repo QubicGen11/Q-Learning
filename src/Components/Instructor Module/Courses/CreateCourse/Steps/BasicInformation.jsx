@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import axios from 'axios';
+import { useParams, useLocation } from 'react-router-dom';
 
 function BasicInfo() {
   const languages = [
@@ -73,7 +74,8 @@ function BasicInfo() {
     fetchSubCategories,
     validationErrors,
     setValidationErrors,
-    setBreadcrumbTitle
+    setBreadcrumbTitle,
+    fetchCourseById
   } = useCourseCreationStore();
   
   // Add default value for basicInfo
@@ -100,6 +102,36 @@ function BasicInfo() {
 
   // Add this constant at the top with other constants
   const difficultyLevels = ["Beginner", "Intermediate", "Advanced"];
+
+  const { id } = useParams();
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log("Current route:", location.pathname);
+    console.log("Route params:", id);
+    
+    const fetchData = async () => {
+      if (id) {
+        console.log("Fetching course with ID:", id);
+        try {
+          await fetchCourseById(id);
+          console.log("Fetch completed");
+        } catch (error) {
+          console.error("Error fetching course:", error);
+        }
+      } else {
+        console.log("No ID provided");
+      }
+    };
+
+    fetchData();
+  }, [id, location, fetchCourseById]);
+
+  // Debug logs
+  console.log("Component re-render");
+  console.log("ID from params:", id);
+  console.log("Current pathname:", location.pathname);
+  console.log("Course data:", courseData);
 
   // Validation function
   const validateField = (field, value) => {

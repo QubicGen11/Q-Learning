@@ -29,7 +29,7 @@ const useSuperAdminStore = create((set, get) => ({
     set({ loading: true });
     try {
       const accessToken = Cookies.get('accessToken');
-      const response = await axios.get(`http://localhost:8089/qlms/allcourses`, {
+      const response = await axios.get(`http://localhost:8089/qlms/allcoursesbyusers`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }

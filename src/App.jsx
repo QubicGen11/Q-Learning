@@ -147,6 +147,7 @@ function App() {
                 <Route path="courses">
                   <Route index element={<CoursesPage />} />
                   <Route path="create" element={<CreateCourse />}>
+                    <Route path="basic-info/:id" element={<BasicInformation />} />
                     <Route path="basic-info" element={<BasicInformation />} />
                     <Route path="media" element={<AddMedia />} />
                     <Route path="about" element={<AboutCourse />} />

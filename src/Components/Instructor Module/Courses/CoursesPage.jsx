@@ -135,9 +135,14 @@ const Courses = () => {
   );
 
   const handleCourseClick = (course) => {
-    setSelectedCourse(course);
+    console.log("Course clicked:", course);
+    console.log("Course ID:", course.id);
+    
+    setSelectedCourse({
+      ...course
+    });
+    console.log("Selected course after setting:", selectedCourse);
     setIsOffcanvasOpen(true);
-    console.log("success");
   };
 
   return (
