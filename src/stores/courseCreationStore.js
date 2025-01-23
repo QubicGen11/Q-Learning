@@ -423,7 +423,7 @@
             enableSubtitles: Boolean(settings.enableSubtitles),
             seoTitle: settings.seoTitle || '',
             seoDescription: settings.seoDescription || '',
-            seoKeywords: stringToArray(settings.seoKeywords),
+            seoKeywords: settings.seoKeywords || settings.seoKeywords,
             hashTags: settings.hashtags ? stringToArray(settings.hashtags) : []
           };
 
