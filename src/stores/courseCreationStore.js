@@ -335,7 +335,7 @@
       
 
       updateChapters: (chapters) => {
-        set((state) => ({
+        set((state) => ({ 
           courseData: {
             ...state.courseData,
             content: {
@@ -379,11 +379,81 @@
         const { courseData } = get();
       
         try {
-          const settings = courseData.courseSettings?.[0] || {};
-          console.log('1. Original settings:', settings);
-      
-          // Format the data with cleaned settings
+          // Extract and format courseSettings
+          const rawSettings = courseData.courseSettings?.[0] || {};
+          const settings = rawSettings['0'] || rawSettings;
+
+          // Helper function to convert date to ISO format
+          const formatDate = (dateString) => {
+            if (!dateString) return null;
+            return new Date(dateString).toISOString();
+          };
+
+          // Helper function to convert comma-separated string to array
+          const stringToArray = (str) => {
+            if (!str) return [];
+            return str.split(',').map(item => item.trim()).filter(Boolean);
+          };
+
+          // Format the courseSettings properly
+          const formattedSettings = {
+            id: settings.id, // Include the ID if it exists for updates
+            courseType: settings.courseType || '',
+            percentageRequired: Number(settings.percentageRequired) || 80,
+            pricingType: settings.pricingType || '',
+            promotionType: settings.promotionType || 'No Promotion',
+            publicAccess: Boolean(settings.publicAccess),
+            enablePreview: Boolean(settings.enablePreview),
+            price: Number(settings.price) || 0,
+            discount: Number(settings.discount) || 0,
+            offeredPrice: Number(settings.offeredPrice) || 0,
+            startDate: formatDate(settings.startDate),
+            endDate: formatDate(settings.endDate),
+            maxStudents: Number(settings.maxStudents) || 100,
+            certificateEligibility: Boolean(settings.certificateEligibility),
+            accessDuration: settings.accessDuration || '',
+            lifeTimeAccess: Boolean(settings.lifeTimeAccess),
+            notifyStudentsOnUpdate: Boolean(settings.notifyStudentsOnUpdate),
+            notifyStudentsOnAssignment: Boolean(settings.notifyStudentsOnAssignment),
+            returnPeriod: settings.returnPeriod || '',
+            refundsAllowed: Boolean(settings.refundsAllowed),
+            allowContentDownloads: Boolean(settings.allowContentDownloads),
+            allowDiscussionParticipation: Boolean(settings.allowDiscussionParticipation),
+            scheduleLiveClasses: Boolean(settings.scheduleLiveClasses),
+            enableSubtitles: Boolean(settings.enableSubtitles),
+            seoTitle: settings.seoTitle || '',
+            seoDescription: settings.seoDescription || '',
+            seoKeywords: stringToArray(settings.seoKeywords),
+            hashTags: settings.hashtags ? stringToArray(settings.hashtags) : []
+          };
+
+          // Format the final data with proper update structure
           const formattedData = {
+            ...courseData,
+            courseSettings: {
+              // If we have an ID, update the existing record, otherwise create new
+              ...(formattedSettings.id ? {
+                update: {
+                  where: { id: formattedSettings.id },
+                  data: formattedSettings
+                }
+              } : {
+                create: formattedSettings
+              })
+            }
+          };
+
+          console.log('Formatted data:', formattedData);
+
+          // Convert comments object to array if needed
+          const commentsArray = courseData.comments ? 
+            (Array.isArray(courseData.comments) ? 
+              courseData.comments : 
+              Object.values(courseData.comments).filter(comment => comment !== null)
+            ) : [];
+
+          // Format the data
+          const formattedDataFinal = {
             courseId: courseData.courseId || localStorage.getItem('currentCourseId'),
             action: isDraft ? 'DRAFT' : 'PUBLISH',
             trainerId: courseData.trainerId || '',
@@ -420,20 +490,19 @@
             glossary: courseData.glossary || [],
             references: courseData.references || [],
             courseFaqs: courseData.faq || [],
-            courseSettings: courseData.courseSettings || [],
-      
-            // Fix for comments: ensure it's always an array
-            comments: Array.isArray(courseData.comments)
-              ? courseData.comments
-              : Object.values(courseData.comments || {}),
+            // Add the properly formatted comments array
+            comments: commentsArray,
+            
+            // Add the properly formatted courseSettings object
+            courseSettings: formattedSettings,
           };
       
-          console.log('2. Final formatted data:', formattedData);
+          console.log('Formatted data:', formattedDataFinal);
       
           const token = Cookies.get('accessToken');
           const response = await axios.post(
             'http://localhost:8089/qlms/courses/draft',
-            formattedData,
+            formattedDataFinal,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
