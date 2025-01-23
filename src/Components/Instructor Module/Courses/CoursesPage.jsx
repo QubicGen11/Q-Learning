@@ -144,6 +144,11 @@ const Courses = () => {
     setIsOffcanvasOpen(true);
   };
 
+  // Add this function to refresh courses
+  const handleCourseDeleted = () => {
+    fetchCourses(); // This will fetch the updated list of courses
+  };
+
   return (
     <div className="container mx-auto p-6 bg-[#ffffff]">
       <h1 className="text-[18px] font-bold text-[#1F2A37]">Courses</h1>
@@ -362,6 +367,7 @@ const Courses = () => {
         isOpen={isOffcanvasOpen}
         onClose={() => setIsOffcanvasOpen(false)}
         course={selectedCourse}
+        onCourseDeleted={handleCourseDeleted}
       />
     </div>
   );

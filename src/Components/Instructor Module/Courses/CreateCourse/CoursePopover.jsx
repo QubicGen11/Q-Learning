@@ -4,11 +4,32 @@ import { TbUserX } from "react-icons/tb";
 import { Popover, Checkbox } from "@mui/material";
 import { IoClose } from "react-icons/io5";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { displayToast } from '../../../Common/Toast/Toast';
 
-const CoursePopover = ({ isOpen, onClose, course }) => {
+const CoursePopover = ({ isOpen, onClose, course, onCourseDeleted }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  // Check if course is live or pending approval
+  const isEditingDisabled = course?.status === "LIVE" || course?.status === "PENDING_APPROVAL";
+  const isDeletingDisabled = course?.status === "LIVE" || course?.status === "PENDING_APPROVAL";
+
+  // Get tooltip text based on course status
+  const getTooltipText = (action) => {
+    if (course?.status === "LIVE") {
+      return action === 'edit' 
+        ? "Live courses cannot be edited"
+        : "Live courses cannot be deleted";
+    } else if (course?.status === "PENDING_APPROVAL") {
+      return action === 'edit'
+        ? "Your course is pending approval. It can be edited only after rejection"
+        : "Your course is pending approval. It can be deleted only after rejection";
+    }
+    return "";
+  };
 
   const handleOpenPopover = (event) => {
     setAnchorEl(event.currentTarget);
@@ -16,15 +37,34 @@ const CoursePopover = ({ isOpen, onClose, course }) => {
   };
 
   const handleEditCourse = () => {
-    console.log("Edit Course clicked");
-    console.log("Course data:", course);
-    console.log("Course ID:", course?.id);
+    if (isEditingDisabled) return;
     
     if (course?.id) {
-      console.log("Navigating to:", `/instructor/courses/create/basic-info/${course.id}`);
       navigate(`/instructor/courses/create/basic-info/${course.id}`);
-    } else {
-      console.log("No course ID found!");
+    }
+  };
+
+  // Add delete course handler
+  const handleDeleteCourse = async () => {
+    if (!course?.id) return;
+
+    if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+      try {
+        const token = Cookies.get('accessToken');
+        await axios.delete(`http://localhost:8089/qlms/courses/delete/${course.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        displayToast('success', 'Course deleted successfully');
+        onClose(); // Close the popover
+        onCourseDeleted(); // Call the callback to refresh the courses list
+        navigate('/instructor/courses');
+      } catch (error) {
+        console.error('Error deleting course:', error);
+        displayToast('error', error.response?.data?.message || 'Failed to delete course');
+      }
     }
   };
 
@@ -68,11 +108,27 @@ const CoursePopover = ({ isOpen, onClose, course }) => {
               <div className="flex gap-[12px] items-center mb-4">
                 <button 
                   onClick={handleEditCourse}
-                  className="px-[8px] py-[6px] w-[120px] h-[32px] bg-[#F3F4F6] text-[#0056B3] rounded-[4px] flex justify-center items-center text-xs gap-[8px]"
+                  disabled={isEditingDisabled}
+                  title={isEditingDisabled ? getTooltipText('edit') : ""}
+                  className={`px-[8px] py-[6px] w-[120px] h-[32px] rounded-[4px] flex justify-center items-center text-xs gap-[8px] ${
+                    isEditingDisabled 
+                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                      : 'bg-[#F3F4F6] text-[#0056B3] hover:bg-[#E2E4E9]'
+                  }`}
                 >
-                  <FiEdit2 className="text-sm" />EditCourse
+                  <FiEdit2 className="text-sm" />
+                  EditCourse
                 </button>
-                <button className="px-[8px] py-[6px] h-[32px] w-[181px] rounded-[4px] bg-[#F3F4F6] text-[#DC3545] justify-center flex items-center gap-[8px] text-xs">
+                <button 
+                  onClick={handleDeleteCourse}
+                  disabled={isDeletingDisabled}
+                  title={isDeletingDisabled ? getTooltipText('delete') : ""}
+                  className={`px-[8px] py-[6px] h-[32px] w-[181px] rounded-[4px] flex justify-center items-center gap-[8px] text-xs ${
+                    isDeletingDisabled
+                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      : 'bg-[#F3F4F6] text-[#DC3545] hover:bg-red-50'
+                  }`}
+                >
                   <FiTrash2 className="text-sm" /> Delete Entire Course
                 </button>
               </div>

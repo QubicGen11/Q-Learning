@@ -423,7 +423,7 @@
             enableSubtitles: Boolean(settings.enableSubtitles),
             seoTitle: settings.seoTitle || '',
             seoDescription: settings.seoDescription || '',
-            seoKeywords: settings.seoKeywords || settings.seoKeywords,
+            seoKeywords: stringToArray(settings.seoKeywords || settings.seoKeywords),
             hashTags: settings.hashtags ? stringToArray(settings.hashtags) : []
           };
 
@@ -524,6 +524,7 @@
                 ? 'Course draft updated successfully!'
                 : 'New course draft created successfully!'
             );
+            localStorage.removeItem('currentCourseId');
             return response.data;
           }
         } catch (error) {
