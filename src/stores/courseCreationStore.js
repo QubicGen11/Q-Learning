@@ -376,86 +376,50 @@
       },
 
       submitCourse: async (isDraft = true) => {
-        const { courseData } = get();
+        const { courseData, courseId } = get();
       
         try {
+          // Helper functions for formatting data
+          const formatDate = (dateString) => (dateString ? new Date(dateString).toISOString() : null);
+          const stringToArray = (str) => (str ? str.split(',').map((item) => item.trim()).filter(Boolean) : []);
+      
           // Extract and format courseSettings
           const rawSettings = courseData.courseSettings?.[0] || {};
-          const settings = rawSettings['0'] || rawSettings;
-
-          // Helper function to convert date to ISO format
-          const formatDate = (dateString) => {
-            if (!dateString) return null;
-            return new Date(dateString).toISOString();
-          };
-
-          // Helper function to convert comma-separated string to array
-          const stringToArray = (str) => {
-            if (!str) return [];
-            return str.split(',').map(item => item.trim()).filter(Boolean);
-          };
-
-          // Format the courseSettings properly
           const formattedSettings = {
-            id: settings.id, // Include the ID if it exists for updates
-            courseType: settings.courseType || '',
-            percentageRequired: Number(settings.percentageRequired) || 80,
-            pricingType: settings.pricingType || '',
-            promotionType: settings.promotionType || 'No Promotion',
-            publicAccess: Boolean(settings.publicAccess),
-            enablePreview: Boolean(settings.enablePreview),
-            price: Number(settings.price) || 0,
-            discount: Number(settings.discount) || 0,
-            offeredPrice: Number(settings.offeredPrice) || 0,
-            startDate: formatDate(settings.startDate),
-            endDate: formatDate(settings.endDate),
-            maxStudents: Number(settings.maxStudents) || 100,
-            certificateEligibility: Boolean(settings.certificateEligibility),
-            accessDuration: settings.accessDuration || '',
-            lifeTimeAccess: Boolean(settings.lifeTimeAccess),
-            notifyStudentsOnUpdate: Boolean(settings.notifyStudentsOnUpdate),
-            notifyStudentsOnAssignment: Boolean(settings.notifyStudentsOnAssignment),
-            returnPeriod: settings.returnPeriod || '',
-            refundsAllowed: Boolean(settings.refundsAllowed),
-            allowContentDownloads: Boolean(settings.allowContentDownloads),
-            allowDiscussionParticipation: Boolean(settings.allowDiscussionParticipation),
-            scheduleLiveClasses: Boolean(settings.scheduleLiveClasses),
-            enableSubtitles: Boolean(settings.enableSubtitles),
-            seoTitle: settings.seoTitle || '',
-            seoDescription: settings.seoDescription || '',
-            seoKeywords: stringToArray(settings.seoKeywords || settings.seoKeywords),
-            hashTags: settings.hashtags ? stringToArray(settings.hashtags) : []
+            id: rawSettings.id,
+            courseType: rawSettings.courseType || '',
+            percentageRequired: Number(rawSettings.percentageRequired) || 80,
+            pricingType: rawSettings.pricingType || '',
+            promotionType: rawSettings.promotionType || 'No Promotion',
+            publicAccess: Boolean(rawSettings.publicAccess),
+            enablePreview: Boolean(rawSettings.enablePreview),
+            price: Number(rawSettings.price) || 0,
+            discount: Number(rawSettings.discount) || 0,
+            offeredPrice: Number(rawSettings.offeredPrice) || 0,
+            startDate: formatDate(rawSettings.startDate),
+            endDate: formatDate(rawSettings.endDate),
+            maxStudents: Number(rawSettings.maxStudents) || 100,
+            certificateEligibility: Boolean(rawSettings.certificateEligibility),
+            accessDuration: rawSettings.accessDuration || '',
+            lifeTimeAccess: Boolean(rawSettings.lifeTimeAccess),
+            notifyStudentsOnUpdate: Boolean(rawSettings.notifyStudentsOnUpdate),
+            notifyStudentsOnAssignment: Boolean(rawSettings.notifyStudentsOnAssignment),
+            returnPeriod: rawSettings.returnPeriod || '',
+            refundsAllowed: Boolean(rawSettings.refundsAllowed),
+            allowContentDownloads: Boolean(rawSettings.allowContentDownloads),
+            allowDiscussionParticipation: Boolean(rawSettings.allowDiscussionParticipation),
+            scheduleLiveClasses: Boolean(rawSettings.scheduleLiveClasses),
+            enableSubtitles: Boolean(rawSettings.enableSubtitles),
+            seoTitle: rawSettings.seoTitle || '',
+            seoDescription: rawSettings.seoDescription || '',
+            seoKeywords: stringToArray(rawSettings.seoKeywords || []),
+            hashTags: rawSettings.hashTags || [],
           };
-
-          // Format the final data with proper update structure
+      
+          // Prepare formatted data for API
           const formattedData = {
-            ...courseData,
-            courseSettings: {
-              // If we have an ID, update the existing record, otherwise create new
-              ...(formattedSettings.id ? {
-                update: {
-                  where: { id: formattedSettings.id },
-                  data: formattedSettings
-                }
-              } : {
-                create: formattedSettings
-              })
-            }
-          };
-
-          console.log('Formatted data:', formattedData);
-
-          // Convert comments object to array if needed
-          const commentsArray = courseData.comments ? 
-            (Array.isArray(courseData.comments) ? 
-              courseData.comments : 
-              Object.values(courseData.comments).filter(comment => comment !== null)
-            ) : [];
-
-          // Format the data
-          const formattedDataFinal = {
-            courseId: courseData.courseId || localStorage.getItem('currentCourseId'),
-            action: isDraft ? 'DRAFT' : 'PUBLISH',
+            courseId: courseId || localStorage.getItem('currentCourseId'),
+            action: isDraft ? 'DRAFT' : 'SUBMIT',
             trainerId: courseData.trainerId || '',
             trainerName: courseData.trainerName || '',
             courseName: courseData.basicInfo?.courseName || '',
@@ -472,7 +436,7 @@
             categoryImage: courseData.media?.categoryImage || '',
             courseBanner: courseData.media?.courseBanner || '',
             courseImage: courseData.media?.courseImage || '',
-            isDraft: isDraft,
+            isDraft,
             isFeatured: false,
             status: isDraft ? 'DRAFT' : 'PENDING_APPROVAL',
             version: '1.0',
@@ -490,49 +454,54 @@
             glossary: courseData.glossary || [],
             references: courseData.references || [],
             courseFaqs: courseData.faq || [],
-            // Add the properly formatted comments array
-            comments: commentsArray,
-            
-            // Add the properly formatted courseSettings object
+            comments: Array.isArray(courseData.comments)
+              ? courseData.comments
+              : Object.values(courseData.comments || {}).filter((comment) => comment !== null),
             courseSettings: formattedSettings,
           };
       
-          console.log('Formatted data:', formattedDataFinal);
+          console.log('Formatted Data for Submission:', formattedData);
       
+          // Determine API method and endpoint
+          const apiEndpoint = courseId
+            ? `http://localhost:8089/qlms/courses/draft/${courseId}`
+            : 'http://localhost:8089/qlms/courses/draft';
+          const method = courseId ? 'put' : 'post';
+      
+          // Perform API request
           const token = Cookies.get('accessToken');
-          const response = await axios.post(
-            'http://localhost:8089/qlms/courses/draft',
-            formattedDataFinal,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+          const response = await axios[method](apiEndpoint, formattedData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
       
-          console.log('3. API Response:', response.data);
+          console.log('API Response:', response.data);
       
           if (response.data) {
             set((state) => ({
               ...state,
-              courseId: response.data.draft.id,
+              courseId: response.data.draft.id || state.courseId,
             }));
       
-            toast.success(
-              courseData.courseId
+            displayToast(
+              'success',
+              courseId
                 ? 'Course draft updated successfully!'
                 : 'New course draft created successfully!'
             );
+      
             localStorage.removeItem('currentCourseId');
             return response.data;
           }
         } catch (error) {
-          console.error('4. API Error:', error);
-          toast.error(error.response?.data?.message || 'Failed to save course');
+          console.error('API Error:', error);
+          displayToast('error', error.response?.data?.message || 'Failed to save course');
           throw error;
         }
       },
+      
       
 
       resetStore: () => {

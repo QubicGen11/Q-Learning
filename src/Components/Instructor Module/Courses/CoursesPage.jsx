@@ -12,6 +12,9 @@ import { SlPencil } from "react-icons/sl";
 import { MdOutlineAdd } from "react-icons/md";
 import './Coursepage.css'
 import useCourseStore from "../../../stores/courseStore";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+
 
 
 
@@ -189,7 +192,7 @@ const Courses = () => {
  
       {/* Courses Table */}
       {loading ? (
-        <div className="text-center py-4">Loading courses...</div>
+       <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />
       ) : error ? (
         <div className="text-center py-4 text-red-500">Error: {error}</div>
       ) : (
