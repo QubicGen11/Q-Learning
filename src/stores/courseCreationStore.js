@@ -34,7 +34,7 @@
       isDraft: true,
       isFeatured: false,
       status: "DRAFT",
-      version: "1.0",
+      version: "",
       
       glossary: [
         { 
@@ -381,7 +381,13 @@
         try {
           // Helper functions for formatting data
           const formatDate = (dateString) => (dateString ? new Date(dateString).toISOString() : null);
-          const stringToArray = (str) => (str ? str.split(',').map((item) => item.trim()).filter(Boolean) : []);
+          const stringToArray = (str) => {
+            if (typeof str !== 'string') {
+              return [];
+            }
+            return str.split(',').map((item) => item.trim()).filter(Boolean);
+          };
+          
       
           // Extract and format courseSettings
           const rawSettings = courseData.courseSettings?.[0] || {};
@@ -439,7 +445,7 @@
             isDraft,
             isFeatured: false,
             status: isDraft ? 'DRAFT' : 'PENDING_APPROVAL',
-            version: '1.0',
+            version: courseData.basicInfo?.version || "1.0",
             courseChapters: courseData.content?.chapters?.map((chapter) => ({
               chapterName: chapter?.chapterName || '',
               chapterLessons: chapter?.lessons?.map((lesson) => ({
@@ -809,6 +815,7 @@
                   category: courseData.category || '',
                   subCategory: courseData.subCategory || '',
                   teachingLanguage: courseData.teachingLanguage || '',
+                  version: courseData.version || '',
                   // hashtags: courseData.courseSettings?.[0]?.hashTags || [],
                 },
                 media: {

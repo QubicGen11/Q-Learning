@@ -319,35 +319,7 @@ const StepIndicator = () => {
     return location.pathname.includes('/settings');
   };
  
- const handleSubmit = async () => {
-  console.log('Submit clicked');
-  setIsSubmitting(true);
 
-  // Check if settings exist
-  if (!courseData.courseSettings?.[0]) {
-    displayToast('error', 'Please fill all the required settings before submitting');
-    setIsSubmitting(false);
-    return;
-  }
-
-  try {
-    const isValid = validateSettings();
-    if (!isValid) {
-      displayToast('error', 'Please complete all required settings fields');
-      setIsSubmitting(false);
-      return;
-    }
-
-    await submitCourse(navigate);
-    displayToast('success', 'Course submitted successfully!');
-    // localStorage.removeItem('courseCreationData');
-  } catch (error) {
-    console.error('Error submitting course:', error);
-    displayToast('error', 'Failed to submit course');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
  
   return (
     <div className="bg-white border-t relative">
@@ -453,7 +425,7 @@ const StepIndicator = () => {
       // Course Settings validation
       // if (!courseSettings?.[0]) {
       //   validationErrors.push("Course settings are required");
-      // } else {
+      // } else { 
       //   const settings = courseSettings[0];
       //   if (!settings.pricingType) validationErrors.push("Pricing type is required");
       //   if (!settings.promotionType) validationErrors.push("Promotion type is required");

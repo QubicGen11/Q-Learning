@@ -14,7 +14,7 @@ const InstructorLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { breadcrumbTitle, currentStep } = useCourseCreationStore();
+  const { breadcrumbTitle, currentStep, courseData } = useCourseCreationStore();
   
   
 
@@ -190,9 +190,16 @@ const InstructorLayout = () => {
             )}
 
             {location.pathname.match(/^\/instructor\/courses\/create/) && (
+              <>
+              
               <div className='bg-gray-500 text-white rounded-md ml-3 w-[70px] text-center' style={{padding:"1px 8px 1px 8px"}}>
                 Drafts
               </div>
+              <div className='bg-gray-500 text-white rounded-md ml-3 w-auto text-center' style={{padding:"1px 8px 1px 8px"}}>
+                V{courseData?.basicInfo?.version || "1.0"}
+              </div>
+              </>
+
             )}
           </div>
           <Outlet />

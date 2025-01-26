@@ -39,7 +39,7 @@ function CourseSettings() {
     endDate: '',
     seoTitle: '',
     seoDescription: '',
-    seoKeywords: '',
+    seoKeywords: 'test',
     hashtags: ''
   });
   const [showAccessDurationSuggestions, setShowAccessDurationSuggestions] = useState(false);
@@ -1015,22 +1015,48 @@ function CourseSettings() {
 
                       {/* SEO Keywords */}
                       <div className='p-2'>
-                        <div className='p-2'>
+                      <div className='p-2'>
                           <label className="block text-sm mb-2 text-gray-600">SEO Keywords *</label>
-                          <input
-                            type="text"
-                            className={`w-5/5 px-3 py-1.5 border rounded text-sm h-9 ${commonStyles.input}`}
-                            value={settings.seoKeywords || ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setSettings(prev => ({
-                                ...prev,
-                                seoKeywords: value
-                              }));
-                              handleSettingChange('seoKeywords', value);
-                            }}
-                            placeholder="Enter SEO Keywords"
-                          />
+                          <div className="relative">
+                            <input
+                              type="text"
+                              className={`w-5/5 px-3 py-1.5 border rounded text-sm h-9 ${commonStyles.input}`}
+                              value={settings.seoKeywords || ''}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setSettings(prev => ({
+                                  ...prev,
+                                  seoKeywords: value
+                                }));
+                                handleSettingChange('seoKeywords', value);
+                              }}
+                              placeholder="Enter SEO Keywords"
+                            />
+                            {settings.seoKeywords && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {settings.seoKeywords.split(',').map((keyword, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm"
+                                  >
+                                    {keyword.trim()}
+                                    <button
+                                      onClick={() => {
+                                        const newKeywords = settings.seoKeywords
+                                          .split(',')
+                                          .filter((_, i) => i !== index)
+                                          .join(',');
+                                        handleSettingChange('seoKeywords', newKeywords);
+                                      }}
+                                      className="text-gray-500 hover:text-gray-700"
+                                    >   
+                                      ×
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Hashtags */}

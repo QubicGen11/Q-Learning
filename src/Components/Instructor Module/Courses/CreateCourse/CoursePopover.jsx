@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiEdit2, FiTrash2, FiSend, FiPlus } from "react-icons/fi";
 import { TbUserX } from "react-icons/tb";
-import { Popover, Checkbox } from "@mui/material";
+import { Popover, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import { IoClose } from "react-icons/io5";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,18 +12,15 @@ const CoursePopover = ({ isOpen, onClose, course, onCourseDeleted }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [openDraftModal, setOpenDraftModal] = useState(false);
 
-  // Check if course is live or pending approval
-  const isEditingDisabled = course?.status === "LIVE" || course?.status === "PENDING_APPROVAL";
+  // Update this to only check for PENDING_APPROVAL
+  const isEditingDisabled = course?.status === "PENDING_APPROVAL";
   const isDeletingDisabled = course?.status === "LIVE" || course?.status === "PENDING_APPROVAL";
 
-  // Get tooltip text based on course status
+  // Update tooltip text
   const getTooltipText = (action) => {
-    if (course?.status === "LIVE") {
-      return action === 'edit' 
-        ? "Live courses cannot be edited"
-        : "Live courses cannot be deleted";
-    } else if (course?.status === "PENDING_APPROVAL") {
+    if (course?.status === "PENDING_APPROVAL") {
       return action === 'edit'
         ? "Your course is pending approval. It can be edited only after rejection"
         : "Your course is pending approval. It can be deleted only after rejection";
@@ -37,10 +34,41 @@ const CoursePopover = ({ isOpen, onClose, course, onCourseDeleted }) => {
   };
 
   const handleEditCourse = () => {
+    if (course?.status === "LIVE") {
+      setOpenDraftModal(true);
+      return;
+    }
+    
     if (isEditingDisabled) return;
     
     if (course?.id) {
       navigate(`/instructor/courses/create/basic-info/${course.id}`);
+    }
+  };
+
+  const handleCreateDraft = async () => {
+    try {
+      const token = Cookies.get('accessToken');
+      await axios.post('http://localhost:8089/qlms/courses/draft', 
+        { courseId: course.id },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      displayToast('success', 'Draft created successfully');
+      setOpenDraftModal(false);
+      onClose();
+      onCourseDeleted();
+    } catch (error) {
+      console.error('Error creating draft:', error);
+      if (error.response?.data?.error) {
+        displayToast('error', error.response.data.error);
+      } else {
+        displayToast('error', 'Failed to create draft');
+      }
     }
   };
 
@@ -227,12 +255,38 @@ const CoursePopover = ({ isOpen, onClose, course, onCourseDeleted }) => {
             <button className="px-[8px] py-[6px] h-[40px] w-[196px] bg-[#0056B3] text-[#F5F5F5] rounded-[4px] text-sm">
               Re-Submit for Review
             </button>
+            <a href="/instructor/courses/create">
             <button className="px-[8px] py-[6px] h-[40px] w-[213px] bg-[#0056B3] text-[#F5F5F5] rounded-[4px] text-sm flex justify-center items-center gap-[8px]">
               <FiPlus className="items-center" />Add Another Course
             </button>
+            </a>
           </div>
         </div>
       </div>
+
+      {/* Draft Creation Modal */}
+      <Dialog
+        open={openDraftModal}
+        onClose={() => setOpenDraftModal(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Create Draft Version</DialogTitle>
+        <DialogContent>
+          <p className="mt-2">
+            This course is currently live. To make changes, a draft version will be created.
+            Would you like to proceed?
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDraftModal(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleCreateDraft} variant="contained" color="primary">
+            Create Draft
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
