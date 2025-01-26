@@ -270,19 +270,77 @@ const CoursePopover = ({ isOpen, onClose, course, onCourseDeleted }) => {
         onClose={() => setOpenDraftModal(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          style: {
+            backgroundColor: '#0056B3',
+            color: 'white',
+            borderRadius: '8px',
+            padding: '16px',
+            fontFamily: "Plus Jakarta Sans",
+            width: '500px',
+           
+          }
+        }}
       >
-        <DialogTitle>Create Draft Version</DialogTitle>
-        <DialogContent>
-          <p className="mt-2">
+        <DialogTitle sx={{ 
+          color: 'white',
+          padding: '8px 16px',
+          fontSize: '1rem',
+          fontWeight: 'bold',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+        Create Draft Version
+          <button 
+            onClick={() => setOpenDraftModal(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '1.2rem'
+            }}
+          >
+            ×
+          </button>
+        </DialogTitle>
+        <DialogContent sx={{ color: 'white', padding: '16px' }}>
+          <p style={{ fontSize: '0.875rem', marginTop: '8px' }}>
             This course is currently live. To make changes, a draft version will be created.
             Would you like to proceed?
           </p>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDraftModal(false)} color="primary">
+        <DialogActions sx={{ padding: '8px 16px' }}>
+          <Button 
+            onClick={() => setOpenDraftModal(false)} 
+            sx={{ 
+              color: 'white',
+              fontFamily: "Plus Jakarta Sans",
+              fontWeight: '400',
+              fontSize: '16px',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleCreateDraft} variant="contained" color="primary">
+          <Button 
+            onClick={handleCreateDraft} 
+            variant="contained"
+            sx={{ 
+              backgroundColor: 'white',
+              fontFamily: "Plus Jakarta Sans",
+              
+              fontWeight: '400',
+              fontSize: '16px',
+              color: '#0056B3',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.9)'
+              }
+            }}
+          >
             Create Draft
           </Button>
         </DialogActions>
