@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCourseCreationStore from '../../../../../stores/courseCreationStore';
 import { IoIosArrowRoundBack, IoIosArrowRoundForward } from 'react-icons/io';
+import { IoClose } from "react-icons/io5";
 import Cookies from 'js-cookie';
 // import { toast } from 'react-toastify';
 import Toast, { displayToast } from '../../../../Common/Toast/Toast';
 import CommentDialog from './CommentDialog';
 import ValidationDialog from './ValidationDialog';
+import Dialog from '@mui/material/Dialog';
+import Coursepagemain from '../../../../CoursePage Components/Coursepagemain';
  
  
  
@@ -33,6 +36,7 @@ const StepIndicator = () => {
   const [toastMessage, setToastMessage] = useState({ type: '', message: '' });
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [showValidationDialog, setShowValidationDialog] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
  
   const mainTabs = [
     {
@@ -319,7 +323,51 @@ const StepIndicator = () => {
     return location.pathname.includes('/settings');
   };
  
+  // Format the preview data
+  const formatPreviewData = () => {
+    const { courseData } = useCourseCreationStore.getState();
+    
+    return {
+      id: courseData?.courseId,
+      courseName: courseData?.basicInfo?.courseName,
+      courseTagline: courseData?.basicInfo?.courseTagline,
+      courseDescription: courseData?.basicInfo?.courseDescription,
+      courseImage: courseData?.media?.courseImage,
+      courseBanner: courseData?.media?.courseBanner,
+      categoryImage: courseData?.basicInfo?.categoryImage,
+      category: courseData?.basicInfo?.category,
+      subCategory: courseData?.basicInfo?.subCategory,
+      updatedAt: new Date().toISOString(),
+      teachingLanguage: courseData?.basicInfo?.teachingLanguage,
+      courseRating: 0,
+      rating: 0,
+      courseSettings: [{
+        price: courseData?.settings?.price,
+        offeredPrice: courseData?.settings?.offeredPrice,
+        discount: courseData?.settings?.discount
+      }],
+      trainerName: courseData?.basicInfo?.trainerName,
+      courseDuration: courseData?.basicInfo?.courseDuration,
+      difficultyLevel: courseData?.basicInfo?.difficultyLevel,
+      coursePreRequisites: courseData?.about?.prerequisites,
+      courseAudience: courseData?.about?.audience,
+      glossary: courseData?.moreInfo?.glossary,
+      references: courseData?.moreInfo?.references,
+      courseFaqs: courseData?.faq?.faqs,
+      courseOutCome: courseData?.about?.courseOutcome,
+      courseChapters: courseData?.content?.chapters?.map(chapter => ({
+        chapter: {
+          chapterName: chapter.chapterName,
+          chapterLessons: chapter.lessons
+        }
+      }))
+    };
+  };
 
+  // Add preview handler
+  const handlePreview = () => {
+    setPreviewOpen(true);
+  };
  
   return (
     <div className="bg-white border-t relative">
@@ -354,7 +402,7 @@ const StepIndicator = () => {
           <div className="flex items-center gap-4 p-2 ">
   <div className="relative">
     <button
-      onClick={() => {}}
+      onClick={handlePreview}
       className="px-4 py-2 h-8 text-sm text-[#0056B3] border border-[#0056B3] hover:bg-gray-50 rounded-md flex items-center gap-2"
     >
       Preview
@@ -636,6 +684,32 @@ const StepIndicator = () => {
          
         </div>
       </div>
+
+      {/* Preview Modal */}
+      <Dialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        maxWidth="xl"
+        fullWidth
+        PaperProps={{
+          style: {
+            maxWidth: '100vw',
+            maxHeight: '100vh',
+            margin: 0,
+            borderRadius: 0
+          }
+        }}
+      >
+        <div className="h-screen overflow-y-auto">
+          <button 
+            onClick={() => setPreviewOpen(false)}
+            className="fixed top-4 right-4 z-50 bg-white rounded-full p-2 shadow-lg"
+          >
+            <IoClose size={24} />
+          </button>
+          <Coursepagemain previewMode={true} previewData={formatPreviewData()} />
+        </div>
+      </Dialog>
     </div>
   );
 };

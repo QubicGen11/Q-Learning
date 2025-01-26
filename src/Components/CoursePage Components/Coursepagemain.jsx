@@ -8,7 +8,7 @@ import Footer from '../New Landingpage/Footer/Footer';
 import SuperLoader from '../Common/SuperLoader';
 import Cookies from 'js-cookie';
 
-const Coursepagemain = () => {
+const Coursepagemain = ({ previewMode = false, previewData = null }) => {
   const { id } = useParams();
   const [courseData, setCourseData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,16 +18,21 @@ const Coursepagemain = () => {
     const fetchCourseData = async () => {
       try {
         setIsLoading(true);
-      
+        
+        if (previewMode && previewData) {
+          setCourseData(previewData);
+          setIsLoading(false);
+          return;
+        }
+
         const token = Cookies.get('accessToken');
-        const response = await axios.get(`http://localhost:8089/qlms/courses/dacc6ea6-0ef0-4235-ba24-091641328c40`, {
+        const response = await axios.get(`http://localhost:8089/qlms/courses/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
         
-        setCourseData(response.data);
-        setCourseData(response.data.course); // Access the course object from the response
+        setCourseData(response.data.course);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching course:', error);
@@ -37,7 +42,7 @@ const Coursepagemain = () => {
     };
 
     fetchCourseData();
-  }, [id]);
+  }, [id, previewMode, previewData]);
 
   if (isLoading) {
     return <SuperLoader />;

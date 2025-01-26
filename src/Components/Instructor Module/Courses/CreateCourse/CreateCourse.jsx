@@ -10,8 +10,7 @@ function CreateCourse() {
     currentStep, 
     setStep, 
     resetStore, 
-    handleNext,
-    submitCourse 
+ 
   } = useCourseCreationStore();
 
   // Updated steps definition
@@ -51,20 +50,7 @@ function CreateCourse() {
     }
   }, [location.pathname, navigate, setStep]);
 
-  const handleCancel = () => {
-    if (window.confirm('Are you sure you want to cancel? All progress will be lost.')) {
-      resetStore();
-      navigate('/instructor/courses');
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      const prevStep = steps[currentStep - 2];
-      setStep(currentStep - 1);
-      navigate(`/instructor/courses/create/${prevStep.path}`);
-    }
-  };
+ 
 
   const [basicInfo, setBasicInfo] = useState({});
   const [mediaInfo, setMediaInfo] = useState({});

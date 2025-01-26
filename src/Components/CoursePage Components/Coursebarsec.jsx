@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import Coursecontentmain from './Coursecontentmain';
 import RelatedCoursesmain from './RelatedCourse/RelatedCoursesmain';
 import Community from './Community Section/Community';
-import usePreLoginFeedStore from '../../stores/preLoginFeedStore';
 
-const Coursebarsec = ({ courseId, courseOutcome }) => {
+
+const Coursebarsec = ({  courseId, courseOutcome }) => {
   const [activeLink, setActiveLink] = useState('Course Content');
 
   const navLinks = [

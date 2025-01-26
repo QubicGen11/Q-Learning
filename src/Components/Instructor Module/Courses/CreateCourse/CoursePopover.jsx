@@ -216,7 +216,7 @@ const CoursePopover = ({ isOpen, onClose, course, onCourseDeleted }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {[...Array(4)].map((_, idx) => (
+                  {[...Array(2)].map((_, idx) => (
                     <tr key={idx} className="hover:bg-gray-50">
                       <td className="border border-gray-200 px-4 py-2 text-center">
                         <input type="checkbox" />

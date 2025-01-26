@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+
 
 const usePreLoginFeedStore = create((set, get) => ({
   categories: [],
