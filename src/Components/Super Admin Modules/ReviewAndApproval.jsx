@@ -78,6 +78,10 @@ const ReviewAndApproval = () => {
     setIsOffcanvasOpen(true);
   };
 
+  const handleStatusChange = () => {
+    fetchCoursesForReview();
+  };
+
   return (
     <div className="bg-white rounded p-6">
       <h2 className="text-xl font-semibold mb-4">Review and Approval</h2>
@@ -218,6 +222,7 @@ const ReviewAndApproval = () => {
         isOpen={isOffcanvasOpen}
         onClose={() => setIsOffcanvasOpen(false)}
         course={selectedCourse}
+        onStatusChange={handleStatusChange}
       />
 
       {/* Pagination */}

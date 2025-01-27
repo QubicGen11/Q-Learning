@@ -5,7 +5,7 @@ import { IoClose } from 'react-icons/io5';
 
 import CourseFullPreview from './CourseFullPreview';
 
-const CoursePreviewOffcanvas = ({ isOpen, onClose, course }) => {
+const CoursePreviewOffcanvas = ({ isOpen, onClose, course, onStatusChange }) => {
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
 
   const handleFullPreview = () => {
@@ -129,6 +129,7 @@ const CoursePreviewOffcanvas = ({ isOpen, onClose, course }) => {
         isOpen={isFullPreviewOpen}
         onClose={() => setIsFullPreviewOpen(false)}
         course={course}
+        onStatusChange={onStatusChange}
       />
     </>
   );

@@ -9,7 +9,7 @@ import { displayToast } from '../Common/Toast/Toast';
 
 
 
-const CourseFullPreview = ({ isOpen, onClose, course }) => {
+const CourseFullPreview = ({ isOpen, onClose, course, onStatusChange }) => {
     const [activeTab, setActiveTab] = useState('Course Information');
     const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -29,6 +29,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                 }
             );
             displayToast('success', "Course approved successfully!");
+            onStatusChange && onStatusChange();
             setTimeout(() => {
                 onClose(); // Close the preview after toast is shown
             }, 1000);
@@ -60,6 +61,7 @@ const CourseFullPreview = ({ isOpen, onClose, course }) => {
                 }
             );
             displayToast('success', "Course rejected successfully!");
+            onStatusChange && onStatusChange();
             setIsCommentDialogOpen(false);
             onClose();
         } catch (error) {
