@@ -7,6 +7,9 @@ const LearnersChoice = () => {
   // Take only the first 4 courses
   const limitedCourses = learnersChoice?.slice(0, 4) || [];
 
+  // Add a default image constant
+  const defaultImage = 'https://images.unsplash.com/photo-1591951425328-48c1fe7179cd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGJvb2tzfGVufDB8fDB8fHww';
+
   const renderStars = (rating) => {
     return '★'.repeat(rating) + '☆'.repeat(5 - rating);
   };
@@ -38,9 +41,13 @@ const LearnersChoice = () => {
                 <div className="relative w-40 sm:w-48 flex-shrink-0">
                   <div className="aspect-video rounded-lg overflow-hidden">
                     <img 
-                      src={course.courseImage || course.courseBanner || 'https://via.placeholder.com/300x200'} 
+                      src={course.courseImage || course.courseBanner || defaultImage}
                       alt={course.courseName}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        e.target.onerror = null; // Prevent infinite loop
+                        e.target.src = defaultImage;
+                      }}
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <span className="absolute top-2 left-2 text-xs text-white px-2 py-1 rounded bg-blue-600">
@@ -49,12 +56,12 @@ const LearnersChoice = () => {
                 </div>
 
                 {/* Right side - Content */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium mb-1 text-gray-900 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
                     {course.courseName}
                   </h3>
                   
-                  <p className="text-xs text-gray-600 mb-2">
+                  <p className="text-sm text-gray-600 mb-2">
                     {course.trainerName}
                   </p>
 

@@ -1,8 +1,39 @@
 import React from 'react'
 import { PiCertificate } from "react-icons/pi";
 
-const Testimonials = ({testimonials}) => {
-  if (!testimonials || testimonials.length === 0) {
+const Testimonials = ({ testimonials }) => {
+  // Static testimonials as fallback
+  const staticTestimonials = [
+    {
+      userName: "Sanju Reddy Jogendar",
+      linkedInUrl: "https://www.linkedin.com/in/johndoe",
+      message: "This course was a game-changer for my career! Highly recommend it to anyone looking to upskill.",
+      courseName: "Advanced Data Science",
+    },
+    {
+      userName: "Shaik Hari Thomas",
+      linkedInUrl: "https://www.linkedin.com/in/janesmith",
+      message: "Fantastic instructors and well-structured content. Helped me land a great job!",
+      courseName: "Machine Learning Essentials",
+    },
+    {
+      userName: "Shaik Abudul Reddy",
+      linkedInUrl: "https://www.linkedin.com/in/alicejohnson",
+      message: "Loved the hands-on approach and real-world examples. Thank you for an amazing experience!",
+      courseName: "Deep Learning Fundamentals",
+    },
+    {
+      userName: "Prnaeeth Joseph",
+      linkedInUrl: "https://www.linkedin.com/in/bobbrown",
+      message: "Exceptional content! The projects were challenging yet rewarding.",
+      courseName: "AI for Beginners",
+    },
+  ];
+
+  // Use provided testimonials or fallback to static ones
+  const displayTestimonials = testimonials?.length ? testimonials : staticTestimonials;
+
+  if (!displayTestimonials || displayTestimonials.length === 0) {
     return (
       <div className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4">
@@ -26,16 +57,16 @@ const Testimonials = ({testimonials}) => {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {testimonials?.map((item, index) => (
+          {displayTestimonials?.map((item, index) => (
             <div key={index} className="bg-white p-6 rounded-lg shadow-sm h-[280px] flex flex-col justify-between">
               {/* Header with name and LinkedIn icon */}
               <div className="flex justify-between items-center mb-4">
                 <div className="text-gray-600 font-medium">
                   {item.userName}
                 </div>
-                <a 
-                  href={item.linkedInUrl} 
-                  target="_blank" 
+                <a
+                  href={item.linkedInUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#0056b3] hover:bg-blue-50 p-1 rounded transition-colors duration-200"
                 >
@@ -68,4 +99,4 @@ const Testimonials = ({testimonials}) => {
   );
 };
 
-export default Testimonials
+export default Testimonials;

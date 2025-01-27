@@ -1,12 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
-import './Mostelling.css'
+import './Mostelling.css';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const MostSellingCourses = ({ courses }) => {
   const navigate = useNavigate();
+
+  // Add a default image constant
+  const defaultImage = 'https://images.unsplash.com/photo-1531988042231-d39a9cc12a9a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGJvb2tzfGVufDB8fDB8fHww';
 
   // Handle card click
   const handleCourseClick = (courseId) => {
@@ -34,7 +37,7 @@ const MostSellingCourses = ({ courses }) => {
     );
   };
 
-  // Add renderStars function
+  // Add renderRating function
   const renderRating = (rating, reviewCount) => {
     return (
       <div className="flex items-center">
@@ -86,72 +89,77 @@ const MostSellingCourses = ({ courses }) => {
         
         <div className="relative">
           <Slider {...settings}>
-            {courses.map((course) => (
-              <div key={course.id} className="px-3">
-                <div 
-                  className="group bg-none rounded-lg overflow-hidden  hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
-                  onClick={() => handleCourseClick(course.id)}
-                >
-                  <div className="relative overflow-hidden">
-                    <img 
-                      src={course.categoryImage || course.courseBanner} 
-                      alt={course.courseName} 
-                      className="w-full h-48 p- object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
-                    />
-                    <div   style={{
-                    
-                    borderRadius: '4px 20px 4px 20px',
-                    padding: '6px 8px 6px 8px',
-                  }} className="absolute top-4 left-4  bg-[#0056B3] text-white px-3 py-2 rounded-md text-sm">
-                    {course.category}
-                    </div>
-                    <div className="absolute top-4 right-4 bg-[#f3f4f6] text-[#0056B3] px-3 py-1 rounded-md text-sm flex items-center">
-                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                      </svg>
-                      32 Enrolled
-                    </div>
-                  </div>
-                  
-                  <div className="">
-                    {/* Rating Stars */}
-                    <div className='flex justify-between items-center  p-2 text-white bg-[#0056B3]'>
-                    <div className=" ">
-                      {renderRating(course.rating || 4.7)}
-                    </div>
-               
-                    <div className="flex items-center gap-2">
-                        <span className="text-md font-bold text-white">
-                          ₹{course.courseSettings[0]?.settings.offeredPrice}/-
-                        </span>
-                        <span className="text-white line-through text-sm">
-                          ₹{course.courseSettings[0]?.settings.price}/-
-                        </span>
+            {courses.map((course) => {
+              // Safely fetch settings values
+              const settings = course.courseSettings?.[0] || {};
+
+              return (
+                <div key={course.id} className="px-3">
+                  <div 
+                    className="group bg-none rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                    onClick={() => handleCourseClick(course.id)}
+                  >
+                    <div className="relative overflow-hidden">
+                      <img 
+                        src={course.courseImage || course.courseBanner || defaultImage}
+                        alt={course.courseName}
+                        onError={(e) => {
+                          e.target.onerror = null; // Prevent infinite loop
+                          e.target.src = defaultImage;
+                        }}
+                        className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+                      />
+                      <div
+                        style={{
+                          borderRadius: '4px 20px 4px 20px',
+                          padding: '6px 8px 6px 8px',
+                        }}
+                        className="absolute top-4 left-4 bg-[#0056B3] text-white px-3 py-2 rounded-md text-sm"
+                      >
+                        {course.category}
                       </div>
-
+                      <div className="absolute top-4 right-4 bg-[#f3f4f6] text-[#0056B3] px-3 py-1 rounded-md text-sm flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                        32 Enrolled
+                      </div>
                     </div>
                     
-                    <div className='p-2'>
-
-                    <h3 className="font-medium text-lg mb-2 group-hover:text-blue-600 transition-colors duration-300">
-                      {course.courseName}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4">{course.trainerName}</p>
-                    {course.courseSettings[0]?.settings.discount && (
-                        <span className="bg-black text-white text-xs px-2 py-1 rounded">
-                          {course.courseSettings[0]?.settings.discount}% Off | Black Friday Sale
-                        </span>
-                      )}
-                    </div>
-                    {/* Price Section */}
-                    <div className="flex items-center justify-between">
-                    
-                  
+                    <div>
+                      {/* Rating Stars */}
+                      <div className="flex justify-between items-center p-2 text-white bg-[#0056B3]">
+                        <div>
+                          {renderRating(course.rating || 4.7)}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-md font-bold text-white">
+                            ₹{settings.offeredPrice || 0}/-
+                          </span>
+                          {settings.price && (
+                            <span className="text-white line-through text-sm">
+                              ₹{settings.price}/-
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="p-2">
+                        <h3 className="font-medium text-lg mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                          {course.courseName}
+                        </h3>
+                        <p className="text-gray-600 text-sm mb-4">{course.trainerName}</p>
+                        {settings.discount && (
+                          <span className="bg-black text-white text-xs px-2 py-1 rounded">
+                            {settings.discount}% Off | Black Friday Sale
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </Slider>
         </div>
       </div>
@@ -160,5 +168,3 @@ const MostSellingCourses = ({ courses }) => {
 };
 
 export default MostSellingCourses;
-
-
