@@ -104,15 +104,35 @@ const NewRegister = () => {
 
   const handleOtpChange = (element, index) => {
     let value = element.value;
-
-    // Allow both uppercase and lowercase letters
+    
+    // Allow both uppercase and lowercase letters and numbers
     if (!/^[a-zA-Z0-9]*$/.test(value)) return;
 
-    updateOtp(index, value);
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    updateOtp(newOtp);
 
     // Focus next input
     if (value && element.nextSibling) {
       element.nextSibling.focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      
+      const newOtp = [...otp];
+      newOtp[index] = '';
+      updateOtp(newOtp);
+
+      // Focus previous input
+      if (index > 0) {
+        const prevInput = e.target.previousSibling;
+        if (prevInput) {
+          prevInput.focus();
+        }
+      }
     }
   };
 
@@ -540,56 +560,19 @@ const NewRegister = () => {
               </motion.h2>
               <div className="flex gap-2 justify-center mb-6">
                 {otp.map((data, index) => (
-                  <motion.div
+                  <motion.input
                     key={index}
-                    initial={{ y: -100, opacity: 0, rotateX: 90 }}
-                    animate={{ 
-                      y: 0, 
-                      opacity: 1,
-                      rotateX: 0,
-                      transition: {
-                        type: "spring",
-                        damping: 12,
-                        stiffness: 100,
-                        delay: index * 0.1,
-                        duration: 0.5
-                      }
-                    }}
-                    whileHover={{ 
-                      scale: 1.1,
-                      transition: { duration: 0.2 }
-                    }}
-                    className="relative"
-                  >
-                    <motion.input
-                      whileFocus={{ 
-                        scale: 1.1,
-                        boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)",
-                        transition: { duration: 0.2 }
-                      }}
-                      type="text"
-                      maxLength="1"
-                      value={data}
-                      onChange={(e) => handleOtpChange(e.target, index)}
-                      onPaste={handlePaste}
-                      onKeyUp={(e) => {
-                        if (e.key === "Backspace" && !e.target.value && e.target.previousSibling) {
-                          e.target.previousSibling.focus();
-                        }
-                      }}
-                      className="w-12 h-12 border-2 rounded text-center text-xl font-medium
+                    type="text"
+                    maxLength="1"
+                    value={data}
+                    onChange={(e) => handleOtpChange(e.target, index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    onPaste={handlePaste}
+                    className="w-12 h-12 border-2 rounded text-center text-xl font-medium
                                focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
-                               transition-all transform"
-                    />
-                    <motion.div
-                      initial={{ scaleX: 0 }}
-                      animate={{ 
-                        scaleX: data ? 1 : 0,
-                        transition: { duration: 0.2 }
-                      }}
-                      className="absolute bottom-0 left-0 w-full h-1 bg-blue-500 origin-left"
-                    />
-                  </motion.div>
+                               transition-all"
+                    autoFocus={index === 0}
+                  />
                 ))}
               </div>
               {timer > 0 && (
