@@ -6,9 +6,8 @@ import Cookies from 'js-cookie';
 const CourseBanner = ({ 
   title, 
   courseTagline,
-  description, 
-  thumbnail, 
-  owner, 
+  courseImage,
+
   price, 
   originalPrice, 
   discount,
@@ -253,7 +252,7 @@ const CourseBanner = ({
               ${isCompact ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[20px] pointer-events-none absolute'}
             `}
             style={{
-              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${categoryImage})`,
+              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${courseImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'

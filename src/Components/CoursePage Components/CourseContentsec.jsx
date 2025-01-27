@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FaChevronDown, FaChevronUp, FaPlayCircle, FaFile } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import './CourseContentsec.css';
+import usePreLoginFeedStore from '../../stores/preLoginFeedStore';
+
 
 const CourseContentsec = ({ 
   courseId,
@@ -14,6 +16,7 @@ const CourseContentsec = ({
 }) => {
   const navigate = useNavigate();
   console.log('Received prerequisites:', coursePreRequisites);
+  const courseDetails = usePreLoginFeedStore((state) => state.courseDetails);
 
   const [expandedSections, setExpandedSections] = useState(['Discovery Learning']);
   const [allExpanded, setAllExpanded] = useState(false);
@@ -36,22 +39,29 @@ const CourseContentsec = ({
     setAllExpanded(!allExpanded);
   };
 
-
-  const sections = React.useMemo(() => {
-    if (!courseChapters || !Array.isArray(courseChapters)) {
+  const lessons = useMemo(() => {
+    if (!courseDetails?.courseChapters?.[0]?.chapter?.chapterLessons) {
       return [];
     }
+    return courseDetails.courseChapters[0].chapter.chapterLessons;
+  }, [courseDetails]);
 
-    return courseChapters.map(item => ({
-      title: item.chapter.chapterName,
-      duration: `${item.chapter.chapterLessons.length} lectures`,
-      subsections: item.chapter.chapterLessons.map(lessonItem => ({
-        title: lessonItem.lesson.lessonTitle,
-        type: lessonItem.lesson.lessonType.toLowerCase(),
-        duration: '00:00'
-      }))
+  const sections = React.useMemo(() => {
+    if (!Array.isArray(courseChapters)) {
+      return [];
+    }
+  
+    return courseChapters.map((item) => ({
+      title: item?.chapter?.chapterName || 'Untitled Chapter',
+      duration: `${item?.chapter?.chapterLessons?.length || 0} lectures`,
+      subsections: (item?.chapter?.chapterLessons || []).map((lessonItem) => ({
+        title: lessonItem?.lessonTitle || 'Untitled Lesson',
+        type: lessonItem?.lessonType?.toLowerCase() || 'content',
+        duration: '00:00',
+      })),
     })).reverse();
   }, [courseChapters]);
+  
 
   const reviews = [
     {
