@@ -1072,41 +1072,46 @@ function CourseSettings() {
                         <div className='p-2'>
                           <label className="block text-sm mb-2 text-gray-600">Hashtags *</label>
                           <div className="relative">
-                            <input
-                              type="text"
-                              className={`w-5/5 px-3 py-1.5 border rounded text-sm h-9 ${commonStyles.input}`}
-                              value={settings.hashTags || ''}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                setSettings(prev => ({
-                                  ...prev,
-                                  hashTags: value
-                                }));
-                                handleSettingChange('hashTags', value);
-                              }}
-                              placeholder="Enter Hashtags"
-                            />
-                            {Array.isArray(settings.hashTags) ? settings.hashTags.map((tag, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm"
-                              >
-                                {tag.trim()}
-                                <button
-                                  onClick={() => {
-                                    const newTags = settings.hashTags.filter((_, i) => i !== index);
-                                    setSettings(prev => ({
-                                      ...prev,
-                                      hashTags: newTags
-                                    }));
-                                    handleSettingChange('hashTags', newTags);
-                                  }}
-                                  className="text-gray-500 hover:text-gray-700"
-                                >   
-                                  ×
-                                </button>
-                              </span>
-                            )) : null}
+                        
+<input
+  type="text"
+  className={`w-5/5 px-3 py-1.5 border rounded text-sm h-9 ${commonStyles.input}`}
+  value={settings.hashTags || ''}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Convert comma-separated string to array
+    const hashTagsArray = value.split(',').map(tag => tag.trim()).filter(tag => tag);
+    setSettings(prev => ({
+      ...prev,
+      hashTags: hashTagsArray
+    }));
+    handleSettingChange('hashTags', hashTagsArray);
+  }}
+  placeholder="Enter Hashtags (comma-separated)"
+/>
+
+{/* Display hashtags */}
+{Array.isArray(settings.hashTags) && settings.hashTags.map((tag, index) => (
+  <span
+    key={index}
+    className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm"
+  >
+    {tag}
+    <button
+      onClick={() => {
+        const newTags = settings.hashTags.filter((_, i) => i !== index);
+        setSettings(prev => ({
+          ...prev,
+          hashTags: newTags
+        }));
+        handleSettingChange('hashTags', newTags);
+      }}
+      className="text-gray-500 hover:text-gray-700"
+    >   
+      ×
+    </button>
+  </span>
+))}
                           </div>
                         </div>
 

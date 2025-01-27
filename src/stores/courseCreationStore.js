@@ -3,6 +3,7 @@
     import Cookies from 'js-cookie';
     import axios from 'axios';
     import { displayToast } from '../Components/Common/Toast/Toast';
+    import { useNavigate } from 'react-router-dom';
 
     // Helper function to load from localStorage
     const loadFromCourseLocalStorage = () => {
@@ -498,7 +499,15 @@
                 : 'New course draft created successfully!'
             );
       
+            // Clear localStorage only after successful response
             localStorage.removeItem('currentCourseId');
+            localStorage.removeItem('courseCreationData');
+
+            // Navigate to courses page
+            setTimeout(() => {
+              window.location.href = '/instructor/courses';
+            }, 2000);
+            
             return response.data;
           }
         } catch (error) {
