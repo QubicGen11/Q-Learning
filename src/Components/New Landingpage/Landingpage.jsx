@@ -76,8 +76,8 @@ const Landingpage = () => {
       <Testimonials testimonials={testimonials} />
       <LearnersChoice courses={learnersChoice}/>
       <Skillassessment/>
-      {/* <Toptrending skills={topTrendingSkills} />
-      <Exploretopskills topSkillsAndCertifications={topSkillsAndCertifications}/> */}
+       <Toptrending skills={topTrendingSkills} />
+      {/* <Exploretopskills topSkillsAndCertifications={topSkillsAndCertifications}/>  */}
       <Footer/>
       
     </div>

@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 const usePreLoginFeedStore = create((set) => ({
   categories: [],
   mostSelling: [],
+  skillsForYou: [],
   topTrendingSkills: [],
   topSkillsAndCertifications: {},
   learnersChoice: [],
@@ -34,6 +35,7 @@ const usePreLoginFeedStore = create((set) => ({
       set({
         categories: recommendations.categories || [],
         mostSelling: recommendations.mostSelling || [],
+        skillsForYou: recommendations.skillsForYou || [],
         topTrendingSkills: recommendations.trendingSkills || [],
         topSkillsAndCertifications: recommendations.skillsForYou || {},
         learnersChoice: recommendations.learnersChoice || [],
@@ -46,6 +48,7 @@ const usePreLoginFeedStore = create((set) => ({
       set({ 
         categories: [],
         mostSelling: [],
+        skillsForYou: [],
         topTrendingSkills: [],
         topSkillsAndCertifications: {},
         learnersChoice: [],
@@ -61,6 +64,7 @@ const usePreLoginFeedStore = create((set) => ({
     set({
       categories: [],
       mostSelling: [],
+      skillsForYou: [],
       topTrendingSkills: [],
       topSkillsAndCertifications: {},
       learnersChoice: [],
