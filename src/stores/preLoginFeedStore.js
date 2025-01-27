@@ -9,9 +9,18 @@ const usePreLoginFeedStore = create((set, get) => ({
   topSkillsAndCertifications: {},
   learnersChoice: [],
   testimonials: [],
+
   courseDetails: null,
   isLoading: false,
   error: null,
+
+  exploreTopSkillsAndCertifications: {
+    unlockPotential: [],
+    trendingSkills: [],
+    masterSkills: [],
+    diverseCourses: [],
+    certifiedCourses: []
+  },
 
   // Fetch course by ID
   getCourseById: async (courseId) => {
@@ -52,32 +61,31 @@ const usePreLoginFeedStore = create((set, get) => ({
 
   // Simplified fetchPreLoginFeed to handle the new API response structure
   fetchPreLoginFeed: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
-      console.log('Fetching pre-login feed...');
-      const token = Cookies.get('accessToken');
-      const response = await fetch('http://localhost:8089/qlms/recommendations', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
+      const response = await fetch('http://localhost:8089/qlms/recommendations');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const { recommendations } = await response.json();
-      console.log('Received recommendations:', recommendations);
+      const data = await response.json();
       
-      set({
-        categories: recommendations.categories || [],
-        mostSelling: recommendations.mostSelling || [],
-        skillsForYou: recommendations.skillsForYou || [],
-        topTrendingSkills: recommendations.trendingSkills || [],
-        topSkillsAndCertifications: recommendations.skillsForYou || {},
-        learnersChoice: recommendations.learnersChoice || [],
-        testimonials: recommendations.testimonials || [],
+      // Update store with the nested recommendations data
+      set({ 
+        categories: data.recommendations?.categories || [],
+        mostSelling: data.recommendations?.mostSelling || [],
+        skillsForYou: data.recommendations?.skillsForYou || [],
+        topTrendingSkills: data.recommendations?.trendingSkillsForYou || [],
+        topSkillsAndCertifications: data.recommendations?.topSkillsAndCertifications || {},
+        learnersChoice: data.recommendations?.learnersChoice || [],
+        testimonials: data.recommendations?.testimonials || [],
+        exploreTopSkillsAndCertifications: {
+          unlockPotential: data.recommendations?.exploreTopSkillsAndCertifications?.unlockPotential || [],
+          trendingSkills: data.recommendations?.exploreTopSkillsAndCertifications?.trendingSkills || [],
+          masterSkills: data.recommendations?.exploreTopSkillsAndCertifications?.masterSkills || [],
+          diverseCourses: data.recommendations?.exploreTopSkillsAndCertifications?.diverseCourses || [],
+          certifiedCourses: data.recommendations?.exploreTopSkillsAndCertifications?.certifiedCourses || []
+        },
         isLoading: false,
         error: null
       });
@@ -91,6 +99,13 @@ const usePreLoginFeedStore = create((set, get) => ({
         topSkillsAndCertifications: {},
         learnersChoice: [],
         testimonials: [],
+        exploreTopSkillsAndCertifications: {
+          unlockPotential: [],
+          trendingSkills: [],
+          masterSkills: [],
+          diverseCourses: [],
+          certifiedCourses: []
+        },
         error: error.message,
         isLoading: false 
       });

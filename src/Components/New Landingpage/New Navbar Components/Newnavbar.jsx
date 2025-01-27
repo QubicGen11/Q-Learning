@@ -56,275 +56,43 @@ const Newnavbar = () => {
   const dropdownRef = useRef(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    checkAuth(); // This is sufficient to handle authentication
+    checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:8089/qlms/categories');
+        const data = await response.json();
+        if (data.categories) {
+          const formattedCategories = data.categories.map((category) => ({
+            title: category.category,
+            icon: '📘',
+            courses: category.subCategories.map((sub) => ({
+              title: sub.subCategory,
+              shortTitle: sub.subCategory,
+              icon: 'https://via.placeholder.com/40',
+            })),
+          }));
+          setCategories(formattedCategories);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load categories.');
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useClickOutside(dropdownRef, () => {
     if (isProfileDropdownOpen) {
       toggleProfileDropdown(false);
     }
   });
-
-  const categories = [
-    { 
-      title: 'Design', 
-      icon: '🎨',
-      courses: [
-        {
-          title: "Web Design",
-          shortTitle: "Web Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-        },
-        {
-          title: "2D Animation",
-          shortTitle: "2D Animation",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-        },
-        {
-          title: "Motion Design",
-          shortTitle: "Motion Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-        },
-        {
-          title: "User Experience",
-          shortTitle: "User Experience Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-        },
-        {
-          title: "UX Design",
-          shortTitle: "UX Design",
-          icon: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-        }
-      ]
-    },
-    { 
-      title: 'Animation', 
-      icon: '🎬',
-      courses: [
-        {
-          title: "3D Animation Fundamentals",
-          instructor: "Alex Turner, 3D Animator",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-          rating: 4.7,
-          reviews: 283,
-          tag: "Bestseller"
-        },
-        {
-          title: "Character Animation",
-          instructor: "Maya Rodriguez, Character Artist",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-          rating: 4.9,
-          reviews: 412,
-          tag: "Trending 🔥"
-        },
-        {
-          title: "Motion Graphics Mastery",
-          instructor: "Chris Lee, Motion Designer",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-          rating: 4.6,
-          reviews: 156,
-          tag: "Most Popular"
-        },
-        {
-          title: "2D Animation Workshop",
-          instructor: "Sarah Kim, Animation Director",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-          rating: 4.8,
-          reviews: 329,
-          tag: "New"
-        }
-      ]
-    },
-    { 
-      title: 'Gen AI', 
-      icon: '🤖',
-      courses: [
-        {
-          title: "Prompt Engineering Mastery",
-          instructor: "Dr. Lisa Chen, AI Researcher",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-          rating: 4.9,
-          reviews: 512,
-          tag: "Trending 🔥"
-        },
-        {
-          title: "AI Model Training",
-          instructor: "Prof. James Wilson, AI Expert",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-          rating: 4.8,
-          reviews: 245,
-          tag: "Bestseller"
-        },
-        {
-          title: "ChatGPT Development",
-          instructor: "Emily Zhang, NLP Specialist",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-          rating: 4.7,
-          reviews: 378,
-          tag: "Most Popular"
-        },
-        {
-          title: "AI Ethics & Safety",
-          instructor: "Dr. Michael Brown, Ethics Researcher",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-          rating: 4.6,
-          reviews: 189,
-          tag: "New"
-        }
-      ]
-    },
-    { 
-      title: 'Web Development', 
-      icon: '💻',
-      courses: [
-        {
-          title: "Full Stack Development",
-          instructor: "Mark Johnson, Senior Dev",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-          rating: 4.8,
-          reviews: 426,
-          tag: "Most Popular"
-        },
-        {
-          title: "React.js Advanced",
-          instructor: "Sophie Chen, Frontend Expert",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-          rating: 4.9,
-          reviews: 567,
-          tag: "Trending 🔥"
-        },
-        {
-          title: "Node.js Backend",
-          instructor: "David Miller, Backend Engineer",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-          rating: 4.7,
-          reviews: 312,
-          tag: "Bestseller"
-        },
-        {
-          title: "Next.js & TypeScript",
-          instructor: "Rachel Green, Tech Lead",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-          rating: 4.8,
-          reviews: 234,
-          tag: "New"
-        }
-      ]
-    },
-    { 
-      title: 'Mobile Development', 
-      icon: '📱',
-      courses: [
-        {
-          title: "iOS Development",
-          instructor: "Tim Cook, iOS Expert",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-          rating: 4.8,
-          reviews: 456,
-          tag: "Bestseller"
-        },
-        {
-          title: "Android Studio Pro",
-          instructor: "Andy Roberts, Android Dev",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-          rating: 4.7,
-          reviews: 389,
-          tag: "Most Popular"
-        },
-        {
-          title: "Flutter Development",
-          instructor: "Maria Garcia, Mobile Expert",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-          rating: 4.9,
-          reviews: 612,
-          tag: "Trending 🔥"
-        },
-        {
-          title: "React Native Mastery",
-          instructor: "Josh Brown, Cross-platform Dev",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-          rating: 4.6,
-          reviews: 278,
-          tag: "New"
-        }
-      ]
-    },
-    { 
-      title: 'Business', 
-      icon: '💼',
-      courses: [
-        {
-          title: "Entrepreneurship 101",
-          instructor: "Richard Branson, Business Mogul",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-          rating: 4.9,
-          reviews: 789,
-          tag: "Bestseller"
-        },
-        {
-          title: "Digital Marketing",
-          instructor: "Lisa Thompson, Marketing Director",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872889/image_9_zafwev.png",
-          rating: 4.8,
-          reviews: 567,
-          tag: "Trending 🔥"
-        },
-        {
-          title: "Business Strategy",
-          instructor: "Robert Kiyosaki, Strategy Expert",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_8_ai6uoo.png",
-          rating: 4.7,
-          reviews: 432,
-          tag: "Most Popular"
-        },
-        {
-          title: "Startup Growth Hacking",
-          instructor: "Sean Ellis, Growth Expert",
-          image: "https://res.cloudinary.com/devewerw3/image/upload/v1732872891/image_7_e201id.png",
-          rating: 4.6,
-          reviews: 234,
-          tag: "New"
-        }
-      ]
-    }
-  ];
 
   const handleMouseLeave = () => {
     closeAll();
@@ -416,13 +184,12 @@ const Newnavbar = () => {
               {/* Explore Dropdown */}
               {isExploreOpen && (
                 <div 
-                  className="absolute left-0 mt-2 w-[1000px] bg-white rounded-lg shadow-xl border border-gray-200 z-30"
+                  className="absolute left-0 mt-2 h-[500px] w-[1000px]  bg-white rounded-lg shadow-xl border border-gray-200 z-30"
                   onMouseLeave={handleMouseLeave}
                 >
                   <div className="flex">
                     {/* Categories List - keep width proportional */}
-                    <a href="/categories">
-                    <div className="w-[250px] border-r border-gray-200 py-2">
+                    <div className="w-[250px] h-[500px] overflow-y-auto border-r border-gray-200 py-2">
                       {categories.map((category, index) => (
                         <div 
                           key={index}
@@ -450,7 +217,6 @@ const Newnavbar = () => {
                         </div>
                       ))}
                     </div>
-                    </a>
 
                     {/* Course Preview - updated layout */}
                     {selectedCategory?.courses && (

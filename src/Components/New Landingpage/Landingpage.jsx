@@ -27,7 +27,8 @@ const Landingpage = () => {
     testimonials,
     isLoading,
     error,
-    fetchPreLoginFeed 
+    fetchPreLoginFeed,
+    exploreTopSkillsAndCertifications
   } = usePreLoginFeedStore();
 
   const { scrollYProgress } = useScroll();
@@ -170,7 +171,16 @@ const Landingpage = () => {
         <Toptrending skills={topTrendingSkills} />
       </motion.div>
 
-      {/* <Exploretopskills topSkillsAndCertifications={topSkillsAndCertifications}/>  */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <Exploretopskills 
+          exploreTopSkillsAndCertifications={exploreTopSkillsAndCertifications}
+        /> 
+      </motion.div>
 
       <motion.div
         initial="hidden"
