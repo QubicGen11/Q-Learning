@@ -16,6 +16,7 @@ const Coursebarsec = ({ courseData, previewMode }) => {
   // Function to render the appropriate component based on active link
   const renderContent = () => {
     switch (activeLink) {
+      
       case 'Course Content':
         return <Coursecontentmain 
           courseData={courseData} 

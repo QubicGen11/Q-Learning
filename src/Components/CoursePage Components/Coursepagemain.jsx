@@ -61,10 +61,17 @@ const Coursepagemain = ({ previewMode = false, previewData = null }) => {
   return (
     <div>
       <Newnavbar />
+      
       <CourseBanner {...courseData} 
+      previewMode={previewMode}
       title={courseData.courseName}
         courseId={courseData.id}
-      
+        teachingLanguage={courseData.teachingLanguage}
+        courseRating={courseData.courseRating}
+        rating={courseData.rating}
+        price={courseData.courseSettings?.[0]?.price}
+        originalPrice={courseData.courseSettings?.[0]?.offeredPrice}
+        discount={courseData.courseSettings?.[0]?.discount}
       />
       <Coursebarsec 
         courseData={courseData}
