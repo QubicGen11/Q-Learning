@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { motion, useScroll } from 'framer-motion'
 import Latestdeals from './LatestDeals Componnets/Latestdeals'
 import Newnavbar from './New Navbar Components/Newnavbar'
 import HeroSection from './Landing Page Section Components/HeroSection'
@@ -29,6 +30,8 @@ const Landingpage = () => {
     fetchPreLoginFeed 
   } = usePreLoginFeedStore();
 
+  const { scrollYProgress } = useScroll();
+
   useEffect(() => {
     // Get the height of Latestdeals after component mounts
     const dealsElement = document.querySelector('.deals-section');
@@ -53,8 +56,27 @@ const Landingpage = () => {
     return <div>Error: {error}</div>; // Or your error component
   }
 
+  // Animation variants for sections
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen">
+      {/* Progress bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-blue-600 origin-left z-50"
+        style={{ scaleX: scrollYProgress }}
+      />
+
       {/* Latest Deals - Always at top */}
       <div className="w-full deals-section">
         <Latestdeals />
@@ -66,20 +88,98 @@ const Landingpage = () => {
       </div>
 
       {/* Main Content - Starts after Latestdeals */}
-      <div className="w-full mt-4" > {/* Adjust 64px to match navbar height */}
+      <motion.div 
+        className="w-full mt-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={sectionVariants}
+      >
         <HeroSection />
-      </div>
-      <Whatyougetcom />
-      <SkillsHomepage categories={categories} />
-      <MostSellingCourses courses={mostSelling} />
-      <EducationAspiration/>
-      <Testimonials testimonials={testimonials} />
-      <LearnersChoice courses={learnersChoice}/>
-      <Skillassessment/>
-       <Toptrending skills={topTrendingSkills} />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <Whatyougetcom />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <SkillsHomepage categories={categories} />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <MostSellingCourses courses={mostSelling} />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <EducationAspiration/>
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <Testimonials testimonials={testimonials} />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <LearnersChoice courses={learnersChoice}/>
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <Skillassessment/>
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <Toptrending skills={topTrendingSkills} />
+      </motion.div>
+
       {/* <Exploretopskills topSkillsAndCertifications={topSkillsAndCertifications}/>  */}
-      <Footer/>
-      
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <Footer/>
+      </motion.div>
     </div>
   )
 }
