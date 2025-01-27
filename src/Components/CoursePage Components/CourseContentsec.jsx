@@ -12,10 +12,17 @@ const CourseContentsec = ({
   endObjective, 
   technologiesUsed,
   courseAudience,
-  courseChapters
+  courseChapters,
+  courseDescription,
+  previewMode
 }) => {
   const navigate = useNavigate();
-  console.log('Received prerequisites:', coursePreRequisites);
+  console.log("Received prerequisites:", coursePreRequisites);
+  console.log("Received prerequisites type:", typeof coursePreRequisites);
+  console.log("Received prerequisites structure:", JSON.stringify(coursePreRequisites, null, 2));
+  console.log("Preview Description:", courseDescription);
+  console.log("About Course:", aboutCourse);
+
   const courseDetails = usePreLoginFeedStore((state) => state.courseDetails);
 
   const [expandedSections, setExpandedSections] = useState(['Discovery Learning']);
@@ -106,6 +113,46 @@ const CourseContentsec = ({
     navigate(`/learn-course/${courseId}`);
   };
 
+  // Helper function to check if it's preview data
+  const isPreviewData = (data) => {
+    return Array.isArray(data) && 
+           typeof data[0] === 'object' && 
+           data[0] !== null &&
+           'preRequisiteRequired' in data[0];
+  };
+
+  // Helper function to get the correct text based on data type
+  const getPreRequisiteText = (item) => {
+    if (typeof item === 'string') {
+      return item.replace('• ', '');
+    }
+    
+    // For normal view (nested structure)
+    if (item.preRequisites) {
+      return item.preRequisites.preRequisiteRequired;
+    }
+    
+    // For preview mode (flat structure)
+    return item.preRequisiteRequired || '';
+  };
+
+  const getAudienceText = (item) => {
+    if (typeof item === 'string') {
+      return item.replace('• ', ''); // Remove bullet if it exists in string
+    }
+    return item.targetAudience || item.audience || '';
+  };
+
+  const getDescription = () => {
+    if (previewMode) {
+      // In preview mode, use courseDescription directly
+      return courseDescription || "No description available";
+    } else {
+      // In normal mode, use aboutCourse.courseDescription
+      return aboutCourse?.courseDescription || "No description available";
+    }
+  };
+
   return (
     <div className="w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -128,6 +175,9 @@ const CourseContentsec = ({
                 {allExpanded ? 'COLLAPSE ALL SECTIONS' : 'EXPAND ALL SECTIONS'}
               </button>
             </div>
+
+            {/* Description Section */}
+      
 
             {/* Course Sections with smooth transition */}
             <div className="border rounded-lg">
@@ -182,18 +232,13 @@ const CourseContentsec = ({
               <h3 className="text-lg font-semibold mb-3">Requirements</h3>
               {Array.isArray(coursePreRequisites) && coursePreRequisites.length > 0 ? (
                 <ul className="space-y-2">
-                  {coursePreRequisites.map((item) => (
+                  {coursePreRequisites.map((item, index) => (
                     <li 
-                      key={item.id} 
+                      key={index} 
                       className="flex items-start gap-2"
                     >
                       <span className="text-gray-600">
-                        • {item.preRequisites?.preRequisiteRequired}
-                        {item.preRequisites?.preRequisiteLevel && (
-                          <span className="ml-2 text-sm text-blue-600">
-                            ({item.preRequisites.preRequisiteLevel})
-                          </span>
-                        )}
+                        • {getPreRequisiteText(item)}
                       </span>
                     </li>
                   ))}
@@ -286,13 +331,13 @@ const CourseContentsec = ({
               <h3 className="text-lg font-semibold mb-3">Who can enrol for this course</h3>
               {Array.isArray(courseAudience) && courseAudience.length > 0 ? (
                 <ul className="space-y-2">
-                  {courseAudience.map((item) => (
+                  {courseAudience.map((item, index) => (
                     <li 
-                      key={item.id}
+                      key={index}
                       className="flex items-start gap-2"
                     >
                       <span className="text-gray-600">
-                        • {item.audience}
+                        • {getAudienceText(item)}
                       </span>
                     </li>
                   ))}

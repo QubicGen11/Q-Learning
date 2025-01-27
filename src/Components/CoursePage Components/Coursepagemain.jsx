@@ -20,6 +20,7 @@ const Coursepagemain = ({ previewMode = false, previewData = null }) => {
         setIsLoading(true);
         
         if (previewMode && previewData) {
+          console.log("Preview Data:", previewData); // Debug log
           setCourseData(previewData);
           setIsLoading(false);
           return;
@@ -27,9 +28,7 @@ const Coursepagemain = ({ previewMode = false, previewData = null }) => {
 
         const token = Cookies.get('accessToken');
         const response = await axios.get(`http://localhost:8089/qlms/courses/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
         
         setCourseData(response.data.course);
@@ -62,37 +61,14 @@ const Coursepagemain = ({ previewMode = false, previewData = null }) => {
   return (
     <div>
       <Newnavbar />
-      <CourseBanner 
-        title={courseData.courseName}
+      <CourseBanner {...courseData} 
+      title={courseData.courseName}
         courseId={courseData.id}
-        courseTagline={courseData.courseTagline}
-        description={courseData.courseDescription}
-        thumbnail={courseData.courseImage}
-        courseBanner={courseData.courseBanner}
-        categoryImage={courseData.categoryImage}
-        courseImage={courseData.courseImage}
-        category={courseData.category}
-        subCategory={courseData.subCategory}
-        updatedAt={courseData.updatedAt}
-        teachingLanguage={courseData.teachingLanguage}
-        courseRating={courseData.courseRating}
-        rating={courseData.rating}
-        price={courseData.courseSettings?.[0]?.price}
-        originalPrice={courseData.courseSettings?.[0]?.offeredPrice}
-        discount={courseData.courseSettings?.[0]?.discount}
-        trainerName={courseData.trainerName}
-        courseDuration={courseData.courseDuration}
-        difficultyLevel={courseData.difficultyLevel}
-        prerequisites={courseData.coursePreRequisites}
-        audience={courseData.courseAudience}
-        glossary={courseData.glossary}
-        references={courseData.references}
-        faqs={courseData.courseFaqs}
+      
       />
       <Coursebarsec 
-        courseId={courseData.id}
-        courseOutcome={courseData.courseOutCome}
-        chapters={courseData.courseChapters}
+        courseData={courseData}
+        previewMode={previewMode}
       />
       <Footer />
     </div>

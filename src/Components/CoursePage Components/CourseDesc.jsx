@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import parse from 'html-react-parser';
 
 const CourseDesc = ({ courseDescription }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -7,7 +8,9 @@ const CourseDesc = ({ courseDescription }) => {
   useEffect(() => {
     // Check if description has more than 30 words
     if (courseDescription) {
-      const wordCount = courseDescription.trim().split(/\s+/).length;
+      // Strip HTML tags for word count
+      const plainText = courseDescription.replace(/<[^>]+>/g, '');
+      const wordCount = plainText.trim().split(/\s+/).length;
       setShouldShowButton(wordCount > 30);
     }
   }, [courseDescription]);
@@ -20,7 +23,9 @@ const CourseDesc = ({ courseDescription }) => {
           
           <div className="w-full">
             <div className={`space-y-4 ${!isExpanded && shouldShowButton ? 'line-clamp-3' : ''}`}>
-              <p className="text-gray-700">{courseDescription}</p>
+              <div className="text-gray-700">
+                {courseDescription ? parse(courseDescription) : 'No description available'}
+              </div>
             </div>
 
             {shouldShowButton && (

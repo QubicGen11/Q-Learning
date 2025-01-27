@@ -349,12 +349,12 @@ const StepIndicator = () => {
       trainerName: courseData?.basicInfo?.trainerName,
       courseDuration: courseData?.basicInfo?.courseDuration,
       difficultyLevel: courseData?.basicInfo?.difficultyLevel,
-      coursePreRequisites: courseData?.about?.prerequisites,
-      courseAudience: courseData?.about?.audience,
+      coursePreRequisites: courseData?.about?.coursePreRequisites || [],
+      courseAudience: courseData?.about?.courseAudience || [],
       glossary: courseData?.moreInfo?.glossary,
       references: courseData?.moreInfo?.references,
       courseFaqs: courseData?.faq?.faqs,
-      courseOutCome: courseData?.about?.courseOutcome,
+      courseOutcome: courseData?.about?.courseOutcome,
       courseChapters: courseData?.content?.chapters?.map(chapter => ({
         chapter: {
           chapterName: chapter.chapterName,

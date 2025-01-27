@@ -4,7 +4,7 @@ import RelatedCoursesmain from './RelatedCourse/RelatedCoursesmain';
 import Community from './Community Section/Community';
 
 
-const Coursebarsec = ({  courseId, courseOutcome }) => {
+const Coursebarsec = ({ courseData, previewMode }) => {
   const [activeLink, setActiveLink] = useState('Course Content');
 
   const navLinks = [
@@ -17,11 +17,15 @@ const Coursebarsec = ({  courseId, courseOutcome }) => {
   const renderContent = () => {
     switch (activeLink) {
       case 'Course Content':
-        return <Coursecontentmain courseId={courseId} courseOutcome={courseOutcome} />;
+        return <Coursecontentmain 
+          courseData={courseData} 
+          
+          previewMode={previewMode}
+        />;
       case 'Related Courses & About Instructor':
-        return <RelatedCoursesmain courseId={courseId} />;
+        return <RelatedCoursesmain courseId={courseData.id} />;
       case 'Community Support':
-        return <Community courseId={courseId} />;
+        return <Community courseId={courseData.id} />;
       default:
         return null;
     }
