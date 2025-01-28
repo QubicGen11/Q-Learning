@@ -9,6 +9,7 @@ const usePreLoginFeedStore = create((set, get) => ({
   topSkillsAndCertifications: {},
   learnersChoice: [],
   testimonials: [],
+  featured: [],
 
   courseDetails: null,
   isLoading: false,
@@ -74,6 +75,7 @@ const usePreLoginFeedStore = create((set, get) => ({
       set({ 
         categories: data.recommendations?.categories || [],
         mostSelling: data.recommendations?.mostSelling || [],
+        featured: data.recommendations?.featured || [],
         skillsForYou: data.recommendations?.skillsForYou || [],
         topTrendingSkills: data.recommendations?.trendingSkillsForYou || [],
         topSkillsAndCertifications: data.recommendations?.topSkillsAndCertifications || {},
@@ -94,6 +96,7 @@ const usePreLoginFeedStore = create((set, get) => ({
       set({ 
         categories: [],
         mostSelling: [],
+        featured: [],
         skillsForYou: [],
         topTrendingSkills: [],
         topSkillsAndCertifications: {},
@@ -117,6 +120,7 @@ const usePreLoginFeedStore = create((set, get) => ({
     set({
       categories: [],
       mostSelling: [],
+      featured: [],
       skillsForYou: [],
       topTrendingSkills: [],
       topSkillsAndCertifications: {},

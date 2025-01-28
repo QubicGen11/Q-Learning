@@ -40,6 +40,9 @@ const useCategoriesStore = create((set) => ({
       });
     }
   },
+
+
+  
 }));
 
 export default useCategoriesStore;
