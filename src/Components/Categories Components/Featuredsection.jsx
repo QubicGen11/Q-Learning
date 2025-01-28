@@ -5,6 +5,9 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./Featuredsection.css";
 import usePreLoginFeedStore from "../../stores/preLoginFeedStore";
+import { Link } from "react-router-dom";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const Featuredsection = () => {
   const sliderRef = useRef(null);
@@ -68,12 +71,16 @@ const Featuredsection = () => {
 
         {/* Course Carousel */}
         {isLoading ? (
-          <p className="text-center">Loading...</p>
+          <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />
         ) : error ? (
           <p className="text-center text-red-500">Error: {error}</p>
         ) : (
           <Slider ref={sliderRef} {...settings}>
             {featured.map((course) => (
+
+              <Link to={`/course/${course.id}`} key={course.id}>
+
+
               <div key={course.id}>
                 <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="flex flex-col lg:flex-row">
@@ -120,6 +127,7 @@ const Featuredsection = () => {
                   </div>
                 </div>
               </div>
+              </Link>
             ))}
           </Slider>
         )}

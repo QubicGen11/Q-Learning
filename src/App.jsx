@@ -36,6 +36,7 @@ import CoursePopover from './Components/Instructor Module/Courses/CreateCourse/C
 import SuperadminLogin from './Components/Super Admin Modules/SuperadminLogin';
 import SuperadminLayout from './Components/Super Admin Modules/SuperadminLayout';
 import ReviewAndApproval from './Components/Super Admin Modules/ReviewAndApproval';
+import ScrollToTops from './ScrollToTops';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -57,14 +58,17 @@ function App() {
   }, []);
 
   return (
+    <>
+    
+   
  
         <Router>
           <div className="min-h-screen transition-colors duration-200 dark:bg-gray-900">
             
            
         
+            <ScrollToTops/>
             <Routes>
-           
          
               {/* <Route path="/" element={<Home />} /> */}
               {/* <Route path="/courses" element={<Courses_main />} />
@@ -163,6 +167,8 @@ function App() {
             <ScrollToTopButton />
           </div>
         </Router>
+    </>
+
     
   );
 }

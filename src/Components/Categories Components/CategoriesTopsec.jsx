@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import useCategoriesStore from '../../stores/CategoriesStore';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const CategoriesTopsec = () => {
   const [searchParams] = useSearchParams();
@@ -61,12 +63,14 @@ const CategoriesTopsec = () => {
 
         {/* Loading/Error Handling */}
         {isLoading ? (
-          <p>Loading...</p>
+          <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {getCourses().map((course) => (
+              <Link to={`/course/${course.id}`} key={course.id}>
+                
               <div
                 key={course.id}
                 className="bg-white rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group"
@@ -109,6 +113,7 @@ const CategoriesTopsec = () => {
                   </div>
                 </div>
               </div>
+              </Link>
             ))}
           </div>
         )}

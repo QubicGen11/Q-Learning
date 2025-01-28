@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom'; // Removed useNavigate
 import useAfterLoginStore from '../../stores/afterlogin';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+
 
 const Topcategories = () => {
   const { 
@@ -45,7 +48,7 @@ const Topcategories = () => {
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Loading categories...</div>;
+    return <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />;
   }
 
   if (error) {

@@ -8,6 +8,8 @@ import Whattolearnnext from './Whattolearnnext'
 import Footer from '../New Landingpage/Footer/Footer'
 import QubinestSuggestionforyou from './QubinestSuggestionforyou'
 import Becauseyouhaveviewd from './Becauseyouhaveviewd'
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const Afterlogin = () => {
   return (
@@ -16,7 +18,7 @@ const Afterlogin = () => {
         <Newnavbar/>
         <div className='mt-5'>
 
-        <Topcategories/>
+        <Topcategories skeleton={Skeleton}/>
         </div>
         <div className="  shadow-md ">
 

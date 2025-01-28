@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import './SkillsHomepage.css';
 import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
+import { Link } from 'react-router-dom';
 
 const SkillsHomepage = () => {
   const skillsForYou = usePreLoginFeedStore((state) => state.skillsForYou || []);
@@ -86,6 +87,13 @@ const SkillsHomepage = () => {
       {/* Subcategory Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {currentSubcategories.map((subCategory, index) => (
+
+<Link
+to={`/categories?category=${selectedCategory}&subCategory=${encodeURIComponent(
+  subCategory.title
+)}`}
+key={index}
+>
           <div
             key={index}
             className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
@@ -107,6 +115,7 @@ const SkillsHomepage = () => {
               </h4>
             </div>
           </div>
+          </Link>
         ))}
       </div>
     </div>

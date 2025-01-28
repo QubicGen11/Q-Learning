@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { FiFilter } from 'react-icons/fi';
 import { BiSort } from 'react-icons/bi';
 import useCategoriesStore from '../../stores/CategoriesStore';
+import { Link } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const AllCourses = () => {
   const { categoriesData, isLoading, error } = useCategoriesStore();
@@ -74,7 +77,7 @@ const AllCourses = () => {
 
         {/* Course Grid */}
         {isLoading ? (
-          <p className="text-center">Loading courses...</p>
+          <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
         ) : (
@@ -83,7 +86,11 @@ const AllCourses = () => {
               paginatedCourses.map((course) => {
                 const tag = assignTag(course); // Assign tag dynamically
                 console.log('Course:', course.courseName, 'Tag:', tag); // Debugging course and tag
-                return (
+                return (  
+                  <Link to={`/course/${course.id}`} key={course.id}>
+
+
+
                   <div
                     key={course.id}
                     className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
@@ -163,6 +170,7 @@ const AllCourses = () => {
                       </div>
                     </div>
                   </div>
+                     </Link>
                 );
               })
             ) : (
