@@ -1,5 +1,6 @@
 import React from 'react';
 import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
+import { Link } from 'react-router-dom';
 
 const LearnersChoice = () => {
   const learnersChoice = usePreLoginFeedStore((state) => state.learnersChoice || []);
@@ -34,7 +35,10 @@ const LearnersChoice = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {limitedCourses.map((course) => (
+          {limitedCourses.map((course) => (   
+            <Link to={`/course/${course.id}`} key={course.id}>
+
+
             <div key={course.id} className="group bg-white border rounded-xl p-4 hover:shadow-lg transition-shadow duration-300">
               <div className="flex gap-4">
                 {/* Left side - Image */}
@@ -102,6 +106,7 @@ const LearnersChoice = () => {
                 </div>
               </div>
             </div>
+              </Link>
           ))}
         </div>
       </div>
