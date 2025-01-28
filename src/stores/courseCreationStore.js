@@ -489,7 +489,7 @@
           if (response.data) {
             set((state) => ({
               ...state,
-              courseId: response.data.draft.id || state.courseId,
+              courseId: response.data.id || response.data.courseId || state.courseId,
             }));
       
             displayToast(
@@ -512,7 +512,33 @@
           }
         } catch (error) {
           console.error('API Error:', error);
-          displayToast('error', error.response?.data?.message || 'Failed to save course');
+          
+          // Handle specific error cases
+          if (error.response) {
+            const { status, data } = error.response;
+            
+            switch (status) {
+              case 403:
+                displayToast('error', data.error || 'Only instructors can save or update course drafts.');
+                break;
+              case 401:
+                displayToast('error', 'Please login to continue.');
+                break;
+              case 400:
+                displayToast('error', data.error || 'Invalid course data. Please check all fields.');
+                break;
+              case 500:
+                displayToast('error', 'Only instructors can submit courses for review.');
+                break;
+              default:
+                displayToast('error', data.error || 'Failed to save course. Please try again.');
+            }
+          } else if (error.request) {
+            displayToast('error', 'Network error. Please check your connection.');
+          } else {
+            displayToast('error', 'Failed to process your request. Please try again.');
+          }
+          
           throw error;
         }
       },

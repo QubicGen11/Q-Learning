@@ -11,12 +11,37 @@ const commonStyles = {
 };
 
 function CourseSettings() {
+  
   const { courseData, updateCourseData, validationErrors } = useCourseCreationStore();
   const [activeSection, setActiveSection] = useState('courseSettings');
   const [courseTypes, setCourseTypes] = useState([]);
   const [settings, setSettings] = useState({
-    hashTags: [] // Initialize hashTags as empty array
+    publicAccess: true,
+    enablePreview: true,
+    accessDuration: '',
+    lifeTimeAccess: true,
+    refundsAllowed: false,
+    returnPeriod: '',
+    allowContentDownloads: true,
+    allowDiscussionParticipation: true,
+    scheduleLiveClasses: true,
+    enableSubtitles: true,
+    pricingType: 'premium',
+    promotionType: 'No Promotion',
+    price: 0,
+    discount: 0,
+    offeredPrice: 0,
+    startDate: null,
+    endDate: null,
+    maxStudents: 100,
+    certificateEligibility: false,
+    percentageRequired: '',
+    seoTitle: '',
+    seoDescription: '',
+    seoKeywords: '',
+    hashTags: [], // Ensure it's always an array
   });
+  
   const [showAccessDurationSuggestions, setShowAccessDurationSuggestions] = useState(false);
   const [showCourseTypeSuggestions, setShowCourseTypeSuggestions] = useState(false);
   const [filteredAccessDurations, setFilteredAccessDurations] = useState([]);
@@ -35,6 +60,7 @@ function CourseSettings() {
     'Qubinest Suggestions for you'
   ];
 
+  
   // Log initial settings
   console.log('Initial courseSettings:', courseData.courseSettings);
 
@@ -949,7 +975,14 @@ function CourseSettings() {
                         type="date"
                         className={`w-[300px] px-3 py-1.5 border rounded text-sm h-9 ${commonStyles.input}`}
                         value={settings.startDate || ''}
-                        onChange={(e) => handleSettingChange('startDate', e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setSettings(prev => ({
+                            ...prev,
+                            startDate: value
+                          }));
+                          handleSettingChange('startDate', value);
+                        }}
                         placeholder="DD-Mon-YYYY"
                         min={new Date().toISOString().split('T')[0]}
                       />

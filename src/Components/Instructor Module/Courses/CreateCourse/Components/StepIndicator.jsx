@@ -548,7 +548,31 @@ const StepIndicator = () => {
                 setShowCommentDialog(false);
                 displayToast('success', 'Course submitted for review successfully!');
               } catch (error) {
-                displayToast('error', 'Failed to submit course');
+                // Handle specific error cases
+                if (error.response) {
+                  const { status, data } = error.response;
+                  
+                  switch (status) {
+                    case 403:
+                      displayToast('error', data.error || 'Only instructors can submit courses for review.');
+                      break;
+                    case 401:
+                      displayToast('error', 'Please login to continue.');
+                      break;
+                    case 400:
+                      displayToast('error', data.error || 'Invalid course data. Please check all fields.');
+                      break;
+                    case 500:
+                      displayToast('error', 'Only instructors can submit courses for review.');
+                      break;
+                    default:
+                      displayToast('error', data.error || 'Failed to submit course. Please try again.');
+                  }
+                } else if (error.request) {
+                  displayToast('error', 'Network error. Please check your connection.');
+                } else {
+                  displayToast('error', 'Failed to process your request. Please try again.');
+                }
               } finally {
                 setIsSubmitting(false);
               }
