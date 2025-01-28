@@ -21,7 +21,7 @@ const SkillsHomepage = () => {
 
   // Default image fallback
   const defaultImage =
-    'https://images.unsplash.com/photo-1531988042231-d39a9cc12a9a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGJvb2tzfGVufDB8fDB8fHww';
+    'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
 
   // Memoized function to get subcategories with images
   const getSubcategoriesWithImages = useCallback(

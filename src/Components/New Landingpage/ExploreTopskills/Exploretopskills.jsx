@@ -25,25 +25,46 @@ const Exploretopskills = ({ exploreTopSkillsAndCertifications }) => {
     { key: 'unlockPotential', title: 'Unlock Potential' }
   ];
 
+  // Shuffle an array
+  const shuffleArray = (array) => {
+    return array
+      .map((item) => ({ ...item, sortOrder: Math.random() }))
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map(({ sortOrder, ...item }) => item);
+  };
+
+  // Shuffle sections and courses
+  const shuffledSections = shuffleArray(sections).map((section) => ({
+    ...section,
+    courses: shuffleArray(
+      exploreTopSkillsAndCertifications[section.key]?.map((course) => ({
+        ...course
+      })) || []
+    )
+  }));
+
   return (
     <div className="bg-[#374151] py-8 sm:py-12 lg:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-white text-center mb-8 sm:mb-12 lg:mb-16">
           Explore top skills and certifications
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sections.map(section => (
+          {shuffledSections.map((section) => (
             <div key={section.key} className="bg-[#1F2937] rounded-lg p-6">
               <h3 className="text-lg font-medium text-white mb-4">{section.title}</h3>
               <ul className="space-y-2">
-                {exploreTopSkillsAndCertifications[section.key]?.map(course => (
-                  <li key={course.id} className="group flex items-center justify-between hover:bg-[#4B5563] rounded-lg p-2 transition-colors duration-200">
+                {section.courses.map((course) => (
+                  <li
+                    key={course.id}
+                    className="group flex items-center justify-between hover:bg-[#4B5563] rounded-lg p-2 transition-colors duration-200"
+                  >
                     <div className="flex items-center space-x-2">
                       <span className="text-xs sm:text-sm text-gray-300">{course.courseName}</span>
                     </div>
                     <svg
-                      className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-300"
+                      className="w-4 h-4 sm:w-5 sm:h-5 group opacity-100 transition-opacity duration-200 text-gray-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

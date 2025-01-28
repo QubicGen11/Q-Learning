@@ -70,7 +70,7 @@ const Newnavbar = () => {
         if (data.categories) {
           const formattedCategories = data.categories.map((category) => ({
             title: category.category,
-            icon: '📘',
+      
             courses: category.subCategories.map((sub) => ({
               title: sub.subCategory,
               shortTitle: sub.subCategory,
@@ -189,11 +189,11 @@ const Newnavbar = () => {
                 >
                   <div className="flex">
                     {/* Categories List - keep width proportional */}
-                    <div className="w-[250px] h-[500px] overflow-y-auto border-r border-gray-200 py-2">
+                    <div className="w-[350px] h-[500px] overflow-y-auto border-r border-gray-200 py-2">
                       {categories.map((category, index) => (
                         <div 
                           key={index}
-                          className={`flex items-center px-4 py-3 cursor-pointer group transition-colors duration-200
+                          className={`flex items-center text-xs px-4 py-3 cursor-pointer group transition-colors duration-200
                             ${selectedCategory?.title === category.title ? 'bg-blue-50' : 'hover:bg-blue-50'}`}
                           onMouseEnter={() => setSelectedCategory(category)}
                         >

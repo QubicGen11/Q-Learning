@@ -108,6 +108,7 @@ function App() {
               <Route path="/whenuserlogout" element={<Whenuserlogout/>} />
               <Route path="*" element={<Notfound/>} />
               <Route path="/categories" element={<Categoriesmain/>} />
+              <Route path="/categories/:id" element={<Categoriesmain/>} />
               <Route path="/course/:id" element={<Coursepagemain/>} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/loader" element={<SuperLoader />} />
