@@ -74,6 +74,7 @@ const Newnavbar = () => {
             courses: category.subCategories.map((sub) => ({
               title: sub.subCategory,
               shortTitle: sub.subCategory,
+              imageUrl: sub.imageUrl,
               icon: 'https://via.placeholder.com/40',
             })),
           }));
@@ -222,8 +223,10 @@ const Newnavbar = () => {
                     {selectedCategory?.courses && (
   <div className="flex-1 p-6  h-[500px] overflow-y-auto">
     <div className="flex justify-between items-center mb-6">
-      <Link
-        to={`/categories?category=${encodeURIComponent(selectedCategory.courses[0]?.title)}`}
+    <Link
+        to={`/categories?category=${encodeURIComponent(
+          selectedCategory.title
+        )}&subCategory=${encodeURIComponent(selectedCategory.courses[0]?.title)}`}
         className="text-sm text-[#0056B3] font-bold hover:underline ml-auto"
       >
         VIEW ALL {selectedCategory.title.toUpperCase()} COURSES
@@ -236,12 +239,12 @@ const Newnavbar = () => {
         to={`/categories?category=${encodeURIComponent(
           selectedCategory.title
         )}&subCategory=${encodeURIComponent(selectedCategory.courses[0]?.title)}`}
-        className="bg-blue-600 rounded-lg p-4 text-white"
+        className=" rounded-lg p-4 text-black"
       >
         <div className="flex flex-col items-center">
           <div className="w-12 h-12 rounded-full bg-white/20 mb-3 flex items-center justify-center">
             <img
-              src={selectedCategory.courses[0]?.icon}
+              src={selectedCategory.courses[0]?.imageUrl}
               alt={selectedCategory.courses[0]?.title}
               className="w-8 h-8"
             />
@@ -263,7 +266,7 @@ const Newnavbar = () => {
         >
           <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
             <img
-              src={course.icon}
+              src={course.imageUrl}
               alt={course.title}
               className="w-8 h-8"
             />
@@ -287,7 +290,7 @@ const Newnavbar = () => {
         >
           <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
             <img
-              src={course.icon}
+              src={course.imageUrl}
               alt={course.title}
               className="w-8 h-8"
             />
@@ -300,7 +303,7 @@ const Newnavbar = () => {
     </div>
 
     {/* Third row */}
-    <div className="grid grid-cols-4 gap-4">
+    {/* <div className="grid grid-cols-4 gap-4">
       {selectedCategory.courses.slice(8, 12).map((course, index) => (
         <Link
           to={`/categories?category=${encodeURIComponent(
@@ -321,7 +324,7 @@ const Newnavbar = () => {
           </span>
         </Link>
       ))}
-    </div>
+    </div> */}
   </div>
 )}
 
