@@ -9,6 +9,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import parse from "html-react-parser";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import trackLastViewedCourse from "../../utils/trackLastViewedCourse";
 
 const QubinestSuggestionforyou = () => {
   const sliderRef = useRef(null);
@@ -62,7 +63,7 @@ const QubinestSuggestionforyou = () => {
         ) : (
           <Slider ref={sliderRef} {...settings}>
             {qubiNestSuggestions.map((course) => (
-              <Link to={`/course/${course.id}`} key={course.id}>
+              <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
                 <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="flex flex-col lg:flex-row">
                     <div className="relative w-full lg:w-[360px]">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
 import { Link } from 'react-router-dom';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'; // Import heart icons
+import trackLastViewedCourse from '../../../utils/trackLastViewedCourse';
 
 const LearnersChoice = () => {
   const learnersChoice = usePreLoginFeedStore((state) => state.learnersChoice || []);
@@ -39,7 +40,7 @@ const LearnersChoice = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {limitedCourses.map((course) => (   
-            <Link to={`/course/${course.id}`} key={course.id}>
+            <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
               <div key={course.id} className="group bg-white border rounded p-3 hover:shadow-lg transition-shadow duration-300 h-40">
                 <div className="flex gap-4 justify-center items-center">
                   {/* Left side - Image */}

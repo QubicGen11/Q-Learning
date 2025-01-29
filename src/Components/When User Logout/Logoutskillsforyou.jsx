@@ -6,6 +6,7 @@ import './Logoutskillsforyou.css';
 import { Link } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
 
 const Logoutskillsforyou = () => {
   const [categoryData, setCategoryData] = useState({});
@@ -106,7 +107,7 @@ const Logoutskillsforyou = () => {
       {courses.length > 0 ? (
         <Slider {...sliderSettings}>
           {courses.map((course, index) => (
-            <Link to={`/course/${course.id}`} key={course.id}>
+            <Link to={`/course/${course.id}`} key={course.id} onClick={() => trackLastViewedCourse(course.id)}>
 
             <div key={course.id} className="px-2">
               <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">

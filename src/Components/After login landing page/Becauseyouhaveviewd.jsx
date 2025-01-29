@@ -7,6 +7,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
 
 const Becauseyouhaveviewd = () => {
   const [courses, setCourses] = useState([]); 
@@ -102,7 +103,7 @@ const Becauseyouhaveviewd = () => {
         ) : (
           <Slider {...sliderSettings}>
             {courses.map((course) => (
-              <Link to={`/course/${course.id}`} key={course.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="bg-white h-72 w-56 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="relative overflow-hidden">
                     <img

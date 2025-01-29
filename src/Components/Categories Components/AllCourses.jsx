@@ -6,6 +6,7 @@ import useCategoriesStore from '../../stores/CategoriesStore';
 import { Link } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
 
 const AllCourses = () => {
   const { categoriesData, isLoading, error } = useCategoriesStore();
@@ -81,7 +82,7 @@ const AllCourses = () => {
               paginatedCourses.map((course) => {
                 const tag = assignTag(course); // Assign tag dynamically
                 return (
-                  <Link to={`/course/${course.id}`} key={course.id}>
+                  <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
                     <div
                       key={course.id}
                       className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"

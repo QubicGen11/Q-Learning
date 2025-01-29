@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import trackLastViewedCourse from "../../utils/trackLastViewedCourse";
 const Featuredsection = () => {
   const sliderRef = useRef(null);
 
@@ -79,7 +80,7 @@ const Featuredsection = () => {
         ) : (
           <Slider ref={sliderRef} {...settings}>
             {featured.map((course) => (
-              <Link to={`/course/${course.id}`} key={course.id}>
+              <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
                 <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="flex flex-col lg:flex-row">
                     {/* Left side - Image */}

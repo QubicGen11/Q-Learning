@@ -5,6 +5,7 @@ import './Mostelling.css';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
+import trackLastViewedCourse from '../../../utils/trackLastViewedCourse';
 
 const MostSellingCourses = ({ courses }) => {
   const navigate = useNavigate();
@@ -16,7 +17,9 @@ const MostSellingCourses = ({ courses }) => {
 
   // Handle card click
   const handleCourseClick = (courseId) => {
+    trackLastViewedCourse(courseId); 
     navigate(`/course/${courseId}`);
+
   };
 
   // Custom arrow components

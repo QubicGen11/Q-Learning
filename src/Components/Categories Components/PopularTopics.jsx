@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import useCategoriesStore from '../../stores/CategoriesStore'; // Import CategoriesStore
 
 const PopularTopics = () => {
@@ -27,6 +27,27 @@ const PopularTopics = () => {
           <p className="text-center">Loading popular topics...</p>
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
+        ) 
+        : mostPopularCourses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-12">
+            <div className="relative w-24 h-24 mb-4">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/2232/2232688.png" 
+                alt="Cooking Icon"
+                className="w-full h-full animate-bounce"
+              />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 animate-fade-in">We're Cooking Something Great! 🍽️</h2>
+            <p className="text-gray-600 mt-2 animate-fade-in delay-200">
+              No courses found in this category. But don't worry, you can explore other amazing courses!
+            </p>
+            <Link
+              to="/courses"
+              className="mt-6 px-6 py-3 bg-[#0056B3] text-white rounded-lg shadow-md hover:bg-[#003c80] transition-all duration-300 ease-in-out transform hover:scale-105 animate-fade-in delay-400"
+            >
+              🔥 Explore Trending Courses
+            </Link>
+          </div>
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {mostPopularCourses.length > 0 ? (

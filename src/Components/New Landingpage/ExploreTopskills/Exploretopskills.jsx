@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import trackLastViewedCourse from "../../../utils/trackLastViewedCourse";
 
 const Exploretopskills = ({ exploreTopSkillsAndCertifications }) => {
   // Log the API response for debugging
@@ -58,7 +59,7 @@ const Exploretopskills = ({ exploreTopSkillsAndCertifications }) => {
               <h3 className="text-lg font-medium text-white mb-4">{section.title}</h3>
               <ul className="space-y-2">
                 {section.courses.map((course) => (
-                  <Link to={`/course/${course.id}`} key={course.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                  <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                   <li
                     key={course.id}
                     className="group flex items-center justify-between hover:bg-[#4B5563] rounded-lg p-2 transition-colors duration-200"

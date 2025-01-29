@@ -558,23 +558,31 @@ const NewRegister = () => {
               >
                 Enter OTP
               </motion.h2>
-              <div className="flex gap-2 justify-center mb-6">
-                {otp.map((data, index) => (
-                  <motion.input
-                    key={index}
-                    type="text"
-                    maxLength="1"
-                    value={data}
-                    onChange={(e) => handleOtpChange(e.target, index)}
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    onPaste={handlePaste}
-                    className="w-12 h-12 border-2 rounded text-center text-xl font-medium
-                               focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
-                               transition-all"
-                    autoFocus={index === 0}
-                  />
-                ))}
-              </div>
+              <div 
+  className="flex gap-2 justify-center mb-6"
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleVerifyOtp();
+    }
+  }}
+>
+  {otp.map((data, index) => (
+    <motion.input
+      key={index}
+      type="text"
+      maxLength="1"
+      value={data}
+      onChange={(e) => handleOtpChange(e.target, index)}
+      onKeyDown={(e) => handleKeyDown(e, index)}
+      onPaste={handlePaste}
+      className="w-12 h-12 border-2 rounded text-center text-xl font-medium
+                 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
+                 transition-all"
+      autoFocus={index === 0}
+    />
+  ))}
+</div>
+
               {timer > 0 && (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.5 }}

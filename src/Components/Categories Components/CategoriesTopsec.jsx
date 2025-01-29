@@ -4,6 +4,7 @@ import useCategoriesStore from '../../stores/CategoriesStore';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'; // Import heart icons
+import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
 
 const CategoriesTopsec = () => {
   const [searchParams] = useSearchParams();
@@ -66,13 +67,34 @@ const CategoriesTopsec = () => {
 
         {/* Loading/Error Handling */}
         {isLoading ? (
-          <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
+  <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />
+) : error ? (
+  <p className="text-red-500">{error}</p>
+) : getCourses().length === 0 ? (
+  <div className="flex flex-col items-center justify-center text-center py-12">
+    <div className="relative w-24 h-24 mb-4">
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/2232/2232688.png" 
+        alt="Cooking Icon"
+        className="w-full h-full animate-bounce"
+      />
+    </div>
+    <h2 className="text-2xl font-bold text-gray-800 animate-fade-in">We're Cooking Something Great! 🍽️</h2>
+    <p className="text-gray-600 mt-2 animate-fade-in delay-200">
+      No courses found in this category. But don't worry, you can explore other amazing courses!
+    </p>
+    <Link
+      to="/courses"
+      className="mt-6 px-6 py-3 bg-[#0056B3] text-white rounded-lg shadow-md hover:bg-[#003c80] transition-all duration-300 ease-in-out transform hover:scale-105 animate-fade-in delay-400"
+    >
+      🔥 Explore Trending Courses
+    </Link>
+  </div>
+) : 
+  (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {getCourses().map((course) => (
-              <Link to={`/course/${course.id}`} key={course.id}>
+              <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
                 <div
                   key={course.id}
                   className="bg-white rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group"
