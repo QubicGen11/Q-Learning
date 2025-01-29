@@ -51,7 +51,7 @@ const WhatToLearnNext = () => {
         <div className="mb-4">
           <h2 className="text-xl font-bold text-[#1B1B1B] mb-2">What to learn next</h2>
           <p className="text-sm text-gray-600">
-            Because you viewed " <Link to="#" className="text-[#0056B3] font-bold hover:underline" >User Experience Certification</Link>"
+            Because you Enrolled " <Link to="#" className="text-[#0056B3] font-bold hover:underline" >User Experience Certification</Link>"
           </p>
         </div>
 
