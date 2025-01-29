@@ -220,93 +220,111 @@ const Newnavbar = () => {
 
                     {/* Course Preview - updated layout */}
                     {selectedCategory?.courses && (
-                      <div className="flex-1 p-6">
-                        <div className="flex justify-between items-center mb-6">
-                          <h3 className="text-sm  text-[#0056B3] ml-auto bg-white rounded-full font-extrabold">
-                            VIEW ALL {selectedCategory.title.toUpperCase()} COURSES
-                          </h3>
-                        </div>
-                        
-                        {/* First row with special treatment for first item */}
-                        <div className="grid grid-cols-4 gap-4 mb-6">
-                          <div className="bg-blue-600 rounded-lg p-4 text-white">
-                            <div className="flex flex-col items-center">
-                              <div className="w-12 h-12 rounded-full bg-white/20 mb-3 flex items-center justify-center">
-                                <img 
-                                  src={selectedCategory.courses[0].icon} 
-                                  alt={selectedCategory.courses[0].title}
-                                  className="w-8 h-8"
-                                />
-                              </div>
-                              <span className="text-sm font-medium text-center">
-                                {selectedCategory.courses[0].shortTitle}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {/* Regular items */}
-                          {selectedCategory.courses.slice(1, 4).map((course, index) => (
-                            <div 
-                              key={index}
-                              className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
-                            >
-                              <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
-                                <img 
-                                  src={course.icon} 
-                                  alt={course.title}
-                                  className="w-8 h-8"
-                                />
-                              </div>
-                              <span className="text-sm font-medium text-center text-gray-800">
-                                {course.shortTitle}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+  <div className="flex-1 p-6  h-[500px] overflow-y-auto">
+    <div className="flex justify-between items-center mb-6">
+      <Link
+        to={`/categories?category=${encodeURIComponent(selectedCategory.courses[0]?.title)}`}
+        className="text-sm text-[#0056B3] font-bold hover:underline ml-auto"
+      >
+        VIEW ALL {selectedCategory.title.toUpperCase()} COURSES
+      </Link>
+    </div>
 
-                        {/* Second row */}
-                        <div className="grid grid-cols-4 gap-4 mb-6">
-                          {selectedCategory.courses.slice(4, 8).map((course, index) => (
-                            <div 
-                              key={index}
-                              className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
-                            >
-                              <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
-                                <img 
-                                  src={course.icon} 
-                                  alt={course.title}
-                                  className="w-8 h-8"
-                                />
-                              </div>
-                              <span className="text-sm font-medium text-center text-gray-800">
-                                {course.shortTitle}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+    {/* First row with special treatment for first item */}
+    <div className="grid grid-cols-4 gap-4 mb-6">
+      <Link
+        to={`/categories?category=${encodeURIComponent(
+          selectedCategory.title
+        )}&subCategory=${encodeURIComponent(selectedCategory.courses[0]?.title)}`}
+        className="bg-blue-600 rounded-lg p-4 text-white"
+      >
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 rounded-full bg-white/20 mb-3 flex items-center justify-center">
+            <img
+              src={selectedCategory.courses[0]?.icon}
+              alt={selectedCategory.courses[0]?.title}
+              className="w-8 h-8"
+            />
+          </div>
+          <span className="text-sm font-medium text-center">
+            {selectedCategory.courses[0]?.shortTitle}
+          </span>
+        </div>
+      </Link>
 
-                        {/* Third row */}
-                        <div className="grid grid-cols-4 gap-4">
-                          {selectedCategory.courses.slice(8, 12).map((course, index) => (
-                            <div 
-                              key={index}
-                              className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
-                            >
-                              <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
-                                <img 
-                                  src={course.icon} 
-                                  alt={course.title}
-                                  className="w-8 h-8"
-                                />
-                              </div>
-                              <span className="text-sm font-medium text-center text-gray-800">
-                                {course.shortTitle}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+      {/* Regular items */}
+      {selectedCategory.courses.slice(1, 4).map((course, index) => (
+        <Link
+          to={`/categories?category=${encodeURIComponent(
+            selectedCategory.title
+          )}&subCategory=${encodeURIComponent(course.title)}`}
+          key={index}
+          className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
+        >
+          <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
+            <img
+              src={course.icon}
+              alt={course.title}
+              className="w-8 h-8"
+            />
+          </div>
+          <span className="text-sm font-medium text-center text-gray-800">
+            {course.shortTitle}
+          </span>
+        </Link>
+      ))}
+    </div>
+
+    {/* Second row */}
+    <div className="grid grid-cols-4 gap-4 mb-6">
+      {selectedCategory.courses.slice(4, 8).map((course, index) => (
+        <Link
+          to={`/categories?category=${encodeURIComponent(
+            selectedCategory.title
+          )}&subCategory=${encodeURIComponent(course.title)}`}
+          key={index}
+          className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
+        >
+          <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
+            <img
+              src={course.icon}
+              alt={course.title}
+              className="w-8 h-8"
+            />
+          </div>
+          <span className="text-sm font-medium text-center text-gray-800">
+            {course.shortTitle}
+          </span>
+        </Link>
+      ))}
+    </div>
+
+    {/* Third row */}
+    <div className="grid grid-cols-4 gap-4">
+      {selectedCategory.courses.slice(8, 12).map((course, index) => (
+        <Link
+          to={`/categories?category=${encodeURIComponent(
+            selectedCategory.title
+          )}&subCategory=${encodeURIComponent(course.title)}`}
+          key={index}
+          className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
+        >
+          <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
+            <img
+              src={course.icon}
+              alt={course.title}
+              className="w-8 h-8"
+            />
+          </div>
+          <span className="text-sm font-medium text-center text-gray-800">
+            {course.shortTitle}
+          </span>
+        </Link>
+      ))}
+    </div>
+  </div>
+)}
+
                   </div>
                 </div>
               )}

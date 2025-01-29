@@ -5,12 +5,15 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const Becauseyouhaveviewd = () => {
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [favorites, setFavorites] = useState({}); // Track favorite state for each course
+  const [favorites, setFavorites] = useState({});
+  const [viewedMessage, setViewedMessage] = useState('');
   const defaultImage = 'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
 
   useEffect(() => {
@@ -19,9 +22,20 @@ const Becauseyouhaveviewd = () => {
         const accessToken = Cookies.get('accessToken');
         if (!accessToken) throw new Error('User not authenticated');
 
-        const response = await fetch(`http://localhost:8089/qlms/recommendations/what-to-learn-next?userId=${accessToken}`);
+        const response = await fetch(`http://localhost:8089/qlms/recommendations/what-to-learn-next`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch: ${response.statusText}`);
+        }
+
         const data = await response.json();
-        setCourses(data.recommendations);
+        setViewedMessage(data.message);
+        setCourses(data.recommendations || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -52,65 +66,50 @@ const Becauseyouhaveviewd = () => {
 
   const sliderSettings = {
     dots: true,
-    infinite: true,
+    infinite: false,
     speed: 500,
     slidesToShow: 5,
     slidesToScroll: 1,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-          infinite: true,
-          dots: true,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-          initialSlide: 2,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
+      { breakpoint: 1024, settings: { slidesToShow: 3, slidesToScroll: 1 } },
+      { breakpoint: 600, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 480, settings: { slidesToShow: 1, slidesToScroll: 1 } },
     ],
   };
 
   return (
     <div className="px-6 py-8">
       <div className="max-w-[1200px] mx-auto">
-        <div className="mb-4">
-          <p className="text-lg font-bold">Because you viewed "   <Link to="#" className="text-[#0056B3] font-bold hover:underline">
-            User Experience Certification
-          </Link>"</p>  
-        
-        </div>
+        {/* Display "Because you viewed..." message */}
+        {viewedMessage && (
+          <div className="mb-4">
+            <p className="text-lg font-bold">
+              {viewedMessage.split('"')[0]} "
+              <Link to="#" className="text-[#0056B3] font-bold hover:underline">
+                {viewedMessage.split('"')[1]}
+              </Link>
+              "
+            </p>
+          </div>
+        )}
 
         {loading ? (
-          <p className="text-center">Loading...</p>
+          <p className="text-center"> <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} /></p>
         ) : error ? (
           <p className="text-center text-red-500">Error: {error}</p>
         ) : (
           <Slider {...sliderSettings}>
             {courses.map((course) => (
               <Link to={`/course/${course.id}`} key={course.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                <div key={course.id} className="bg-white h-72 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="bg-white h-72 w-56 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="relative overflow-hidden">
                     <img
                       src={course.courseImage || defaultImage}
                       alt={course.courseName}
                       onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop
+                        e.target.onerror = null;
                         e.target.src = defaultImage;
                       }}
                       className="w-full aspect-[4/3] object-cover transition-transform duration-300 hover:scale-110"
@@ -125,10 +124,10 @@ const Becauseyouhaveviewd = () => {
                       <div
                         className="cursor-pointer"
                         onClick={(e) => {
-                          e.preventDefault(); // Prevent navigation when clicking the heart
+                          e.preventDefault();
                           setFavorites((prev) => ({
                             ...prev,
-                            [course.id]: !prev[course.id], // Toggle favorite state for this course
+                            [course.id]: !prev[course.id],
                           }));
                         }}
                       >
