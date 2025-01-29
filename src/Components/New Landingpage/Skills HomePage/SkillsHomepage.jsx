@@ -78,9 +78,12 @@ const SkillsHomepage = () => {
           <button className="text-[#0056B3] hover:text-[#0056B3] font-medium bg-white px-4 py-2 rounded-md border border-[#0056B3] transition-all duration-300 hover:bg-[#F3F4F6]">
             {selectedCategory} Skill Assessments
           </button>
+          <Link to={`/categories?category=${selectedCategory}`}>
+          
           <button className="text-[#0056B3] hover:text-[#0056B3] font-medium bg-white px-4 py-2 rounded-md border border-[#0056B3] transition-all duration-300 hover:bg-[#F3F4F6]">
             View all {selectedCategory} Courses
           </button>
+          </Link>
         </div>
       </div>
 

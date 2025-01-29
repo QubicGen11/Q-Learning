@@ -40,8 +40,8 @@ const LearnersChoice = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {limitedCourses.map((course) => (   
             <Link to={`/course/${course.id}`} key={course.id}>
-              <div key={course.id} className="group bg-white border rounded-xl p-4 hover:shadow-lg transition-shadow duration-300">
-                <div className="flex gap-4">
+              <div key={course.id} className="group bg-white border rounded p-3 hover:shadow-lg transition-shadow duration-300 h-40">
+                <div className="flex gap-4 justify-center items-center">
                   {/* Left side - Image */}
                   <div className="relative w-40 sm:w-48 flex-shrink-0">
                     <div className="aspect-video rounded-lg overflow-hidden">

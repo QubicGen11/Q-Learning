@@ -99,7 +99,7 @@ const MostSellingCourses = ({ courses }) => {
               return (
                 <div key={course.id} className="px-3">
                   <div 
-                    className="group bg-none h-96 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                    className="group bg-none border border-gray-200 h-96 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
                     onClick={() => handleCourseClick(course.id)}
                   >
                     <div className="relative overflow-hidden">

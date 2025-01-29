@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Slider from "react-slick";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import "slick-carousel/slick/slick.css";
@@ -8,16 +8,18 @@ import usePreLoginFeedStore from "../../stores/preLoginFeedStore";
 import { Link } from "react-router-dom";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 const Featuredsection = () => {
   const sliderRef = useRef(null);
-  
+
   // Simplified store access
-  const featured = usePreLoginFeedStore(state => state.featured);
+  const featured = usePreLoginFeedStore((state) => state.featured);
   const defaultImage = "https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg";
-  const isLoading = usePreLoginFeedStore(state => state.isLoading);
-  const error = usePreLoginFeedStore(state => state.error);
-  const fetchPreLoginFeed = usePreLoginFeedStore(state => state.fetchPreLoginFeed);
+  const isLoading = usePreLoginFeedStore((state) => state.isLoading);
+  const error = usePreLoginFeedStore((state) => state.error);
+  const fetchPreLoginFeed = usePreLoginFeedStore((state) => state.fetchPreLoginFeed);
+
+  const [favorites, setFavorites] = useState({}); // Track favorite state for each course
 
   useEffect(() => {
     fetchPreLoginFeed();
@@ -71,17 +73,13 @@ const Featuredsection = () => {
 
         {/* Course Carousel */}
         {isLoading ? (
-          <Skeleton height={40} count={5} style={{ marginBottom: '10px' }} />
+          <Skeleton height={40} count={5} style={{ marginBottom: "10px" }} />
         ) : error ? (
           <p className="text-center text-red-500">Error: {error}</p>
         ) : (
           <Slider ref={sliderRef} {...settings}>
             {featured.map((course) => (
-
               <Link to={`/course/${course.id}`} key={course.id}>
-
-
-              <div key={course.id}>
                 <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="flex flex-col lg:flex-row">
                     {/* Left side - Image */}
@@ -102,31 +100,53 @@ const Featuredsection = () => {
 
                     {/* Right side - Content */}
                     <div className="flex-1 p-4 sm:p-6 lg:p-8">
-                      <h3 className="text-base sm:text-lg lg:text-xl font-medium text-gray-800 mb-2">
-                        {course.courseName || "Course Name"}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 hidden sm:block">
-                        {course.courseTagline || "Course Tagline"}
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">
-                        {course.trainerName || "Instructor Name"}
-                      </p>
+                      <div className="flex justify-between">
+                        {/* Course Details */}
+                        <div>
+                          <h3 className="text-base sm:text-lg lg:text-xl font-medium text-gray-800 mb-2">
+                            {course.courseName || "Course Name"}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 hidden sm:block">
+                            {course.courseTagline || "Course Tagline"}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">
+                            {course.trainerName || "Instructor Name"}
+                          </p>
 
-                      <div className="flex flex-wrap items-center text-[10px] sm:text-xs text-gray-500 gap-1 sm:gap-2 mb-3 sm:mb-4">
-                        <span>{course.courseDuration || "Duration Unavailable"}</span>
-                        <span>•</span>
-                        <span>{course.difficultyLevel || "All Levels"}</span>
-                      </div>
+                          <div className="flex flex-wrap items-center text-[10px] sm:text-xs text-gray-500 gap-1 sm:gap-2 mb-3 sm:mb-4">
+                            <span>{course.courseDuration || "Duration Unavailable"}</span>
+                            <span>•</span>
+                            <span>{course.difficultyLevel || "All Levels"}</span>
+                          </div>
 
-                      <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                        <span className="text-lg sm:text-xl font-bold text-[#0056B3]">
-                          ₹{course.courseSettings?.[0]?.offeredPrice || "N/A"}
-                        </span>
+                          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                            <span className="text-lg sm:text-xl font-bold text-[#0056B3]">
+                              ₹{course.courseSettings?.[0]?.offeredPrice || "N/A"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Heart Button */}
+                        <div
+                          className="relative ml-auto cursor-pointer"
+                          onClick={(e) => {
+                            e.preventDefault(); // Prevent navigation when clicking the heart
+                            setFavorites((prev) => ({
+                              ...prev,
+                              [course.id]: !prev[course.id], // Toggle favorite state for this course
+                            }));
+                          }}
+                        >
+                          {favorites[course.id] ? (
+                            <AiFillHeart className="text-red-500 text-xl" />
+                          ) : (
+                            <AiOutlineHeart className="text-black text-xl" />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
               </Link>
             ))}
           </Slider>

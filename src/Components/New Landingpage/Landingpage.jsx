@@ -22,7 +22,7 @@ const Landingpage = () => {
     categories,
     mostSelling,
     topTrendingSkills,
-    topSkillsAndCertifications,
+
     learnersChoice,
     testimonials,
     isLoading,

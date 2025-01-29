@@ -28,7 +28,7 @@ const Testimonials = ({ testimonials }) => {
       courseName: "Deep Learning Fundamentals",
     },
     {
-      userName: "Prnaeeth Joseph",
+      userName: "Mastan Praneeth Joseph Sony",
       linkedInUrl: "https://www.linkedin.com/in/bobbrown",
       message: "Exceptional content! The projects were challenging yet rewarding.",
       courseName: "AI for Beginners",
