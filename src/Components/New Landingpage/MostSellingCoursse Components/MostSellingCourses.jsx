@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
 import './Mostelling.css';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 
 const MostSellingCourses = ({ courses }) => {
   const navigate = useNavigate();
+
+  const [favorites, setFavorites] = useState({}); // Object to track favorite state for each course
 
   // Add a default image constant
   const defaultImage = 'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
@@ -96,7 +99,7 @@ const MostSellingCourses = ({ courses }) => {
               return (
                 <div key={course.id} className="px-3">
                   <div 
-                    className="group bg-none rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                    className="group bg-none h-96 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
                     onClick={() => handleCourseClick(course.id)}
                   >
                     <div className="relative overflow-hidden">
@@ -124,6 +127,10 @@ const MostSellingCourses = ({ courses }) => {
                         </svg>
                         32 Enrolled
                       </div>
+                      
+                      <div>
+
+                      </div>
                     </div>
                     
                     <div>
@@ -145,10 +152,37 @@ const MostSellingCourses = ({ courses }) => {
                       </div>
                       
                       <div className="p-2">
+
+                        <div className='flex justify-between items-center'>
+
                         <h3 className="font-medium text-lg mb-2 group-hover:text-blue-600 transition-colors duration-300">
                           {course.courseName}
                         </h3>
+
+                        <div
+                        className=" cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent clicking the card
+                          setFavorites((prev) => ({
+                            ...prev,
+                            [course.id]: !prev[course.id], // Toggle favorite state for this course
+                          }));
+                        }}
+                      >
+                        {favorites[course.id] ? (
+                          <AiFillHeart className="text-red-500 text-2xl" />
+                        ) : (
+                          <AiOutlineHeart className="text-black text-2xl" />
+                        )}
+                      </div>
+                        </div>
+
+
+                              
+                 
                         <p className="text-gray-600 text-sm mb-4">{course.trainerName}</p>
+
+                        
                         {settings.discount && (
                           <span className="bg-black text-white text-xs px-2 py-1 rounded">
                             {settings.discount}% Off | Black Friday Sale

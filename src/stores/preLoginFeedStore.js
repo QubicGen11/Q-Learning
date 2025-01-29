@@ -10,6 +10,7 @@ const usePreLoginFeedStore = create((set, get) => ({
   learnersChoice: [],
   testimonials: [],
   featured: [],
+  qubiNestSuggestions: [],
 
   courseDetails: null,
   isLoading: false,
@@ -77,6 +78,7 @@ const usePreLoginFeedStore = create((set, get) => ({
         mostSelling: data.recommendations?.mostSelling || [],
         featured: data.recommendations?.featured || [],
         skillsForYou: data.recommendations?.skillsForYou || [],
+        qubiNestSuggestions: data.recommendations?.qubiNestSuggestions || [],
         topTrendingSkills: data.recommendations?.trendingSkillsForYou || [],
         topSkillsAndCertifications: data.recommendations?.topSkillsAndCertifications || {},
         learnersChoice: data.recommendations?.learnersChoice || [],
@@ -98,6 +100,7 @@ const usePreLoginFeedStore = create((set, get) => ({
         mostSelling: [],
         featured: [],
         skillsForYou: [],
+        qubiNestSuggestions: [],
         topTrendingSkills: [],
         topSkillsAndCertifications: {},
         learnersChoice: [],
@@ -126,6 +129,7 @@ const usePreLoginFeedStore = create((set, get) => ({
       topSkillsAndCertifications: {},
       learnersChoice: [],
       testimonials: [],
+      qubiNestSuggestions: [],
       courseDetails: null,
       isLoading: false,
       error: null

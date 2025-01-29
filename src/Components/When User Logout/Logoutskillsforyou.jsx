@@ -93,7 +93,7 @@ const Logoutskillsforyou = () => {
             onClick={() => handleCategoryChange(category)}
             className={`whitespace-nowrap px-4 py-2 text-sm font-medium transition-all duration-300 ${
               selectedCategory === category
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-[#f2f9ff]'
                 : 'text-gray-600 hover:text-blue-600 hover:border-b-2 hover:border-blue-600'
             }`}
           >
@@ -121,9 +121,9 @@ const Logoutskillsforyou = () => {
                     className="w-full h-40 object-cover transition-transform duration-300 hover:scale-110"
 
                   />
-                  <div className="absolute top-2 left-2 bg-[#0056B3] text-white text-xs px-2 py-1 rounded">
+                  {/* <div className="absolute top-2 left-2 bg-[#0056B3] text-white text-xs px-2 py-1 rounded">
                     {course.price || 'Free'}
-                  </div>
+                  </div> */}
                 </div>
                 <div className="p-4">
                   <h4 className="text-sm font-medium text-[#1B1B1B] mb-2 line-clamp-2">

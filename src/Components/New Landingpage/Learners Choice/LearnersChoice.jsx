@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
 import { Link } from 'react-router-dom';
+import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'; // Import heart icons
 
 const LearnersChoice = () => {
   const learnersChoice = usePreLoginFeedStore((state) => state.learnersChoice || []);
@@ -14,6 +15,8 @@ const LearnersChoice = () => {
   const renderStars = (rating) => {
     return '★'.repeat(rating) + '☆'.repeat(5 - rating);
   };
+
+  const [favorites, setFavorites] = useState({}); // Object to track favorite state for each course
 
   if (!learnersChoice || learnersChoice.length === 0) {
     return (
@@ -37,76 +40,96 @@ const LearnersChoice = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {limitedCourses.map((course) => (   
             <Link to={`/course/${course.id}`} key={course.id}>
-
-
-            <div key={course.id} className="group bg-white border rounded-xl p-4 hover:shadow-lg transition-shadow duration-300">
-              <div className="flex gap-4">
-                {/* Left side - Image */}
-                <div className="relative w-40 sm:w-48 flex-shrink-0">
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <img 
-                      src={course.courseImage || course.courseBanner || defaultImage}
-                      alt={course.courseName}
-                      onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop
-                        e.target.src = defaultImage;
-                      }}
-                      className="w-full h-full object-cover"
-                    />
+              <div key={course.id} className="group bg-white border rounded-xl p-4 hover:shadow-lg transition-shadow duration-300">
+                <div className="flex gap-4">
+                  {/* Left side - Image */}
+                  <div className="relative w-40 sm:w-48 flex-shrink-0">
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <img 
+                        src={course.courseImage || course.courseBanner || defaultImage}
+                        alt={course.courseName}
+                        onError={(e) => {
+                          e.target.onerror = null; // Prevent infinite loop
+                          e.target.src = defaultImage;
+                        }}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span className="absolute top-2 left-2 text-xs text-white px-2 py-1 rounded bg-blue-600">
+                      {course.category}
+                    </span>
                   </div>
-                  <span className="absolute top-2 left-2 text-xs text-white px-2 py-1 rounded bg-blue-600">
-                    {course.category}
-                  </span>
-                </div>
 
-                {/* Right side - Content */}
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    {course.courseName}
-                  </h3>
-                  
-                  <p className="text-sm text-gray-600 mb-2">
-                    {course.trainerName}
-                  </p>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-yellow-400 text-sm">{renderStars(course.rating)}</span>
-                    <span className="text-xs text-gray-600">({course.rating})</span>
-                  </div>
-                  
-                  {/* Price */}
-                  <div className="flex items-center gap-2 mb-2">
-                    {course.courseSettings?.[0]?.settings && (
-                      <>
-                        <span className="text-blue-600 font-bold">
-                          ₹{course.courseSettings[0].settings.price}
-                        </span>
-                        {course.courseSettings[0].settings.offeredPrice && (
-                          <span className="text-gray-400 text-sm line-through">
-                            ₹{course.courseSettings[0].settings.offeredPrice}
-                          </span>
+                  {/* Right side - Content */}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          {course.courseName}
+                        </h3>
+                        
+                        <p className="text-sm text-gray-600 mb-2">
+                          {course.trainerName}
+                        </p>
+                      </div>
+                      
+                      {/* Heart Button */}
+                      <div
+                        className="cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent navigation when clicking the heart
+                          setFavorites((prev) => ({
+                            ...prev,
+                            [course.id]: !prev[course.id], // Toggle favorite state for this course
+                          }));
+                        }}
+                      >
+                        {favorites[course.id] ? (
+                          <AiFillHeart className="text-red-500 text-xl" />
+                        ) : (
+                          <AiOutlineHeart className="text-gray-400 text-xl" />
                         )}
-                        {course.courseSettings[0].settings.discount && (
-                          <span className="text-green-600 text-xs">
-                            {course.courseSettings[0].settings.discount}% off
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </div>
+                      </div>
+                    </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
-                    <div className="flex items-center gap-3">
-                      <span>{course.viewsCount || 0} Viewing</span>
-                      <span>{course.difficultyLevel}</span>
-                      <span>{course.courseDuration}</span>
+                    {/* Rating */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-yellow-400 text-sm">{renderStars(course.rating)}</span>
+                      <span className="text-xs text-gray-600">({course.rating})</span>
+                    </div>
+                    
+                    {/* Price */}
+                    <div className="flex items-center gap-2 mb-2">
+                      {course.courseSettings?.[0]?.settings && (
+                        <>
+                          <span className="text-blue-600 font-bold">
+                            ₹{course.courseSettings[0].settings.price}
+                          </span>
+                          {course.courseSettings[0].settings.offeredPrice && (
+                            <span className="text-gray-400 text-sm line-through">
+                              ₹{course.courseSettings[0].settings.offeredPrice}
+                            </span>
+                          )}
+                          {course.courseSettings[0].settings.discount && (
+                            <span className="text-green-600 text-xs">
+                              {course.courseSettings[0].settings.discount}% off
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                      <div className="flex items-center gap-3">
+                        <span>{course.viewsCount || 0} Viewing</span>
+                        <span>{course.difficultyLevel}</span>
+                        <span>{course.courseDuration}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-              </Link>
+            </Link>
           ))}
         </div>
       </div>
