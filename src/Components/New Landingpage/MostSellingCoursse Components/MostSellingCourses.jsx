@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
 import './Mostelling.css';
@@ -6,12 +6,14 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import trackLastViewedCourse from '../../../utils/trackLastViewedCourse';
+import { addToWishlist, getWishlist, removeFromWishlist } from '../../../utils/wishlist';
 
 const MostSellingCourses = ({ courses }) => {
   const navigate = useNavigate();
 
-  const [favorites, setFavorites] = useState({}); // Object to track favorite state for each course
+  const [favorites, setFavorites] = useState(new Set()); // Object to track favorite state for each course
 
+ 
   // Add a default image constant
   const defaultImage = 'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
 
@@ -61,6 +63,49 @@ const MostSellingCourses = ({ courses }) => {
       </div>
     );
   };
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const response = await getWishlist();
+        if (response && response.wishlist) {
+          console.log('Fetched Wishlist:', response.wishlist); // Debugging API response
+
+          // Create a Set of courseIds for faster lookup
+          const wishlistSet = new Set(response.wishlist.map((item) => item.courseId));
+          setFavorites(wishlistSet);
+        }
+      } catch (error) {
+        console.error('Error fetching wishlist:', error);
+      }
+    };
+
+    fetchWishlist();
+  }, []);
+
+
+
+  const toggleWishlist = async (courseId, e) => {
+    e.stopPropagation(); // Prevent card click event
+  
+    if (favorites.has(courseId)) {
+      // Remove from wishlist
+      await removeFromWishlist(courseId);
+      setFavorites((prev) => {
+        const updated = new Set(prev);
+        updated.delete(courseId);
+        return updated;
+      });
+    } else {
+      // Add to wishlist
+      await addToWishlist(courseId);
+      setFavorites((prev) => {
+        const updated = new Set(prev);
+        updated.add(courseId);
+        return updated;
+      });
+    }
+  };
+  
 
   const settings = {
     dots: false,
@@ -172,11 +217,13 @@ const MostSellingCourses = ({ courses }) => {
                           }));
                         }}
                       >
-                        {favorites[course.id] ? (
-                          <AiFillHeart className="text-red-500 text-2xl" />
-                        ) : (
-                          <AiOutlineHeart className="text-black text-2xl" />
-                        )}
+                    <div className="absolute top-4 right-4 cursor-pointer" onClick={(e) => toggleWishlist(course.id, e)}>
+                    {favorites.has(course.id) ? (
+    <AiFillHeart className="text-red-500 text-2xl" />
+) : (
+    <AiOutlineHeart className="text-black text-2xl" />
+)}
+                    </div>
                       </div>
                         </div>
 

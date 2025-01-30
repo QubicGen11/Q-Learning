@@ -6,7 +6,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'; // Import heart icons
 import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
 
-const CategoriesTopsec = () => {
+const CategoriesTopsec = ({ scrollToCourses }) => {
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category'); // Dynamic category
   const subCategory = searchParams.get('subCategory'); // Dynamic subCategory (optional)
@@ -84,9 +84,12 @@ const CategoriesTopsec = () => {
       No courses found in this category. But don't worry, you can explore other amazing courses!
     </p>
     <Link
-      to="/courses"
-      className="mt-6 px-6 py-3 bg-[#0056B3] text-white rounded-lg shadow-md hover:bg-[#003c80] transition-all duration-300 ease-in-out transform hover:scale-105 animate-fade-in delay-400"
-    >
+        onClick={(e) => {
+          e.preventDefault();
+          scrollToCourses();
+        }}
+        className="mt-6 px-6 py-3 bg-[#0056B3] text-white rounded-lg shadow-md hover:bg-[#003c80] transition-all duration-300 ease-in-out transform hover:scale-105 animate-fade-in delay-400"
+      >
       🔥 Explore Trending Courses
     </Link>
   </div>

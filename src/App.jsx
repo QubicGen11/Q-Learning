@@ -37,6 +37,7 @@ import SuperadminLogin from './Components/Super Admin Modules/SuperadminLogin';
 import SuperadminLayout from './Components/Super Admin Modules/SuperadminLayout';
 import ReviewAndApproval from './Components/Super Admin Modules/ReviewAndApproval';
 import ScrollToTops from './ScrollToTops';
+import Testforprelime from './Components/Testforprelime/Testforprelime';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -163,6 +164,8 @@ function App() {
                   </Route>
                 </Route>
               </Route>
+
+              <Route path="/testforprelime" element={<Testforprelime/>} />
             </Routes>
             <ScrollToTopButton />
           </div>

@@ -196,7 +196,11 @@ const Newnavbar = () => {
                           key={index}
                           className={`flex items-center text-xs px-4 py-3 cursor-pointer group transition-colors duration-200
                             ${selectedCategory?.title === category.title ? 'bg-blue-50' : 'hover:bg-blue-50'}`}
-                          onMouseEnter={() => setSelectedCategory(category)}
+                            onMouseEnter={() => {
+                              if (selectedCategory?.title !== category.title) {
+                                setSelectedCategory(category);
+                              }
+                            }}
                         >
                           <span className="mr-3 text-xl">{category.icon}</span>
                           <span className="text-gray-700 group-hover:text-blue-600 font-medium">
@@ -220,10 +224,10 @@ const Newnavbar = () => {
                     </div>
 
                     {/* Course Preview - updated layout */}
-                    {selectedCategory?.courses && (
-  <div className="flex-1 p-6  h-[500px] overflow-y-auto">
+                    {selectedCategory && selectedCategory.courses?.length > 0 && (
+  <div className="flex-1 p-6 h-[500px] overflow-y-auto">
     <div className="flex justify-between items-center mb-6">
-    <Link
+      <Link
         to={`/categories?category=${encodeURIComponent(
           selectedCategory.title
         )}&subCategory=${encodeURIComponent(selectedCategory.courses[0]?.title)}`}
@@ -233,100 +237,36 @@ const Newnavbar = () => {
       </Link>
     </div>
 
-    {/* First row with special treatment for first item */}
     <div className="grid grid-cols-4 gap-4 mb-6">
-      <Link
-        to={`/categories?category=${encodeURIComponent(
-          selectedCategory.title
-        )}&subCategory=${encodeURIComponent(selectedCategory.courses[0]?.title)}`}
-        className=" rounded-lg p-4 text-black"
-      >
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-white/20 mb-3 flex items-center justify-center">
-            <img
-              src={selectedCategory.courses[0]?.imageUrl}
-              alt={selectedCategory.courses[0]?.title}
-              className="w-8 h-8"
-            />
-          </div>
-          <span className="text-sm font-medium text-center">
-            {selectedCategory.courses[0]?.shortTitle}
-          </span>
-        </div>
-      </Link>
-
-      {/* Regular items */}
-      {selectedCategory.courses.slice(1, 4).map((course, index) => (
+      {selectedCategory.courses.map((course, index) => (
         <Link
           to={`/categories?category=${encodeURIComponent(
             selectedCategory.title
           )}&subCategory=${encodeURIComponent(course.title)}`}
           key={index}
-          className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
+          className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 justify-center"
         >
-          <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
+          {/* <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
             <img
-              src={course.imageUrl}
+              src={course.imageUrl || `https://picsum.photos/seed/${encodeURIComponent(course.title)}/64`}
               alt={course.title}
-              className="w-8 h-8"
+              className="w-8 h-8 rounded-full"
+              loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null; // Prevent infinite loop
+                e.target.src = "https://via.placeholder.com/64"; // Fallback image
+              }}
             />
-          </div>
+          </div> */}
           <span className="text-sm font-medium text-center text-gray-800">
             {course.shortTitle}
           </span>
         </Link>
       ))}
     </div>
-
-    {/* Second row */}
-    <div className="grid grid-cols-4 gap-4 mb-6">
-      {selectedCategory.courses.slice(4, 8).map((course, index) => (
-        <Link
-          to={`/categories?category=${encodeURIComponent(
-            selectedCategory.title
-          )}&subCategory=${encodeURIComponent(course.title)}`}
-          key={index}
-          className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
-        >
-          <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
-            <img
-              src={course.imageUrl}
-              alt={course.title}
-              className="w-8 h-8"
-            />
-          </div>
-          <span className="text-sm font-medium text-center text-gray-800">
-            {course.shortTitle}
-          </span>
-        </Link>
-      ))}
-    </div>
-
-    {/* Third row */}
-    {/* <div className="grid grid-cols-4 gap-4">
-      {selectedCategory.courses.slice(8, 12).map((course, index) => (
-        <Link
-          to={`/categories?category=${encodeURIComponent(
-            selectedCategory.title
-          )}&subCategory=${encodeURIComponent(course.title)}`}
-          key={index}
-          className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50"
-        >
-          <div className="w-12 h-12 rounded-full bg-gray-100 mb-3 flex items-center justify-center">
-            <img
-              src={course.icon}
-              alt={course.title}
-              className="w-8 h-8"
-            />
-          </div>
-          <span className="text-sm font-medium text-center text-gray-800">
-            {course.shortTitle}
-          </span>
-        </Link>
-      ))}
-    </div> */}
   </div>
 )}
+
 
                   </div>
                 </div>
