@@ -9,6 +9,7 @@ import Footer from '../New Landingpage/Footer/Footer';
 import Logoutherosec from './Logoutherosec';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import Learnerchoiceafterlogout from './Learnerchoiceafterlogout';
 const Whenuserlogout = () => {
   const { learnersChoice, isLoading, error, fetchPreLoginFeed } = usePreLoginFeedStore();
 
@@ -32,7 +33,8 @@ const Whenuserlogout = () => {
       <Newnavbar />
       <Logoutherosec />
       <Logoutskillsforyou />
-      <LearnersChoice courses={learnersChoice} /> {/* Pass learnersChoice */}
+      <Learnerchoiceafterlogout courses={learnersChoice}/>
+      
       <Footer />
     </div>
   );

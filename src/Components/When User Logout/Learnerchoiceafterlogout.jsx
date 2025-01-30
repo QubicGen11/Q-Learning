@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
+
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'; // Import heart icons
-import trackLastViewedCourse from '../../../utils/trackLastViewedCourse';
-
-import useWishlistStore from '../../../stores/wishlistStore';
+import useWishlistStore from '../../stores/wishlistStore';
+import usePreLoginFeedStore from '../../stores/preLoginFeedStore';
+import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
 
 const Learnerchoiceafterlogout = () => {
   const learnersChoice = usePreLoginFeedStore((state) => state.learnersChoice || []);
@@ -90,11 +90,7 @@ const Learnerchoiceafterlogout = () => {
             toggleWishlist(course.id, e); // Toggle the wishlist state
           }}
         >
-          {favorites.has(course.id) ? (
-            <AiFillHeart className="text-red-500 text-2xl" />
-          ) : (
-            <AiOutlineHeart className="text-black text-2xl" />
-          )}
+     
         </div>
       </div>
 
