@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -8,13 +8,24 @@ import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
+import useWishlistStore from '../../stores/wishlistStore';
 
 const Becauseyouhaveviewd = () => {
   const [courses, setCourses] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [favorites, setFavorites] = useState({});
+
   const [viewedMessage, setViewedMessage] = useState('');
+
+  const { favorites, fetchWishlist, toggleWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    fetchWishlist(); // Fetch wishlist when component mounts
+  }, []);
+
+
+  const navigate = useNavigate()
+
   const defaultImage = 'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
 
   useEffect(() => {
@@ -103,8 +114,13 @@ const Becauseyouhaveviewd = () => {
         ) : (
           <Slider {...sliderSettings}>
             {courses.map((course) => (
-              <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="bg-white h-72 w-56 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <>
+              
+                <div className="bg-white h-72 w-56 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
+                onClick={() => {
+                  trackLastViewedCourse(course.id);
+                  navigate(`/course/${course.id}`);
+                }}>
                   <div className="relative overflow-hidden">
                     <img
                       src={course.courseImage || defaultImage}
@@ -122,22 +138,23 @@ const Becauseyouhaveviewd = () => {
                   <div className="p-3">
                     <div className="flex justify-between items-center">
                       <h3 className="text-sm font-medium text-[#1B1B1B] mb-2 line-clamp-2">{course.courseName}</h3>
-                      <div
-                        className="cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setFavorites((prev) => ({
-                            ...prev,
-                            [course.id]: !prev[course.id],
-                          }));
-                        }}
-                      >
-                        {favorites[course.id] ? (
-                          <AiFillHeart className="text-red-500 text-xl" />
-                        ) : (
-                          <AiOutlineHeart className="text-gray-400 text-xl" />
-                        )}
-                      </div>
+                   
+                   {/* Heart fill code */}
+
+                   <div
+          className="cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card navigation
+            toggleWishlist(course.id, e); // Toggle the wishlist state
+          }}
+        >
+          {favorites.has(course.id) ? (
+            <AiFillHeart className="text-red-500 text-2xl" />
+          ) : (
+            <AiOutlineHeart className="text-black text-2xl" />
+          )}
+        </div>
+
                     </div>
                     <p className="text-xs text-gray-500 mb-2">{course.trainerName}</p>
                     <div className="flex items-center text-xs text-gray-600">
@@ -157,7 +174,8 @@ const Becauseyouhaveviewd = () => {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </>
+              
             ))}
           </Slider>
         )}

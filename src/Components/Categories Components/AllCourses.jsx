@@ -3,18 +3,29 @@ import { FiFilter } from 'react-icons/fi';
 import { BiSort } from 'react-icons/bi';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'; // Import heart icons
 import useCategoriesStore from '../../stores/CategoriesStore';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import trackLastViewedCourse from '../../utils/trackLastViewedCourse';
+import useWishlistStore from '../../stores/wishlistStore';
 
 const AllCourses = () => {
   const { categoriesData, isLoading, error } = useCategoriesStore();
+  const { favorites, fetchWishlist, toggleWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    fetchWishlist(); // Fetch wishlist when component mounts
+  }, []);
+
+
+  const navigate = useNavigate()
+
+  
   const defaultImage =
     'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
 
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
-  const [favorites, setFavorites] = useState({}); // Track favorite state for each course
+// Track favorite state for each course
   const resultsPerPage = 5; // Set the number of courses per page
 
   const allCourses = categoriesData?.allCourses || []; // Get all courses from Zustand store
@@ -82,10 +93,14 @@ const AllCourses = () => {
               paginatedCourses.map((course) => {
                 const tag = assignTag(course); // Assign tag dynamically
                 return (
-                  <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
+                 
                     <div
                       key={course.id}
                       className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+                      onClick={() => {
+                        trackLastViewedCourse(course.id);
+                        navigate(`/course/${course.id}`);
+                      }}
                     >
                       {/* Course Image */}
                       <div className="relative">
@@ -110,11 +125,22 @@ const AllCourses = () => {
                             }));
                           }}
                         >
-                          {favorites[course.id] ? (
-                            <AiFillHeart className="text-red-500 text-xl" />
-                          ) : (
-                            <AiOutlineHeart className="text-black text-xl" />
-                          )}
+                          
+                          <div
+          className="cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card navigation
+            toggleWishlist(course.id, e); // Toggle the wishlist state
+          }}
+        >
+          {favorites.has(course.id) ? (
+            <AiFillHeart className="text-red-500 text-2xl" />
+          ) : (
+            <AiOutlineHeart className="text-black text-2xl" />
+          )}
+        </div>
+
+
                         </div>
 
                         {/* Price */}
@@ -180,7 +206,7 @@ const AllCourses = () => {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                 
                 );
               })
             ) : (

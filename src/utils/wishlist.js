@@ -1,4 +1,6 @@
 import Cookies from 'js-cookie';
+import { displayToast } from '../Components/Common/Toast/Toast';
+
 
 const API_BASE_URL = "http://localhost:8089/qlms";
 
@@ -9,14 +11,16 @@ const API_BASE_URL = "http://localhost:8089/qlms";
 export const addToWishlist = async (courseId) => {
   try {
     const accessToken = Cookies.get('accessToken');
-    
+
+    if (!accessToken) {
+      displayToast('error', 'Please login to add to wishlist');
+      return;
+    }
+
     const headers = {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
     };
-
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
 
     const response = await fetch(`${API_BASE_URL}/addWishlist`, {
       method: 'POST',
@@ -30,9 +34,11 @@ export const addToWishlist = async (courseId) => {
 
     const data = await response.json();
     console.log('Course added to wishlist:', data);
+    displayToast('success', 'Course added to wishlist');
     return data;
   } catch (err) {
     console.error('Error adding to wishlist:', err.message);
+    displayToast('error', 'Failed to add to wishlist');
   }
 };
 
@@ -44,13 +50,15 @@ export const getWishlist = async () => {
   try {
     const accessToken = Cookies.get('accessToken');
 
+    if (!accessToken) {
+      // displayToast('error', 'Please login to view your wishlist');
+      return [];
+    }
+
     const headers = {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
     };
-
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
 
     const response = await fetch(`${API_BASE_URL}/getWishlist`, {
       method: 'GET',
@@ -66,6 +74,7 @@ export const getWishlist = async () => {
     return data;
   } catch (err) {
     console.error('Error fetching wishlist:', err.message);
+    displayToast('error', 'Failed to fetch wishlist');
   }
 };
 
@@ -77,13 +86,15 @@ export const removeFromWishlist = async (courseId) => {
   try {
     const accessToken = Cookies.get('accessToken');
 
+    if (!accessToken) {
+      displayToast('error', 'Please login to manage your wishlist');
+      return;
+    }
+
     const headers = {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
     };
-
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
 
     const response = await fetch(`${API_BASE_URL}/deleteWishlist`, {
       method: 'DELETE',
@@ -97,8 +108,10 @@ export const removeFromWishlist = async (courseId) => {
 
     const data = await response.json();
     console.log('Course removed from wishlist:', data);
+    displayToast('success', 'Course removed from wishlist');
     return data;
   } catch (err) {
     console.error('Error removing from wishlist:', err.message);
+    displayToast('error', 'Failed to remove from wishlist');
   }
 };

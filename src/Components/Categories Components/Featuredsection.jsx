@@ -10,7 +10,25 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import trackLastViewedCourse from "../../utils/trackLastViewedCourse";
+import { displayToast } from "../Common/Toast/Toast";
+import { addToWishlist, getWishlist, removeFromWishlist } from "../../utils/wishlist";
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+import useWishlistStore from "../../stores/wishlistStore";
 const Featuredsection = () => {
+
+  const { favorites, fetchWishlist, toggleWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    fetchWishlist(); // Fetch wishlist when component mounts
+  }, []);
+  const navigate = useNavigate()
+
+
+
+
+ 
+  
   const sliderRef = useRef(null);
 
   // Simplified store access
@@ -20,7 +38,7 @@ const Featuredsection = () => {
   const error = usePreLoginFeedStore((state) => state.error);
   const fetchPreLoginFeed = usePreLoginFeedStore((state) => state.fetchPreLoginFeed);
 
-  const [favorites, setFavorites] = useState({}); // Track favorite state for each course
+   // Track favorite state for each course
 
   useEffect(() => {
     fetchPreLoginFeed();
@@ -80,8 +98,14 @@ const Featuredsection = () => {
         ) : (
           <Slider ref={sliderRef} {...settings}>
             {featured.map((course) => (
-              <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
-                <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+
+              
+                <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
+                onClick={() => {
+                  trackLastViewedCourse(course.id);
+                  navigate(`/course/${course.id}`);
+                }}
+                >
                   <div className="flex flex-col lg:flex-row">
                     {/* Left side - Image */}
                     <div className="relative w-full lg:w-[360px]">
@@ -138,17 +162,25 @@ const Featuredsection = () => {
                             }));
                           }}
                         >
-                          {favorites[course.id] ? (
-                            <AiFillHeart className="text-red-500 text-xl" />
-                          ) : (
-                            <AiOutlineHeart className="text-black text-xl" />
-                          )}
+                        <div
+          className="cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card navigation
+            toggleWishlist(course.id, e); // Toggle the wishlist state
+          }}
+        >
+          {favorites.has(course.id) ? (
+            <AiFillHeart className="text-red-500 text-2xl" />
+          ) : (
+            <AiOutlineHeart className="text-black text-2xl" />
+          )}
+        </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </Link>
+             
             ))}
           </Slider>
         )}

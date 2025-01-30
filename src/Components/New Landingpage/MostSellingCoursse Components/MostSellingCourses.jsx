@@ -6,14 +6,19 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import trackLastViewedCourse from '../../../utils/trackLastViewedCourse';
-import { addToWishlist, getWishlist, removeFromWishlist } from '../../../utils/wishlist';
+
+import { displayToast } from '../../Common/Toast/Toast';
+import Cookies from 'js-cookie';
+import useWishlistStore from '../../../stores/wishlistStore';
 
 const MostSellingCourses = ({ courses }) => {
   const navigate = useNavigate();
 
-  const [favorites, setFavorites] = useState(new Set()); // Object to track favorite state for each course
+  const { favorites, fetchWishlist, toggleWishlist } = useWishlistStore();
 
- 
+  useEffect(() => {
+    fetchWishlist(); // Fetch wishlist when component mounts
+  }, []);
   // Add a default image constant
   const defaultImage = 'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
 
@@ -63,6 +68,8 @@ const MostSellingCourses = ({ courses }) => {
       </div>
     );
   };
+
+
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
@@ -84,27 +91,8 @@ const MostSellingCourses = ({ courses }) => {
 
 
 
-  const toggleWishlist = async (courseId, e) => {
-    e.stopPropagation(); // Prevent card click event
-  
-    if (favorites.has(courseId)) {
-      // Remove from wishlist
-      await removeFromWishlist(courseId);
-      setFavorites((prev) => {
-        const updated = new Set(prev);
-        updated.delete(courseId);
-        return updated;
-      });
-    } else {
-      // Add to wishlist
-      await addToWishlist(courseId);
-      setFavorites((prev) => {
-        const updated = new Set(prev);
-        updated.add(courseId);
-        return updated;
-      });
-    }
-  };
+
+
   
 
   const settings = {

@@ -3,12 +3,10 @@ import usePreLoginFeedStore from '../../../stores/preLoginFeedStore';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'; // Import heart icons
 import trackLastViewedCourse from '../../../utils/trackLastViewedCourse';
-import { addToWishlist, getWishlist, removeFromWishlist } from '../../../utils/wishlist';
-import { displayToast } from '../../Common/Toast/Toast';
-import Cookies from 'js-cookie';
+
 import useWishlistStore from '../../../stores/wishlistStore';
 
-const LearnersChoice = () => {
+const Learnerchoiceafterlogout = () => {
   const learnersChoice = usePreLoginFeedStore((state) => state.learnersChoice || []);
  
   const navigate = useNavigate()
@@ -144,4 +142,4 @@ const LearnersChoice = () => {
   );
 };
 
-export default LearnersChoice;
+export default Learnerchoiceafterlogout;

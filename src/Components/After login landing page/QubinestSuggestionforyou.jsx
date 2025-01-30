@@ -4,19 +4,30 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import usePreLoginFeedStore from "../../stores/preLoginFeedStore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import parse from "html-react-parser";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import trackLastViewedCourse from "../../utils/trackLastViewedCourse";
+import useWishlistStore from "../../stores/wishlistStore";
 
 const QubinestSuggestionforyou = () => {
   const sliderRef = useRef(null);
+
+  const { favorites, fetchWishlist, toggleWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    fetchWishlist(); // Fetch wishlist when component mounts
+  }, []);
+
+
+  const navigate = useNavigate()
+
   const defaultImage =
     'https://res.cloudinary.com/devewerw3/image/upload/v1738054203/florencia-viadana-1J8k0qqUfYY-unsplash_hsheym.jpg';
 
-  const [favorites, setFavorites] = useState({}); // Track favorite state for each course
+  
   const qubiNestSuggestions = usePreLoginFeedStore(state => state.qubiNestSuggestions);
   const isLoading = usePreLoginFeedStore(state => state.isLoading);
   const error = usePreLoginFeedStore(state => state.error);
@@ -63,8 +74,13 @@ const QubinestSuggestionforyou = () => {
         ) : (
           <Slider ref={sliderRef} {...settings}>
             {qubiNestSuggestions.map((course) => (
-              <Link to={`/course/${course.id}`} key={course.id}  onClick={() => trackLastViewedCourse(course.id)}>
-                <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <>
+              
+                <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
+                 onClick={() => {
+                  trackLastViewedCourse(course.id);
+                  navigate(`/course/${course.id}`);
+                }}>
                   <div className="flex flex-col lg:flex-row">
                     <div className="relative w-full lg:w-[360px]">
                       <div className="absolute top-3 left-3 bg-[#0056B3] text-white text-xs px-2 py-1 rounded">
@@ -108,29 +124,29 @@ const QubinestSuggestionforyou = () => {
                         </span>
                       </div>
                       </div> 
+
+                      {/* heart fill  */}
                       <div
-                        className="relative ml-auto cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault(); // Prevent navigation when clicking the heart
-                          setFavorites((prev) => ({
-                            ...prev,
-                            [course.id]: !prev[course.id], // Toggle favorite state for this course
-                          }));
-                        }}
-                      >
-                        {favorites[course.id] ? (
-                          <AiFillHeart className="text-red-500 text-xl" />
-                        ) : (
-                          <AiOutlineHeart className="text-black text-xl" />
-                        )}
-                      </div>
+          className="cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card navigation
+            toggleWishlist(course.id, e); // Toggle the wishlist state
+          }}
+        >
+          {favorites.has(course.id) ? (
+            <AiFillHeart className="text-red-500 text-2xl" />
+          ) : (
+            <AiOutlineHeart className="text-black text-2xl" />
+          )}
+        </div>
 
                       </div>
 
                     </div>
                   </div>
                 </div>
-              </Link>
+              </>
+             
             ))}
           </Slider>
         )}

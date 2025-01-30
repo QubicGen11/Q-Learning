@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FaHeart, FaVolumeMute } from 'react-icons/fa';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import useWishlistStore from '../../stores/wishlistStore';
+import { useNavigate } from 'react-router-dom';
+import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 
 const CourseBanner = ({ 
   title, 
@@ -21,6 +24,17 @@ const CourseBanner = ({
   rating,
   courseId
 }) => {
+  const course = {
+    id: courseId
+  }
+
+  const { favorites, fetchWishlist, toggleWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    fetchWishlist(); // Fetch wishlist when component mounts
+  }, []);
+  const navigate = useNavigate()
+
   const [isCompact, setIsCompact] = useState(false);
   const bannerRef = useRef(null);
   const lastScrollY = useRef(0);
@@ -180,9 +194,19 @@ const CourseBanner = ({
 
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 flex items-center gap-3">
                   {title}
-                  <button className="text-gray-400 hover:text-red-500 transition-colors">
-                    <FaHeart className="text-2xl" />
-                  </button>
+                  <div
+          className="cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card navigation
+            toggleWishlist(course.id, e); // Toggle the wishlist state
+          }}
+        >
+          {favorites.has(course.id) ? (
+            <AiFillHeart className="text-red-500 text-2xl" />
+          ) : (
+            <AiOutlineHeart className="text-black text-2xl" />
+          )}
+        </div>
                 </h1>
 
                 <p className="text-gray-300 text-lg mb-6">
