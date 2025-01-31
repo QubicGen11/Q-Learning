@@ -226,19 +226,7 @@ const CourseBanner = ({
 
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 flex items-center gap-3">
                   {title}
-                  <div
-          className="cursor-pointer bg-white rounded-full p-1"
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent card navigation
-            toggleWishlist(course.id, e); // Toggle the wishlist state
-          }}
-        >
-          {favorites.has(course.id) ? (
-            <AiFillHeart className="text-red-500 text-2xl" />
-          ) : (
-            <AiOutlineHeart className="text-black text-2xl" />
-          )}
-        </div>
+                  
                 </h1>
 
                 <p className="text-gray-300 text-lg mb-6">
@@ -261,6 +249,19 @@ const CourseBanner = ({
                     Last updated {formatDate(updatedAt)}
                   </div>
                   <div className="bg-green-600 px-2 py-1 rounded">{teachingLanguage}</div>
+                  <div
+          className="cursor-pointer bg-white rounded-full p-1"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card navigation
+            toggleWishlist(course.id, e); // Toggle the wishlist state
+          }}
+        >
+          {favorites.has(course.id) ? (
+            <AiFillHeart className="text-red-500 text-2xl" />
+          ) : (
+            <AiOutlineHeart className="text-black text-2xl" />
+          )}
+        </div>
                   <div className="flex items-center gap-1">
                     
                     {/* <span></span> */}

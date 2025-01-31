@@ -188,7 +188,7 @@ const MostSellingCourses = ({ courses }) => {
                           }));
                         }}
                       >
-                    <div className="absolute top-4 right-4 cursor-pointer" onClick={(e) => toggleWishlist(course.id, e)}>
+                    <div className="cursor-pointer" onClick={(e) => toggleWishlist(course.id, e)}>
                     {favorites.has(course.id) ? (
     <AiFillHeart className="text-red-500 text-2xl" />
 ) : (

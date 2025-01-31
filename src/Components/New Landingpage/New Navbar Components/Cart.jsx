@@ -142,15 +142,15 @@ const Cart = () => {
 
                       <div
                         key={item.course.id}
-                        className="flex gap-4 p-3 cursor-pointer  transition-all rounded-md w-[50vw]"
+                        className="flex gap-4  cursor-pointer  transition-all rounded-md w-[50vw] border-b border-gray-300"
                         onClick={() => handleNavigate(item.course.id)}
                       >
                         <img
                           src={item.course.courseImage}
                           alt={item.course.courseName}
-                          className="w-32 h-24 object-cover rounded"
+                          className="w-40 h-32 object-cover "
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 mt-4  justify-center items-center">
                           <h3 className="text-sm font-medium">{item.course.courseName}</h3>
                           <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                             <span>{item.course.courseDuration} HOURS OF LEARNING</span>
