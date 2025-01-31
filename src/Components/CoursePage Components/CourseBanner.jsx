@@ -5,6 +5,9 @@ import Cookies from 'js-cookie';
 import useWishlistStore from '../../stores/wishlistStore';
 import { useNavigate } from 'react-router-dom';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
+import useCartStore from "../../stores/useCartStore";
+import LoginRegisterModal from '../Login Modal/LoginRegisterModal';
+
 
 const CourseBanner = ({ 
   title, 
@@ -30,10 +33,39 @@ const CourseBanner = ({
 
   const { favorites, fetchWishlist, toggleWishlist } = useWishlistStore();
 
+
+  const { cartItems, addToCart, fetchCart , removeFromCart , showLoginModal , toggleLoginModal , toggleCartItem } = useCartStore(); // Access cart methods
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const isAddedToCart = cartItems.some((item) => item.courseId === courseId);
+
+  useEffect(() => {
+    fetchCart(); // Fetch the cart when the component mounts
+    fetchWishlist(); // Fetch the wishlist
+  }, [fetchCart, fetchWishlist]);
+
+ 
+
+  const handleAddToCart = async () => {
+    try {
+      if (isAddedToCart) {
+        // Remove the course from the cart
+        await removeFromCart(courseId);
+        console.log(`Course ${courseId} removed from cart`);
+        
+      } else {
+        // Add the course to the cart
+        await addToCart(courseId);
+        console.log(`Course ${courseId} added to cart`);
+      }
+    } catch (error) {
+      console.error("Error toggling cart item:", error);
+    }
+  };
+
   useEffect(() => {
     fetchWishlist(); // Fetch wishlist when component mounts
   }, []);
-  const navigate = useNavigate()
+ 
 
   const [isCompact, setIsCompact] = useState(false);
   const bannerRef = useRef(null);
@@ -195,7 +227,7 @@ const CourseBanner = ({
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 flex items-center gap-3">
                   {title}
                   <div
-          className="cursor-pointer"
+          className="cursor-pointer bg-white rounded-full p-1"
           onClick={(e) => {
             e.stopPropagation(); // Prevent card navigation
             toggleWishlist(course.id, e); // Toggle the wishlist state
@@ -256,9 +288,16 @@ const CourseBanner = ({
                     <FaVolumeMute size={30} color='white'/>
                 </div>
                 
-                <button className="w-full bg-[#0056b3] text-white py-3 rounded font-semibold mb-3 hover:bg-blue-700 transition-colors">
-                  Add to Cart
-                </button>
+                <button
+        onClick={() => toggleCartItem(courseId)}
+        className={`w-full py-3 rounded font-semibold mb-3 transition-colors ${
+          isAddedToCart ? "bg-red-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
+        }`}
+      >
+        {isAddedToCart ? "Remove from Cart" : "Add to Cart"}
+      </button>
+         
+
                 <button 
                   onClick={initializePayment}
                   className="w-full bg-[#f3f4f6] text-blue-600 border-2 py-3 rounded font-semibold hover:bg-blue-50 transition-colors"
@@ -303,9 +342,16 @@ const CourseBanner = ({
                   <span className="text-2xl font-bold text-white">₹{price}</span>
                   {discount && <span className="text-green-500 text-sm">{discount}% off</span>}
                 </div>
-                <button className="bg-[#0056b3] text-white px-4 py-2 rounded hover:bg-blue-700">
-                  Add to Cart
+                <button className={`bg-[#0056b3] text-white px-4 py-2 rounded hover:bg-blue-700 ${isAddedToCart
+                ? "bg-green-600 text-white"
+                : "bg-[#0056b3] text-white hover:bg-blue-700"
+            }`}
+            disabled={isAddingToCart} onClick={handleAddToCart}>
+                 {isAddedToCart ? "Remove from Cart" : "Add to Cart"}
                 </button>
+
+
+          
                 <button 
                   onClick={initializePayment}
                   className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100"

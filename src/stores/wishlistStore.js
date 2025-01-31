@@ -34,7 +34,7 @@ const useWishlistStore = create((set, get) => ({
         localStorage.setItem("localWishlist", JSON.stringify(localWishlist));
         displayToast("info", "Saved to wishlist. Log in to sync.");
       } else {
-        displayToast("info", "Already saved to wishlist. Log in to sync.");
+        displayToast("info", " Please Log in to save to wishlist.");
       }
       set({ showLoginModal: true }); // Show login modal
       return;
