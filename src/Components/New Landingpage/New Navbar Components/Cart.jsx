@@ -42,7 +42,7 @@ const Cart = () => {
             <img
               src="https://res.cloudinary.com/defsu5bfc/image/upload/v1738318712/Group_hbebvm.png"
               alt="Empty Cart Illustration"
-              className="w-64 md:w-80 mt-6"
+              className="w-36 md:w-80 mt-6"
             />
             <button className="mt-8 bg-[#0056B3] hover:bg-[#003F89] text-white px-8 py-3 rounded-lg text-sm md:text-base font-medium">
               Explore Courses
@@ -114,10 +114,22 @@ const Cart = () => {
                             e.stopPropagation(); // Prevent navigation when clicking remove
                             handleRemove(item.courseId);
                           }}
-                          className="text-blue-600 text-xs hover:underline hover:bg-[#F3F4F6] p-2 rounded-lg"
+                          className="text-[#0056b3] text-xs hover:underline hover:bg-[#F3F4F6] p-2 rounded-lg"
                         >
                           Remove
                         </button>
+                      </div>
+                      <div className="flex items-center gap-5 justify-between">
+                        <div className="flex items-center gap-2">
+
+                        <button className=" text-[#0056b3]  py-1.5 rounded text-2xl ">₹{item.courseSettings?.[0]?.offeredPrice || "N/A"}</button>
+                        <button className=" text-black  py-1.5 rounded text-lg font-bold ">23232</button>
+                        </div>
+                        <div className="flex items-center gap-2">
+
+                        <button className=" text-[#0056b3]  py-1.5 rounded text-md  ">Remove</button>
+                        <button className=" text-[#0056b3]  py-1.5 rounded text-md  bg-[#f3f4f6] p-2">Save For Later</button>
+                        </div>
                       </div>
                     </div>
                   </div>

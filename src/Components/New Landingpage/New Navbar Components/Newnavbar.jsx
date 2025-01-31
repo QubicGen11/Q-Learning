@@ -10,6 +10,8 @@ import useNavbarStore from '../../../stores/navbarStore';
 import useAuthStore from '../../../stores/authStore';
 import NotificationPopup from './NotificationPopup';
 import WishlistPopup from './WishlistPopup';
+import useWishlistStore from '../../../stores/wishlistStore';
+import useCartStore from '../../../stores/useCartStore';
 
 const useClickOutside = (ref, handler) => {
   useEffect(() => {
@@ -52,6 +54,10 @@ const Newnavbar = () => {
     logout,
     checkAuth
   } = useAuthStore();
+  const { favorites, fetchWishlist } = useWishlistStore(); // For wishlist
+  const { cartItems, fetchCart } = useCartStore(); // For cart
+  const wishlistCount = favorites ? favorites.size : 0; // Get wishlist count
+  const cartCount = cartItems ? cartItems.length : 0; // Get cart count
 
   const dropdownRef = useRef(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -304,19 +310,34 @@ const Newnavbar = () => {
               />
             </div>
             <div className="relative">
-              <FiHeart 
-                size={20} 
-                className="wishlist-icon text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200" 
+              <FiHeart
+                size={20}
+                className="wishlist-icon text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200"
                 onClick={() => setIsWishlistOpen(!isWishlistOpen)}
               />
-              <WishlistPopup 
-                isOpen={isWishlistOpen} 
-                onClose={() => setIsWishlistOpen(false)}
-              />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-4 -right-4 bg-[#0056b3] text-white text-xs font-bold px-2 py-1 rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+              <WishlistPopup isOpen={isWishlistOpen} onClose={() => setIsWishlistOpen(false)} />
             </div>
-            <Link to="/cart">
-              <FiShoppingCart size={20} />
-            </Link>
+
+            <div className="relative">
+              <Link to="/cart">
+                <FiShoppingCart
+                  size={20}
+                  className="text-gray-600 hover:text-[#0056B3] cursor-pointer transform transition-transform hover:scale-125 duration-200"
+                />
+              </Link>
+              {cartCount > 0 && (
+                <span className="absolute -top-4 -right-4 bg-[#0056b3] text-white text-xs font-bold px-2 py-1 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+
+
             <div ref={dropdownRef} className="relative">
               <button 
                 className="flex items-center cursor-pointer hover:text-[#0056B3] transition-colors duration-200"
