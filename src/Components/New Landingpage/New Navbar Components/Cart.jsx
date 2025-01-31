@@ -66,75 +66,118 @@ const Cart = () => {
                 <h1 className="text-3xl font-semibold">Course(s) in Cart</h1>
               </div>
               <div className="flex items-center gap-4">
-                <div>
-                  <div className="text-xs text-right text-gray-600">Total</div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold">
-                      ₹
-                      {cartItems.reduce(
-                        (total, item) => total + parseFloat(item?.course?.price || 0),
-                        0
-                      )}
-                    </span>
-                  </div>
-                </div>
+              <div>
+  <div className="text-xs  text-gray-600  text-start">Total</div>
+  <div className="flex items-center gap-2">
+    {/* Display the total of all offered prices */}
+    <span className="text-3xl font-bold text-black">
+      ₹
+      {cartItems.reduce((total, item) => {
+        const offeredPrice = item.course?.courseSettings?.[0]?.offeredPrice || 0;
+        return total + parseFloat(offeredPrice);
+      }, 0).toFixed(2)}
+    </span>
+
+    {/* Display the total of all actual prices */}
+    <span className="text-xl font-bold line-through text-gray-600 mt-3">
+      ₹
+      {cartItems.reduce((total, item) => {
+        const actualPrice = item.course?.courseSettings?.[0]?.price || 0;
+        return total + parseFloat(actualPrice);
+      }, 0).toFixed(2)}
+    </span>
+  </div>
+
+  {/* Display the total savings percentage */}
+  <div className="text-sm text-gray-500">
+    
+    {(() => {
+      const totalActualPrice = cartItems.reduce((total, item) => {
+        const actualPrice = item.course?.courseSettings?.[0]?.price || 0;
+        return total + parseFloat(actualPrice);
+      }, 0);
+
+      const totalOfferedPrice = cartItems.reduce((total, item) => {
+        const offeredPrice = item.course?.courseSettings?.[0]?.offeredPrice || 0;
+        return total + parseFloat(offeredPrice);
+      }, 0);
+
+      // Calculate percentage savings
+      const savingsPercentage = totalActualPrice
+        ? (((totalActualPrice - totalOfferedPrice) / totalActualPrice) * 100).toFixed(2)
+        : 0;
+
+      return ` ${savingsPercentage} % off`;
+    })()}
+  </div>
+</div>
+
                 <button className="bg-[#0056B3] text-white px-4 py-1.5 rounded text-sm">Checkout</button>
               </div>
             </div>
 
             {/* Cart Items */}
             <div className="flex flex-col gap-6 p-2">
-              {cartItems.map((item, index) => {
-                if (!item.course) {
-                  console.warn(`Cart item at index ${index} has no course property:`, item);
-                  return null; // Skip rendering if course is undefined
-                }
+            {cartItems.map((item, index) => {
+  if (!item.course) {
+    console.warn(`Cart item at index ${index} has no course property:`, item);
+    return null; // Skip rendering if course is undefined
+  }
 
-                return (
-                  <div
-                    key={item.course.id}
-                    className="flex gap-4 p-3 cursor-pointer hover:bg-gray-100 transition-all rounded-md"
-                    onClick={() => handleNavigate(item.course.id)}
-                  >
-                    <img
-                      src={item.course.courseImage}
-                      alt={item.course.courseName}
-                      className="w-32 h-24 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h3 className="text-sm font-medium">{item.course.courseName}</h3>
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                        <span>{item.course.courseDuration} HOURS</span>
-                        <span>•</span>
-                        <span>{item.course.difficultyLevel}</span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent navigation when clicking remove
-                            handleRemove(item.courseId);
-                          }}
-                          className="text-[#0056b3] text-xs hover:underline hover:bg-[#F3F4F6] p-2 rounded-lg"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-5 justify-between">
-                        <div className="flex items-center gap-2">
+ 
+  const courseSettings = item.course.courseSettings?.[0]; // Access courseSettings safely
+  const offeredPrice = courseSettings?.offeredPrice || "N/A"; // Offered price
+  const price = courseSettings?.price || "N/A"; // Regular price
 
-                        <button className=" text-[#0056b3]  py-1.5 rounded text-2xl ">₹{item.courseSettings?.[0]?.offeredPrice || "N/A"}</button>
-                        <button className=" text-black  py-1.5 rounded text-lg font-bold ">23232</button>
-                        </div>
-                        <div className="flex items-center gap-2">
 
-                        <button className=" text-[#0056b3]  py-1.5 rounded text-md  ">Remove</button>
-                        <button className=" text-[#0056b3]  py-1.5 rounded text-md  bg-[#f3f4f6] p-2">Save For Later</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+  return (
+    <div
+      key={item.course.id}
+      className="flex gap-4 p-3 cursor-pointer hover:bg-gray-100 transition-all rounded-md"
+      onClick={() => handleNavigate(item.course.id)}
+    >
+      <img
+        src={item.course.courseImage}
+        alt={item.course.courseName}
+        className="w-32 h-24 object-cover rounded"
+      />
+      <div className="flex-1">
+        <h3 className="text-sm font-medium">{item.course.courseName}</h3>
+        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+          <span>{item.course.courseDuration} HOURS</span>
+          <span>•</span>
+          <span>{item.course.difficultyLevel}</span>
+        </div>
+
+        <div className="flex items-center gap-5 justify-between">
+          <div className="flex items-center gap-4">
+            <button className="text-[#0056b3] py-1.5 rounded text-2xl font-bold">
+              ₹{offeredPrice}/-
+            </button>
+            <button className="text-[#4B5563] py-1.5 rounded text-lg mt-2 line-through  " >
+              ₹{price}/-
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              className="text-[#0056b3] py-1.5 rounded text-md"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent navigation when clicking remove
+                handleRemove(item.courseId);
+              }}
+            >
+              Remove
+            </button>
+            <button className="text-[#0056b3] py-1.5 rounded text-md bg-[#f3f4f6] p-2">
+              Save For Later
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+})}
+
             </div>
 
             {/* Apply Coupon */}
