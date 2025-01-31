@@ -70,24 +70,7 @@ const MostSellingCourses = ({ courses }) => {
   };
 
 
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      try {
-        const response = await getWishlist();
-        if (response && response.wishlist) {
-          console.log('Fetched Wishlist:', response.wishlist); // Debugging API response
 
-          // Create a Set of courseIds for faster lookup
-          const wishlistSet = new Set(response.wishlist.map((item) => item.courseId));
-          setFavorites(wishlistSet);
-        }
-      } catch (error) {
-        console.error('Error fetching wishlist:', error);
-      }
-    };
-
-    fetchWishlist();
-  }, []);
 
 
 

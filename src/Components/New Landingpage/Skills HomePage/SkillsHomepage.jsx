@@ -9,7 +9,9 @@ const SkillsHomepage = () => {
 
   // Memoized unique categories to prevent recalculation
   const uniqueCategories = useMemo(() => {
-    return [...new Set(skillsForYou.map((item) => item.category).filter(Boolean))];
+    const categories = [...new Set(skillsForYou.map((item) => item.category).filter(Boolean))];
+    console.log("Extracted Unique Categories:", categories);
+    return categories;
   }, [skillsForYou]);
 
   // Default category (memoized for stability)

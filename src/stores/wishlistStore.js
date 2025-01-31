@@ -3,8 +3,11 @@ import Cookies from "js-cookie";
 import { addToWishlist, getWishlist, removeFromWishlist } from "../utils/wishlist";
 import { displayToast } from "../Components/Common/Toast/Toast";
 
-const useWishlistStore = create((set) => ({
+const useWishlistStore = create((set, get) => ({
   favorites: new Set(),
+  showLoginModal: false, // Modal visibility state
+  openLoginModal: () => set({ showLoginModal: true }), // Open modal
+  closeLoginModal: () => set({ showLoginModal: false }), // Close modal
 
   fetchWishlist: async () => {
     try {
@@ -22,11 +25,22 @@ const useWishlistStore = create((set) => ({
     e.stopPropagation(); // Prevent card click event
 
     const accessToken = Cookies.get("accessToken");
+
     if (!accessToken) {
-      displayToast("error", "Please login to add to wishlist");
+      // Save courseId to localStorage if user is not logged in
+      const localWishlist = JSON.parse(localStorage.getItem("localWishlist")) || [];
+      if (!localWishlist.includes(courseId)) {
+        localWishlist.push(courseId);
+        localStorage.setItem("localWishlist", JSON.stringify(localWishlist));
+        displayToast("info", "Saved to wishlist. Log in to sync.");
+      } else {
+        displayToast("info", "Already saved to wishlist. Log in to sync.");
+      }
+      set({ showLoginModal: true }); // Show login modal
       return;
     }
 
+    // If logged in, update server-side wishlist
     set((state) => {
       const updatedFavorites = new Set(state.favorites);
       if (updatedFavorites.has(courseId)) {
@@ -40,6 +54,20 @@ const useWishlistStore = create((set) => ({
       }
       return { favorites: updatedFavorites };
     });
+  },
+
+  syncLocalWishlist: async () => {
+    // Sync local wishlist to server after login
+    const localWishlist = JSON.parse(localStorage.getItem("localWishlist")) || [];
+    if (localWishlist.length > 0) {
+      for (const courseId of localWishlist) {
+        await addToWishlist(courseId); // Add each course to server-side wishlist
+      }
+      displayToast("success", "Wishlist synced successfully.");
+      localStorage.removeItem("localWishlist"); // Clear local wishlist
+    }
+    // Fetch updated wishlist from server
+    get().fetchWishlist();
   },
 }));
 

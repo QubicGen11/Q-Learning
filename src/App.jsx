@@ -38,6 +38,11 @@ import SuperadminLayout from './Components/Super Admin Modules/SuperadminLayout'
 import ReviewAndApproval from './Components/Super Admin Modules/ReviewAndApproval';
 import ScrollToTops from './ScrollToTops';
 import Testforprelime from './Components/Testforprelime/Testforprelime';
+import Learnerchoiceafterlogout from './Components/When User Logout/Learnerchoiceafterlogout';
+import LoginPromptModal from './Components/Login Modal/LoginRegisterModal';
+import LoginRegisterModal from './Components/Login Modal/LoginRegisterModal';
+import LoginModal from './Components/New Login Components/LoginModal';
+import Registrationmodal from './Components/New Login Components/Registrationmodal';
 // import CreateCourse from './Components/Instructor Module/Courses/CreateCourse/CreateCourse';
 
 // Configure default options for all SweetAlert2 popups
@@ -111,6 +116,7 @@ function App() {
               {/* <Route path="/cart" element={<Cart />} /> */}
               <Route path="/afterlogin" element={<Afterlogin/>} />
               <Route path="/whenuserlogout" element={<Whenuserlogout/>} />
+              <Route path="/learnerchoiceafterlogout" element={<Learnerchoiceafterlogout/>} />
               <Route path="*" element={<Notfound/>} />
               <Route path="/categories" element={<Categoriesmain/>} />
               <Route path="/categories/:id" element={<Categoriesmain/>} />
@@ -166,7 +172,11 @@ function App() {
               </Route>
 
               <Route path="/testforprelime" element={<Testforprelime/>} />
+              <Route path="/loginmodal" element={<LoginModal/>} />
+              <Route path="/registrationmodal" element={<Registrationmodal/>} />
             </Routes>
+              <LoginRegisterModal />
+
             <ScrollToTopButton />
           </div>
         </Router>
